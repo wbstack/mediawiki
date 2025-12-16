@@ -2,16 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Agilight",
+			"Karak-Kyzyl",
 			"Көпек",
-			"Монгуш Салим",
-			"Karak-Kyzyl"
+			"Монгуш Салим"
 		]
 	},
 	"mobile-frontend-copyright": "Контент $1 лицензия аайы-биле (өскези айыттынмаан болза) ажык.",
 	"mobile-frontend-editor-summary-placeholder": "Чижек: Алдаг эттинген, ишти неметинген",
-	"mobile-frontend-featured-article": "Хүннүң шилиндек материалы",
 	"mobile-frontend-last-modified-date": "Сөөлгү эткен үези $1 -  $2",
-	"mobile-frontend-news-items": "Медээлерде",
 	"mobile-frontend-privacy-link-text": "Хуу медээлел",
 	"mobile-frontend-terms-text": "Ажыглаарының байдалдары",
 	"mobile-frontend-view": "Мобильдиг янзызы",

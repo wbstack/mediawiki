@@ -2,8 +2,9 @@
 
 namespace Wikibase\Client\DataAccess\ParserFunctions;
 
-use Parser;
-use PPFrame;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\PPFrame;
+use MediaWiki\Parser\PPNode;
 use Wikibase\Client\DataAccess\DataAccessSnakFormatterFactory;
 use Wikibase\Client\WikibaseClient;
 use Wikibase\DataModel\Entity\EntityId;
@@ -76,7 +77,7 @@ class Runner {
 	/**
 	 * @param Parser $parser
 	 * @param PPFrame $frame
-	 * @param array $args
+	 * @param PPNode[] $args
 	 * @param string $type One of DataAccessSnakFormatterFactory::TYPE_*
 	 *
 	 * @return array Wikitext in element 0, flags in named elements
@@ -160,7 +161,7 @@ class Runner {
 		return [
 			$rendered,
 			'noparse' => false, // parse wikitext
-			'nowiki' => false,  // formatters take care of escaping as needed
+			'nowiki' => false, // formatters take care of escaping as needed
 		];
 	}
 

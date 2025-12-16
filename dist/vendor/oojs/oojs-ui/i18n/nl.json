@@ -13,6 +13,7 @@
 			"Konovalov",
 			"Mainframe98",
 			"Marcelhospers",
+			"McDutchie",
 			"RajeshPandey",
 			"Romaine",
 			"SPQRobin",
@@ -23,6 +24,7 @@
 			"सरोज कुमार ढकाल"
 		]
 	},
+	"ooui-copytextlayout-copy": "Kopiëren",
 	"ooui-outline-control-move-down": "Item omlaag verplaatsen",
 	"ooui-outline-control-move-up": "Item omhoog verplaatsen",
 	"ooui-outline-control-remove": "Item verwijderen",
@@ -36,10 +38,9 @@
 	"ooui-dialog-process-dismiss": "Sluiten",
 	"ooui-dialog-process-retry": "Opnieuw proberen",
 	"ooui-dialog-process-continue": "Doorgaan",
-	"ooui-combobox-button-label": "Schakelopties",
+	"ooui-combobox-button-label": "Opties omschakelen",
 	"ooui-selectfile-button-select": "Selecteer een bestand",
 	"ooui-selectfile-button-select-multiple": "Bestanden selecteren",
-	"ooui-selectfile-not-supported": "Selectie van een bestand wordt niet ondersteund",
 	"ooui-selectfile-placeholder": "Er is geen bestand geselecteerd",
 	"ooui-selectfile-dragdrop-placeholder": "Sleep hier een bestand heen",
 	"ooui-selectfile-dragdrop-placeholder-multiple": "Sleep hier bestanden heen",

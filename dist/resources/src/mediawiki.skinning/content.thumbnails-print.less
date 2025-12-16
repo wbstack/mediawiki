@@ -1,16 +1,13 @@
+@import 'mediawiki.skin.variables.less';
+@import 'content.variables.less';
+
 /* stylelint-disable selector-class-pattern */
-@import 'variables.less';
-
-/* @noflip */
-table.floatright,
-div.floatright {
-	border: 0;
-}
-
-/* @noflip */
-table.floatleft,
-div.floatleft {
-	border: 0;
+table,
+div {
+	&.floatright,
+	&.floatleft {
+		border: 0;
+	}
 }
 
 div.thumb {
@@ -23,12 +20,12 @@ div.thumb {
 }
 
 div.thumbinner {
-	border: @border-thumbinner-print;
-	background-color: @background-color-thumbinner-print;
-	font-size: @font-size-thumbinner-print;
+	background-color: @background-color-base-print;
 	color: @color-thumbinner-print;
-	border-radius: 2px;
 	min-width: 100px;
+	border: @border-base-print;
+	border-radius: @border-radius-base;
+	font-size: @font-size-thumbinner-print;
 }
 
 .thumbborder {

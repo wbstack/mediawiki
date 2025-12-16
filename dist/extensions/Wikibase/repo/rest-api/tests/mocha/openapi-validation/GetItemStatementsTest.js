@@ -1,49 +1,48 @@
 'use strict';
 
-const chai = require( 'chai' );
-const { createEntity, createSingleItem, createRedirectForItem } = require( '../helpers/entityHelper' );
-const { RequestBuilder } = require( '../helpers/RequestBuilder' );
-const expect = chai.expect;
+const { expect } = require( '../helpers/chaiHelper' );
+const {
+	createRedirectForItem,
+	createItemWithStatements,
+	createUniqueStringProperty,
+	newStatementWithRandomStringValue,
+	getLatestEditMetadata
+} = require( '../helpers/entityHelper' );
+const {
+	newGetItemStatementsRequestBuilder,
+	newCreateItemRequestBuilder
+} = require( '../helpers/RequestBuilderFactory' );
 
-function newGetItemStatementsRequestBuilder( itemId ) {
-	return new RequestBuilder()
-		.withRoute( 'GET', '/entities/items/{item_id}/statements' )
-		.withPathParam( 'item_id', itemId );
-}
-
-describe( 'validate GET /entities/items/{id}/statements responses against OpenAPI spec', () => {
+describe( newGetItemStatementsRequestBuilder().getRouteDescription(), () => {
 
 	let itemId;
-	let latestRevisionId;
+	let lastRevisionId;
 
 	before( async () => {
-		const createItemResponse = await createEntity( 'item', {} );
-		itemId = createItemResponse.entity.id;
-		latestRevisionId = createItemResponse.entity.lastrevid;
-	} );
-
-	it( '200 OK response is valid for an Item with no statements', async () => {
-		const response = await newGetItemStatementsRequestBuilder( itemId ).makeRequest();
-
-		expect( response.status ).to.equal( 200 );
-		expect( response ).to.satisfyApiSpec;
+		const createItemResponse = await newCreateItemRequestBuilder( {} ).makeRequest();
+		itemId = createItemResponse.body.id;
+		lastRevisionId = ( await getLatestEditMetadata( itemId ) ).revid;
 	} );
 
 	it( '200 OK response is valid for an Item with statements', async () => {
-		const { entity: { id } } = await createSingleItem();
+		const statementPropertyId = ( await createUniqueStringProperty() ).body.id;
+		const { id } = await createItemWithStatements( [
+			newStatementWithRandomStringValue( statementPropertyId ),
+			newStatementWithRandomStringValue( statementPropertyId )
+		] );
 		const response = await newGetItemStatementsRequestBuilder( id ).makeRequest();
 
-		expect( response.status ).to.equal( 200 );
-		expect( response ).to.satisfyApiSpec;
+		expect( response ).to.have.status( 200 );
+		expect( response ).to.satisfyApiSchema;
 	} );
 
 	it( '304 Not Modified response is valid', async () => {
 		const response = await newGetItemStatementsRequestBuilder( itemId )
-			.withHeader( 'If-None-Match', `"${latestRevisionId}"` )
+			.withHeader( 'If-None-Match', `"${lastRevisionId}"` )
 			.makeRequest();
 
-		expect( response.status ).to.equal( 304 );
-		expect( response ).to.satisfyApiSpec;
+		expect( response ).to.have.status( 304 );
+		expect( response ).to.satisfyApiSchema;
 	} );
 
 	it( '308 Permanent Redirect response is valid for a redirected item', async () => {
@@ -51,22 +50,22 @@ describe( 'validate GET /entities/items/{id}/statements responses against OpenAP
 
 		const response = await newGetItemStatementsRequestBuilder( redirectSourceId ).makeRequest();
 
-		expect( response.status ).to.equal( 308 );
-		expect( response ).to.satisfyApiSpec;
+		expect( response ).to.have.status( 308 );
+		expect( response ).to.satisfyApiSchema;
 	} );
 
 	it( '400 Bad Request response is valid for an invalid item ID', async () => {
 		const response = await newGetItemStatementsRequestBuilder( 'X123' ).makeRequest();
 
-		expect( response.status ).to.equal( 400 );
-		expect( response ).to.satisfyApiSpec;
+		expect( response ).to.have.status( 400 );
+		expect( response ).to.satisfyApiSchema;
 	} );
 
 	it( '404 Not Found response is valid for a non-existing item', async () => {
-		const response = await await newGetItemStatementsRequestBuilder( 'Q99999' ).makeRequest();
+		const response = await newGetItemStatementsRequestBuilder( 'Q99999' ).makeRequest();
 
-		expect( response.status ).to.equal( 404 );
-		expect( response ).to.satisfyApiSpec;
+		expect( response ).to.have.status( 404 );
+		expect( response ).to.satisfyApiSchema;
 	} );
 
 } );

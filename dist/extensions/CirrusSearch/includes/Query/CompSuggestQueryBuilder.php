@@ -97,7 +97,7 @@ class CompSuggestQueryBuilder {
 		$suggest = $this->buildSuggestQueries( $this->profile, $term, $queryLen );
 
 		// Handle variants, update the set of profiles and suggest queries
-		if ( !empty( $variants ) ) {
+		if ( $variants ) {
 			$this->handleVariants( $suggest, $variants, $queryLen, $origTerm );
 		}
 		return $suggest;
@@ -233,7 +233,7 @@ class CompSuggestQueryBuilder {
 						$targetTitle = $suggest['_source']['target_title']['title'];
 						$targetTitleNS = $suggest['_source']['target_title']['namespace'];
 					}
-					list( $docId, $type ) = $this->decodeId( $suggest['_id'] );
+					[ $docId, $type ] = $this->decodeId( $suggest['_id'] );
 					$score = $discount * $suggest['_score'];
 					$pageId = $this->searchContext->getConfig()->makePageId( $docId );
 					$suggestion = new SearchSuggestion( $score, null, null, $pageId );
@@ -291,10 +291,7 @@ class CompSuggestQueryBuilder {
 	 */
 	public static function computeHardLimit( $limit, $offset, SearchConfig $config ) {
 		$limit += $offset;
-		$hardLimit = $config->get( 'CirrusSearchCompletionSuggesterHardLimit' );
-		if ( $hardLimit === null ) {
-			$hardLimit = 50;
-		}
+		$hardLimit = $config->get( 'CirrusSearchCompletionSuggesterHardLimit' ) ?? 50;
 		if ( $limit > $hardLimit ) {
 			return $hardLimit;
 		}

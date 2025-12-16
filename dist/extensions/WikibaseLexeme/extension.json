@@ -8,11 +8,12 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "wikibase",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"load_composer_autoloader": true,
 	"AutoloadNamespaces": {
-		"Wikibase\\Lexeme\\": "src/"
+		"Wikibase\\Lexeme\\": "src/",
+		"Wikibase\\Lexeme\\Maintenance\\": "maintenance/"
 	},
 	"TestAutoloadNamespaces": {
 		"Wikibase\\Lexeme\\Tests\\": "tests/phpunit/composer/",
@@ -27,9 +28,6 @@
 		"LexemeNamespace": {
 			"value": 146
 		},
-		"LexemeTalkNamespace": {
-			"value": 147
-		},
 		"LexemeLanguageCodePropertyId": {
 			"value": null
 		},
@@ -39,10 +37,6 @@
 		},
 		"LexemeEnableDataTransclusion": {
 			"value": false
-		},
-		"LexemeEnableNewAlpha": {
-			"value": false,
-			"description": "Whether to enable the experimental new version of Special:NewLexeme, Special:NewLexemeAlpha. (Temporary.)"
 		}
 	},
 	"ExtensionMessagesFiles": {
@@ -62,15 +56,8 @@
 			"tests/qunit/jquery.wikibase.grammaticalfeatureview.tests.js",
 			"tests/qunit/jquery.wikibase.senselistview.tests.js",
 			"tests/qunit/jquery.wikibase.senseview.tests.js",
-			"tests/qunit/widgets/ItemSelectorWidget.tests.js",
 			"tests/qunit/widgets/GrammaticalFeatureListWidget.tests.js",
 			"resources/widgets/GrammaticalFeatureListWidget.js",
-			"tests/qunit/services/ItemLookup.tests.js",
-			"resources/services/ItemLookup.js",
-			"tests/qunit/services/LanguageFromItemExtractor.tests.js",
-			"resources/services/LanguageFromItemExtractor.js",
-			"tests/qunit/special/formHelpers/LexemeLanguageFieldObserver.tests.js",
-			"resources/special/formHelpers/LexemeLanguageFieldObserver.js",
 			"tests/qunit/entityChangers/FormChanger.tests.js",
 			"resources/entityChangers/FormChanger.js",
 			"resources/serialization/FormSerializer.js",
@@ -93,7 +80,6 @@
 			"tests/qunit/view/ControllerViewFactory.tests.js",
 			"tests/qunit/view/ViewFactoryFactory.tests.js"
 		],
-		"es6": true,
 		"dependencies": [
 			"mediawiki.widgets",
 			"oojs-ui-core",
@@ -109,20 +95,16 @@
 			"wikibase.lexeme.lexemeview",
 			"wikibase.lexeme.view.ViewFactoryFactory",
 			"wikibase.lexeme.view.ViewFactoryFactory",
-			"wikibase.lexeme.widgets.ItemSelectorWidget",
 			"test.WikibaseRepository"
 		]
 	},
 	"Hooks": {
-		"InfoAction": [
-			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onInfoAction"
-		],
+		"InfoAction": "main",
 		"WikibaseRepoEntityNamespaces": [
 			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onWikibaseRepoEntityNamespaces"
 		],
-		"CanonicalNamespaces": [
-			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onCanonicalNamespaces"
-		],
+		"CanonicalNamespaces": "main",
+		"LoadExtensionSchemaUpdates": "main",
 		"WikibaseRepoEntityTypes": [
 			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onWikibaseRepoEntityTypes"
 		],
@@ -144,6 +126,11 @@
 		"ScribuntoExternalLibraries": [
 			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onScribuntoExternalLibraries"
 		]
+	},
+	"HookHandlers": {
+		"main": {
+			"class": "Wikibase\\Lexeme\\WikibaseLexemeHooks"
+		}
 	},
 	"MessagesDirs": {
 		"WikibaseLexeme": [

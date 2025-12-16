@@ -21,6 +21,7 @@ services:
     environment:
 
       - WBSTACK_LOAD_MW_INTERNAL=yes # THIS is normally hidden
+      - WBSTACK_DOCKER_COMPOSE=yes
       - PLATFORM_API_BACKEND_HOST=api.svc
 
       - MW_DB_SERVER_MASTER=mysql.svc:3306
@@ -36,6 +37,8 @@ services:
 
       - MW_REDIS_SERVER_READ=redis.svc
       - MW_REDIS_SERVER_WRITE=redis.svc
+      - MW_REDIS_CACHE_SERVER_READ=redis.svc
+      - MW_REDIS_CACHE_SERVER_WRITE=redis.svc
       - MW_REDIS_PASSWORD=
 
     volumes:
@@ -65,7 +68,7 @@ services:
       - mediawiki-mysql-data:/var/lib/mysql
       - ./docker-compose/mysql/main:/mwdd-custom
       - ./docker-compose/mysql/write-db-template.sh:/write-db-template.sh
-      - ./dist-persist/wbstack/data/mw1.39-wbs1.sql:/template/schema.sql
+      - ./dist-persist/wbstack/data/mw1.43-wbs1.sql:/template/schema.sql
     entrypoint: "/mwdd-custom/entrypoint.sh"
     command: "mysqld"
 
@@ -96,7 +99,7 @@ services:
       - mysql-replica-data:/var/lib/mysql
       - ./docker-compose/mysql/replica:/mwdd-custom
       - ./docker-compose/mysql/write-db-template.sh:/write-db-template.sh
-      - ./dist-persist/wbstack/data/mw1.39-wbs1.sql:/template/schema.sql
+      - ./dist-persist/wbstack/data/mw1.43-wbs1.sql:/template/schema.sql
     entrypoint: "/mwdd-custom/entrypoint.sh"
     command: "mysqld"
     networks:

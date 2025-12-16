@@ -1,10 +1,12 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Localizer;
 
 use Exception;
 use InvalidArgumentException;
-use Message;
+use MediaWiki\Message\Message;
 
 /**
  * Interface for services that provide localized messages for various types of Exceptions.
@@ -20,23 +22,16 @@ interface ExceptionLocalizer {
 	 *
 	 * The localized message may or may not contain the text returned by $ex->getMessage().
 	 *
-	 * @param Exception $ex
-	 *
 	 * @throws InvalidArgumentException If localization of the given exception is not supported.
-	 * @return Message
 	 */
-	public function getExceptionMessage( Exception $ex );
+	public function getExceptionMessage( Exception $ex ): Message;
 
 	/**
 	 * Whether this localizer can handle the given exception.
 	 *
 	 * This is intended for use by a dispatcher to determine which localizer
 	 * can handle a given exception.
-	 *
-	 * @param Exception $ex
-	 *
-	 * @return bool
 	 */
-	public function hasExceptionMessage( Exception $ex );
+	public function hasExceptionMessage( Exception $ex ): bool;
 
 }

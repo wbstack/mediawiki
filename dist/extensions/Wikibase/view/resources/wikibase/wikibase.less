@@ -30,7 +30,7 @@ h1 .wikibase-title-id {
 	color: #202122;
 }
 
-h1 .wikibase-title-id:before {
+h1 .wikibase-title-id::before {
 	/* Prevent id being hidden in ellipsis on very long labels: */
 	content: ' ';
 }
@@ -82,11 +82,6 @@ h1 .wikibase-title-id:before {
 	clear: both;
 }
 
-span.wb-itemlink-id { /* item id within a link to an item (especially on special pages) */
-	font-size: 0.85em;
-	unicode-bidi: embed;
-}
-
 /********** BASIC LAYOUT **********/
 
 #bodyContent {
@@ -104,6 +99,7 @@ h2.wb-section-heading {
 	margin-top: 1em;
 	padding-left: 10px;
 	border-bottom: 0;
+	box-sizing: border-box;
 	width: 100%;
 }
 
@@ -112,8 +108,6 @@ h2.wb-section-heading {
 	border: 1px solid #a2a9b1;
 	border-radius: 0;
 	box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
 }
 
 .wikibase-entityview textarea {
@@ -167,8 +161,6 @@ h2.wb-section-heading {
 
 div.wikibase-statementview textarea {
 	margin: 0;
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
@@ -213,7 +205,6 @@ div.wikibase-statementview textarea {
 		word-wrap: break-word;
 		padding: 10px;
 		padding-bottom: 0; /* avoid scrollbars on multi-line property labels */
-		-webkit-transition: top 0.1s ease-out;
 		transition: top 0.1s ease-out;
 		position: sticky;
 		top: 10px;
@@ -248,11 +239,11 @@ div.wikibase-statementview-mainsnak .wikibase-snakview-property-container {
 }
 
 div.wikibase-snakview {
-	padding: 10px 5px 5px 10px;
+	padding: 10px 5px 5px 0.625rem;
 }
 
 div.wikibase-snakview .wikibase-snakview-value-container {
-	margin-left: 16px;
+	margin-left: 1rem;
 	min-height: 1.6em; /* reduces jumping when clicking edit */
 }
 
@@ -301,21 +292,6 @@ div .wikibase-snakview-value span.error.wb-format-error {
 	line-height: 2em;
 	float: right;
 }
-
-/***** ENTITY ID VALUES *****/
-
-.wb-language-fallback-indicator {
-	font-style: italic;
-	margin-right: 0.5em;
-	line-height: 1;
-	font-size: 0.8em;
-
-	&.wb-language-fallback-variant {
-		display: none;
-	}
-}
-
-/***** /ENTITY ID VALUES *****/
 
 /***** TIME VALUES *****/
 
@@ -372,8 +348,6 @@ div .wikibase-snakview-value span.error.wb-format-error {
 
 .wikibase-statementgrouplistview .wb-new .wikibase-statementview-mainsnak .wikibase-snakview-property input {
 	width: 100%;
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
@@ -384,7 +358,7 @@ div .wikibase-snakview-value span.error.wb-format-error {
 
 .wikibase-snakview-typeselector {
 	position: absolute;
-	left: 12px;
+	left: 0.75rem;
 }
 
 .wikibase-snakview-unsupportedsnaktype,
@@ -439,7 +413,7 @@ span.wikibase-snakview-variation-novaluesnak {
 }
 
 .wikibase-statementview-qualifiers .wikibase-snaklistview .wikibase-snaklistview-listview .wikibase-snakview-value-container .wikibase-snakview-body {
-	margin-left: 16px;
+	margin-left: 1rem;
 	margin-right: 18em;
 	word-wrap: break-word;
 }
@@ -453,8 +427,6 @@ span.wikibase-snakview-variation-novaluesnak {
 }
 
 .wikibase-statementview-qualifiers .wikibase-snaklistview .wikibase-snaklistview-listview .wikibase-snakview-value-container .wikibase-snakview-value .valueview-value textarea {
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
@@ -622,7 +594,7 @@ span.wikibase-snakview-variation-novaluesnak {
 }
 
 .wikibase-referenceview .wikibase-snaklistview-listview .wikibase-snakview-value-container .wikibase-snakview-body {
-	margin-left: 16px;
+	margin-left: 1rem;
 	margin-right: 18em;
 	word-wrap: break-word;
 }
@@ -636,8 +608,6 @@ span.wikibase-snakview-variation-novaluesnak {
 }
 
 .wikibase-referenceview .wikibase-snaklistview-listview .wikibase-snakview-value-container .wikibase-snakview-value .valueview-value textarea {
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
 

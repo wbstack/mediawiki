@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:Preferences
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,12 +16,22 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
 
+namespace MediaWiki\Specials;
+
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Preferences\PreferencesFactory;
-use MediaWiki\User\UserOptionsManager;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\User\Options\UserOptionsManager;
+use MediaWiki\User\User;
+use OOUI\FieldLayout;
+use OOUI\SearchInputWidget;
+use PermissionsError;
+use PreferencesFormOOUI;
 
 /**
  * A special page that allows users to change their preferences
@@ -32,19 +40,16 @@ use MediaWiki\User\UserOptionsManager;
  */
 class SpecialPreferences extends SpecialPage {
 
-	/** @var PreferencesFactory */
-	private $preferencesFactory;
-
-	/** @var UserOptionsManager */
-	private $userOptionsManager;
+	private PreferencesFactory $preferencesFactory;
+	private UserOptionsManager $userOptionsManager;
 
 	/**
 	 * @param PreferencesFactory|null $preferencesFactory
 	 * @param UserOptionsManager|null $userOptionsManager
 	 */
 	public function __construct(
-		PreferencesFactory $preferencesFactory = null,
-		UserOptionsManager $userOptionsManager = null
+		?PreferencesFactory $preferencesFactory = null,
+		?UserOptionsManager $userOptionsManager = null
 	) {
 		parent::__construct( 'Preferences' );
 		// This class is extended and therefore falls back to global state - T265924
@@ -75,9 +80,8 @@ class SpecialPreferences extends SpecialPage {
 		$out->addModules( 'mediawiki.special.preferences.ooui' );
 		$out->addModuleStyles( [
 			'mediawiki.special.preferences.styles.ooui',
-			'mediawiki.widgets.TagMultiselectWidget.styles',
+			'oojs-ui-widgets.styles',
 		] );
-		$out->addModuleStyles( 'oojs-ui-widgets.styles' );
 
 		$session = $this->getRequest()->getSession();
 		if ( $session->get( 'specialPreferencesSaveSuccess' ) ) {
@@ -118,6 +122,17 @@ class SpecialPreferences extends SpecialPage {
 		}
 		$out->addJsConfigVars( 'wgPreferencesTabs', $prefTabs );
 
+		$out->addHTML( new FieldLayout(
+			new SearchInputWidget( [
+				'placeholder' => $this->msg( 'searchprefs' )->text(),
+			] ),
+			[
+				'classes' => [ 'mw-prefs-search' ],
+				'label' => $this->msg( 'searchprefs' )->text(),
+				'invisibleLabel' => true,
+				'infusable' => true,
+			]
+		) );
 		$htmlForm->show();
 	}
 
@@ -152,7 +167,6 @@ class SpecialPreferences extends SpecialPage {
 			->setSubmitTextMsg( 'restoreprefs' )
 			->setSubmitDestructive()
 			->setSubmitCallback( [ $this, 'submitReset' ] )
-			->suppressReset()
 			->showCancel()
 			->setCancelTarget( $this->getPageTitle() )
 			->show();
@@ -164,7 +178,7 @@ class SpecialPreferences extends SpecialPage {
 		}
 
 		$user = $this->getUser()->getInstanceForUpdate();
-		$this->userOptionsManager->resetOptions( $user, $this->getContext(), 'all' );
+		$this->userOptionsManager->resetAllOptions( $user );
 		$user->saveSettings();
 
 		// Set session data for the success message
@@ -177,6 +191,12 @@ class SpecialPreferences extends SpecialPage {
 	}
 
 	protected function getGroupName() {
-		return 'users';
+		return 'login';
 	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialPreferences::class, 'SpecialPreferences' );

@@ -9,20 +9,20 @@ use DataValues\Geo\Parsers\FloatCoordinateParser;
 use ValueParsers\ParseException;
 use ValueParsers\ParserOptions;
 
+/**
+ * @api
+ */
 class LatLongPrecisionParser {
+	private ?array $parsers = null;
 
-	private $options;
-	private $parsers;
-
-	public function __construct( ParserOptions $options = null ) {
-		$this->options = $options;
+	public function __construct( private ?ParserOptions $options = null ) {
 	}
 
 	public function parse( string $coordinate ): PreciseLatLong {
 		foreach ( $this->getParsers() as $parser ) {
 			try {
 				$latLongPrecision = $parser->parse( $coordinate );
-			} catch ( ParseException $parseException ) {
+			} catch ( ParseException ) {
 				continue;
 			}
 

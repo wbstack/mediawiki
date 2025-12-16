@@ -2,7 +2,7 @@
 
 import sys
 from typing import Any, Dict, List
-from github import Github
+from github import Github, Auth
 import yaml
 
 TARGET_DIR = sys.argv[1]
@@ -19,11 +19,11 @@ mediawiki_version = codebases['mediawikiVersion']
 extensions = codebases['extensions']
 skins = codebases['skins']
 
-TOKEN = None
+token = None
 with open(GITHUB_TOKEN_FILE, "r") as filehandler:
-    TOKEN = filehandler.readline().strip()
+    token = filehandler.readline().strip()
 
-githubClient = Github(TOKEN)
+github_client = Github(auth=Auth.Token(token))
 
 def get_mediawiki_branch_from_version(version: str) -> str:
     return f"REL{version.replace('.', '_')}"
@@ -39,7 +39,7 @@ def make_artifact_entry(details: Dict[str, str], extra_remove: List[str]) -> Dic
     name = details['name']
 
     if "repoName" in details.keys():
-        artifact_url = get_github_url_from_ref(githubClient, details['repoRef'], details['repoName'])
+        artifact_url = get_github_url_from_ref(github_client, details['repoRef'], details['repoName'])
     elif "url" in details.keys():
         artifact_url = details['url']
     else:
@@ -66,7 +66,7 @@ class FixedIndentingDumper(yaml.Dumper):
     def increase_indent(self, flow=False, indentless=False):
         return super().increase_indent(flow, False)
 
-default_branch = get_mediawiki_branch_from_version(mediawiki_version)
+default_branch = get_mediawiki_branch_from_version(mediawiki_version) # pylint: disable-msg=C0103
 remove_from_all = codebases.get('removeFromAll', [])
 output: List[Dict] = [make_artifact_entry({
     'name': 'mediawiki',

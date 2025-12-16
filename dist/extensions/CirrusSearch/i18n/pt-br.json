@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Cainamarques",
+			"CoelhitaWingz223",
 			"Dianakc",
 			"Eduardo Addad de Oliveira",
 			"Eduardoaddad",
@@ -9,8 +10,7 @@
 			"Hamilton Abreu",
 			"HenriqueCrang",
 			"Jaideraf",
-			"Jefersonmoraes",
-			"CoelhitaWingz223"
+			"Jefersonmoraes"
 		]
 	},
 	"cirrussearch-desc": "Mecanismo de busca ''Elasticsearch'' para MediaWiki",
@@ -22,8 +22,7 @@
 	"cirrussearch-regex-too-busy-error": "Demasiadas buscas com expressões regulares em execução. Por favor, tente novamente mais tarde.",
 	"cirrussearch-regex-too-complex-error": "A expressão regular é complexa demais. Saiba mais como simplificá-la [[mw:Special:MyLanguage/Help:CirrusSearch/RegexTooComplex|aqui]].",
 	"cirrussearch-now-using": "Esta wiki está utilizando um novo mecanismo de busca. ([[mw:Special:MyLanguage/Help:CirrusSearch|Saiba mais]])",
-	"cirrussearch-ignored-headings": "#<!-- deixe esta linha exatamente como está --> <pre>\n# Subtítulos que serão ignorados pela busca.\n# Mudanças feitas aqui têm efeito quando a página com o subtítulo é indexada.\n# Você pode forçar a reindexação realizando uma edição nula.\n# A sintaxe é a seguinte:\n# * Tudo a partir do caractere \"#\" até o final da linha é um comentário\n# * Cada linha não vazia é o título exato a ser ignorado, inclusive no uso de maiúsculas\nReferências\nLigações externas\nVer também\n #</pre> <!-- deixe esta linha exatamente como está -->",
-	"cirrussearch-boost-templates": "#<!-- deixe esta linha exatamente como está --> <pre>\n# Se uma página contiver uma destas predefinições a sua classificação na pesquisa será multiplicada pela percentagem configurada.\n# As alterações a esta página têm efeito imediato.\n# A sintaxe é a seguinte:\n# * Tudo desde um símbolo de cardinal (#) até ao fim da linha é um comentário.\n# * Todas as linhas não vazias são o nome exato da predefinição cuja classificação deve ser alterada, incluindo o espaço nominal e respeitando o uso de maiúsculas, seguido pelo carácter \"|\", seguido por um número, seguido pelo carácter \"%\".\n# Exemplos de linhas corretas:\n# Predefinição:Boa|150%\n# Predefinição:Muito muito boa|300%\n# Predefinição:Má|50%\n# Exemplos de linhas que não terão efeito:\n# Predefinição:Exemplo|150.234234% <-- não são permitidos algarismos decimais!\n# Exemplo|150% <--- funciona do ponto de vista técnico, mas só para tansclusão da página Exemplo no espaço nominal principal\n# Pode testar alterações da configuração realizando uma pesquisa com a forma boost-templates:\"XX\" onde XX são todas as predefinições cuja classificação pretende alterar, separadas por espaços em vez de quebras de linha.\n# As pesquisas com a forma boost-templates:\"XX\" ignoram o conteúdo deste campo.\n #</pre> <!-- deixe esta linha exatamente como ela está -->",
+	"cirrussearch-boost-templates": "#<!-- deixe esta linha exatamente como está --> <pre>\n# Se uma página contiver uma destas predefinições a sua classificação na pesquisa será multiplicada pela percentagem configurada.\n# As alterações a esta página têm efeito imediato.\n# A sintaxe é a seguinte:\n# * Tudo desde um símbolo de cardinal (#) até ao fim da linha é um comentário.\n# * Todas as linhas não vazias são o nome exato da predefinição cuja classificação deve ser alterada, incluindo o espaço nominal e respeitando o uso de maiúsculas, seguido pelo carácter \"|\", seguido por um número, seguido pelo carácter \"%\".\n# Exemplos de linhas corretas:\n# Predefinição:Boa|150%\n# Predefinição:Muito muito boa|300%\n# Predefinição:Má|50%\n# Exemplos de linhas que não terão efeito:\n# Predefinição:Exemplo|150.234234% # não são permitidos algarismos decimais!\n# Exemplo|150% # funciona do ponto de vista técnico, mas só para tansclusão da página Exemplo no espaço nominal principal\n# Pode testar alterações da configuração realizando uma pesquisa com a forma boost-templates:\"XX\" onde XX são todas as predefinições cuja classificação pretende alterar, separadas por espaços em vez de quebras de linha.\n# As pesquisas com a forma boost-templates:\"XX\" ignoram o conteúdo deste campo.\n #</pre> <!-- deixe esta linha exatamente como ela está -->",
 	"cirrussearch-pref-label": "Nova busca",
 	"cirrussearch-pref-desc": "Experimente o nosso novo mecanismo de busca que suporta um maior número de idiomas, fornece resultados mais atualizados e pode até encontrar textos incluídos em predefinições.",
 	"cirrussearch-give-feedback": "Dê-nos a sua opinião",
@@ -68,18 +67,14 @@
 	"cirrussearch-feature-too-many-conditions": "Muitas condições fornecidas para '$1', truncando para $2.",
 	"cirrussearch-feature-deepcat-endpoint": "$wgCirrusSearchCategoryEndpoint deve ser configurado para um ponto de extremidade SPARQL válido para usar a pesquisa de categoria profunda.",
 	"cirrussearch-feature-deepcat-exception": "Consulta SPARQL de pesquisa de categoria profunda falhou",
+	"cirrussearch-feature-deepcat-timeout": "A pesquisa de categorias profunda ultrapassou o tempo limite. É possível que a categoria possui demasiadas subcategorias",
 	"cirrussearch-feature-deepcat-toomany": "A consulta profunda da categoria retornou muitas categorias",
 	"cirrussearch-feature-deepcat-invalid-title": "A categoria fornecida é inválida.",
 	"cirrussearch-feature-pageid-invalid-id": "{{PLURAL:$2|ID|IDs}} de página inválida: $1",
 	"cirrussearch-incategory-feature-no-valid-categories": "Nenhuma categoria válida fornecida a '$1'.",
 	"cirrussearch-mlt-feature-no-valid-titles": "Nenhum título válido fornecido a '$1'.",
 	"cirrussearch-mlt-not-configured": "O recurso \"$1\" está mal configurado. Peça a um administrador para consertar $wgCirrusSearchMoreLikeThisFields",
-	"cirrussearch-explore-similar-related": "Relacionado",
-	"cirrussearch-explore-similar-categories": "Categorias",
-	"cirrussearch-explore-similar-languages": "Idiomas",
 	"cirrussearch-explore-similar-related-none": "Nenhuma página relacionada disponível",
-	"cirrussearch-explore-similar-categories-none": "Nenhuma categoria disponível",
-	"cirrussearch-explore-similar-languages-none": "Não disponível em outras idiomas",
 	"cirrussearch-article-words": "Palavras em todas as páginas de conteúdo",
 	"cirrussearch-keyword-prefix-ns-mismatch": "O espaço nominal encontrado no termo a pesquisar <code>prefix:</code> não é compatível com os espaços nominais pedidos. Pode corrigi-lo dando à sua consulta o prefixo <code>all:</code>.",
 	"cirrussearch-autoselect-profile": "Deixe o mecanismo de pesquisa decidir o melhor perfil a ser usado.",

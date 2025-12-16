@@ -5,10 +5,10 @@ Tracking happens on two levels:
 - The client wiki tracks which pages use (which aspect of) which entity (from which repo).
 - Each repo tracks which client uses which entity.
 
-This is used to optimize change notifications on two levels (see @ref md_docs_topics_change-propagation):
+This is used to optimize change notifications on two levels (see @ref docs_topics_change-propagation):
 
 - The repo sends notifications to the clients that use the modified entity in question.
-- The client compares incoming notifications with it's local tracking table to decide which pages to purge/update.
+- The client compares incoming notifications with its local tracking table to decide which pages to purge/update.
 
 ### Client side usage tracking
 
@@ -17,9 +17,7 @@ The “aspect” is used to decide which kind of change is relevant for the give
 Among others the following aspects are defined:
 
  - **sitelinks**
-   - Only an item's sitelinks are used.
-   - This would be the case for a client page that is connected to an item on the repo via an incoming sitelink, but does not access any data of the item directly.
-   - A change to the sitelinks may be applied without re-parsing the page, by overwriting the sitelinks in the cached ParserOutput object.
+   - Only an item's sitelinks (including badges) are used.
  - **label**
    - Only the entity's label is used.
    - This would be the case when a localized reference to the entity is shown on a page.
@@ -99,8 +97,8 @@ Each repo tracks which client uses which entity. This is done in the [wb_changes
 This table is updated whenever the client side tracking table is updated.
 To do this, the client wiki must, whenever a page is edited, determine which entities are used (in order to record this in the local tracking table), but in addition to this, detect whether an entity that wasn't used previously anywhere on the wiki is now used by the edited page, or whether the edit removed the last usage of any of the entities previously used on the page.
 
-[wb_changes_subscription]: @ref md_docs_sql_wb_changes_subscription
-[wbc_entity_usage]: @ref md_docs_sql_wbc_entity_usage
+[wb_changes_subscription]: @ref docs_sql_wb_changes_subscription
+[wbc_entity_usage]: @ref docs_sql_wbc_entity_usage
 [LinksUpdateComplete]: https://www.mediawiki.org/wiki/Manual:Hooks/LinksUpdateComplete
 [ParserCacheSave]: https://www.mediawiki.org/wiki/Manual:Hooks/ParserCacheSave
 [ArticleDeleteComplete]: https://www.mediawiki.org/wiki/Manual:Hooks/ArticleDeleteComplete

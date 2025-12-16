@@ -4,16 +4,24 @@ namespace CirrusSearch;
 
 use CirrusSearch\BuildDocument\BuildDocument;
 use CirrusSearch\BuildDocument\BuildDocumentException;
+use CirrusSearch\BuildDocument\DocumentSizeLimiter;
+use CirrusSearch\Extra\MultiList\MultiListBuilder;
+use CirrusSearch\Profile\SearchProfileService;
 use CirrusSearch\Search\CirrusIndexField;
+use CirrusSearch\Wikimedia\WeightedTagsHooks;
 use Elastica\Bulk\Action\AbstractDocument;
 use Elastica\Document;
 use Elastica\Exception\Bulk\ResponseException;
+use Elastica\Exception\RuntimeException;
+use Elastica\JSON;
+use Elastica\Response;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
-use Status;
-use Title;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
 use Wikimedia\Assert\Assert;
-use WikiPage;
+use Wikimedia\Rdbms\IDBAccessObject;
+use Wikimedia\Stats\StatsFactory;
 
 /**
  * Handles non-maintenance write operations to the elastic search cluster.
@@ -34,6 +42,7 @@ use WikiPage;
  * http://www.gnu.org/copyleft/gpl.html
  */
 class DataSender extends ElasticsearchIntermediary {
+
 	/** @var \Psr\Log\LoggerInterface */
 	private $log;
 
@@ -50,31 +59,36 @@ class DataSender extends ElasticsearchIntermediary {
 	 */
 	private $searchConfig;
 
+	private StatsFactory $stats;
+	/**
+	 * @var DocumentSizeLimiter
+	 */
+	private $docSizeLimiter;
+
 	/**
 	 * @param Connection $conn
 	 * @param SearchConfig $config
+	 * @param StatsFactory|null $stats A StatsFactory (already prefixed with the right component)
+	 * @param DocumentSizeLimiter|null $docSizeLimiter
 	 */
-	public function __construct( Connection $conn, SearchConfig $config ) {
+	public function __construct(
+		Connection $conn,
+		SearchConfig $config,
+		?StatsFactory $stats = null,
+		?DocumentSizeLimiter $docSizeLimiter = null
+	) {
 		parent::__construct( $conn, null, 0 );
+		$this->stats = $stats ?? Util::getStatsFactory();
 		$this->log = LoggerFactory::getInstance( 'CirrusSearch' );
 		$this->failedLog = LoggerFactory::getInstance( 'CirrusSearchChangeFailed' );
 		$this->indexBaseName = $config->get( SearchConfig::INDEX_BASE_NAME );
 		$this->searchConfig = $config;
+		$this->docSizeLimiter = $docSizeLimiter ?? new DocumentSizeLimiter(
+			$config->getProfileService()->loadProfile( SearchProfileService::DOCUMENT_SIZE_LIMITER ) );
 	}
 
 	/**
-	 * @param string $indexSuffix
-	 * @param string[] $docIds
-	 * @param string $tagField
-	 * @param string $tagPrefix
-	 * @param string|string[]|null $tagNames A tag name or list of tag names. Each tag will be
-	 *   set for each document ID. Omit for tags which are fully defined by their prefix.
-	 * @param int[]|int[][]|null $tagWeights An optional map of docid => weight. When $tagName is
-	 *   null, the weight is an integer. When $tagName is not null, the weight is itself a
-	 *   tagname => int map. Weights are between 1-1000, and can be omitted (in which case no
-	 *   update will be sent for the corresponding docid/tag combination).
-	 * @param int $batchSize
-	 * @return Status
+	 * @deprecated use {@link sendWeightedTagsUpdate} instead.
 	 */
 	public function sendUpdateWeightedTags(
 		string $indexSuffix,
@@ -82,70 +96,59 @@ class DataSender extends ElasticsearchIntermediary {
 		string $tagField,
 		string $tagPrefix,
 		$tagNames = null,
-		array $tagWeights = null,
+		?array $tagWeights = null,
 		int $batchSize = 30
 	): Status {
-		Assert::parameterType( [ 'string', 'array', 'null' ], $tagNames, '$tagNames' );
-		if ( is_array( $tagNames ) ) {
-			Assert::parameterElementType( 'string', $tagNames, '$tagNames' );
-		}
-		if ( $tagNames === null ) {
-			$tagNames = [ 'exists' ];
-			if ( $tagWeights !== null ) {
-				$tagWeights = [ 'exists' => $tagWeights ];
-			}
-		} elseif ( is_string( $tagNames ) ) {
-			$tagNames = [ $tagNames ];
-		}
+		return $this->sendWeightedTagsUpdate(
+			$indexSuffix,
+			$tagPrefix,
+			is_array( $tagWeights ) ? array_reduce(
+				$docIds, static function ( $docTagsWeights, $docId ) use ( $tagNames, $tagWeights ) {
+					if ( array_key_exists( $docId, $tagWeights ) ) {
+						$docTagsWeights[$docId] = MultiListBuilder::buildTagWeightsFromLegacyParameters(
+						$tagNames,
+						$tagWeights[$docId]
+						);
+					}
 
-		Assert::precondition( strpos( $tagPrefix, '/' ) === false,
-			"invalid tag prefix $tagPrefix: must not contain /" );
-		foreach ( $tagNames as $tagName ) {
-			Assert::precondition( strpos( $tagName, '|' ) === false,
-				"invalid tag name $tagName: must not contain |" );
-		}
-		if ( $tagWeights ) {
-			foreach ( $tagWeights as $docId => $docWeights ) {
-				Assert::precondition( in_array( $docId, $docIds ),
-					"document ID $docId used in \$tagWeights but not found in \$docIds" );
-				foreach ( $docWeights as $tagName => $weight ) {
-					Assert::precondition( in_array( $tagName, $tagNames, true ),
-						"tag name $tagName used in \$tagWeights but not found in \$tagNames" );
-					Assert::precondition( is_int( $weight ), "weights must be integers but $weight is "
-						. gettype( $weight ) );
-					Assert::precondition( $weight >= 1 && $weight <= 1000,
-						"weights must be between 1 and 1000 (found: $weight)" );
-				}
-			}
-		}
+					return $docTagsWeights;
+				}, []
+			) : array_fill_keys( $docIds, MultiListBuilder::buildTagWeightsFromLegacyParameters( $tagNames ) ),
+			$batchSize
+		);
+	}
 
+	/**
+	 * @param string $indexSuffix
+	 * @param string $tagPrefix
+	 * @param int[][]|null[][] $tagWeights a map of `[ docId: string => [ tagName: string => tagWeight: int|null ] ]`
+	 * @param int $batchSize
+	 *
+	 * @return Status
+	 */
+	public function sendWeightedTagsUpdate(
+		string $indexSuffix,
+		string $tagPrefix,
+		array $tagWeights,
+		int $batchSize = 30
+	): Status {
 		$client = $this->connection->getClient();
 		$status = Status::newGood();
 		$pageIndex = $this->connection->getIndex( $this->indexBaseName, $indexSuffix );
-		foreach ( array_chunk( $docIds, $batchSize ) as $docIdsChunk ) {
+		foreach ( array_chunk( array_keys( $tagWeights ), $batchSize ) as $docIdsChunk ) {
 			$bulk = new \Elastica\Bulk( $client );
 			$bulk->setIndex( $pageIndex );
 			foreach ( $docIdsChunk as $docId ) {
-				$tags = [];
-				foreach ( $tagNames as $tagName ) {
-					$tagValue = "$tagPrefix/$tagName";
-					if ( $tagWeights !== null ) {
-						if ( !isset( $tagWeights[$docId][$tagName] ) ) {
-							continue;
-						}
-						// To pass the assertions above, the weight must be either an int, a float
-						// with an integer value, or a string representation of one of those.
-						// Convert to int to ensure there is no trailing '.0'.
-						$tagValue .= '|' . (int)$tagWeights[$docId][$tagName];
-					}
-					$tags[] = $tagValue;
-				}
-				if ( !$tags ) {
-					continue;
-				}
+				$docTags = MultiListBuilder::buildWeightedTags(
+					$tagPrefix,
+					$tagWeights[$docId],
+				);
 				$script = new \Elastica\Script\Script( 'super_detect_noop', [
-					'source' => [ $tagField => $tags ],
-					'handlers' => [ $tagField => CirrusIndexField::MULTILIST_HANDLER ],
+					'source' => [
+						WeightedTagsHooks::FIELD_NAME => array_map( static fn ( $docTag ) => (string)$docTag,
+							$docTags )
+					],
+					'handlers' => [ WeightedTagsHooks::FIELD_NAME => CirrusIndexField::MULTILIST_HANDLER ],
 				], 'super_detect_noop' );
 				$script->setId( $docId );
 				$bulk->addScript( $script, 'update' );
@@ -158,11 +161,17 @@ class DataSender extends ElasticsearchIntermediary {
 			// Execute the bulk update
 			$exception = null;
 			try {
-				$this->start( new BulkUpdateRequestLog( $this->connection->getClient(),
-					'updating {numBulk} documents',
-					'send_data_reset_weighted_tags',
-					[ 'numBulk' => count( $docIdsChunk ), 'index' => $pageIndex->getName() ]
-				) );
+				$this->start(
+					new BulkUpdateRequestLog(
+						$this->connection->getClient(),
+						'updating {numBulk} documents',
+						'send_data_reset_weighted_tags',
+						[
+							'numBulk' => count( $docIdsChunk ),
+							'index' => $pageIndex->getName()
+						]
+					)
+				);
 				$bulk->send();
 			} catch ( ResponseException $e ) {
 				if ( !$this->bulkResponseExceptionIsJustDocumentMissing( $e ) ) {
@@ -175,28 +184,23 @@ class DataSender extends ElasticsearchIntermediary {
 				$this->success();
 			} else {
 				$this->failure( $exception );
-				$this->failedLog->warning( "Update weighted tag {weightedTagFieldName} for {weightedTagPrefix} in articles: {documents}",
-					[
+				$this->failedLog->warning(
+					"Update weighted tag {weightedTagFieldName} for {weightedTagPrefix} in articles: {docIds}", [
 						'exception' => $exception,
-						'weightedTagFieldName' => $tagField,
+						'weightedTagFieldName' => WeightedTagsHooks::FIELD_NAME,
 						'weightedTagPrefix' => $tagPrefix,
-						'weightedTagNames' => implode( '|', $tagNames ),
-						'weightedTagWeight' => $tagWeights,
-						'docIds' => implode( ',', $docIds )
-					] );
-				$status->error( 'cirrussearch-failed-update-weighted-tags' );
+						'weightedTagWeight' => var_export( $tagWeights, true ),
+						'docIds' => implode( ',', array_keys( $tagWeights ) )
+					]
+				);
 			}
 		}
+
 		return $status;
 	}
 
 	/**
-	 * @param string $indexSuffix
-	 * @param string[] $docIds
-	 * @param string $tagField
-	 * @param string $tagPrefix
-	 * @param int $batchSize
-	 * @return Status
+	 * @deprecated use {@link sendWeightedTagsUpdate} instead.
 	 */
 	public function sendResetWeightedTags(
 		string $indexSuffix,
@@ -205,13 +209,10 @@ class DataSender extends ElasticsearchIntermediary {
 		string $tagPrefix,
 		int $batchSize = 30
 	): Status {
-		return $this->sendUpdateWeightedTags(
+		return $this->sendWeightedTagsUpdate(
 			$indexSuffix,
-			$docIds,
-			$tagField,
 			$tagPrefix,
-			CirrusIndexField::MULTILIST_DELETE_GROUPING,
-			null,
+			array_fill_keys( $docIds, [ CirrusIndexField::MULTILIST_DELETE_GROUPING => null ] ),
 			$batchSize
 		);
 	}
@@ -239,11 +240,12 @@ class DataSender extends ElasticsearchIntermediary {
 		$services = MediaWikiServices::getInstance();
 		$builder = new BuildDocument(
 			$this->connection,
-			$services->getDBLoadBalancer()->getConnection( DB_REPLICA ),
-			$services->getParserCache(),
+			$services->getConnectionProvider()->getReplicaDatabase(),
 			$services->getRevisionStore(),
-			new CirrusSearchHookRunner( $services->getHookContainer() ),
-			$services->getBacklinkCacheFactory()
+			$services->getBacklinkCacheFactory(),
+			$this->docSizeLimiter,
+			$services->getTitleFormatter(),
+			$services->getWikiPageFactory()
 		);
 		try {
 			foreach ( $documents as $i => $doc ) {
@@ -252,6 +254,7 @@ class DataSender extends ElasticsearchIntermediary {
 					// queue and should no longer be written to elastic.
 					unset( $documents[$i] );
 				}
+				$this->reportDocSize( $doc );
 			}
 		} catch ( BuildDocumentException $be ) {
 			$this->failedLog->warning(
@@ -330,55 +333,50 @@ class DataSender extends ElasticsearchIntermediary {
 					);
 				}
 			);
-			if ( !$justDocumentMissing ) {
-				$exception = $e;
-			}
+			$exception = $e;
 		} catch ( \Elastica\Exception\ExceptionInterface $e ) {
 			$exception = $e;
 		}
 
-		// TODO: rewrite error handling, the logic here is hard to follow
-		$validResponse = $responseSet !== null && count( $responseSet->getBulkResponses() ) > 0;
-		if ( $exception === null && ( $justDocumentMissing || $validResponse ) ) {
+		if ( $justDocumentMissing ) {
+			// wa have a failure but this is just docs that are missing in the index
+			// missing docs are logged above
 			$this->success();
-			if ( $validResponse ) {
-				// @phan-suppress-next-line PhanTypeMismatchArgumentNullable responseset is not null
-				$this->reportUpdateMetrics( $responseSet, $indexSuffix, count( $documents ) );
-			}
 			return Status::newGood();
-		} else {
-			$this->failure( $exception );
-			$documentIds = array_map( static function ( $d ) {
-				return (string)( $d->getId() );
-			}, $documents );
-			$logContext = [ 'docId' => implode( ', ', $documentIds ) ];
-			if ( $exception ) {
-				$logContext['exception'] = $exception;
-			} else {
-				// we want to figure out error_massage from the responseData log, because
-				// error_message is currently not set when exception is null and response is not
-				// valid
-				$responseData = $responseSet->getData();
-				$responseDataString = json_encode( $responseData );
-
-				// in logstash some error_message seems to be empty we are assuming its due to
-				// non UTF-8 sequences in the response data causing the json_encode to return empty
-				// string,so we added a logic to validate the assumption
-				if ( json_last_error() === JSON_ERROR_UTF8 ) {
-					$responseDataString =
-						json_encode( $this->convertEncoding( $responseData ) );
-				} elseif ( json_last_error() !== JSON_ERROR_NONE ) {
-					$responseDataString = json_last_error_msg();
-				}
-
-				$logContext['error_message'] = mb_substr( $responseDataString, 0, 4096 );
-			}
-			$this->failedLog->warning(
-				'Failed to update documents {docId}',
-				$logContext
-			);
-			return Status::newFatal( 'cirrussearch-failed-send-data' );
 		}
+		// check if the response is valid by making sure that it has bulk responses
+		if ( $responseSet !== null && count( $responseSet->getBulkResponses() ) > 0 ) {
+			$this->success();
+			$this->reportUpdateMetrics( $responseSet, $indexSuffix, count( $documents ) );
+			return Status::newGood();
+		}
+		// Everything else should be a failure.
+		if ( $exception === null ) {
+			// Elastica failed to identify the error, reason is that the Elastica Bulk\Response
+			// does identify errors only in individual responses if the request fails without
+			// getting a formal elastic response Bulk\Response->isOk might remain true
+			// So here we construct the ResponseException that should have been built and thrown
+			// by Elastica
+			$lastRequest = $this->connection->getClient()->getLastRequest();
+			if ( $lastRequest !== null ) {
+				$exception = new \Elastica\Exception\ResponseException( $lastRequest,
+					new Response( $responseSet->getData() ) );
+			} else {
+				$exception = new RuntimeException( "Unknown error in bulk request (Client::getLastRequest() is null)" );
+			}
+		}
+		$this->failure( $exception );
+		$documentIds = array_map( static function ( $d ) {
+			return (string)( $d->getId() );
+		}, $documents );
+		$this->failedLog->warning(
+			'Failed to update documents {docId}',
+			[
+				'docId' => implode( ', ', $documentIds ),
+				'exception' => $exception
+			]
+		);
+		return Status::newFatal( 'cirrussearch-failed-send-data' );
 	}
 
 	/**
@@ -408,14 +406,18 @@ class DataSender extends ElasticsearchIntermediary {
 				$updateStats[$opRes] = 1;
 			}
 		}
-		$stats = MediaWikiServices::getInstance()->getStatsdDataFactory();
 		$cluster = $this->connection->getClusterName();
 		$metricsPrefix = "CirrusSearch.$cluster.updates";
 		foreach ( $updateStats as $what => $num ) {
-			$stats->updateCount(
-				"$metricsPrefix.details.{$this->indexBaseName}.$indexSuffix.$what", $num
-			);
-			$stats->updateCount( "$metricsPrefix.all.$what", $num );
+			$this->stats->getCounter( "update_total" )
+				->setLabel( "status", $what )
+				->setLabel( "search_cluster", $cluster )
+				->setLabel( "index_name", $indexSuffix )
+				->copyToStatsdAt( [
+					"$metricsPrefix.details.{$this->indexBaseName}.$indexSuffix.$what",
+					"$metricsPrefix.all.$what"
+				] )
+				->incrementBy( $num );
 		}
 	}
 
@@ -513,8 +515,8 @@ class DataSender extends ElasticsearchIntermediary {
 					$this->connection->getClient(),
 					'updating {numBulk} documents in other indexes',
 					'send_data_other_idx_write',
-						[ 'numBulk' => count( $updates ), 'index' => $indexName ]
-					) );
+					[ 'numBulk' => count( $updates ), 'index' => $indexName ]
+				) );
 				$bulk->send();
 			} catch ( ResponseException $e ) {
 				if ( !$this->bulkResponseExceptionIsJustDocumentMissing( $e ) ) {
@@ -548,7 +550,7 @@ class DataSender extends ElasticsearchIntermediary {
 	 */
 	protected function decideRequiredSetAction( Title $title ) {
 		$page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
-		$page->loadPageData( WikiPage::READ_LATEST );
+		$page->loadPageData( IDBAccessObject::READ_LATEST );
 		if ( $page->exists() ) {
 			return 'add';
 		} else {
@@ -621,9 +623,9 @@ class DataSender extends ElasticsearchIntermediary {
 
 	/**
 	 * Converts a document into a call to super_detect_noop from the wikimedia-extra plugin.
-	 * @internal made public for testing purposes
 	 * @param \Elastica\Document $doc
 	 * @return \Elastica\Script\Script
+	 * @internal made public for testing purposes
 	 */
 	public function docToSuperDetectNoopScript( \Elastica\Document $doc ) {
 		$handlers = CirrusIndexField::getHint( $doc, CirrusIndexField::NOOP_HINT );
@@ -676,6 +678,26 @@ class DataSender extends ElasticsearchIntermediary {
 		}
 
 		return $d;
+	}
+
+	private function reportDocSize( Document $doc ): void {
+		$cluster = $this->connection->getClusterName();
+		try {
+			// Use the same JSON output that Elastica uses, it might not be the options MW uses
+			// to populate event-gate (esp. regarding escaping UTF-8) but hopefully it's close
+			// to what we will be using.
+			$len = strlen( JSON::stringify( $doc->getData(), \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES ) );
+			// Use a timing stat as we'd like to have percentiles calculated (possibly use T348796 once available)
+			// note that prior to switching to prometheus we used to have min and max, if that's proven to be still useful
+			// to track abnormally large docs we might consider another approach (log a warning?)
+			$this->stats->getTiming( "update_doc_size_kb" )
+				->setLabel( "search_cluster", $cluster )
+				->copyToStatsdAt( "CirrusSearch.$cluster.updates.all.doc_size" )
+				->observe( $len );
+
+		} catch ( \JsonException $e ) {
+			$this->log->warning( "Cannot estimate CirrusSearch doc size", [ "exception" => $e ] );
+		}
 	}
 
 }

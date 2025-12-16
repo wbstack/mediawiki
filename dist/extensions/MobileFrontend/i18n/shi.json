@@ -1,14 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
+			"AguzulH",
 			"Amara-Amaziɣ",
-			"Ayour2002",
-			"AguzulH"
+			"Ayour2002"
 		]
 	},
-	"mobile-frontend-copyright": "Mayad illa ddu $1 abla iɣ ittuybdar mas ur t-igi.",
-	"mobile-frontend-featured-article": "Isisfiwn f ɣassad ittuyxtarn",
-	"mobile-frontend-news-items": "Ɣ inɣmisn",
+	"mobile-frontend-copyright": "Tumayt tlla ddu $1 amr iɣ ittuybdar mas unmgal.",
 	"mobile-frontend-terms-text": "Tifadiwin n usmrs",
 	"mobile-frontend-view": "Annay n ttilifun",
 	"mobile-frontend-view-desktop": "Tunɣilt n usira",

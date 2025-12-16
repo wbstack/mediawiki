@@ -6,7 +6,7 @@ use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Snak\PropertyNoValueSnak;
 use Wikibase\DataModel\Statement\Statement;
-use Wikibase\View\LocalizedTextProvider;
+use Wikibase\View\DummyLocalizedTextProvider;
 use Wikibase\View\SpecialPageLinker;
 use Wikibase\View\Template\TemplateFactory;
 use Wikibase\View\ToolbarEditSectionGenerator;
@@ -40,7 +40,7 @@ class ToolbarEditSectionGeneratorTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function getAddStatementToGroupSectionProvider() {
+	public static function getAddStatementToGroupSectionProvider() {
 		return [
 			[ new NumericPropertyId( 'P1' ) ],
 		];
@@ -59,13 +59,13 @@ class ToolbarEditSectionGeneratorTest extends \PHPUnit\Framework\TestCase {
 		$this->assertStringContainsString( $expected, $html );
 	}
 
-	public function getLabelDescriptionAliasesEditSectionProvider() {
+	public static function getLabelDescriptionAliasesEditSectionProvider() {
 		return [
 			[
 				'en',
 				new NumericPropertyId( 'P1' ),
-				'Special:SetLabelDescriptionAliases/P1/en'
-			]
+				'Special:SetLabelDescriptionAliases/P1/en',
+			],
 		];
 	}
 
@@ -78,9 +78,9 @@ class ToolbarEditSectionGeneratorTest extends \PHPUnit\Framework\TestCase {
 		$this->assertStringContainsString( $expected, $html );
 	}
 
-	public function getSiteLinksEditSectionProvider() {
+	public static function getSiteLinksEditSectionProvider() {
 		return [
-			[ new NumericPropertyId( 'P1' ), 'Special:SetSiteLink/P1' ]
+			[ new NumericPropertyId( 'P1' ), 'Special:SetSiteLink/P1' ],
 		];
 	}
 
@@ -98,7 +98,7 @@ class ToolbarEditSectionGeneratorTest extends \PHPUnit\Framework\TestCase {
 
 	public function getStatementEditSection() {
 		return [
-			[ new Statement( new PropertyNoValueSnak( new NumericPropertyId( 'P1' ) ) ) ]
+			[ new Statement( new PropertyNoValueSnak( new NumericPropertyId( 'P1' ) ) ) ],
 		];
 	}
 
@@ -114,7 +114,7 @@ class ToolbarEditSectionGeneratorTest extends \PHPUnit\Framework\TestCase {
 		return new ToolbarEditSectionGenerator(
 			$specialPageLinker,
 			$templateFactory,
-			$this->createMock( LocalizedTextProvider::class )
+			new DummyLocalizedTextProvider()
 		);
 	}
 

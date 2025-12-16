@@ -4,7 +4,6 @@ declare( strict_types=1 );
 namespace Wikibase\Lib\FederatedProperties;
 
 use InvalidArgumentException;
-use LogicException;
 use Wikibase\DataModel\Entity\Property;
 use Wikibase\DataModel\Entity\PropertyId;
 
@@ -13,9 +12,9 @@ use Wikibase\DataModel\Entity\PropertyId;
  */
 class FederatedPropertyId implements PropertyId {
 
-	private $serialization;
+	private string $serialization;
 
-	private $remoteId;
+	private string $remoteId;
 
 	/**
 	 * @param string $uriSerialization The concept URI serialization of the ID
@@ -29,11 +28,12 @@ class FederatedPropertyId implements PropertyId {
 		$this->remoteId = $remoteId;
 	}
 
-	public function serialize(): ?string {
-		return $this->serialization;
+	public function __serialize(): array {
+		return [ $this->serialization ];
 	}
 
-	public function unserialize( $serialization ): void {
+	public function __unserialize( array $data ): void {
+		[ $serialization ] = $data;
 		self::assertValidSerialization( $serialization );
 		$this->serialization = $serialization;
 	}
@@ -69,14 +69,6 @@ class FederatedPropertyId implements PropertyId {
 	public function equals( $target ) {
 		return $target instanceof FederatedPropertyId &&
 			$target->getSerialization() === $this->serialization;
-	}
-
-	public function getLocalPart() {
-		throw new LogicException( 'Not implemented for FederatedPropertyId' );
-	}
-
-	public function getRepositoryName() {
-		throw new LogicException( 'Not implemented for FederatedPropertyId' );
 	}
 
 }

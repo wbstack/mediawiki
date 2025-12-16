@@ -1,0 +1,35 @@
+<?php declare( strict_types=1 );
+
+namespace Wikibase\Repo\RestApi\Application\Validation;
+
+use Wikibase\DataModel\Term\TermList;
+
+/**
+ * @license GPL-2.0-or-later
+ */
+class PropertyLabelsContentsValidator {
+
+	private ?TermList $validatedLabels = null;
+	private PropertyLabelValidator $labelValidator;
+
+	public function __construct( PropertyLabelValidator $labelValidator ) {
+		$this->labelValidator = $labelValidator;
+	}
+
+	public function validate( PartiallyValidatedLabels $labels, TermList $descriptions, ?array $languages = null ): ?ValidationError {
+		$languages ??= array_keys( $labels->toTextArray() );
+		foreach ( $languages as $language ) {
+			$error = $this->labelValidator->validate( $language, $labels->getByLanguage( $language )->getText(), $descriptions );
+			if ( $error ) {
+				return $error;
+			}
+		}
+		$this->validatedLabels = $labels->asPlainTermList();
+
+		return null;
+	}
+
+	public function getValidatedLabels(): TermList {
+		return $this->validatedLabels;
+	}
+}

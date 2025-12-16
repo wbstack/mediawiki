@@ -2,12 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Ganbarzada",
+			"Patriot Kor",
 			"Patriot Kur",
-			"Гусейн",
-			"Patriot Kor"
+			"Гусейн"
 		]
 	},
 	"wikibase-entity-query": "Syvol",
+	"nstab-item": "Element",
+	"tooltip-ca-nstab-item": "Elementi dijə karde",
 	"wikibase-edit": "sərost kardej",
 	"wikibase-save": "огәтеј",
 	"wikibase-cancel": "ləğv karde",

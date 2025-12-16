@@ -1,5 +1,6 @@
 <?php
 
+use MediaWiki\Languages\LanguageNameUtils;
 use MediaWiki\MediaWikiServices;
 
 /**
@@ -55,7 +56,7 @@ class LanguageNameSearch {
 		if ( $languageNameUtils->isKnownLanguageTag( $searchKey ) ) {
 			$name = mb_strtolower( $languageNameUtils->getLanguageName( $searchKey, $userLanguage ) );
 			// Check if language code is a prefix of the name
-			if ( strpos( $name, $searchKey ) === 0 ) {
+			if ( str_starts_with( $name, $searchKey ) ) {
 				$results[$searchKey] = $name;
 			} else {
 				$results[$searchKey] = "$searchKey – $name";
@@ -82,7 +83,7 @@ class LanguageNameSearch {
 				// If $userLanguage is not provided (null), it is the same as autonym
 				$candidates = [
 					mb_strtolower( $languageNameUtils->getLanguageName( $code, $userLanguage ) ),
-					mb_strtolower( $languageNameUtils->getLanguageName( $code, null ) ),
+					mb_strtolower( $languageNameUtils->getLanguageName( $code, LanguageNameUtils::AUTONYMS ) ),
 					$name
 				];
 
@@ -105,11 +106,21 @@ class LanguageNameSearch {
 		return $results;
 	}
 
+	/**
+	 * @param string $name
+	 * @param string $searchKey
+	 * @param int $typos
+	 * @return bool
+	 */
 	public static function matchNames( $name, $searchKey, $typos ) {
 		return strrpos( $name, $searchKey, -strlen( $name ) ) !== false
 			|| ( $typos > 0 && self::levenshteinDistance( $name, $searchKey ) <= $typos );
 	}
 
+	/**
+	 * @param string $name
+	 * @return int
+	 */
 	public static function getIndex( $name ) {
 		$codepoint = self::getCodepoint( $name );
 

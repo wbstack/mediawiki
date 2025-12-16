@@ -1,31 +1,33 @@
+/* eslint-disable no-jquery/no-jquery-constructor, no-jquery/no-other-methods, no-jquery/no-css,
+	no-jquery/no-find-collection, no-jquery/no-each-collection, no-jquery/no-attr */
 /**
  * Collapsible tabs for Vector
  */
 function init() {
-	var cactionsId = 'p-cactions',
+	const cactionsId = 'p-cactions',
 		$cactions = $( '#' + cactionsId ),
 		// eslint-disable-next-line no-jquery/no-global-selector
-		$tabContainer = $( '#p-views ul' ),
+		$tabContainer = $( '#p-views ul' );
+	let initialCactionsWidth = function () {
+		// HACK: This depends on a discouraged feature of jQuery width().
+		// The #p-cactions element is generally hidden by default, but
+		// the consumers of this function need to know the width that the
+		// "More" menu would consume if it were visible. This means it
+		// must not return 0 if hidden, but rather virtually render it
+		// and compute its width, then hide it again. jQuery width() does
+		// all that for us.
+		const width = $cactions.width() || 0;
 		initialCactionsWidth = function () {
-			// HACK: This depends on a discouraged feature of jQuery width().
-			// The #p-cactions element is generally hidden by default, but
-			// the consumers of this function need to know the width that the
-			// "More" menu would consume if it were visible. This means it
-			// must not return 0 if hidden, but rather virtually render it
-			// and compute its width, then hide it again. jQuery width() does
-			// all that for us.
-			var width = $cactions.width() || 0;
-			initialCactionsWidth = function () {
-				return width;
-			};
 			return width;
 		};
+		return width;
+	};
 
 	// Bind callback functions to animate our drop down menu in and out
 	// and then call the collapsibleTabs function on the menu
 	$tabContainer
-		.on( 'beforeTabCollapse', function () {
-			var expandedWidth;
+		.on( 'beforeTabCollapse', () => {
+			let expandedWidth;
 			// If the dropdown was hidden, show it
 			if ( !mw.util.isPortletVisible( cactionsId ) ) {
 				mw.util.showPortlet( cactionsId );
@@ -40,7 +42,7 @@ function init() {
 					.animate( { width: expandedWidth }, 'normal' );
 			}
 		} )
-		.on( 'beforeTabExpand', function () {
+		.on( 'beforeTabExpand', () => {
 			// If we're removing the last child node right now, hide the dropdown
 			if ( $cactions.find( 'li' ).length === 1 ) {
 				// eslint-disable-next-line no-jquery/no-animate
@@ -54,7 +56,7 @@ function init() {
 			expandCondition: function ( eleWidth ) {
 				// This looks a bit awkward because we're doing expensive queries as late
 				// as possible.
-				var distance = $.collapsibleTabs.calculateTabDistance();
+				const distance = $.collapsibleTabs.calculateTabDistance();
 				// If there are at least eleWidth + 1 pixels of free space, expand.
 				// We add 1 because .width() will truncate fractional values but .offset() will not.
 				if ( distance >= eleWidth + 1 ) {
@@ -70,7 +72,7 @@ function init() {
 				}
 			},
 			collapseCondition: function () {
-				var collapsibleWidth = 0,
+				let collapsibleWidth = 0,
 					doCollapse = false;
 
 				// This looks a bit awkward because we're doing expensive queries as late
@@ -96,7 +98,7 @@ function init() {
 				// 3. and, the left-navigation and right-navigation are overlapping
 				//    each other, e.g. when making the window very narrow, or if a gadget
 				//    added a lot of tabs.
-				$tabContainer.children( 'li.collapsible' ).each( function ( _index, element ) {
+				$tabContainer.children( 'li.collapsible' ).each( ( _index, element ) => {
 					collapsibleWidth += $( element ).width() || 0;
 					if ( collapsibleWidth > initialCactionsWidth() ) {
 						// We've found one or more collapsible links that are wider

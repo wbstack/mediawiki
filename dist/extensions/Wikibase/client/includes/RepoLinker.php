@@ -4,9 +4,9 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Client;
 
-use Html;
 use InvalidArgumentException;
 use LogicException;
+use MediaWiki\Html\Html;
 use Wikibase\DataAccess\EntitySourceDefinitions;
 use Wikibase\DataModel\Entity\EntityId;
 
@@ -83,7 +83,7 @@ class RepoLinker {
 	 *
 	 * @return string (html)
 	 */
-	public function buildEntityLink( EntityId $entityId, array $classes = [], string $text = null ): string {
+	public function buildEntityLink( EntityId $entityId, array $classes = [], ?string $text = null ): string {
 		if ( $text === null ) {
 			$text = $entityId->getSerialization();
 		}
@@ -129,7 +129,7 @@ class RepoLinker {
 	 */
 	public function getEntityConceptUri( EntityId $entityId ): string {
 		$baseUri = $this->getConceptBaseUri( $entityId );
-		return $baseUri . '/' . wfUrlencode( $entityId->getLocalPart() );
+		return $baseUri . '/' . wfUrlencode( $entityId->getSerialization() );
 	}
 
 	public function getBaseUrl(): string {
@@ -150,9 +150,9 @@ class RepoLinker {
 			$uri = $source->getConceptBaseUri();
 		}
 
-		if ( !isset( $uri ) ) {
+		if ( $uri === null ) {
 			throw new LogicException(
-				'No base URI for for concept URI for repository: ' . $entityId->getRepositoryName()
+				'No base URI for for concept URI for entity source: ' . $source->getSourceName()
 			);
 		}
 		return rtrim( $uri, '/' );

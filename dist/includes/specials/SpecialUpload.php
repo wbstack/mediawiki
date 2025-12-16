@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:Upload
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,34 +16,60 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
- * @ingroup Upload
  */
 
+namespace MediaWiki\Specials;
+
+use BitmapHandler;
+use ChangeTags;
+use ErrorPageError;
+use ImageGalleryBase;
+use JobQueueGroup;
+use LocalFile;
+use LocalRepo;
+use LogEventsList;
+use MediaWiki\Config\Config;
+use MediaWiki\HookContainer\HookRunner;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\User\UserOptionsLookup;
+use MediaWiki\Request\FauxRequest;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\NamespaceInfo;
+use MediaWiki\Title\Title;
+use MediaWiki\User\Options\UserOptionsLookup;
+use MediaWiki\User\User;
 use MediaWiki\Watchlist\WatchlistManager;
+use PermissionsError;
+use Psr\Log\LoggerInterface;
+use RepoGroup;
+use UnexpectedValueException;
+use UploadBase;
+use UploadForm;
+use UploadFromStash;
+use UserBlockedError;
+use WikiFilePage;
 
 /**
- * Form for handling uploads and special page.
+ * Form for uploading media files.
  *
  * @ingroup SpecialPage
  * @ingroup Upload
  */
 class SpecialUpload extends SpecialPage {
 
-	/** @var LocalRepo */
-	private $localRepo;
-
-	/** @var UserOptionsLookup */
-	private $userOptionsLookup;
-
-	/** @var NamespaceInfo */
-	private $nsInfo;
-
-	/** @var WatchlistManager */
-	private $watchlistManager;
+	private LocalRepo $localRepo;
+	private UserOptionsLookup $userOptionsLookup;
+	private NamespaceInfo $nsInfo;
+	private WatchlistManager $watchlistManager;
+	/** @var bool wether uploads by url should be asynchronous or not */
+	public bool $allowAsync;
+	private JobQueueGroup $jobQueueGroup;
+	private LoggerInterface $log;
 
 	/**
 	 * @param RepoGroup|null $repoGroup
@@ -54,54 +78,72 @@ class SpecialUpload extends SpecialPage {
 	 * @param WatchlistManager|null $watchlistManager
 	 */
 	public function __construct(
-		RepoGroup $repoGroup = null,
-		UserOptionsLookup $userOptionsLookup = null,
-		NamespaceInfo $nsInfo = null,
-		WatchlistManager $watchlistManager = null
+		?RepoGroup $repoGroup = null,
+		?UserOptionsLookup $userOptionsLookup = null,
+		?NamespaceInfo $nsInfo = null,
+		?WatchlistManager $watchlistManager = null
 	) {
 		parent::__construct( 'Upload', 'upload' );
 		// This class is extended and therefor fallback to global state - T265300
 		$services = MediaWikiServices::getInstance();
-		$repoGroup = $repoGroup ?? $services->getRepoGroup();
+		$this->jobQueueGroup = $services->getJobQueueGroup();
+		$repoGroup ??= $services->getRepoGroup();
 		$this->localRepo = $repoGroup->getLocalRepo();
 		$this->userOptionsLookup = $userOptionsLookup ?? $services->getUserOptionsLookup();
 		$this->nsInfo = $nsInfo ?? $services->getNamespaceInfo();
 		$this->watchlistManager = $watchlistManager ?? $services->getWatchlistManager();
+		$this->allowAsync = (
+			$this->getConfig()->get( MainConfigNames::EnableAsyncUploads ) &&
+			$this->getConfig()->get( MainConfigNames::EnableAsyncUploadsByURL )
+		);
+		$this->log = LoggerFactory::getInstance( 'SpecialUpload' );
 	}
 
 	public function doesWrites() {
 		return true;
 	}
 
-	/** Misc variables */
+	// Misc variables
 
 	/** @var WebRequest|FauxRequest The request this form is supposed to handle */
 	public $mRequest;
+	/** @var string */
 	public $mSourceType;
+
+	/** @var string The cache key to use to retreive the status of your async upload */
+	public $mCacheKey;
 
 	/** @var UploadBase */
 	public $mUpload;
 
 	/** @var LocalFile */
 	public $mLocalFile;
+	/** @var bool */
 	public $mUploadClicked;
 
-	/** User input variables from the "description" section */
+	// User input variables from the "description" section
 
 	/** @var string The requested target file name */
 	public $mDesiredDestName;
+	/** @var string */
 	public $mComment;
+	/** @var string */
 	public $mLicense;
 
-	/** User input variables from the root section */
+	// User input variables from the root section
 
+	/** @var bool */
 	public $mIgnoreWarning;
+	/** @var bool */
 	public $mWatchthis;
+	/** @var string */
 	public $mCopyrightStatus;
+	/** @var string */
 	public $mCopyrightSource;
 
-	/** Hidden variables */
+	// Hidden variables
 
+	/** @var string */
 	public $mDestWarningAck;
 
 	/** @var bool The user followed an "overwrite this file" link */
@@ -109,6 +151,7 @@ class SpecialUpload extends SpecialPage {
 
 	/** @var bool The user clicked "Cancel and return to upload form" button */
 	public $mCancelUpload;
+	/** @var bool */
 	public $mTokenOk;
 
 	/** @var bool Subclasses can use this to determine whether a file was uploaded */
@@ -160,8 +203,25 @@ class SpecialUpload extends SpecialPage {
 		$token = $request->getVal( 'wpEditToken' );
 		$this->mTokenOk = $this->getUser()->matchEditToken( $token );
 
+		// If this is an upload from Url and we're allowing async processing,
+		// check for the presence of the cache key parameter, or compute it. Else, it should be empty.
+		if ( $this->isAsyncUpload() ) {
+			$this->mCacheKey = \UploadFromUrl::getCacheKeyFromRequest( $request );
+		} else {
+			$this->mCacheKey = '';
+		}
+
 		$this->uploadFormTextTop = '';
 		$this->uploadFormTextAfterSummary = '';
+	}
+
+	/**
+	 * Check if the current request is an async upload by url request
+	 *
+	 * @return bool
+	 */
+	protected function isAsyncUpload() {
+		return ( $this->mSourceType === 'url' && $this->allowAsync );
 	}
 
 	/**
@@ -178,13 +238,6 @@ class SpecialUpload extends SpecialPage {
 
 	/**
 	 * @param string|null $par
-	 * @throws ErrorPageError
-	 * @throws Exception
-	 * @throws FatalError
-	 * @throws MWException
-	 * @throws PermissionsError
-	 * @throws ReadOnlyError
-	 * @throws UserBlockedError
 	 */
 	public function execute( $par ) {
 		$this->useTransactionalTimeLimit();
@@ -217,16 +270,6 @@ class SpecialUpload extends SpecialPage {
 			);
 		}
 
-		// Global blocks
-		if ( $user->isBlockedGlobally() ) {
-			throw new UserBlockedError(
-				$user->getGlobalBlock(),
-				$user,
-				$this->getLanguage(),
-				$this->getRequest()->getIP()
-			);
-		}
-
 		# Check whether we actually want to allow changing stuff
 		$this->checkReadOnly();
 
@@ -238,8 +281,17 @@ class SpecialUpload extends SpecialPage {
 			return;
 		}
 
-		# Process upload or show a form
-		if (
+		# If we have a cache key, show the upload status.
+		if ( $this->mTokenOk && $this->mCacheKey !== '' ) {
+			if ( $this->mUpload && $this->mUploadClicked && !$this->mCancelUpload ) {
+				# If the user clicked the upload button, we need to process the upload
+				$this->processAsyncUpload();
+			} else {
+				# Show the upload status
+				$this->showUploadStatus( $user );
+			}
+		} elseif (
+			# Process upload or show a form
 			$this->mTokenOk && !$this->mCancelUpload &&
 			( $this->mUpload && $this->mUploadClicked )
 		) {
@@ -261,16 +313,184 @@ class SpecialUpload extends SpecialPage {
 	}
 
 	/**
+	 * Show the upload status
+	 *
+	 * @param User $user The owner of the upload
+	 */
+	protected function showUploadStatus( $user ) {
+		// first, let's fetch the status from the main stash
+		$progress = UploadBase::getSessionStatus( $user, $this->mCacheKey );
+		if ( !$progress ) {
+			$progress = [ 'status' => Status::newFatal( 'invalid-cache-key' ) ];
+		}
+		$this->log->debug( 'Upload status: stage {stage}, result {result}', $progress );
+
+		$status = $progress['status'] ?? Status::newFatal( 'invalid-cache-key' );
+		$stage = $progress['stage'] ?? 'unknown';
+		$result = $progress['result'] ?? 'unknown';
+		switch ( $stage ) {
+			case 'publish':
+				switch ( $result ) {
+					case 'Success':
+						// The upload is done. Check the result and either show the form with the error
+						// occurred, or redirect to the file itself
+						// Success, redirect to description page
+						$this->mUploadSuccessful = true;
+						$this->getHookRunner()->onSpecialUploadComplete( $this );
+						// Redirect to the destination URL, but purge the cache of the file description page first
+						// TODO: understand why this is needed
+						$title = Title::makeTitleSafe( NS_FILE, $this->mRequest->getText( 'wpDestFile' ) );
+						if ( $title ) {
+							$this->log->debug( 'Purging page', [ 'title' => $title->getText() ] );
+							$page = new WikiFilePage( $title );
+							$page->doPurge();
+						}
+						$this->getOutput()->redirect( $this->mRequest->getText( 'wpDestUrl' ) );
+						break;
+					case 'Warning':
+						$this->showUploadWarning( UploadBase::unserializeWarnings( $progress['warnings'] ) );
+						break;
+					case 'Failure':
+						$details = $status->getValue();
+						// Verification failed.
+						if ( is_array( $details ) && isset( $details['verification'] ) ) {
+							$this->processVerificationError( $details['verification'] );
+						} else {
+							$this->showUploadError( $this->getOutput()->parseAsInterface(
+								$status->getWikiText( false, false, $this->getLanguage() ) )
+							);
+						}
+						break;
+					case 'Poll':
+						$this->showUploadProgress(
+							[ 'active' => true, 'msg' => 'upload-progress-processing' ]
+						);
+						break;
+					default:
+						// unknown result, just show a generic error
+						$this->showUploadError( $this->getOutput()->parseAsInterface(
+							$status->getWikiText( false, false, $this->getLanguage() ) )
+						);
+						break;
+				}
+				break;
+			case 'queued':
+				// show stalled progress bar
+				$this->showUploadProgress( [ 'active' => false, 'msg' => 'upload-progress-queued' ] );
+				break;
+			case 'fetching':
+				switch ( $result ) {
+					case 'Success':
+						// The file is being downloaded from a URL
+						// TODO: show active progress bar saying we're downloading the file
+						$this->showUploadProgress( [ 'active' => true, 'msg' => 'upload-progress-downloading' ] );
+						break;
+					case 'Failure':
+						// downloading failed
+						$this->showUploadError( $this->getOutput()->parseAsInterface(
+							$status->getWikiText( false, false, $this->getLanguage() ) )
+						);
+						break;
+					default:
+						// unknown result, just show a generic error
+						$this->showUploadError( $this->getOutput()->parseAsInterface(
+							$status->getWikiText( false, false, $this->getLanguage() ) )
+						);
+						break;
+				}
+				break;
+			default:
+				// unknown status, just show a generic error
+				if ( $status->isOK() ) {
+					$status = Status::newFatal( 'upload-progress-unknown' );
+				}
+				$statusmsg = $this->getOutput()->parseAsInterface(
+					$status->getWikiText( false, false, $this->getLanguage() )
+				);
+				$message = '<h2>' . $this->msg( 'uploaderror' )->escaped() . '</h2>' . HTML::errorBox( $statusmsg );
+				$this->showUploadForm( $this->getUploadForm( $message ) );
+				break;
+		}
+	}
+
+	/**
+	 * Show the upload progress in a form, with a refresh button
+	 *
+	 * This is used when the upload is being processed asynchronously. We're
+	 * forced to use a refresh button because we need to poll the primary mainstash.
+	 * See UploadBase::getSessionStatus for more information.
+	 *
+	 * @param array $options
+	 * @return void
+	 */
+	private function showUploadProgress( $options ) {
+		// $isActive = $options['active'] ?? false;
+		//$progressBarProperty = $isActive ? '' : 'disabled';
+		$message = $this->msg( $options['msg'] )->escaped();
+		$destUrl = $this->mRequest->getText( 'wpDestUrl', '' );
+		if ( !$destUrl && $this->mUpload ) {
+			if ( !$this->mLocalFile ) {
+				$this->mLocalFile = $this->mUpload->getLocalFile();
+			}
+			// This probably means the title is bad, so we can't get the URL
+			// but we need to wait for the job to execute.
+			if ( $this->mLocalFile === null ) {
+				$destUrl = '';
+			} else {
+				$destUrl = $this->mLocalFile->getTitle()->getFullURL();
+			}
+		}
+
+		$destName = $this->mDesiredDestName;
+		if ( !$destName ) {
+			$destName = $this->mRequest->getText( 'wpDestFile' );
+		}
+
+		// Needed if we have warnings to show
+		$sourceURL = $this->mRequest->getText( 'wpUploadFileURL' );
+
+		$form = new HTMLForm( [
+			'CacheKey' => [
+				'type' => 'hidden',
+				'default' => $this->mCacheKey,
+			],
+			'SourceType' => [
+				'type' => 'hidden',
+				'default' => $this->mSourceType,
+			],
+			'DestUrl' => [
+				'type' => 'hidden',
+				'default' => $destUrl,
+			],
+			'DestFile' => [
+				'type' => 'hidden',
+				'default' => $destName,
+			],
+			'UploadFileURL' => [
+				'type' => 'hidden',
+				'default' => $sourceURL,
+			],
+		], $this->getContext(), 'uploadProgress' );
+		$form->setSubmitText( $this->msg( 'upload-refresh' )->escaped() );
+		// TODO: use codex, add a progress bar
+		//$preHtml = "<cdx-progress-bar aria--label='upload progressbar' $progressBarProperty />";
+		$preHtml = "<div id='upload-progress-message'>$message</div>";
+		$form->addPreHtml( $preHtml );
+		$form->setSubmitCallback(
+			static function ( $formData ) {
+				return true;
+			}
+		);
+		$form->prepareForm();
+		$this->getOutput()->addHTML( $form->getHTML( false ) );
+	}
+
+	/**
 	 * Show the main upload form
 	 *
 	 * @param HTMLForm|string $form An HTMLForm instance or HTML string to show
 	 */
 	protected function showUploadForm( $form ) {
-		# Add links if file was previously deleted
-		if ( $this->mDesiredDestName ) {
-			$this->showViewDeletedLinks();
-		}
-
 		if ( $form instanceof HTMLForm ) {
 			$form->show();
 		} else {
@@ -305,7 +525,8 @@ class SpecialUpload extends SpecialPage {
 			$this->getLinkRenderer(),
 			$this->localRepo,
 			$this->getContentLanguage(),
-			$this->nsInfo
+			$this->nsInfo,
+			$this->getHookContainer()
 		);
 		$form->setTitle( $this->getPageTitle() ); // Remove subpage
 
@@ -314,7 +535,7 @@ class SpecialUpload extends SpecialPage {
 			!$this->mTokenOk && !$this->mCancelUpload &&
 			( $this->mUpload && $this->mUploadClicked )
 		) {
-			$form->addPreText( $this->msg( 'session_fail_preview' )->parse() );
+			$form->addPreHtml( $this->msg( 'session_fail_preview' )->parse() );
 		}
 
 		# Give a notice if the user is uploading a file that has been deleted or moved
@@ -325,56 +546,28 @@ class SpecialUpload extends SpecialPage {
 			LogEventsList::showLogExtract( $delNotice, [ 'delete', 'move' ],
 				$desiredTitleObj,
 				'', [ 'lim' => 10,
-					'conds' => [ 'log_action != ' . $this->localRepo->getReplicaDB()->addQuotes( 'revision' ) ],
+					'conds' => [ $this->localRepo->getReplicaDB()->expr( 'log_action', '!=', 'revision' ) ],
 					'showIfEmpty' => false,
 					'msgKey' => [ 'upload-recreate-warning' ] ]
 			);
 		}
-		$form->addPreText( $delNotice );
+		$form->addPreHtml( $delNotice );
 
 		# Add text to form
-		$form->addPreText( '<div id="uploadtext">' .
+		$form->addPreHtml( '<div id="uploadtext">' .
 			$this->msg( 'uploadtext', [ $this->mDesiredDestName ] )->parseAsBlock() .
 			'</div>' );
 		# Add upload error message
-		$form->addPreText( $message );
+		$form->addPreHtml( $message );
 
 		# Add footer to form
 		$uploadFooter = $this->msg( 'uploadfooter' );
 		if ( !$uploadFooter->isDisabled() ) {
-			$form->addPostText( '<div id="mw-upload-footer-message">'
+			$form->addPostHtml( '<div id="mw-upload-footer-message">'
 				. $uploadFooter->parseAsBlock() . "</div>\n" );
 		}
 
 		return $form;
-	}
-
-	/**
-	 * Shows the "view X deleted revisions link""
-	 */
-	protected function showViewDeletedLinks() {
-		$title = Title::makeTitleSafe( NS_FILE, $this->mDesiredDestName );
-		$user = $this->getUser();
-		// Show a subtitle link to deleted revisions (to sysops et al only)
-		if ( $title instanceof Title ) {
-			$count = $title->getDeletedEditsCount();
-			if ( $count > 0 && $this->getAuthority()->isAllowed( 'deletedhistory' ) ) {
-				$restorelink = $this->getLinkRenderer()->makeKnownLink(
-					SpecialPage::getTitleFor( 'Undelete', $title->getPrefixedText() ),
-					$this->msg( 'restorelink' )->numParams( $count )->text()
-				);
-				$link = $this->msg(
-					$this->getAuthority()->isAllowed( 'delete' ) ? 'thisisdeleted' : 'viewdeleted'
-				)->rawParams( $restorelink )->parseAsBlock();
-				$this->getOutput()->addHTML(
-					Html::rawElement(
-						'div',
-						[ 'id' => 'contentSub2' ],
-						$link
-					)
-				);
-			}
-		}
 	}
 
 	/**
@@ -425,10 +618,15 @@ class SpecialUpload extends SpecialPage {
 			return false;
 		}
 
-		$stashStatus = $this->mUpload->tryStashFile( $this->getUser() );
-		if ( $stashStatus->isGood() ) {
-			$sessionKey = $stashStatus->getValue()->getFileKey();
-			$uploadWarning = 'uploadwarning-text';
+		if ( $this->mUpload ) {
+			$stashStatus = $this->mUpload->tryStashFile( $this->getUser() );
+			if ( $stashStatus->isGood() ) {
+				$sessionKey = $stashStatus->getValue()->getFileKey();
+				$uploadWarning = 'uploadwarning-text';
+			} else {
+				$sessionKey = null;
+				$uploadWarning = 'uploadwarning-text-nostash';
+			}
 		} else {
 			$sessionKey = null;
 			$uploadWarning = 'uploadwarning-text-nostash';
@@ -524,18 +722,18 @@ class SpecialUpload extends SpecialPage {
 	}
 
 	/**
-	 * Do the upload.
-	 * Checks are made in SpecialUpload::execute()
+	 * Common steps for processing uploads
+	 *
+	 * @param Status $fetchFileStatus
+	 * @return bool
 	 */
-	protected function processUpload() {
-		// Fetch the file if required
-		$status = $this->mUpload->fetchFile();
-		if ( !$status->isOK() ) {
+	protected function performUploadChecks( $fetchFileStatus ): bool {
+		if ( !$fetchFileStatus->isOK() ) {
 			$this->showUploadError( $this->getOutput()->parseAsInterface(
-				$status->getWikiText( false, false, $this->getLanguage() )
+				$fetchFileStatus->getWikiText( false, false, $this->getLanguage() )
 			) );
 
-			return;
+			return false;
 		}
 		if ( !$this->getHookRunner()->onUploadForm_BeforeProcessing( $this ) ) {
 			wfDebug( "Hook 'UploadForm:BeforeProcessing' broke processing the file." );
@@ -544,15 +742,19 @@ class SpecialUpload extends SpecialPage {
 			// and UploadBase::verifyFile.
 			// If you use this hook to break uploading, the user will be returned
 			// an empty form with no error message whatsoever.
-			return;
+			return false;
 		}
 
 		// Upload verification
+		// If this is an asynchronous upload-by-url, skip the verification
+		if ( $this->isAsyncUpload() ) {
+			return true;
+		}
 		$details = $this->mUpload->verifyUpload();
 		if ( $details['status'] != UploadBase::OK ) {
 			$this->processVerificationError( $details );
 
-			return;
+			return false;
 		}
 
 		// Verify permissions for this title
@@ -562,7 +764,7 @@ class SpecialUpload extends SpecialPage {
 			$code = array_shift( $permErrors[0] );
 			$this->showRecoverableUploadError( $this->msg( $code, $permErrors[0] )->parse() );
 
-			return;
+			return false;
 		}
 
 		$this->mLocalFile = $this->mUpload->getLocalFile();
@@ -571,44 +773,63 @@ class SpecialUpload extends SpecialPage {
 		if ( !$this->mIgnoreWarning ) {
 			$warnings = $this->mUpload->checkWarnings( $user );
 			if ( $this->showUploadWarning( $warnings ) ) {
-				return;
+				return false;
 			}
 		}
 
-		// This is as late as we can throttle, after expected issues have been handled
-		if ( UploadBase::isThrottled( $user ) ) {
-			$this->showRecoverableUploadError(
-				$this->msg( 'actionthrottledtext' )->escaped()
-			);
-			return;
-		}
+		return true;
+	}
 
+	/**
+	 * Get the page text and tags for the upload
+	 *
+	 * @return array|null
+	 */
+	protected function getPageTextAndTags() {
 		// Get the page text if this is not a reupload
 		if ( !$this->mForReUpload ) {
 			$pageText = self::getInitialPageText( $this->mComment, $this->mLicense,
-				$this->mCopyrightStatus, $this->mCopyrightSource, $this->getConfig() );
+				$this->mCopyrightStatus, $this->mCopyrightSource,
+				$this->getConfig() );
 		} else {
 			$pageText = false;
 		}
-
 		$changeTags = $this->getRequest()->getVal( 'wpChangeTags' );
 		if ( $changeTags === null || $changeTags === '' ) {
 			$changeTags = [];
 		} else {
 			$changeTags = array_filter( array_map( 'trim', explode( ',', $changeTags ) ) );
 		}
-
 		if ( $changeTags ) {
 			$changeTagsStatus = ChangeTags::canAddTagsAccompanyingChange(
-				$changeTags, $user );
+				$changeTags, $this->getUser() );
 			if ( !$changeTagsStatus->isOK() ) {
 				$this->showUploadError( $this->getOutput()->parseAsInterface(
 					$changeTagsStatus->getWikiText( false, false, $this->getLanguage() )
 				) );
 
-				return;
+				return null;
 			}
 		}
+		return [ $pageText, $changeTags ];
+	}
+
+	/**
+	 * Do the upload.
+	 * Checks are made in SpecialUpload::execute()
+	 */
+	protected function processUpload() {
+		// Fetch the file if required
+		$status = $this->mUpload->fetchFile();
+		if ( !$this->performUploadChecks( $status ) ) {
+			return;
+		}
+		$user = $this->getUser();
+		$pageAndTags = $this->getPageTextAndTags();
+		if ( $pageAndTags === null ) {
+			return;
+		}
+		[ $pageText, $changeTags ] = $pageAndTags;
 
 		$status = $this->mUpload->performUpload(
 			$this->mComment,
@@ -635,6 +856,60 @@ class SpecialUpload extends SpecialPage {
 	}
 
 	/**
+	 * Process an asynchronous upload
+	 */
+	protected function processAsyncUpload() {
+		// Ensure the upload we're dealing with is an UploadFromUrl
+		if ( !$this->mUpload instanceof \UploadFromUrl ) {
+			$this->showUploadError( $this->msg( 'uploaderror' )->escaped() );
+
+			return;
+		}
+		// check we can fetch the file
+		$status = $this->mUpload->canFetchFile();
+		if ( !$this->performUploadChecks( $status ) ) {
+			$this->log->debug( 'Upload failed verification: {error}', [ 'error' => $status ] );
+			return;
+		}
+
+		$pageAndTags = $this->getPageTextAndTags();
+		if ( $pageAndTags === null ) {
+			return;
+		}
+		[ $pageText, $changeTags ] = $pageAndTags;
+
+		// Create a new job to process the upload from url
+		$job = new \UploadFromUrlJob(
+			[
+				'filename' => $this->mUpload->getDesiredDestName(),
+				'url' => $this->mUpload->getUrl(),
+				'comment' => $this->mComment,
+				'tags' => $changeTags,
+				'text' => $pageText,
+				'watch' => $this->mWatchthis,
+				'watchlistexpiry' => null,
+				'session' => $this->getContext()->exportSession(),
+				'reupload' => $this->mForReUpload,
+				'ignorewarnings' => $this->mIgnoreWarning,
+			]
+		);
+		// Save the session status
+		$cacheKey = $job->getCacheKey();
+		UploadBase::setSessionStatus( $this->getUser(), $cacheKey, [
+			'status' => Status::newGood(),
+			'stage' => 'queued',
+			'result' => 'Poll'
+		] );
+		$this->log->info( "Submitting UploadFromUrlJob for {filename}",
+			[ 'filename' => $this->mUpload->getDesiredDestName() ]
+		);
+		// Submit the job
+		$this->jobQueueGroup->push( $job );
+		// Show the upload status
+		$this->showUploadStatus( $this->getUser() );
+	}
+
+	/**
 	 * Get the initial image page text based on a comment and optional file status information
 	 * @param string $comment
 	 * @param string $license
@@ -644,7 +919,7 @@ class SpecialUpload extends SpecialPage {
 	 * @return string
 	 */
 	public static function getInitialPageText( $comment = '', $license = '',
-		$copyStatus = '', $source = '', Config $config = null
+		$copyStatus = '', $source = '', ?Config $config = null
 	) {
 		if ( $config === null ) {
 			wfDebug( __METHOD__ . ' called without a Config instance passed to it' );
@@ -672,7 +947,7 @@ class SpecialUpload extends SpecialPage {
 
 		$pageText = $comment . "\n";
 		$headerText = '== ' . $msg['filedesc'] . ' ==';
-		if ( $comment !== '' && strpos( $comment, $headerText ) === false ) {
+		if ( $comment !== '' && !str_contains( $comment, $headerText ) ) {
 			// prepend header to page text unless it's already there (or there is no content)
 			$pageText = $headerText . "\n" . $pageText;
 		}
@@ -686,7 +961,8 @@ class SpecialUpload extends SpecialPage {
 		}
 
 		// allow extensions to modify the content
-		Hooks::runner()->onUploadForm_getInitialPageText( $pageText, $msg, $config );
+		( new HookRunner( MediaWikiServices::getInstance()->getHookContainer() ) )
+			->onUploadForm_getInitialPageText( $pageText, $msg, $config );
 
 		return $pageText;
 	}
@@ -733,7 +1009,6 @@ class SpecialUpload extends SpecialPage {
 	 * Provides output to the user for a result of UploadBase::verifyUpload
 	 *
 	 * @param array $details Result of UploadBase::verifyUpload
-	 * @throws MWException
 	 */
 	protected function processVerificationError( $details ) {
 		switch ( $details['status'] ) {
@@ -802,7 +1077,7 @@ class SpecialUpload extends SpecialPage {
 				$this->showUploadError( $this->msg( $error, $args )->parse() );
 				break;
 			default:
-				throw new MWException( __METHOD__ . ": Unknown value `{$details['status']}`" );
+				throw new UnexpectedValueException( __METHOD__ . ": Unknown value `{$details['status']}`" );
 		}
 	}
 
@@ -817,10 +1092,10 @@ class SpecialUpload extends SpecialPage {
 		}
 		$success = $this->mUpload->unsaveUploadedFile();
 		if ( !$success ) {
-			$this->getOutput()->showFatalError(
-				$this->msg( 'filedeleteerror' )
-					->params( $this->mUpload->getTempPath() )
-					->escaped()
+			$this->getOutput()->showErrorPage(
+				'internalerror',
+				'filedeleteerror',
+				[ $this->mUpload->getTempPath() ]
 			);
 
 			return false;
@@ -911,3 +1186,9 @@ class SpecialUpload extends SpecialPage {
 		return $bitmapHandler->autoRotateEnabled();
 	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialUpload::class, 'SpecialUpload' );

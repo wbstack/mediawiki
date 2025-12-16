@@ -2,7 +2,6 @@
 	"@metadata": {
 		"authors": [
 			"Huuchin",
-			"Amire80",
 			"Ukhant Erdemt",
 			"Алия"
 		]
@@ -29,8 +28,12 @@
 	"vector-jumptosearch": "Хәәлтүр шилҗх",
 	"vector-jumptocontent": "Аһулһур шилҗх",
 	"vector-more-actions": "Делгрңгү",
+	"vector-appearance-label": "Һазад бәәдл",
+	"vector-feature-custom-font-size-name": "Бичвр",
+	"vector-feature-custom-font-size-2-label": "Том",
 	"vector-searchsuggest-containing": "<strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong> бичвриг аһулсн халхиг хәәх",
 	"vector-intro-page": "Help:Оршл",
+	"vector-toc-label": "Һарцг",
 	"vector-toc-beginning": "Эклц",
 	"vector-toc-toggle-button-label": "$1 кесгиг нееҗ хаах",
 	"vector-anon-user-menu-pages": "Эврә нерәр невтрәд уга кергләчнрт зөрүлсн халхс",
@@ -40,6 +43,20 @@
 	"vector-toc-menu-tooltip": "Һарцг",
 	"vector-toc-collapsible-button-label": "Һарцгиг нееҗ хаах",
 	"vector-site-nav-label": "Сайт",
+	"vector-main-menu-label": "Үндсн цес",
+	"vector-page-tools-label": "Керглүр",
+	"vector-page-tools-general-label": "Йирңкә",
+	"vector-page-tools-actions-label": "Үүлдл",
+	"vector-pin-element-label": "хаҗуһин цесд шилҗүлх",
+	"vector-unpin-element-label": "хүмх",
 	"vector-2022-prefs-talkpage": "[[mw:Talk:Reading/Web/Desktop_Improvements|Күүндән]]",
-	"tooltip-vector-anon-user-menu-title": "Үлү суңһвр"
+	"tooltip-vector-anon-user-menu-title": "Үлү суңһвр",
+	"vector-page-tools-nav-label": "Халхин керглүр",
+	"vector-prefs-limited-width": "Кизәрлсн өргнә җурмиг асах",
+	"vector-prefs-limited-width-help": "Умшачин туршлһан сәәҗрүлхин төлә кизәрлсн өргнә җурмиг асатн",
+	"empty-language-selector-body": "Халхин аһулһнь бусд келнд орчулгдад уга.",
+	"vector-toc-unpinned-popup": "Аһулһнь нааран шилҗүлгдв.",
+	"vector-page-tools-unpinned-popup": "Керглүрин цеснь нааран шилҗүлгдв.",
+	"vector-main-menu-unpinned-popup": "Үндсн цеснь нааран шилҗүлгдв.",
+	"vector-2022-beta-preview-label": "Vector 2022 beta"
 }

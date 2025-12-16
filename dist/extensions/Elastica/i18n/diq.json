@@ -1,8 +1,6 @@
 {
 	"@metadata": {
-		"authors": [
-			"1917 Ekim Devrimi"
-		]
+		"authors": []
 	},
-	"elastica-desc": "Kıtabxaney [http://elastica.io/ Elastica] tedarik kerdışa derganiya binan rê temel [http://www.elasticsearch.org/ Elasticsearch] gureyneno"
+	"elastica-desc": "Kıtabxaney [https://elastica.io/ Elastica] tedarik kerdışa derganiya binan rê temel [https://www.elastic.co/ Elasticsearch] gureyneno"
 }

@@ -1,11 +1,13 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\ParserOutput;
 
 use InvalidArgumentException;
-use Language;
-use ParserOutput;
-use SpecialPage;
+use MediaWiki\Language\Language;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\SpecialPage\SpecialPage;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\TermLanguageFallbackChain;
@@ -22,40 +24,24 @@ use Wikibase\View\ViewPlaceHolderEmitter;
  */
 class FullEntityParserOutputGenerator implements EntityParserOutputGenerator {
 
-	/**
-	 * @var DispatchingEntityViewFactory
-	 */
-	private $entityViewFactory;
+	private DispatchingEntityViewFactory $entityViewFactory;
 
-	/**
-	 * @var DispatchingEntityMetaTagsCreatorFactory
-	 */
-	private $entityMetaTagsCreatorFactory;
+	private DispatchingEntityMetaTagsCreatorFactory $entityMetaTagsCreatorFactory;
 
-	/**
-	 * @var ParserOutputJsConfigBuilder
-	 */
-	private $configBuilder;
+	private ParserOutputJsConfigBuilder $configBuilder;
 
-	/**
-	 * @var TermLanguageFallbackChain
-	 */
-	private $termLanguageFallbackChain;
+	private TermLanguageFallbackChain $termLanguageFallbackChain;
 
-	/**
-	 * @var EntityDataFormatProvider
-	 */
-	private $entityDataFormatProvider;
+	private EntityDataFormatProvider $entityDataFormatProvider;
 
 	/**
 	 * @var EntityParserOutputUpdater[]
 	 */
-	private $dataUpdaters;
+	private array $dataUpdaters;
 
-	/**
-	 * @var Language
-	 */
-	private $language;
+	private Language $language;
+
+	private bool $isMobileView;
 
 	/**
 	 * @param DispatchingEntityViewFactory $entityViewFactory
@@ -65,6 +51,7 @@ class FullEntityParserOutputGenerator implements EntityParserOutputGenerator {
 	 * @param EntityDataFormatProvider $entityDataFormatProvider
 	 * @param EntityParserOutputUpdater[] $dataUpdaters
 	 * @param Language $language
+	 * @param bool $isMobileView
 	 */
 	public function __construct(
 		DispatchingEntityViewFactory $entityViewFactory,
@@ -73,7 +60,8 @@ class FullEntityParserOutputGenerator implements EntityParserOutputGenerator {
 		TermLanguageFallbackChain $termLanguageFallbackChain,
 		EntityDataFormatProvider $entityDataFormatProvider,
 		array $dataUpdaters,
-		Language $language
+		Language $language,
+		bool $isMobileView
 	) {
 		$this->entityViewFactory = $entityViewFactory;
 		$this->entityMetaTagsCreatorFactory = $entityMetaTagsCreatorFactory;
@@ -82,30 +70,27 @@ class FullEntityParserOutputGenerator implements EntityParserOutputGenerator {
 		$this->entityDataFormatProvider = $entityDataFormatProvider;
 		$this->dataUpdaters = $dataUpdaters;
 		$this->language = $language;
+		$this->isMobileView = $isMobileView;
 	}
 
 	/**
 	 * Creates the parser output for the given entity revision.
 	 *
-	 * @param EntityRevision $entityRevision
-	 * @param bool $generateHtml
-	 *
 	 * @throws InvalidArgumentException
-	 * @return ParserOutput
 	 */
 	public function getParserOutput(
 		EntityRevision $entityRevision,
-		$generateHtml = true
-	) {
+		bool $generateHtml = true
+	): ParserOutput {
 		$entity = $entityRevision->getEntity();
 
 		$parserOutput = new ParserOutput();
+		$parserOutput->resetParseStartTime();
 
 		$updaterCollection = new EntityParserOutputDataUpdaterCollection( $parserOutput, $this->dataUpdaters );
 		$updaterCollection->updateParserOutput( $entity );
 
-		$configVars = $this->configBuilder->build( $entity );
-		$parserOutput->addJsConfigVars( $configVars );
+		$this->configBuilder->build( $entity, $parserOutput );
 
 		$entityMetaTagsCreator = $this->entityMetaTagsCreatorFactory->newEntityMetaTags( $entity->getType(), $this->language );
 
@@ -146,7 +131,7 @@ class FullEntityParserOutputGenerator implements EntityParserOutputGenerator {
 	private function addHtmlToParserOutput(
 		ParserOutput $parserOutput,
 		EntityRevision $entityRevision
-	) {
+	): void {
 		$entity = $entityRevision->getEntity();
 
 		$entityView = $this->entityViewFactory->newEntityView(
@@ -173,31 +158,41 @@ class FullEntityParserOutputGenerator implements EntityParserOutputGenerator {
 		}
 	}
 
-	private function addModules( ParserOutput $parserOutput ) {
+	private function addModules( ParserOutput $parserOutput ): void {
 		// make css available for JavaScript-less browsers
 		$parserOutput->addModuleStyles( [
-			'wikibase.common',
-			'jquery.wikibase.toolbar.styles',
+			'wikibase.alltargets',
 		] );
+		// split parser cache by desktop/mobile (T344362)
+		$parserOutput->recordOption( 'wbMobile' );
+		// T324991
+		if ( !$this->isMobileView ) {
+			$parserOutput->addModuleStyles( [
+				'wikibase.desktop',
+				'jquery.wikibase.toolbar.styles',
+			] );
+		}
 
 		$parserOutput->addModules( [
 			// fire the entityLoaded hook which got configured through $this->configBuilder
 			'wikibase.entityPage.entityLoaded',
+		] );
+		// T324991
+		if ( !$this->isMobileView ) {
 			// make sure required client-side resources will be loaded
 			// FIXME: Separate the JavaScript that is also needed in read-only mode from
 			// the JavaScript that is only necessary for editing.
-			'wikibase.ui.entityViewInit',
-		] );
+			$parserOutput->addModules( [
+				'wikibase.ui.entityViewInit',
+			] );
+		}
 	}
 
 	/**
 	 * Add alternate links as extension data.
 	 * OutputPageBeforeHTMLHookHandler will add these to the OutputPage.
-	 *
-	 * @param ParserOutput $parserOutput
-	 * @param EntityId $entityId
 	 */
-	private function addAlternateLinks( ParserOutput $parserOutput, EntityId $entityId ) {
+	private function addAlternateLinks( ParserOutput $parserOutput, EntityId $entityId ): void {
 		$entityDataFormatProvider = $this->entityDataFormatProvider;
 		$subPagePrefix = $entityId->getSerialization() . '.';
 
@@ -212,7 +207,7 @@ class FullEntityParserOutputGenerator implements EntityParserOutputGenerator {
 				$links[] = [
 					'rel' => 'alternate',
 					'href' => $entityDataTitle->getCanonicalURL(),
-					'type' => $entityDataFormatProvider->getMimeType( $format )
+					'type' => $entityDataFormatProvider->getMimeType( $format ),
 				];
 			}
 		}

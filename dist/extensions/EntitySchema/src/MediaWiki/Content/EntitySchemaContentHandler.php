@@ -1,33 +1,32 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\MediaWiki\Content;
 
 use Action;
 use Article;
-use Content;
-use DifferenceEngine;
-use EntitySchema\DataAccess\SchemaEncoder;
+use EntitySchema\DataAccess\EntitySchemaEncoder;
+use EntitySchema\MediaWiki\Actions\EntitySchemaEditAction;
+use EntitySchema\MediaWiki\Actions\EntitySchemaSubmitAction;
 use EntitySchema\MediaWiki\Actions\RestoreSubmitAction;
 use EntitySchema\MediaWiki\Actions\RestoreViewAction;
-use EntitySchema\MediaWiki\Actions\SchemaEditAction;
-use EntitySchema\MediaWiki\Actions\SchemaSubmitAction;
 use EntitySchema\MediaWiki\Actions\UndoSubmitAction;
 use EntitySchema\MediaWiki\Actions\UndoViewAction;
 use EntitySchema\MediaWiki\UndoHandler;
 use EntitySchema\Presentation\InputValidator;
-use EntitySchema\Services\SchemaConverter\SchemaConverter;
-use IContextSource;
-use JsonContentHandler;
-use Language;
+use EntitySchema\Services\Converter\EntitySchemaConverter;
 use LogicException;
+use MediaWiki\Content\Content;
+use MediaWiki\Content\JsonContentHandler;
 use MediaWiki\Content\Renderer\ContentParseParams;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
-use Page;
-use ParserOutput;
-use RequestContext;
-use SlotDiffRenderer;
-use Title;
-use WikiPage;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Title\Title;
+use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Content handler for the EntitySchema content
@@ -36,24 +35,25 @@ use WikiPage;
  */
 class EntitySchemaContentHandler extends JsonContentHandler {
 
-	public function __construct( $modelId = EntitySchemaContent::CONTENT_MODEL_ID ) {
+	public function __construct(
+		string $modelId
+	) {
+		// $modelId is typically EntitySchemaContent::CONTENT_MODEL_ID
 		parent::__construct( $modelId );
 	}
 
-	protected function getContentClass() {
+	protected function getContentClass(): string {
 		return EntitySchemaContent::class;
 	}
 
-	public function createDifferenceEngine( IContextSource $context,
-		$old = 0, $new = 0,
-		$rcid = 0, // FIXME: Deprecated, no longer used
-		$refreshCache = false, $unhide = false
-	) {
-		return new DifferenceEngine( $context, $old, $new, $rcid, $refreshCache, $unhide );
-	}
-
-	protected function getSlotDiffRendererInternal( IContextSource $context ): SlotDiffRenderer {
-		return new EntitySchemaSlotDiffRenderer( $context );
+	protected function getSlotDiffRendererWithOptions(
+		IContextSource $context,
+		$options = []
+	): EntitySchemaSlotDiffRenderer {
+		return new EntitySchemaSlotDiffRenderer(
+			$context,
+			$this->createTextSlotDiffRenderer( $options )
+		);
 	}
 
 	/**
@@ -67,39 +67,36 @@ class EntitySchemaContentHandler extends JsonContentHandler {
 	 *
 	 * @return Language The page's language
 	 */
-	public function getPageViewLanguage( Title $title, Content $content = null ) {
+	public function getPageViewLanguage( Title $title, ?Content $content = null ): Language {
 		$context = RequestContext::getMain();
 		return $context->getLanguage();
 	}
 
-	public function canBeUsedOn( Title $title ) {
+	public function canBeUsedOn( Title $title ): bool {
 		return $title->inNamespace( NS_ENTITYSCHEMA_JSON ) && parent::canBeUsedOn( $title );
 	}
 
-	public function getActionOverrides() {
+	public function getActionOverrides(): array {
 		return [
-			'edit' => function ( Page $article, IContextSource $context = null ) {
+			'edit' => function ( Article $article, IContextSource $context ) {
 				return $this->getActionOverridesEdit( $article, $context );
 			},
-			'submit' => function ( Page $article, IContextSource $context = null ) {
+			'submit' => function ( Article $article, IContextSource $context ) {
 				return $this->getActionOverridesSubmit( $article, $context );
 			},
 		];
 	}
 
 	/**
-	 * @param Article|Page $page
-	 * @param IContextSource|null $context
+	 * @param Article $article
+	 * @param IContextSource $context
 	 * @return Action|callable
 	 */
 	private function getActionOverridesEdit(
-		Page $page,
-		?IContextSource $context
+		Article $article,
+		IContextSource $context
 	) {
 		global $wgEditSubmitButtonLabelPublish;
-
-		$article = $this->prepareActionForBC( $page, $context, __METHOD__ );
-		$context = $context ?? RequestContext::getMain();
 
 		if ( $article->getPage()->getRevisionRecord() === null ) {
 			return Action::factory( 'view', $article, $context );
@@ -113,44 +110,47 @@ class EntitySchemaContentHandler extends JsonContentHandler {
 		) {
 			return new UndoViewAction(
 				$article,
-				new EntitySchemaSlotDiffRenderer( $context ),
-				$context
+				$context,
+				$this->getSlotDiffRendererWithOptions( $context )
 			);
 		}
 
 		if ( $req->getCheck( 'restore' ) ) {
 			return new RestoreViewAction(
 				$article,
-				new EntitySchemaSlotDiffRenderer( $context ),
-				$context
+				$context,
+				$this->getSlotDiffRendererWithOptions( $context )
 			);
 		}
 
 		// TODo: check redirect?
 		// !$article->isRedirect()
-		return new SchemaEditAction(
+		$repoSettings = WikibaseRepo::getSettings();
+		return new EntitySchemaEditAction(
 			$article,
+			$context,
 			new InputValidator(
 				$context,
-				MediaWikiServices::getInstance()->getMainConfig()
+				MediaWikiServices::getInstance()->getMainConfig(),
+				MediaWikiServices::getInstance()->getLanguageNameUtils()
 			),
 			$wgEditSubmitButtonLabelPublish,
 			MediaWikiServices::getInstance()->getUserOptionsLookup(),
-			$context
+			$repoSettings->getSetting( 'dataRightsUrl' ),
+			$repoSettings->getSetting( 'dataRightsText' ),
+			MediaWikiServices::getInstance()->getTempUserConfig()
 		);
 	}
 
 	/**
-	 * @param Article|Page $page
-	 * @param IContextSource|null $context
+	 * @param Article $article
+	 * @param IContextSource $context
 	 * @return RestoreSubmitAction|UndoSubmitAction|string
 	 */
 	private function getActionOverridesSubmit(
-		Page $page,
-		?IContextSource $context
+		Article $article,
+		IContextSource $context
 	) {
-		$article = $this->prepareActionForBC( $page, $context, __METHOD__ );
-		$context = $context ?? RequestContext::getMain();
 		$req = $context->getRequest();
 
 		if (
@@ -164,29 +164,10 @@ class EntitySchemaContentHandler extends JsonContentHandler {
 			return new RestoreSubmitAction( $article, $context );
 		}
 
-		return SchemaSubmitAction::class;
+		return EntitySchemaSubmitAction::class;
 	}
 
-	private function prepareActionForBC(
-		Page $article,
-		?IContextSource $context,
-		string $action
-	): Article {
-		if ( $article instanceof WikiPage ) {
-			$article = Article::newFromWikiPage(
-				$article,
-				$context ?? RequestContext::getMain()
-			);
-		} elseif ( !$article instanceof Article ) {
-			throw new LogicException(
-				"Hook: {$action} call with unknown page: " . get_class( $article )
-			);
-		}
-
-		return $article;
-	}
-
-	public function supportsDirectApiEditing() {
+	public function supportsDirectApiEditing(): bool {
 		return false;
 	}
 
@@ -242,7 +223,7 @@ class EntitySchemaContentHandler extends JsonContentHandler {
 		}
 		$patchedSchema = $patchStatus->getValue()->data;
 
-		return new EntitySchemaContent( SchemaEncoder::getPersistentRepresentation(
+		return new EntitySchemaContent( EntitySchemaEncoder::getPersistentRepresentation(
 			$schemaId,
 			$patchedSchema['labels'],
 			$patchedSchema['descriptions'],
@@ -262,7 +243,7 @@ class EntitySchemaContentHandler extends JsonContentHandler {
 	 *
 	 * @return bool Always true in this default implementation.
 	 */
-	public function isParserCacheSupported() {
+	public function isParserCacheSupported(): bool {
 		return true;
 	}
 
@@ -273,7 +254,7 @@ class EntitySchemaContentHandler extends JsonContentHandler {
 		Content $content,
 		ContentParseParams $cpoParams,
 		ParserOutput &$parserOutput
-	) {
+	): void {
 		'@phan-var EntitySchemaContent $content';
 		$parserOptions = $cpoParams->getParserOptions();
 		$generateHtml = $cpoParams->getGenerateHtml();
@@ -281,7 +262,7 @@ class EntitySchemaContentHandler extends JsonContentHandler {
 			$languageCode = $parserOptions->getUserLang();
 			$renderer = new EntitySchemaSlotViewRenderer( $languageCode );
 			$renderer->fillParserOutput(
-				( new SchemaConverter() )
+				( new EntitySchemaConverter() )
 					->getFullViewSchemaData( $content->getText(), [ $languageCode ] ),
 				$cpoParams->getPage(),
 				$parserOutput

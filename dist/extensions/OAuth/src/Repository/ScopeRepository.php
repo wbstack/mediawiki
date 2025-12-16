@@ -11,11 +11,11 @@ use MediaWiki\Extension\OAuth\Entity\ClientEntity;
 use MediaWiki\Extension\OAuth\Entity\ScopeEntity;
 use MediaWiki\Extension\OAuth\Entity\UserEntity;
 use MediaWiki\MediaWikiServices;
-use WikiMap;
+use MediaWiki\WikiMap\WikiMap;
 
 class ScopeRepository implements ScopeRepositoryInterface {
 	/**
-	 * @var array
+	 * @var string[]
 	 */
 	protected $allowedScopes = [
 		'#default',
@@ -28,6 +28,9 @@ class ScopeRepository implements ScopeRepositoryInterface {
 		$this->allowedScopes = array_merge( $this->allowedScopes, $grantsInfo->getValidGrants() );
 	}
 
+	/**
+	 * @return string[]
+	 */
 	public function getAllowedScopes() {
 		return $this->allowedScopes;
 	}
@@ -40,7 +43,7 @@ class ScopeRepository implements ScopeRepositoryInterface {
 	 * @return ScopeEntityInterface|null
 	 */
 	public function getScopeEntityByIdentifier( $identifier ) {
-		if ( in_array( $identifier,  $this->allowedScopes, true ) ) {
+		if ( in_array( $identifier, $this->allowedScopes, true ) ) {
 			return new ScopeEntity( $identifier );
 		}
 
@@ -105,9 +108,9 @@ class ScopeRepository implements ScopeRepositoryInterface {
 	/**
 	 * Detect "#default" scope and replace it with all client's allowed scopes
 	 *
-	 * @param array $scopes
+	 * @param ScopeEntityInterface[] $scopes
 	 * @param ClientEntityInterface|ClientEntity $client
-	 * @return array
+	 * @return ScopeEntityInterface[]
 	 */
 	private function replaceDefaultScope( array $scopes, ClientEntityInterface $client ) {
 		// Normally, #default scope would be an only scope set, but go through whole array in case

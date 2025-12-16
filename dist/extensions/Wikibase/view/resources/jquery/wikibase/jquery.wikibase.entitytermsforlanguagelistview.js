@@ -73,6 +73,16 @@
 		_moreLanguagesItems: {},
 
 		/**
+		 * @type {string[]} List of languages shown per default.
+		 */
+		_defaultLanguages: [],
+
+		/**
+		 * @type {OO.ui.PopupWidget|null}
+		 */
+		_popup: null,
+
+		/**
 		 * @see jQuery.ui.TemplatedWidget._create
 		 */
 		_create: function () {
@@ -83,11 +93,33 @@
 			}
 
 			PARENT.prototype._create.call( this );
+			this._defaultLanguages = this.options.userLanguages;
+
+			this._amendDefaultLanguages();
 
 			this._verifyExistingDom();
 			this._createListView();
 
 			this.element.addClass( 'wikibase-entitytermsforlanguagelistview' );
+		},
+
+		_amendDefaultLanguages: function () {
+			if ( !mw.config.get( 'wbEnableMulLanguageCode' ) ) {
+				return;
+			}
+			// eslint-disable-next-line es-x/no-array-prototype-includes
+			if ( this._defaultLanguages.includes( 'mul' ) ) {
+				return;
+			}
+
+			if ( mw.config.get( 'wbTmpAlwaysShowMulLanguageCode' ) === false ) {
+				// temporarily show "mul" only if it has a label or alias, see T330217 for removing this block
+				if ( !( 'mul' in this._getMoreLanguages() ) ) {
+					return;
+				}
+			}
+
+			this._defaultLanguages.push( 'mul' );
 		},
 
 		/**
@@ -123,19 +155,23 @@
 
 			// Scrape languages from static HTML:
 			var mismatchAt = null,
-				userLanguages = this.options.userLanguages;
+				languages = this._defaultLanguages;
 			$entitytermsforlanguageview.each( function ( i ) {
 				var match = $( this )
 					.attr( 'class' )
 					.match( /(?:^|\s)wikibase-entitytermsforlanguageview-(\S+)/ );
-				if ( match && match[ 1 ] !== userLanguages[ i ] ) {
+				if ( match && match[ 1 ] !== languages[ i ] ) {
+					if ( match[ 1 ] !== 'mul' ) {
+						// "mul" might be included in the existing term box, but we want it to be after
+						// everything else, thus discarding it is expected.
+						mw.log.warn( 'Existing entitytermsforlanguagelistview DOM does not match configured languages' );
+					}
 					mismatchAt = i;
 					return false;
 				}
 			} );
 
 			if ( mismatchAt !== null ) {
-				mw.log.warn( 'Existing entitytermsforlanguagelistview DOM does not match configured languages' );
 				$entitytermsforlanguageview.slice( mismatchAt ).remove();
 			}
 		},
@@ -179,11 +215,14 @@
 					listItemWidget: listItemWidget,
 					newItemOptionsFn: function ( value ) {
 						return {
+							allLanguageLabels: function () {
+								return self.options.value.getLabels();
+							},
 							value: value
 						};
 					}
 				} ),
-				value: this.options.userLanguages.map( function ( lang ) {
+				value: this._defaultLanguages.map( function ( lang ) {
 					return self._getValueForLanguage( lang );
 				} ),
 				listItemNodeName: 'TR'
@@ -191,6 +230,13 @@
 
 			if ( !this.element.find( '.wikibase-entitytermsforlanguagelistview-more' ).length ) {
 				this._createEntitytermsforlanguagelistviewMore();
+			}
+
+			if (
+				mw.user.isNamed() &&
+				!mw.user.options.get( 'wb-dont-show-again-mul-popup' )
+			) {
+				this._addPulsatingDotToMul();
 			}
 		},
 
@@ -222,7 +268,7 @@
 		 */
 		_hasMoreLanguages: function () {
 			var fingerprint = this.options.value,
-				minLength = this.options.userLanguages.length;
+				minLength = this._defaultLanguages.length;
 
 			if ( fingerprint.getLabels().length > minLength
 				|| fingerprint.getDescriptions().length > minLength
@@ -340,7 +386,7 @@
 				languages[ lang ] = lang;
 			} );
 
-			this.options.userLanguages.forEach( function ( lang ) {
+			this._defaultLanguages.forEach( function ( lang ) {
 				delete languages[ lang ];
 			} );
 
@@ -359,6 +405,54 @@
 				// This does not only keep the toggler visible, it also updates all stick(y)nodes.
 				window.scrollBy( 0, top - previousTop );
 			}
+		},
+
+		/**
+		 * Click handler to open Popup when clicking pulsating dot for mul language.
+		 *
+		 * @private
+		 */
+		_onMulPulsatingDotClicked: function ( _event ) {
+			if ( !this._popup ) {
+				var $target = $( this.element ).find( '.mw-pulsating-dot-popup-container' );
+
+				var dontShowMulPopupCheckbox = new OO.ui.CheckboxInputWidget( {
+					value: true,
+					selected: false
+				} ).on( 'change', function ( value ) {
+					new mw.Api().saveOption( 'wb-dont-show-again-mul-popup', value ? '1' : null );
+					mw.user.options.set( 'wb-dont-show-again-mul-popup', value ? '1' : null );
+				} );
+
+				var showAgainLayout = new OO.ui.FieldLayout( dontShowMulPopupCheckbox, {
+					align: 'inline',
+					label: mw.msg( 'wikibase-entityterms-languagelistview-mul-popup-dont-show-again' )
+				} );
+
+				var $tooltipContent = $( '<div>' ).append(
+					mw.message(
+						'wikibase-entityterms-languagelistview-mul-popup-content',
+						'https://www.wikidata.org/wiki/Special:MyLanguage/Help:Default_values_for_labels_and_aliases'
+					).parseDom(),
+					showAgainLayout.$element
+				);
+
+				this._popup = new OO.ui.PopupWidget( {
+					padded: true,
+					width: 400,
+					head: true,
+					label: mw.msg(
+						'wikibase-entityterms-languagelistview-mul-popup-title'
+					),
+					$content: $tooltipContent,
+					classes: [ 'wikibase-entityterms-languagelistview-mul-popup' ],
+					$floatableContainer: $target,
+					position: 'below',
+					align: 'forwards'
+				} );
+				$( document.body ).append( this._popup.$element );
+			}
+			this._popup.toggle();
 		},
 
 		/**
@@ -382,6 +476,10 @@
 			var listview = this.$listview.data( 'listview' );
 			return listview.startEditing().done( function () {
 				self.updateInputSize();
+
+				if ( $( self.element ).find( '.mw-pulsating-dot-container' ).length ) {
+					self._onMulPulsatingDotClicked();
+				}
 			} );
 		},
 
@@ -389,6 +487,10 @@
 		 * @param {boolean} [dropValue]
 		 */
 		_stopEditing: function ( dropValue ) {
+			if ( this._popup ) {
+				this._popup.toggle( false );
+			}
+
 			var listview = this.$listview.data( 'listview' );
 
 			return $.when.apply( $, listview.value().map( function ( entitytermsforlanguageview ) {
@@ -512,6 +614,25 @@
 			}
 
 			return response;
+		},
+
+		/**
+		 * Adds a clickable pulsating dot into the language column for "mul", if we have a "mul" row.
+		 *
+		 * @private
+		 */
+		_addPulsatingDotToMul: function () {
+			var $mulLanguageRow = this.element.find( '.wikibase-entitytermsforlanguageview-mul' );
+			if ( $mulLanguageRow.length ) {
+				var $pulsatingDot = $( '<a>' ).addClass( 'mw-pulsating-dot' );
+				var $pulsatingDotPopupContainer = $( '<span>' ).addClass( 'mw-pulsating-dot-popup-container' )
+					.append( $pulsatingDot );
+				var $pulsatingDotContainer = $( '<span>' ).addClass( 'mw-pulsating-dot-container' )
+					.append( $pulsatingDotPopupContainer )
+					.on( 'click', this._onMulPulsatingDotClicked.bind( this ) );
+				$mulLanguageRow.find( '.wikibase-entitytermsforlanguageview-language' )
+					.append( $pulsatingDotContainer );
+			}
 		}
 	} );
 

@@ -1,9 +1,9 @@
 <?php
 namespace JsonConfig;
 
-use Exception;
+use InvalidArgumentException;
+use MediaWiki\Title\TitleValue;
 use stdClass;
-use TitleValue;
 
 /**
  * A value object class that contains namespace ID, title, and
@@ -22,11 +22,10 @@ final class JCTitle extends TitleValue {
 	 * @param int $namespace Possibly belonging to a foreign wiki
 	 * @param string $dbkey
 	 * @param stdClass $config JsonConfig configuration object
-	 * @throws Exception
 	 */
 	public function __construct( $namespace, $dbkey, stdClass $config ) {
 		if ( $namespace !== $config->namespace ) {
-			throw new Exception( 'Namespace does not match config' );
+			throw new InvalidArgumentException( 'Namespace does not match config' );
 		}
 		parent::__construct( $namespace, $dbkey );
 		$this->config = $config;

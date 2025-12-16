@@ -1,9 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
+			"Cuatro Remos",
 			"Manke ruLpa"
 		]
 	},
+	"mobile-frontend-copyright": "Tüfachi mülen $1 müten am mapu mvlelu, dem ka afimiñ kiñe chi küme niey.",
 	"mobile-frontend-joined-just-now": "Fewla {{GENDER:$1|konküley}}",
 	"mobile-frontend-joined-seconds": "{{GENDER:$1|Konpey}} {{PLURAL:$2|$2 sequndo}} mew",
 	"mobile-frontend-joined-minutes": "{{GENDER:$1|Konpey}} {{PLURAL:$2|$2 minuto}} mew",
@@ -12,12 +14,6 @@
 	"mobile-frontend-joined-months": "{{GENDER:$1|Konpey}} {{PLURAL:$2|$2 küyenh}} mew",
 	"mobile-frontend-joined-years": "{{GENDER:$1|Konpey}} {{PLURAL:$2|$2 tripantu}} mew",
 	"mobile-frontend-language-heading": "<strong>Zungun</strong>",
-	"mobile-frontend-languages-404-title": "Welulkan zungun mew",
-	"mobile-frontend-languages-header": "Zungun",
-	"mobile-frontend-languages-header-page": "$1 - Kake zungun",
-	"mobile-frontend-languages-nonexistent-title": "Mülelay tapülh $1 pingelu.",
-	"mobile-frontend-languages-text": "Müley $1 ta $2 kake {{PLURAL:$2|zungun}} mew.",
-	"mobile-frontend-languages-variant-header": "{{#language:{{CONTENTLANG}}}} ñi kakewme xoy",
 	"mobile-frontend-languages-structured-overlay-all-languages-header": "Kake zungun",
 	"mobile-frontend-languages-structured-overlay-search-input-placeholder": "Kintun kiñe zungun",
 	"mobile-frontend-languages-structured-overlay-no-results": "Mülelay feychi zungun",
@@ -26,10 +22,8 @@
 	"mobile-frontend-terms-text": "Chumngechi ñi Püneleam",
 	"mobile-frontend-view": "Mütrümwe mew",
 	"mobile-frontend-view-desktop": "Rentrükünuwe",
-	"mobile-frontend-watchlist-a-z": "Wif",
 	"mobile-frontend-watchlist-cta-button-login": "Konwe",
 	"mobile-frontend-watchlist-cta-button-signup": "Wirintukuwnge",
-	"mobile-frontend-watchlist-feed": "Kakünupelu",
 	"mobile-frontend-watchlist-filter-all": "Itrokom",
 	"mobile-frontend-watchlist-filter-articles": "Tapülh",
 	"mobile-frontend-watchlist-filter-other": "Kakelu",

@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Eitvys200",
-			"Zygimantus",
-			"Nokeoo"
+			"Nokeoo",
+			"Zygimantus"
 		]
 	},
 	"nstab-data": "Duomenys",
@@ -14,7 +14,7 @@
 	"jsonconfig-edit-action-cancel": "Atšaukti",
 	"jsonconfig-edit-button-label": "Redaguoti kaip lentelę",
 	"jsonconfig-edit-dialog-error": "Negalima redaguoti kaip lentelės: $1",
-	"jsonconfig-edit-dialog-error-data-inavlid": "Duomenys neatitinka schemos",
+	"jsonconfig-edit-dialog-error-data-invalid": "Duomenys neatitinka schemos",
 	"jsonconfig-edit-dialog-error-data-missing": "Trūksta JSON <code>data</code> elemento arba nėra masyvas",
 	"jsonconfig-edit-dialog-error-data-too-large": "Duomenų rinkinys per didelis, kad būtų galima redaguoti kaip lentelę",
 	"jsonconfig-edit-dialog-error-field-name-missing": "Kiekvienas laukas turi turėti pavadinimą",
@@ -40,6 +40,7 @@
 	"jsonconfig-type-name-localized": "lokalizuota",
 	"jsonconfig-type-name-number": "skaičius",
 	"jsonconfig-type-name-boolean": "loginė reikšmė",
+	"jsonconfig-use-category": "Puslapiai, naudojantys JsonConfig plėtinį",
 	"jsonconfig-license": "Duomenys prieinami $1.",
 	"jsonconfig-license-not-set": "Kai redaguojate šį puslapį, sutinkate išleisti savo indėlį pagal licenciją, nurodytą <code>licence</code> lauke.",
 	"jsonconfig-license-notice": "'''Pastaba:''' Kai redaguojate šį puslapį, sutinkate išleisti savo indėlį pagal [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",

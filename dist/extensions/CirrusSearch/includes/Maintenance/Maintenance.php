@@ -6,8 +6,11 @@ use CirrusSearch\Connection;
 use CirrusSearch\MetaStore\MetaStoreIndex;
 use CirrusSearch\SearchConfig;
 use CirrusSearch\UserTestingEngine;
+use MediaWiki\Maintenance\Maintenance as MWMaintenance;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Settings\SettingsBuilder;
+use MediaWiki\Status\Status;
+use RuntimeException;
 
 // Maintenance class is loaded before autoload, so we need to pull the interface
 require_once __DIR__ . '/Printer.php';
@@ -30,7 +33,7 @@ require_once __DIR__ . '/Printer.php';
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  * http://www.gnu.org/copyleft/gpl.html
  */
-abstract class Maintenance extends \Maintenance implements Printer {
+abstract class Maintenance extends MWMaintenance implements Printer {
 	/**
 	 * @var string The string to indent output with
 	 */
@@ -55,7 +58,7 @@ abstract class Maintenance extends \Maintenance implements Printer {
 		$this->requireExtension( 'CirrusSearch' );
 	}
 
-	public function finalSetup( SettingsBuilder $settingsBuilder = null ) {
+	public function finalSetup( SettingsBuilder $settingsBuilder ) {
 		parent::finalSetup( $settingsBuilder );
 
 		if ( $this->hasOption( 'userTestTrigger' ) ) {
@@ -84,13 +87,9 @@ abstract class Maintenance extends \Maintenance implements Printer {
 		$engine->activateTest( $status );
 	}
 
-	/**
-	 * @param string $maintClass
-	 * @param string|null $classFile
-	 * @return \Maintenance
-	 */
-	public function runChild( $maintClass, $classFile = null ) {
-		$child = parent::runChild( $maintClass, $classFile );
+	/** @inheritDoc */
+	public function createChild( string $maintClass, ?string $classFile = null ): MWMaintenance {
+		$child = parent::createChild( $maintClass, $classFile );
 		if ( $child instanceof self ) {
 			$child->searchConfig = $this->searchConfig;
 		}
@@ -104,12 +103,6 @@ abstract class Maintenance extends \Maintenance implements Printer {
 	 */
 	public function getConnection( $cluster = null ) {
 		if ( $cluster ) {
-			if ( !$this->getSearchConfig() instanceof SearchConfig ) {
-				// We shouldn't ever get here ... but the makeConfig type signature returns the parent
-				// class of SearchConfig so just being extra careful...
-				throw new \RuntimeException( 'Expected instanceof CirrusSearch\SearchConfig, but received ' .
-					get_class( $this->getSearchConfig() ) );
-			}
 			$connection = Connection::getPool( $this->getSearchConfig(), $cluster );
 		} else {
 			if ( $this->connection === null ) {
@@ -129,11 +122,17 @@ abstract class Maintenance extends \Maintenance implements Printer {
 			$this->searchConfig = MediaWikiServices::getInstance()
 				->getConfigFactory()
 				->makeConfig( 'CirrusSearch' );
+			if ( !$this->searchConfig instanceof SearchConfig ) {
+				// We shouldn't ever get here ... but the makeConfig type signature returns the parent
+				// class of SearchConfig so just being extra careful...
+				throw new \RuntimeException( 'Expected instanceof CirrusSearch\SearchConfig, but received ' .
+					get_class( $this->searchConfig ) );
+			}
 		}
 		return $this->searchConfig;
 	}
 
-	public function getMetaStore( Connection $conn = null ) {
+	public function getMetaStore( ?Connection $conn = null ) {
 		return new MetaStoreIndex( $conn ?? $this->getConnection(), $this, $this->getSearchConfig() );
 	}
 
@@ -224,14 +223,15 @@ abstract class Maintenance extends \Maintenance implements Printer {
 			$this->getConnection(),
 			$this,
 			$this->getSearchConfig() );
-		$metastore->createIfNecessary();
+		$status = $metastore->createIfNecessary();
+		$this->unwrap( $status );
 		return $metastore;
 	}
 
 	protected function requireCirrusReady() {
 		// If the version does not exist it's certainly because nothing has been indexed.
 		if ( !$this->getMetaStore()->cirrusReady() ) {
-			throw new \Exception(
+			throw new RuntimeException(
 				"Cirrus meta store does not exist, you must index your data first"
 			);
 		}
@@ -262,6 +262,19 @@ abstract class Maintenance extends \Maintenance implements Printer {
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * Helper method for Status returning methods, such as via ConfigUtils
+	 *
+	 * @param Status $status
+	 * @return mixed
+	 */
+	protected function unwrap( Status $status ) {
+		if ( !$status->isGood() ) {
+			$this->fatalError( (string)$status );
+		}
+		return $status->getValue();
 	}
 
 }

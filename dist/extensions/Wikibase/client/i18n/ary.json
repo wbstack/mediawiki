@@ -2,13 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Anass Sedrati",
+			"Ideophagous",
 			"Meno25",
 			"Reda Benkhadra",
-			"SADIQUI",
-			"Ideophagous"
+			"SADIQUI"
 		]
 	},
 	"tooltip-t-wikibase": "ليان د عنصر مرتابط ف الريپو ديال الضوني",
+	"wikibase-after-page-move": "التحويل ديالك خاص يكون [$1 باين دابا ف الليان د اللوغة ديال ستون {{WBREPONAME}}]. بغيناك عافاك تتيقن بلي هادشي طرا.",
 	"wikibase-comment-update": "تبديل عنصر {{WBREPONAME}}",
 	"wikibase-dataitem": "عنصر {{WBREPONAME}}",
 	"wikibase-editlinks": "بدل ليانات",
@@ -18,6 +19,7 @@
 	"wikibase-linkitem-close": "سد الشريجم د لختيار و عاود شارجي الصفحة",
 	"wikibase-linkitem-title": "ربط معا صفحة",
 	"wikibase-linkitem-linkpage": "ربط معا صفحة",
+	"wikibase-linkitem-selectlink": "عافاك {{GENDER:|ختار|ختاري}} سيت و صفحة باش {{GENDER:|تربطها|تربطيها}} معا هاد الصفحة",
 	"wikibase-linkitem-input-site": "لوغة:",
 	"wikibase-linkitem-input-page": "الصفحة:",
 	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",

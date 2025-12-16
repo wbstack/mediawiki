@@ -1,20 +1,12 @@
 'use strict';
 
+const { readFileSync } = require( 'fs' );
 const { assert, clientFactory } = require( 'api-testing' );
-const SwaggerParser = require( '@apidevtools/swagger-parser' );
 const { default: OpenAPIRequestCoercer } = require( 'openapi-request-coercer' );
 const { default: OpenAPIRequestValidator } = require( 'openapi-request-validator' );
 
-const basePath = 'rest.php/wikibase/v0';
-
-// "static" because it can be shared across requests, and we don't want to dereference it every time
-let openApiSpec = null;
-
-async function getOrLoadSpec() {
-	openApiSpec = openApiSpec || await SwaggerParser.dereference( './specs/openapi.json' );
-
-	return openApiSpec;
-}
+const basePath = 'rest.php/wikibase/v1';
+const openapiSchema = JSON.parse( readFileSync( `${__dirname}/../../../src/RouteHandlers/openapi.json` ) );
 
 class RequestBuilder {
 
@@ -24,8 +16,9 @@ class RequestBuilder {
 		this.pathParams = {};
 		this.queryParams = {};
 		this.jsonBodyParams = {};
-		this.headers = {};
+		this.headers = { 'user-agent': 'e2e tests' };
 		this.user = null;
+		this.configOverrides = {};
 		this.validate = false;
 		this.assertValid = false;
 	}
@@ -36,7 +29,7 @@ class RequestBuilder {
 	 * @return {this}
 	 */
 	withRoute( method, route ) {
-		this.method = method;
+		this.method = method.toUpperCase();
 		this.route = route;
 		return this;
 	}
@@ -62,6 +55,11 @@ class RequestBuilder {
 		return this;
 	}
 
+	withEmptyJsonBody() {
+		this.jsonBodyParams = {};
+		return this;
+	}
+
 	withHeader( name, value ) {
 		this.headers[ name.toLowerCase() ] = value;
 		return this;
@@ -73,6 +71,16 @@ class RequestBuilder {
 	 */
 	withUser( user ) {
 		this.user = user;
+		return this;
+	}
+
+	/**
+	 * @param {string} setting
+	 * @param {*|Function} value - function arguments will be evaluated when makeRequest() is called
+	 * @return {this}
+	 */
+	withConfigOverride( setting, value ) {
+		this.configOverrides[ setting ] = value;
 		return this;
 	}
 
@@ -94,10 +102,9 @@ class RequestBuilder {
 			this.withHeader( 'Cookie', `XDEBUG_SESSION=${XDEBUG_SESSION}` );
 		}
 
-		const spec = await getOrLoadSpec();
-		this.validateRouteAndMethod( spec );
+		this.validateRouteAndMethod( openapiSchema );
 		if ( this.validate ) {
-			this.validateRequest( spec );
+			this.validateRequest( openapiSchema );
 		}
 
 		let body = null;
@@ -110,6 +117,13 @@ class RequestBuilder {
 				body = this.jsonBodyParams;
 				break;
 		}
+
+		for ( const setting in this.configOverrides ) {
+			this.configOverrides[ setting ] = this.configOverrides[ setting ] instanceof Function ?
+				await this.configOverrides[ setting ]() :
+				this.configOverrides[ setting ];
+		}
+		this.headers[ 'x-config-override' ] = JSON.stringify( this.configOverrides );
 
 		const rest = clientFactory.getRESTClient( basePath, this.user );
 
@@ -181,12 +195,20 @@ class RequestBuilder {
 
 			if ( typeof errors !== 'undefined' ) {
 				const error = errors.errors[ 0 ];
-				errorMessage = `[${error.errorCode}] ${error.path} ${error.message} in ${error.location}`;
+				errorMessage = `[${error.errorCode}] ${error.path} ${error.message} in '${error.location}'`;
 			}
 			assert.isUndefined( errors, errorMessage );
 		} else {
-			assert.isDefined( errors );
+			assert.isDefined( errors, 'expected the request to be invalid, but it is not' );
 		}
+	}
+
+	getRouteDescription() {
+		return openapiSchema.paths[ this.route ][ this.method.toLowerCase() ].operationId;
+	}
+
+	getMethod() {
+		return this.method;
 	}
 
 }

@@ -2,10 +2,10 @@
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
-use ApiUsageException;
 use InvalidArgumentException;
 use LogicException;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiUsageException;
 use OutOfBoundsException;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
@@ -89,6 +89,7 @@ class StatementModificationHelper {
 			$this->errorReporter->dieError( 'Could not find the statement', 'no-such-claim' );
 		}
 
+		// @phan-suppress-next-line PhanTypeMismatchReturnNullable not-null here
 		return $statement;
 	}
 
@@ -167,7 +168,7 @@ class StatementModificationHelper {
 	 * @param EntityDocument $entity
 	 * @param Summary|null $summary The summary object to update with information about the change.
 	 */
-	public function applyChangeOp( ChangeOp $changeOp, EntityDocument $entity, Summary $summary = null ) {
+	public function applyChangeOp( ChangeOp $changeOp, EntityDocument $entity, ?Summary $summary = null ) {
 		try {
 			$result = $changeOp->validate( $entity );
 

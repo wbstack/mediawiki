@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace Wikibase\Client\ChangeModification;
 
 use MediaWiki\MediaWikiServices;
-use Title;
+use MediaWiki\Title\Title;
 use Wikibase\Client\WikibaseClient;
 use Wikibase\Lib\Rdbms\ClientDomainDb;
 
@@ -55,11 +55,11 @@ class ChangeDeletionNotificationJob extends ChangeModificationNotificationJob {
 		$dbw = $this->clientDb->connections()->getWriteConnection();
 
 		foreach ( array_chunk( $relevantChanges, $this->batchSize ) as $rcIdBatch ) {
-			$dbw->delete(
-				'recentchanges',
-				[ 'rc_id' => $rcIdBatch ],
-				__METHOD__
-			);
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( 'recentchanges' )
+				->where( [ 'rc_id' => $rcIdBatch ] )
+				->caller( __METHOD__ )
+				->execute();
 
 			$this->clientDb->replication()->waitForAllAffectedClusters();
 		}

@@ -2,13 +2,12 @@
 
 namespace Wikibase\Client\RecentChanges;
 
-use CentralIdLookup;
-use ExternalUserNames;
-use Language;
-use Message;
-use MWException;
+use MediaWiki\Language\Language;
+use MediaWiki\Message\Message;
+use MediaWiki\Title\Title;
+use MediaWiki\User\CentralId\CentralIdLookup;
+use MediaWiki\User\ExternalUserNames;
 use RecentChange;
-use Title;
 use Wikibase\DataAccess\EntitySourceDefinitions;
 use Wikibase\Lib\Changes\ChangeRow;
 use Wikibase\Lib\Changes\EntityChange;
@@ -74,8 +73,8 @@ class RecentChangeFactory {
 		SiteLinkCommentCreator $siteLinkCommentCreator,
 		EntitySourceDefinitions $entitySourceDefinitions,
 		ClientDomainDb $clientDomainDb,
-		CentralIdLookup $centralIdLookup = null,
-		ExternalUserNames $externalUsernames = null
+		?CentralIdLookup $centralIdLookup = null,
+		?ExternalUserNames $externalUsernames = null
 	) {
 		$this->language = $language;
 		$this->siteLinkCommentCreator = $siteLinkCommentCreator;
@@ -96,7 +95,7 @@ class RecentChangeFactory {
 	 *
 	 * @return RecentChange
 	 */
-	public function newRecentChange( EntityChange $change, Title $target, array $preparedAttribs = null ) {
+	public function newRecentChange( EntityChange $change, Title $target, ?array $preparedAttribs = null ) {
 		if ( $preparedAttribs === null ) {
 			$preparedAttribs = $this->prepareChangeAttributes( $change );
 		}
@@ -233,7 +232,7 @@ class RecentChangeFactory {
 
 		// Temporary compatibility until Ie7b9c482cf6a0dd7215b34841efd86fb51be651a
 		// has been deployed long enough that all rows have it.
-		// See @ref md_docs_topics_change-propagation for why it can be 0 other than pre-deploy rows.
+		// See @ref docs_topics_change-propagation for why it can be 0 other than pre-deploy rows.
 		if ( $this->centralIdLookup
 			&& isset( $metadata['central_user_id'] )
 			&& $metadata['central_user_id'] !== 0
@@ -308,10 +307,9 @@ class RecentChangeFactory {
 	 * @param Title|null $target The page we create an edit summary for. Needed to create an article
 	 *         specific edit summary on site link changes. Ignored otherwise.
 	 *
-	 * @throws MWException
 	 * @return string
 	 */
-	private function getEditCommentMulti( EntityChange $change, Title $target = null ) {
+	private function getEditCommentMulti( EntityChange $change, ?Title $target = null ) {
 		$info = $change->getInfo();
 
 		if ( isset( $info['changes'] ) ) {
@@ -345,10 +343,9 @@ class RecentChangeFactory {
 	 * @param Title|null $target The page we create an edit summary for. Needed to create an article
 	 *         specific edit summary on site link changes. Ignored otherwise.
 	 *
-	 * @throws MWException
 	 * @return string
 	 */
-	private function getEditComment( EntityChange $change, Title $target = null ) {
+	private function getEditComment( EntityChange $change, ?Title $target ) {
 		$siteLinkDiff = $change instanceof ItemChange
 			? $change->getSiteLinkDiff()
 			: null;
@@ -387,7 +384,6 @@ class RecentChangeFactory {
 	 * @param string $key
 	 *
 	 * @return Message
-	 * @throws MWException
 	 */
 	private function msg( $key, ...$params ) {
 		if ( isset( $params[0] ) && is_array( $params[0] ) ) {

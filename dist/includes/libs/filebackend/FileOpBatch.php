@@ -21,6 +21,13 @@
  * @ingroup FileBackend
  */
 
+namespace Wikimedia\FileBackend;
+
+use StatusValue;
+use Wikimedia\FileBackend\FileOpHandle\FileBackendStoreOpHandle;
+use Wikimedia\FileBackend\FileOps\FileOp;
+use Wikimedia\FileBackend\FileOps\FileStatePredicates;
+
 /**
  * Helper class for representing batch file operations.
  * Do not use this class from places outside FileBackend.
@@ -64,7 +71,7 @@ class FileOpBatch {
 		$ignoreErrors = !empty( $opts['force'] );
 		$maxConcurrency = $opts['concurrency'] ?? 1;
 
-		$predicates = FileOp::newPredicates(); // account for previous ops in prechecks
+		$predicates = new FileStatePredicates(); // account for previous ops in prechecks
 		$curBatch = []; // concurrent FileOp sub-batch accumulation
 		$curBatchDeps = FileOp::newDependencies(); // paths used in FileOp sub-batch
 		$pPerformOps = []; // ordered list of concurrent FileOp sub-batches
@@ -87,7 +94,6 @@ class FileOpBatch {
 			// Update list of affected paths in this batch
 			$curBatchDeps = $fileOp->applyDependencies( $curBatchDeps );
 			// Simulate performing the operation...
-			$oldPredicates = $predicates;
 			$subStatus = $fileOp->precheck( $predicates ); // updates $predicates
 			$status->merge( $subStatus );
 			if ( !$subStatus->isOK() ) {
@@ -181,3 +187,6 @@ class FileOpBatch {
 		}
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( FileOpBatch::class, 'FileOpBatch' );

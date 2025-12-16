@@ -1,16 +1,13 @@
-$( function () {
-	var router = require( 'mediawiki.router' );
-	if ( !router.isSupported() ) {
-		return;
-	}
+$( () => {
+	const router = require( 'mediawiki.router' );
 
 	// Always clean up the address bar, even (and especially) if the feature is disabled.
 	try {
-		var uri = new mw.Uri( location.href );
-		if ( uri.query.searchToken ) {
-			delete uri.query.searchToken;
+		const url = new URL( location.href );
+		if ( url.searchParams.get( 'searchToken' ) ) {
+			url.searchParams.remove( 'searchToken' );
 			router.navigateTo( document.title, {
-				path: uri.toString(),
+				path: url.toString(),
 				useReplaceState: true
 			} );
 		}
@@ -43,10 +40,13 @@ $( function () {
 	 */
 	function handlePossiblyNavigatingClick() {
 		try {
-			var clickUri = new mw.Uri( location.href );
-			clickUri.query.searchToken = mw.config.get( 'wgCirrusSearchRequestSetToken' );
+			const clickUrl = new URL( location.href );
+			clickUrl.searchParams.set(
+				'searchToken',
+				mw.config.get( 'wgCirrusSearchRequestSetToken' )
+			);
 			router.navigateTo( document.title, {
-				path: clickUri.toString(),
+				path: clickUrl.toString(),
 				useReplaceState: true
 			} );
 		} catch ( e ) {
@@ -55,7 +55,7 @@ $( function () {
 
 	// Bind to content area (instead of document.body) to avoid most potential
 	// issues and overhead from clicks that are definitely not to a search result.
-	mw.hook( 'wikipage.content' ).add( function ( $content ) {
+	mw.hook( 'wikipage.content' ).add( ( $content ) => {
 		// Optimisation: Avoid overhead from finding, iterating, and creating event bindings
 		// for every result. Use a delegate selector instead.
 		$content.on( 'click', 'a', handlePossiblyNavigatingClick );

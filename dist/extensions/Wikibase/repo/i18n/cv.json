@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Astahar",
 			"Chuvash",
-			"Chuvash2014",
-			"Astahar"
+			"Chuvash2014"
 		]
 	},
 	"wikibase-desc": "Структурӑланӑ даннӑйсен управӑшӗ",
@@ -11,6 +11,12 @@
 	"wikibase-entity-item": "элемент",
 	"wikibase-entity-property": "Уйрӑмлӑх",
 	"wikibase-entity-query": "Ыйтни",
+	"nstab-item": "Элемент",
+	"tooltip-ca-nstab-item": "Элемента пӑх",
+	"nstab-property": "Уйрӑмлӑх",
+	"tooltip-ca-nstab-property": "Уйрӑмлӑха пӑх",
+	"nstab-query": "Ыйтни",
+	"tooltip-ca-nstab-query": "Ыйтнине пӑх",
 	"wikibase-edit": "тӳрлет",
 	"wikibase-save": "упраса хӑвар",
 	"wikibase-publish": "вырнаҫтар",
@@ -34,12 +40,14 @@
 	"wikibase-entitytermsforlanguagelistview-language": "Чӗлхе",
 	"wikibase-entitytermsforlanguagelistview-more": "Мӗнпур кӗртнӗ чӗлхесенче",
 	"wikibase-entitytermsforlanguagelistview-less": "Сахалрах чӗлхесемпе",
+	"wikibase-entityterms-languagelistview-mul-popup-dont-show-again": "Урӑх кӑтартмалла мар",
 	"wikibase-label-empty": "Ятне кӑтартман",
 	"wikibase-label-edit-placeholder": "ятне ҫырӑр",
 	"wikibase-label-edit-placeholder-language-aware": "ятне $1 чӗлхепе ҫырӑр",
 	"wikibase-description-empty": "Ӑнлантарӑвне ҫырса тултарман",
 	"wikibase-description-edit-placeholder": "ӑнлантарнине ҫырса кӗртӗр",
 	"wikibase-description-edit-placeholder-language-aware": "ӑнлантарнине ҫырса кӗртӗр ($1)",
+	"wikibase-description-edit-placeholder-not-applicable": "усӑ курма май ҫук",
 	"wikibase-aliases-edit-placeholder": "синонимсене кӗртӗр",
 	"wikibase-aliases-edit-placeholder-language-aware": "синонимсене кӗртӗр ($1)",
 	"wikibase-aliases-edit-label": "вертикаллӑ йӗрке уйӑрнӑ псевдонимсем:",
@@ -157,6 +165,7 @@
 	"wikibase-setlabeldescriptionaliases-label-label": "Ят:",
 	"wikibase-setlabeldescriptionaliases-description-label": "Ӑнлантарни:",
 	"wikibase-setlabeldescriptionaliases-aliases-label": "Синонимсем:",
+	"wikibase-setlabeldescriptionaliases-continue": "Малалла",
 	"wikibase-setsitelink-site": "Сайт идентификаторӗ:",
 	"wikibase-setsitelink-label": "Сайт каҫи:",
 	"wikibase-setsitelink-badges": "Паллӑсем:",

@@ -21,10 +21,13 @@
  * @ingroup Maintenance
  */
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Maintenance\Maintenance;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\Title\Title;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script to check that pages marked as being redirects really are.
@@ -39,7 +42,7 @@ class CheckBadRedirects extends Maintenance {
 
 	public function execute() {
 		$this->output( "Fetching redirects...\n" );
-		$dbr = $this->getDB( DB_REPLICA );
+		$dbr = $this->getReplicaDB();
 		$result = $dbr->newSelectQueryBuilder()
 			->select( [ 'page_namespace', 'page_title', 'page_latest' ] )
 			->from( 'page' )
@@ -51,7 +54,7 @@ class CheckBadRedirects extends Maintenance {
 		$this->output( "Found $count redirects.\n" .
 			"Checking for bad redirects:\n\n" );
 
-		$revLookup = MediaWikiServices::getInstance()->getRevisionLookup();
+		$revLookup = $this->getServiceContainer()->getRevisionLookup();
 		foreach ( $result as $row ) {
 			$title = Title::makeTitle( $row->page_namespace, $row->page_title );
 			$revRecord = $revLookup->getRevisionById( $row->page_latest );
@@ -66,5 +69,7 @@ class CheckBadRedirects extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = CheckBadRedirects::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

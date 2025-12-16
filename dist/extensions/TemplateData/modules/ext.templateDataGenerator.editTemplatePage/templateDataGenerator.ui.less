@@ -1,5 +1,9 @@
 .tdg-editscreen-main {
-	margin-bottom: 1em;
+	margin: 1em 0;
+
+	.skin-vector-legacy .ve-init-mw-desktopArticleTarget-originalContent & {
+		font-size: (14 / 16em);
+	}
 }
 
 .tdg-editscreen-main-helplink {
@@ -90,13 +94,22 @@
 	}
 }
 
-/* LanguageSearchWidget */
+.tdg-languageResultWidget {
+	&-name {
+		text-align: left;
+	}
 
-.tdg-languageResultWidget-otherMatch {
-	float: right;
-	color: #777;
+	&-otherMatch {
+		float: right;
+		color: #777;
+	}
+
+	&-highlight {
+		font-weight: bold;
+	}
 }
 
-.tdg-languageResultWidget-highlight {
-	font-weight: bold;
+.mw-templateData-template-add-map-button .oo-ui-buttonElement-button {
+	text-align: left;
+	white-space: normal;
 }

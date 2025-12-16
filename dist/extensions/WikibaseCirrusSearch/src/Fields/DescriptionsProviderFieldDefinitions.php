@@ -2,6 +2,7 @@
 
 namespace Wikibase\Search\Elastic\Fields;
 
+use MediaWiki\Config\ConfigFactory;
 use Wikibase\Repo\Search\Fields\FieldDefinitions;
 use Wikibase\Repo\Search\Fields\WikibaseIndexField;
 
@@ -24,11 +25,16 @@ class DescriptionsProviderFieldDefinitions implements FieldDefinitions {
 
 	/**
 	 * @param string[] $languageCodes
-	 * @param array $stemmingSettings
+	 * @param ConfigFactory|null $configFactory
 	 */
-	public function __construct( array $languageCodes, array $stemmingSettings ) {
+	public function __construct( array $languageCodes, ?ConfigFactory $configFactory = null ) {
 		$this->languageCodes = $languageCodes;
-		$this->stemmingSettings = $stemmingSettings;
+		if ( $configFactory === null ) {
+			$this->stemmingSettings = [];
+		} else {
+			$this->stemmingSettings = $configFactory->makeConfig( 'WikibaseCirrusSearch' )
+				->get( 'UseStemming' );
+		}
 	}
 
 	/**

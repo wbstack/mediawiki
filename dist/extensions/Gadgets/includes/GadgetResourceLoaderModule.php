@@ -3,6 +3,7 @@
 namespace MediaWiki\Extension\Gadgets;
 
 use InvalidArgumentException;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\ResourceLoader as RL;
 
 /**
@@ -32,8 +33,10 @@ class GadgetResourceLoaderModule extends RL\WikiModule {
 	 */
 	private function getGadget() {
 		if ( !$this->gadget ) {
+			/** @var GadgetRepo $repo */
+			$repo = MediaWikiServices::getInstance()->getService( 'GadgetsRepo' );
 			try {
-				$this->gadget = GadgetRepo::singleton()->getGadget( $this->id );
+				$this->gadget = $repo->getGadget( $this->id );
 			} catch ( InvalidArgumentException $e ) {
 				// Fallback to a placeholder object...
 				$this->gadget = Gadget::newEmptyGadget( $this->id );
@@ -60,8 +63,10 @@ class GadgetResourceLoaderModule extends RL\WikiModule {
 			foreach ( $gadget->getScripts() as $script ) {
 				$pages[$script] = [ 'type' => 'script' ];
 			}
-			foreach ( $gadget->getJSONs() as $json ) {
-				$pages[$json] = [ 'type' => 'data' ];
+			if ( $gadget->isPackaged() ) {
+				foreach ( $gadget->getJSONs() as $json ) {
+					$pages[$json] = [ 'type' => 'data' ];
+				}
 			}
 		}
 
@@ -74,7 +79,24 @@ class GadgetResourceLoaderModule extends RL\WikiModule {
 	 * @return string
 	 */
 	public function getRequireKey( $titleText ): string {
-		return GadgetRepo::singleton()->titleWithoutPrefix( $titleText );
+		/** @var GadgetRepo $repo */
+		$repo = MediaWikiServices::getInstance()->getService( 'GadgetsRepo' );
+		return $repo->titleWithoutPrefix( $titleText, $this->id );
+	}
+
+	/**
+	 * @param string $fileName
+	 * @param string $contents
+	 * @return string
+	 */
+	protected function validateScriptFile( $fileName, $contents ) {
+		// Temporary solution to support gadgets in ES6 by disabling validation
+		// for them and putting them in a separate resource group to avoid a syntax error in them
+		// from corrupting core/extension-loaded scripts or other non-ES6 gadgets.
+		if ( $this->requiresES6() ) {
+			return $contents;
+		}
+		return parent::validateScriptFile( $fileName, $contents );
 	}
 
 	/**
@@ -83,7 +105,7 @@ class GadgetResourceLoaderModule extends RL\WikiModule {
 	 * @return bool
 	 */
 	public function isPackaged(): bool {
-		return $this->gadget->isPackaged();
+		return $this->getGadget()->isPackaged();
 	}
 
 	/**
@@ -91,7 +113,7 @@ class GadgetResourceLoaderModule extends RL\WikiModule {
 	 * @param RL\Context|null $context
 	 * @return string[] Names of resources this module depends on
 	 */
-	public function getDependencies( RL\Context $context = null ) {
+	public function getDependencies( ?RL\Context $context = null ) {
 		return $this->getGadget()->getDependencies();
 	}
 
@@ -109,15 +131,15 @@ class GadgetResourceLoaderModule extends RL\WikiModule {
 		return $this->getGadget()->getMessages();
 	}
 
-	public function getTargets() {
-		return $this->getGadget()->getTargets();
-	}
-
 	public function getSkins(): ?array {
 		return $this->getGadget()->getRequiredSkins() ?: null;
 	}
 
+	public function requiresES6(): bool {
+		return $this->getGadget()->requiresES6();
+	}
+
 	public function getGroup() {
-		return 'site';
+		return $this->requiresES6() ? 'es6-gadget' : self::GROUP_SITE;
 	}
 }

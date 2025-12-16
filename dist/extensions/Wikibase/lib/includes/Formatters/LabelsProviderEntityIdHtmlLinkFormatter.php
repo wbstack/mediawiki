@@ -2,7 +2,7 @@
 
 namespace Wikibase\Lib\Formatters;
 
-use Html;
+use MediaWiki\Html\Html;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\EntityId\EntityIdLabelFormatter;
 use Wikibase\DataModel\Services\Lookup\LabelDescriptionLookup;
@@ -106,16 +106,10 @@ class LabelsProviderEntityIdHtmlLinkFormatter extends EntityIdLabelFormatter {
 		return $html;
 	}
 
-	/**
-	 * @param EntityId $entityId
-	 * @param Term|null $term
-	 *
-	 * @return string[]
-	 */
-	private function getAttributes( EntityId $entityId, Term $term = null ) {
+	private function getAttributes( EntityId $entityId, ?Term $term ): array {
 		$attributes = [
 			'title' => $this->entityTitleTextLookup->getPrefixedText( $entityId ),
-			'href' => $this->entityUrlLookup->getLinkUrl( $entityId )
+			'href' => $this->entityUrlLookup->getLinkUrl( $entityId ),
 		];
 
 		if ( $term instanceof TermFallback

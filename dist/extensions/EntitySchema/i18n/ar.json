@@ -1,18 +1,22 @@
 {
 	"@metadata": {
 		"authors": [
+			"Alshamiri1",
 			"Meno25",
-			"ديفيد"
+			"ديفيد",
+			"Mohammed Qays"
 		]
 	},
+	"datatypes-type-entity-schema": "مخطط الكيان",
 	"entityschema-desc": "تخزين ومناقشة المخططات لكيانات قاعدة الويكي",
 	"special-newschema": "إنشاء مخطط كيان جديد",
+	"nstab-entityschema": "معرف مخطط الكيان",
+	"tooltip-ca-nstab-entityschema": "تعريف مخطط الكيان",
 	"entityschema-newschema-label": "التسمية:",
 	"entityschema-newschema-description": "الوصف:",
 	"entityschema-newschema-aliases": "الأسماء المستعارة، مفصولة بأنابيب:",
 	"entityschema-newschema-schema-shexc": "رمز تعبيرات الشكل:",
 	"entityschema-newschema-submit": "إنشاء",
-	"entityschema-newschema-copyright": "بالنقر على \"$1\"، فإنك توافق على [[$2| شروط الاستخدام]]، وتوافق بشكل لا رجعة فيه على نشر مساهمتك تحت $3.",
 	"entityschema-anonymouseditwarning": "تحذير: لم تقم بتسجيل الدخول؛ سيتم تسجيل عنوان الآيني الخاص بك في تاريخ تحرير هذا المخطط.",
 	"entityschema-label-edit-placeholder": "أدخل تسمية ب$1",
 	"entityschema-description-edit-placeholder": "أدخل وصفا ب$1",
@@ -23,7 +27,6 @@
 	"entityschema-error-schemaupdate-failed": "السكيما لم يمكن تحديثها",
 	"entityschema-error-schematext-conflict": "تم تغيير هذا المخطط في غضون ذلك؛ تُرجَى العودة إلى صفحة المخطط ومحاولة تحريرها مرة أخرى.",
 	"entityschema-error-namebadge-conflict": "تم تغيير هذا المخطط في غضون ذلك؛ الرجاء العودة إلى صفحة المخطط ومحاولة تعديل التسميات والأوصاف والأسماء المستعارة بهذه اللغة مرة أخرى.",
-	"entityschema-error-saving-failed": "فشل حفظ المخطط مع الرسالة التالية: $1",
 	"entityschema-error-not-post": "يجب أن يتم هذا الإجراء مع طلب مشاركة.",
 	"entityschema-error-inconsistent-id": "المراجعات المقدمة لا تنتمي جميعها إلى العنوان المحدد.",
 	"entityschema-error-wrong-page-revisions": "النسخة المقدمة لا تنتمي إلى الصفحة الحالية.",
@@ -35,7 +38,7 @@
 	"entityschema-error-input-too-long": "نص المخطط الذي أدخلته طويل جدا؛ الحد الأقصى للطول هو {{PLURAL:$1|بايت واحد|$1 بايت}}، يبلغ طول النص {{PLURAL:$2|بايت واحد|$1 بايت}}.",
 	"entityschema-noschema": "لا يوجد مخطط هنا، انتقل إلى [[Special:NewSchema]] لإنشاء واحد جديد.",
 	"entityschema-summary-generated": "ملخص (سيتم إلحاقه بملخص مولد تلقائيا):",
-	"entityschema-label-empty": "لم يتم تحديد التسمية",
+	"entityschema-label-empty": "لم تُضف التسمية",
 	"entityschema-namebadge-header-language-code": "رمز اللغة",
 	"entityschema-namebadge-header-label": "التسمية",
 	"entityschema-namebadge-header-description": "الوصف",
@@ -79,5 +82,9 @@
 	"entityschema-special-setlabeldescriptionaliases-info": "أنت تقوم بتعيين التسمية والوصف والأسماء المستعارة ب'''$1''' للمخطط [[$3|$2]].",
 	"entityschema-special-label": "التسمية:",
 	"entityschema-special-description": "الوصف:",
-	"entityschema-special-aliases": "الأسماء المستعارة، مفصولة بأنابيب:"
+	"entityschema-special-aliases": "الأسماء المستعارة، مفصولة بأنابيب:",
+	"wikibase-listdatatypes-entity-schema-head": "مخطط الكيان",
+	"wikibase-listdatatypes-entity-schema-body": "رابط مخططات الكيانات المخزنة في النطاق المكون في نفس الويكي، يجب أن تكون القيمة بدون بادئة النطاق \"EntitySchema:\"",
+	"wikibase-validator-illegal-entity-schema-title": "يجب أن تبدأ القيمة بـ<code>E</code> وأن يكون الباقي مجرد أرقام.",
+	"wikibase-validator-no-such-entity-schema": "إن EntitySchema $1 غير موجود."
 }

@@ -2,12 +2,12 @@
 
 namespace Wikibase\Repo\Content;
 
-use Content;
-use IContextSource;
+use Article;
+use MediaWiki\Content\Content;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Parser\ParserOptions;
 use MediaWiki\Revision\SlotRenderingProvider;
-use Page;
-use ParserOptions;
-use Title;
+use MediaWiki\Title\Title;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\NumericPropertyId;
@@ -104,22 +104,19 @@ class PropertyHandler extends EntityHandler {
 		$this->entityTermStoreWriter = $entityTermStoreWriter;
 	}
 
-	/**
-	 * @return (\Closure|class-string)[]
-	 */
 	public function getActionOverrides() {
 		return [
-			'history' => function ( Page $page, IContextSource $context ) {
+			'history' => function ( Article $article, IContextSource $context ) {
 				return new HistoryEntityAction(
-					$page,
+					$article,
 					$context,
 					$this->entityIdLookup,
 					$this->labelLookupFactory->newLabelDescriptionLookup( $context->getLanguage() )
 				);
 			},
 			'view' => ViewEntityAction::class,
-			'edit' => EditEntityAction::class,
-			'submit' => SubmitEntityAction::class,
+			'edit' => EditEntityAction::SPEC,
+			'submit' => SubmitEntityAction::SPEC,
 		];
 	}
 
@@ -210,7 +207,7 @@ class PropertyHandler extends EntityHandler {
 	 *
 	 * @return PropertyContent
 	 */
-	protected function newEntityContent( EntityHolder $entityHolder = null ) {
+	protected function newEntityContent( ?EntityHolder $entityHolder ) {
 		return new PropertyContent( $entityHolder );
 	}
 

@@ -4,7 +4,7 @@ namespace Wikibase\Lexeme\Search\Elastic;
 use CirrusSearch\Search\BaseCirrusSearchResultSet;
 use CirrusSearch\Search\BaseResultsType;
 use Elastica\ResultSet;
-use Language;
+use MediaWiki\Language\Language;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lexeme\DataAccess\LexemeDescription;
 use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
@@ -77,14 +77,6 @@ class LexemeFulltextResult extends BaseResultsType {
 	 * @return string[]
 	 */
 	public function getFields() {
-		return [];
-	}
-
-	/**
-	 * ES5 variant of getFields.
-	 * @return string[]
-	 */
-	public function getStoredFields() {
 		return [];
 	}
 
@@ -162,7 +154,7 @@ class LexemeFulltextResult extends BaseResultsType {
 				break;
 			}
 		}
-		if ( empty( $repr ) ) {
+		if ( $repr === '' ) {
 			// Didn't find the right id? Weird, skip it.
 			return null;
 		}
@@ -236,8 +228,9 @@ class LexemeFulltextResult extends BaseResultsType {
 			// Highlight part contains information about what has actually been matched.
 			$highlight = $r->getHighlights();
 
-			$lang = $sourceData['lexeme_language']['entity'];
-			$category = $sourceData['lexical_category'];
+			// we accept missing lemma fields (see T365692)
+			$lang = $sourceData['lexeme_language']['entity'] ?? '';
+			$category = $sourceData['lexical_category'] ?? '';
 
 			$features = [];
 			$lexemeData = [
@@ -284,7 +277,7 @@ class LexemeFulltextResult extends BaseResultsType {
 			}
 		}
 
-		if ( empty( $rawResults ) ) {
+		if ( !$rawResults ) {
 			return new \CirrusSearch\Search\ResultSet();
 		}
 		// Create prefetched lookup

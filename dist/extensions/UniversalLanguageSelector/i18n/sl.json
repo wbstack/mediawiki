@@ -38,7 +38,7 @@
 	"ext-uls-webfonts-system-font": "Sistemska pisava",
 	"ext-uls-back-to-display-settings": "Nazaj na nastavitve prikaza",
 	"ext-uls-input-settings-title": "Nastavitve vnosa",
-	"ext-uls-input-settings-title-short": "Vhod",
+	"ext-uls-input-settings-title-short": "Vnos",
 	"ext-uls-input-settings-desc": "Pišete v drugem jeziku?",
 	"ext-uls-input-settings-ime-settings": "Načini vnosa za $1",
 	"ext-uls-input-settings-ui-language": "Jezik za pisanje",
@@ -70,10 +70,10 @@
 	"ext-uls-setlang-accept": "Sprejmi spremembo",
 	"ext-uls-setlang-loading": "Izvajam ...",
 	"ext-uls-setlang-cancel": "Ne spremeni",
-	"ext-uls-actions-menu-header": "Več možnosti",
 	"ext-uls-actions-menu-language-settings-item-label": "Odpri jezikovne nastavitve",
 	"ext-uls-empty-state-header": "Ni še jezikov",
 	"ext-uls-empty-state-desc": "Za zdaj ni na voljo še noben jezik",
 	"ext-uls-empty-state-header-actions-available": "Ni še jezikov. Želite dodati novega?",
-	"ext-uls-empty-state-desc-actions-available": "Zagotovite vsebino v več jezikih."
+	"ext-uls-empty-state-desc-actions-available": "Zagotovite vsebino v več jezikih.",
+	"ext-uls-add-languages-button-label": "Dodaj jezike"
 }

@@ -60,6 +60,7 @@ return call_user_func( function() {
 		// in the parser functions and via Lua.
 		// Allows users to split the ParserCache by user language.
 		'allowDataAccessInUserLanguage' => false,
+		'moveConnectedItemLinkToOtherProjects' => false,
 
 		/**
 		 * Prefix to use for cache keys that should be shared among a Wikibase Repo instance and all
@@ -278,9 +279,6 @@ return call_user_func( function() {
 	// characters (e.g. space, percent, etc.) should NOT be encoded.
 	$defaults['tabularDataStorageBaseUrl'] = 'https://commons.wikimedia.org/wiki/';
 
-	// Namespace id for entity schema data type
-	$defaults['entitySchemaNamespace'] = 640;
-
 	// Disabled entity access
 	$defaults['disabledAccessEntityTypes'] = [];
 
@@ -291,7 +289,7 @@ return call_user_func( function() {
 	$defaults['entityUsageModifierLimits'] = [
 		EntityUsage::DESCRIPTION_USAGE => 30,
 		EntityUsage::LABEL_USAGE => 30,
-		EntityUsage::STATEMENT_USAGE => 10
+		EntityUsage::STATEMENT_USAGE => 10,
 	];
 
 	// Batch size for adding entity usage records

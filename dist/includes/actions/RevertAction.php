@@ -23,6 +23,15 @@
  * @author Rob Church <robchur@gmail.com>
  */
 
+use MediaWiki\Context\IContextSource;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Language\Language;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Status\Status;
+use MediaWiki\User\User;
+use MediaWiki\Utils\MWTimestamp;
+
 /**
  * File reversion user interface
  * WikiPage must contain getFile method: \WikiFilePage
@@ -32,25 +41,22 @@
  */
 class RevertAction extends FormAction {
 
-	/** @var Language */
-	private $contentLanguage;
-
-	/** @var RepoGroup */
-	private $repoGroup;
+	private Language $contentLanguage;
+	private RepoGroup $repoGroup;
 
 	/**
-	 * @param Page $page
+	 * @param Article $article
 	 * @param IContextSource $context
 	 * @param Language $contentLanguage
 	 * @param RepoGroup $repoGroup
 	 */
 	public function __construct(
-		Page $page,
+		Article $article,
 		IContextSource $context,
 		Language $contentLanguage,
 		RepoGroup $repoGroup
 	) {
-		parent::__construct( $page, $context );
+		parent::__construct( $article, $context );
 		$this->contentLanguage = $contentLanguage;
 		$this->repoGroup = $repoGroup;
 	}
@@ -65,6 +71,7 @@ class RevertAction extends FormAction {
 	}
 
 	public function getRestriction() {
+		// Required permissions of revert are complicated, will be checked below.
 		return 'upload';
 	}
 
@@ -72,6 +79,16 @@ class RevertAction extends FormAction {
 		if ( $this->getTitle()->getNamespace() !== NS_FILE ) {
 			throw new ErrorPageError( $this->msg( 'nosuchaction' ), $this->msg( 'nosuchactiontext' ) );
 		}
+
+		$rights = [ 'reupload' ];
+		if ( $user->equals( $this->getFile()->getUploader() ) ) {
+			// reupload-own is more basic, put it in the front for error messages.
+			array_unshift( $rights, 'reupload-own' );
+		}
+		if ( !$user->isAllowedAny( ...$rights ) ) {
+			throw new PermissionsError( $rights[0] );
+		}
+
 		parent::checkCanExecute( $user );
 
 		$oldimage = $this->getRequest()->getText( 'oldimage' );
@@ -121,7 +138,7 @@ class RevertAction extends FormAction {
 				'raw' => true,
 				'default' => $this->msg( 'filerevert-intro',
 					$this->getTitle()->getText(), $userDate, $userTime,
-					wfExpandUrl(
+					(string)MediaWikiServices::getInstance()->getUrlUtils()->expand(
 						$this->getFile()
 							->getArchiveUrl(
 								$this->getRequest()->getText( 'oldimage' )
@@ -178,7 +195,7 @@ class RevertAction extends FormAction {
 
 		$this->getOutput()->addWikiMsg( 'filerevert-success', $this->getTitle()->getText(),
 			$userDate, $userTime,
-			wfExpandUrl(
+			(string)MediaWikiServices::getInstance()->getUrlUtils()->expand(
 				$this->getFile()
 					->getArchiveUrl(
 						$this->getRequest()->getText( 'oldimage' )
@@ -189,7 +206,7 @@ class RevertAction extends FormAction {
 	}
 
 	protected function getPageTitle() {
-		return $this->msg( 'filerevert', $this->getTitle()->getText() )->text();
+		return $this->msg( 'filerevert' )->plaintextParams( $this->getTitle()->getText() );
 	}
 
 	protected function getDescription() {

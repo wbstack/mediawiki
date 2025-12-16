@@ -45,7 +45,7 @@ class WbStackPlatformReservedUser{
         $user->saveSettings();
 
         // Promote the user to platform user??
-        array_map( [ $user, 'addGroup' ], [ 'platform' ] );
+        $services->getUserGroupManager()->addUserToMultipleGroups($user, [ 'platform', 'bot' ], null, true);
 
         return true;
     }
@@ -79,7 +79,7 @@ class WbStackPlatformReservedUser{
         $context = \RequestContext::getMain();
         $context->setUser( self::getUser() );
 
-        $dbw = \MediaWiki\Extension\OAuth\Backend\Utils::getCentralDB( DB_MASTER );
+        $dbw = \MediaWiki\Extension\OAuth\Backend\Utils::getCentralDB( DB_PRIMARY );
         $control = new \MediaWiki\Extension\OAuth\Control\ConsumerSubmitControl( $context, $data, $dbw );
         $status = $control->submit();
 
@@ -145,7 +145,7 @@ class WbStackPlatformReservedUser{
             $user->getId(),
             $c,
             $c->getWiki(),
-            \MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance::READ_NORMAL,
+            \IDBAccessObject::READ_NORMAL,
             $c->getOAuthVersion(),
         );
 

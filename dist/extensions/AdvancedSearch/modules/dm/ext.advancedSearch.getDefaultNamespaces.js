@@ -1,27 +1,22 @@
-( function () {
-	'use strict';
+'use strict';
 
-	mw.libs = mw.libs || {};
-	mw.libs.advancedSearch = mw.libs.advancedSearch || {};
-	mw.libs.advancedSearch.dm = mw.libs.advancedSearch.dm || {};
-
-	/**
-	 * Get the default search namespace IDs from user settings
-	 *
-	 * @param {Object} userSettings User settings like in mw.user.fields.values
-	 * @return {string[]} Namespace IDs
-	 */
-	mw.libs.advancedSearch.dm.getDefaultNamespaces = function ( userSettings ) {
-		var defaultNamespaces = [];
-		Object.keys( userSettings ).forEach( function ( key ) {
-			if ( userSettings[ key ] ) {
-				var matches = key.match( /^searchNs(\d+)$/ );
-				if ( matches ) {
-					defaultNamespaces.push( matches[ 1 ] );
-				}
+/**
+ * Get the default search namespace ids from user settings
+ *
+ * @param {Object.<string,string>} userSettings User settings like in mw.user.fields.values
+ * @return {string[]} Namespace ids
+ */
+const getDefaultNamespaces = function ( userSettings ) {
+	const defaultNamespaces = [];
+	for ( const key in userSettings ) {
+		if ( userSettings[ key ] ) {
+			const matches = key.match( /^searchNs(\d+)$/ );
+			if ( matches ) {
+				defaultNamespaces.push( matches[ 1 ] );
 			}
-		} );
-		return defaultNamespaces;
-	};
+		}
+	}
+	return defaultNamespaces;
+};
 
-}() );
+module.exports = getDefaultNamespaces;

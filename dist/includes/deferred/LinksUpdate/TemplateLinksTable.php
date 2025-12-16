@@ -2,9 +2,8 @@
 
 namespace MediaWiki\Deferred\LinksUpdate;
 
-use Config;
-use MediaWiki\MainConfigNames;
-use ParserOutput;
+use LogicException;
+use MediaWiki\Parser\ParserOutput;
 
 /**
  * templatelinks
@@ -12,13 +11,6 @@ use ParserOutput;
  * @since 1.38
  */
 class TemplateLinksTable extends GenericPageLinksTable {
-	/** @var int */
-	private $migrationStage;
-
-	public function __construct( Config $config ) {
-		$this->migrationStage = $config->get( MainConfigNames::TemplateLinksSchemaMigrationStage );
-	}
-
 	public function setParserOutput( ParserOutput $parserOutput ) {
 		$this->newLinks = $parserOutput->getTemplates();
 	}
@@ -32,11 +24,13 @@ class TemplateLinksTable extends GenericPageLinksTable {
 	}
 
 	protected function getNamespaceField() {
-		return 'tl_namespace';
+		// @phan-suppress-previous-line PhanPluginNeverReturnMethod
+		throw new LogicException( 'not supported' );
 	}
 
 	protected function getTitleField() {
-		return 'tl_title';
+		// @phan-suppress-previous-line PhanPluginNeverReturnMethod
+		throw new LogicException( 'not supported' );
 	}
 
 	protected function getFromNamespaceField() {
@@ -52,6 +46,6 @@ class TemplateLinksTable extends GenericPageLinksTable {
 	 * @return int
 	 */
 	protected function linksTargetNormalizationStage(): int {
-		return $this->migrationStage;
+		return MIGRATION_NEW;
 	}
 }

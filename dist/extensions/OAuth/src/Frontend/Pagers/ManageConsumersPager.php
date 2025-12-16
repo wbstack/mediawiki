@@ -2,9 +2,6 @@
 
 namespace MediaWiki\Extension\OAuth\Frontend\Pagers;
 
-use MediaWiki\Extension\OAuth\Backend\Utils;
-use MediaWiki\Extension\OAuth\Frontend\SpecialPages\SpecialMWOAuthManageConsumers;
-
 /**
  * (c) Aaron Schulz 2013, GPL
  *
@@ -24,12 +21,17 @@ use MediaWiki\Extension\OAuth\Frontend\SpecialPages\SpecialMWOAuthManageConsumer
  * http://www.gnu.org/copyleft/gpl.html
  */
 
+use MediaWiki\Extension\OAuth\Backend\Utils;
+use MediaWiki\Extension\OAuth\Frontend\SpecialPages\SpecialMWOAuthManageConsumers;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Pager\ReverseChronologicalPager;
+use MediaWiki\Title\Title;
+use stdClass;
 
 /**
  * Query to list out consumers
  */
-class ManageConsumersPager extends \ReverseChronologicalPager {
+class ManageConsumersPager extends ReverseChronologicalPager {
 	/** @var SpecialMWOAuthManageConsumers */
 	public $mForm;
 
@@ -55,14 +57,14 @@ class ManageConsumersPager extends \ReverseChronologicalPager {
 	}
 
 	/**
-	 * @return \Title
+	 * @return Title
 	 */
 	public function getTitle() {
 		return $this->mForm->getFullTitle();
 	}
 
 	/**
-	 * @param \stdClass $row
+	 * @param stdClass $row
 	 * @return string
 	 */
 	public function formatRow( $row ) {

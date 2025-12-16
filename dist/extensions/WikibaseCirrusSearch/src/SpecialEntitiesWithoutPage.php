@@ -2,8 +2,8 @@
 
 namespace Wikibase\Search\Elastic;
 
-use HTMLForm;
-use Title;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Title\Title;
 use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\LanguageNameLookup;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
@@ -158,7 +158,7 @@ class SpecialEntitiesWithoutPage extends SpecialWikibaseQueryPage {
 		$options = [];
 
 		foreach ( $this->termsLanguages->getLanguages() as $languageCode ) {
-			$languageName = $this->languageNameLookup->getName( $languageCode );
+			$languageName = $this->languageNameLookup->getNameForTerms( $languageCode );
 			$options["$languageName ($languageCode)"] = $languageCode;
 		}
 

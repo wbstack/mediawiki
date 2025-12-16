@@ -2,7 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Fitoschido",
+			"Lluis Cat",
 			"Mguix",
+			"Paucabot",
 			"Toniher",
 			"Vriullop"
 		]
@@ -17,6 +19,7 @@
 	"wikibase-entity-summary-wblmergelexemes-to": "S'ha fusionat el lexema a $3",
 	"wikibase-lexeme-gloss-empty": "Cap glossa definida",
 	"wikibase-lexeme-lemma-language-not-recognized": "No s'ha reconegut el codi de llengua proporcionat.",
+	"wikibase-lexeme-lexicographical-data": "Dades lexicogràfiques",
 	"wikibase-lexeme-mergelexemes-error-cannot-load": "No s'ha pogut carregar el lexema.",
 	"wikibase-lexeme-mergelexemes-error-conflicting-lemma": "No s'han pogut fusionar els lexemes. Resolgueu els conflictes abans. Error: els lexemes tenen la mateixa variant ortogràfica.",
 	"wikibase-lexeme-mergelexemes-error-cross-referencing-statement": "No s'han pogut fusionar els lexemes. Resolgueu els conflictes abans. Error: els lexemes s'enllacen mútuament en una afirmació.",
@@ -33,6 +36,7 @@
 	"wikibase-lexeme-mergelexemes-submit": "Fusiona els lexemes",
 	"wikibase-lexeme-mergelexemes-success": "S'ha fusionat $1 a $2 i s'ha redirigit.",
 	"wikibase-lexeme-mergelexemes-to-id": "L'ID al qual fusionar",
+	"wikibase-lexeme-randomlexeme": "Lexema aleatori",
 	"wikibase-lexeme-summary-add-form": "Nova forma $3 afegida amb {{PLURAL:$1|representació|representacions}}",
 	"wikibase-lexeme-summary-add-form-grammatical-features": "{{PLURAL:$1|Tret gramatical|Trets gramaticals}} de la forma $3 {{PLURAL:$1|afegit|afegits}}",
 	"wikibase-lexeme-summary-add-form-representations": "{{PLURAL:$1|Representació afegida|Representacions afegides}} de la forma $3",
@@ -97,11 +101,11 @@
 	"wikibaselexeme-lemma-redundant-language": "No és possible introduir més d'un lema amb la mateixa variant ortogràfica.",
 	"wikibaselexeme-newlexeme-fieldset": "Crea un lexema nou",
 	"wikibaselexeme-newlexeme-language": "Llengua del lexema",
-	"wikibaselexeme-newlexeme-language-placeholder": "Introduïu la llengua, p. ex., català",
+	"wikibaselexeme-newlexeme-language-placeholder": "Llengua del lexema, p. ex., «català»",
 	"wikibaselexeme-newlexeme-lemma": "Lema",
 	"wikibaselexeme-newlexeme-lemma-language": "Variant ortogràfica del lema",
 	"wikibaselexeme-newlexeme-lexicalcategory": "Categoria lèxica",
-	"wikibaselexeme-newlexeme-lexicalcategory-placeholder": "Introduïu la categoria lèxica, p. ex., substantiu",
+	"wikibaselexeme-newlexeme-lexicalcategory-placeholder": "Categoria del lexema, p. ex., «numeral»",
 	"wikibaselexeme-no-features": "cap tret",
 	"wikibaselexeme-search-result-stats": "$1 {{PLURAL:$1|afirmació|afirmacions}}, $2 {{PLURAL:$2|forma|formes}}",
 	"wikibaselexeme-sense-gloss-invalid-language": "Els codis de llengua de les glosses han de ser vàlids",

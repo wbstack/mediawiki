@@ -1,7 +1,5 @@
 <?php
 /**
- * Copyright 2014
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -22,9 +20,9 @@
 
 namespace MediaWiki\Extension\Gadgets\Content;
 
-use FormatJson;
-use JsonContent;
-use Status;
+use MediaWiki\Content\JsonContent;
+use MediaWiki\Json\FormatJson;
+use MediaWiki\Status\Status;
 
 class GadgetDefinitionContent extends JsonContent {
 
@@ -51,21 +49,28 @@ class GadgetDefinitionContent extends JsonContent {
 	 * @return string
 	 */
 	public function beautifyJSON() {
-		// @todo we should normalize entries in module.scripts and module.styles
+		// @todo we should normalize entries in module.pages
 		return FormatJson::encode( $this->getAssocArray(), "\t", FormatJson::UTF8_OK );
 	}
 
 	/**
+	 * Helper for isValid
+	 *
+	 * This placed into a separate method so that the detailed error can be communicated
+	 * to editors via GadgetDefinitionContentHandler::validateSave, instead of the generic
+	 * 'invalid-content-data' message from ContentHandler::validateSave based on isValid.
+	 *
 	 * @return Status
 	 */
 	public function validate() {
 		// Cache the validation result to avoid re-computations
 		if ( !$this->validation ) {
 			if ( !parent::isValid() ) {
+				// Invalid JSON, use the detailed Status from JsonContent::getData for syntax errors.
 				$this->validation = $this->getData();
 			} else {
 				$validator = new GadgetDefinitionValidator();
-				$this->validation = $validator->validate( $this->getAssocArray() );
+				$this->validation = $validator->validate( $this->getAssocArray(), true );
 			}
 		}
 		return $this->validation;
@@ -82,7 +87,7 @@ class GadgetDefinitionContent extends JsonContent {
 		$info = wfObjectToArray( $this->getData()->getValue() );
 		/** @var GadgetDefinitionContentHandler $handler */
 		$handler = $this->getContentHandler();
-		$info = wfArrayPlus2d( $info, $handler->getDefaultMetadata() );
+		$info = wfArrayPlus2d( $info, $handler->getEmptyDefinition() );
 
 		return $info;
 	}

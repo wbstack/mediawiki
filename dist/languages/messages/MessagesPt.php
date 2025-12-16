@@ -1,8 +1,6 @@
 <?php
 /** Portuguese (português)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -89,12 +87,18 @@ $namespaceNames = [
 ];
 
 $namespaceAliases = [
-	'Usuário'           => NS_USER,
-	'Usuário_Discussão' => NS_USER_TALK,
-	'Imagem'            => NS_FILE,
-	'Imagem_Discussão'  => NS_FILE_TALK,
-	'Arquivo'           => NS_FILE,
-	'Arquivo_Discussão' => NS_FILE_TALK,
+	'Usuário'                 => NS_USER,
+	'Usuário_Discussão'       => NS_USER_TALK,
+	'Usuária'                 => NS_USER, // T33986
+	'Usuária_Discussão'       => NS_USER_TALK, // T33986
+	'Usuário(a)'              => NS_USER, // T33986
+	'Usuário(a)_Discussão'    => NS_USER_TALK, // T33986
+	'Utilizador(a)'           => NS_USER, // T33986
+	'Utilizador(a)_Discussão' => NS_USER_TALK, // T33986
+	'Imagem'                  => NS_FILE,
+	'Imagem_Discussão'        => NS_FILE_TALK,
+	'Arquivo'                 => NS_FILE,
+	'Arquivo_Discussão'       => NS_FILE_TALK,
 ];
 
 $namespaceGenderAliases = [
@@ -105,9 +109,9 @@ $namespaceGenderAliases = [
 $defaultDateFormat = 'dmy';
 
 $dateFormats = [
-	'dmy time' => 'H\hi\m\i\n',
-	'dmy date' => 'j \d\e F \d\e Y',
-	'dmy both' => 'H\hi\m\i\n \d\e j \d\e F \d\e Y',
+	'dmy time' => 'H"h"i"min"',
+	'dmy date' => 'j "de" F "de" Y',
+	'dmy both' => 'H"h"i"min" "de" j "de" F "de" Y',
 ];
 
 $separatorTransformTable = [ ',' => "\u{00A0}", '.' => ',' ];
@@ -185,6 +189,7 @@ $specialPageAliases = [
 	'Recentchanges'             => [ 'Mudanças_recentes' ],
 	'Recentchangeslinked'       => [ 'Alterações_relacionadas', 'Novidades_relacionadas', 'Mudanças_relacionadas' ],
 	'Redirect'                  => [ 'Redirecionar', 'Redireccionar' ],
+	'Renameuser'                => [ 'Alterar_nome_de_utilizador' ],
 	'ResetTokens'               => [ 'Reiniciar_tokens', 'Reiniciar_os_tokens' ],
 	'Revisiondelete'            => [ 'Eliminar_edição', 'Eliminar_revisão', 'Apagar_edição', 'Apagar_revisão' ],
 	'Search'                    => [ 'Pesquisar', 'Busca', 'Buscar', 'Procurar', 'Pesquisa' ],
@@ -265,7 +270,7 @@ $magicWords = [
 	'img_top'                   => [ '1', 'acima', 'top' ],
 	'img_upright'               => [ '1', 'superiordireito', 'superiordireito=$1', 'superiordireito_$1', 'superiordireito $1', 'upright', 'upright=$1', 'upright $1' ],
 	'index'                     => [ '1', '__INDEXAR__', '__INDEX__' ],
-	'language'                  => [ '0', '#IDIOMA:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#IDIOMA', '#LANGUAGE' ],
 	'lc'                        => [ '0', 'MINUSCULA', 'MINÚSCULA', 'MINUSCULAS', 'MINÚSCULAS', 'LC:' ],
 	'lcfirst'                   => [ '0', 'PRIMEIRAMINUSCULA:', 'PRIMEIRAMINÚSCULA:', 'LCFIRST:' ],
 	'localday'                  => [ '1', 'DIALOCAL', 'LOCALDAY' ],

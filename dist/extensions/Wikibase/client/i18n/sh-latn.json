@@ -1,15 +1,20 @@
 {
 	"@metadata": {
 		"authors": [
-			"Winston Sung"
+			"BadDog",
+			"Winston Sung",
+			"Aca"
 		]
 	},
 	"wikibase-client-desc": "Klijent za proširenje Wikibaza",
-	"tooltip-t-wikibase": "Link na povezane podatke spremišnih stavki",
+	"tooltip-t-wikibase": "Pogledajte povezanu stavku u skladištu podataka",
+	"wikibase-after-page-move": "Premještanje se sada treba odraziti na jezičku vezu u [$1 stavci na Wikipodacima]. Provjerite da li se to dogodilo.",
+	"wikibase-after-page-delete": "Trebalo bi da je veza do stranice uklonjena iz [$1 povezane stavke na {{GRAMMAR:lokativ|{{WBREPONAME}}}}]. Provjerite da li se to dogodilo.",
 	"wikibase-comment-update": "{{WBREPONAME}} promijenjena stavka",
 	"wikibase-dataitem": "Stavka na Wikipodacima",
 	"wikibase-editlinks": "Uredi veze",
-	"wikibase-editlinkstitle": "Uredi međujezične poveznice",
+	"wikibase-editlinkstitle": "Uredi jezičke veze",
+	"wikibase-addlinkstitle": "Dodaj međujezičke veze",
 	"wikibase-linkitem-addlinks": "Dodaj veze",
 	"wikibase-linkitem-title": "Povezivanje sa stranicom",
 	"wikibase-linkitem-linkpage": "Poveži sa stranicom",

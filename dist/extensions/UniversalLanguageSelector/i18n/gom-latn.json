@@ -60,5 +60,6 @@
 	"ext-uls-empty-state-header": "Azun bhaso nant",
 	"ext-uls-empty-state-desc": "Sodheak khoincheoch bhaso uplobdh nant",
 	"ext-uls-empty-state-header-actions-available": "Azun bhaso nant. Novi zoddchi?",
-	"ext-uls-empty-state-desc-actions-available": "Mozkur anik bhasani uplobdh kor."
+	"ext-uls-empty-state-desc-actions-available": "Mozkur anik bhasani uplobdh kor.",
+	"ext-uls-add-languages-button-label": "Bhaso zodd"
 }

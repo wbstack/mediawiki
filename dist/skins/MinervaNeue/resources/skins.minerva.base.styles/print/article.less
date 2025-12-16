@@ -1,12 +1,12 @@
+/* stylelint-disable selector-max-id */
 @import '../../../minerva.less/minerva.variables.less';
 @import '../../../minerva.less/minerva.mixins.less';
 
 @dividerHeight: 2px;
 @dividerSpacing: 28px;
 
-// stylelint-disable-next-line selector-max-id
 .hatnote,
-.pre-content #page-actions {
+.pre-content #p-views {
 	display: none;
 }
 
@@ -22,7 +22,7 @@
 		line-height: normal;
 		letter-spacing: normal;
 		text-align: left;
-		color: @colorGray1;
+		color: @color-print;
 	}
 
 	.tagline {
@@ -30,12 +30,11 @@
 	}
 }
 
-// Prefer class & direct child selector `.mw-body > .content` over `#bodyContent`.
-.mw-body > .content {
+.content {
 	padding-top: 55px;
 	position: relative;
 
-	&:before {
+	&::before {
 		top: 0;
 	}
 }
@@ -55,21 +54,21 @@
 	text-align: left;
 	margin: 0 !important;
 
-	&:after {
+	&::after {
 		bottom: @dividerHeight + @dividerSpacing;
 	}
 }
 
-// Prefer class & direct child selector `.mw-body > .content` over `#bodyContent`.
-.thumb:after,
-.mw-body > .content:before {
+.thumb::after,
+.content::before {
 	position: absolute;
 	left: 0;
 	content: '';
 	display: block;
 	width: 55px;
 	height: @dividerHeight;
-	background: @borderColorPrint;
+	// `background` used as `border`.
+	background: @border-color-print;
 }
 
 .thumbcaption {
@@ -79,38 +78,49 @@
 	font-size: 28px;
 }
 
-// `#mw-content-text` doesn't feature universal class selector.
-// `class|='mw-content'` catches `.mw-content`, but also `.mw-content-rtl`.
-[ class|='mw-content' ] {
+.mw-body-content {
 	font-size: 36px;
 
 	a {
 		text-decoration: underline;
-		color: @colorGray2;
+		color: @color-print;
 	}
 
 	blockquote {
-		color: @colorGray5;
+		color: @color-print-subtle;
 		padding: 5px 39px;
 		font-style: italic;
 	}
 
-	.section-heading {
+	.mw-heading,
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
 		border-bottom: 0;
 		padding-bottom: 0;
 		margin-bottom: 16px;
 	}
 
+	.mw-heading2,
 	h2 {
 		font-size: 48px;
 	}
 
+	.mw-heading3,
 	h3 {
 		font-size: 40px;
 		margin-bottom: 13px;
 	}
 
-	h4, h5, h6 {
+	.mw-heading4,
+	.mw-heading5,
+	.mw-heading6,
+	h4,
+	h5,
+	h6 {
 		font-size: 36px;
 		margin-bottom: 12px;
 	}

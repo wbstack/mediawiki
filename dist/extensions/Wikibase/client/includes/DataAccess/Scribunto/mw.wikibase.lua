@@ -72,6 +72,7 @@ local statementCache = initCache( 50 )
 function wikibase.setupInterface( settings )
 	local php = mw_interface
 	mw_interface = nil
+	local counter = 0
 
 	-- Caching variable for the entity id string belonging to the current page (nil if page is not linked to an entity)
 	local pageEntityId = false
@@ -115,9 +116,16 @@ function wikibase.setupInterface( settings )
 	end
 
 	local function incrementStatsKey( key )
-		if math.random() <= settings.trackLuaFunctionCallsSampleRate then
+		-- Per T360891#9664129: We only take a sample here, thus only every nth function call actually gets tracked.
+		-- The offset we use here is randomly generated in PHP and injected.
+		local counterWithOffset = counter + settings.trackLuaFunctionCallsCounterOffset
+		local divisor = math.ceil( 1 / settings.trackLuaFunctionCallsSampleRate - 0.5 )
+
+		if counterWithOffset % divisor == 0 then
 			php.incrementStatsKey( key )
 		end
+
+		counter = counter + 1
 	end
 
 	-- Get the entity id for the current page. Cached.
@@ -285,6 +293,19 @@ function wikibase.setupInterface( settings )
 		return php.getLabelByLanguage( id, languageCode )
 	end
 
+	-- Get the description in languageCode for the given entity id.
+	--
+	-- @param {string} id
+	-- @param {string} languageCode
+	function wikibase.getDescriptionByLang( id, languageCode )
+		incrementStatsKey( 'wikibase.client.scribunto.wikibase.getDescriptionByLang.call' )
+
+		checkType( 'getDescriptionByLang', 1, id, 'string' )
+		checkType( 'getDescriptionByLang', 2, languageCode, 'string' )
+
+		return php.getDescriptionByLanguage( id, languageCode )
+	end
+
 	-- Get the description, description language for the given entity id, if specified,
 	-- or of the connected entity, if exists.
 	--
@@ -356,6 +377,27 @@ function wikibase.setupInterface( settings )
 		end
 
 		return php.entityExists( entityId )
+	end
+
+	-- Return a list of badges from an item for a certain site (or the local wiki).
+	--
+	-- @param {string} itemId
+	-- @param {string} [globalSiteId]
+	function wikibase.getBadges( itemId, globalSiteId )
+		incrementStatsKey( 'wikibase.client.scribunto.wikibase.getBadges.call' )
+
+		checkType( 'getBadges', 1, itemId, 'string' )
+		checkTypeMulti( 'getBadges', 2, globalSiteId, { 'string', 'nil' } )
+
+		if itemId ~= wikibase.getEntityIdForCurrentPage() then
+			if not settings.allowArbitraryDataAccess then
+				error( 'Access to arbitrary entities has been disabled.', 2 )
+			end
+			-- Currently the whole entity needs to be loaded (PHP side), thus making this expensive.
+			php.incrementExpensiveFunctionCount()
+		end
+
+		return php.getBadges( itemId, globalSiteId )
 	end
 
 	-- Render a Snak value from its serialization as wikitext escaped plain text.

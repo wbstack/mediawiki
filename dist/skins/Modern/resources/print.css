@@ -14,8 +14,8 @@ a,
 a.external,
 a.new,
 a.stub {
-	color: inherit !important; /* stylelint-disable-line declaration-no-important */
-	text-decoration: inherit !important; /* stylelint-disable-line declaration-no-important */
+	color: inherit !important;
+	text-decoration: inherit !important;
 }
 
 pre,

@@ -23,14 +23,14 @@
 			"Sakretsu",
 			"Sannita",
 			"Titore",
-			"Una giornata uggiosa '94"
+			"Una giornata uggiosa '94",
+			"Valepert"
 		]
 	},
 	"wikibase-client-desc": "Client per l'estensione Wikibase",
 	"tooltip-t-wikibase": "Collegamento all'elemento connesso dell'archivio dati",
 	"wikibase-after-page-move": "Verifica che [$1 l'elemento {{WBREPONAME}} associato] sia stato aggiornato automaticamente per mantenere i collegamenti linguistici sulla pagina.",
 	"wikibase-after-page-delete": "I collegamenti a questa pagina dovrebbero essere stati rimossi [$1 dall'elemento {{WBREPONAME}} associato]. Ti chiediamo di verificare che ciò sia avvenuto.",
-	"wikibase-after-page-delete-queued": "L'[$1 elemento {{WBREPONAME}}] associato con questa pagina sarà aggiornato automaticamente. Nota che questo potrebbe non accadere istantaneamente.",
 	"wikibase-comment-add": "Un elemento di {{WBREPONAME}} è stato creato.",
 	"wikibase-comment-remove": "L'elemento di {{WBREPONAME}} associato è stato cancellato. I collegamenti interlinguistici sono stati rimossi.",
 	"wikibase-comment-linked": "Un elemento di {{WBREPONAME}} è stato collegato a questa pagina.",
@@ -114,6 +114,8 @@
 	"wikibase-sitelinks-link-columnheading": "Pagina collegata",
 	"echo-category-title-wikibase-action": "{{PLURAL:$1|Connessione|Connessioni}} con {{WBREPONAME}}",
 	"echo-pref-tooltip-wikibase-action": "Avvisami quando qualcuno connette una pagina che {{GENDER:|ho creato}} a un elemento {{WBREPONAME}}.",
+	"exceeded-entity-limit-category": "Pagine con accesso a troppe entità {{WBREPONAME}}",
+	"exceeded-entity-limit-category-desc": "Questa categoria elenca le pagine che accedono a troppe entità {{WBREPONAME}}.",
 	"notification-header-page-connection": "La pagina <strong>$3</strong> è {{GENDER:$2|stata connessa}} {{PLURAL:$4|-1=a un elemento {{WBREPONAME}}|all'elemento {{WBREPONAME}} $4}}, dove i dati rilevanti sull'argomento possono essere raccolti.",
 	"notification-bundle-header-page-connection": "<strong>$3</strong> e {{PLURAL:$4|un'altra pagina|altre $4 pagine|100=99+ altre pagine}} sono {{GENDER:$2|state connesse}} a elementi {{WBREPONAME}}, dove possono essere raccolti i dati rilevanti agli argomenti.",
 	"notification-link-text-view-item": "{{GENDER:$1|Vedi}} elemento",

@@ -20,6 +20,10 @@
  * @file
  */
 
+namespace MediaWiki\Json;
+
+use MediaWiki\Status\Status;
+
 /**
  * JSON formatter wrapper class
  */
@@ -294,3 +298,5 @@ class FormatJson {
 		return $buffer . substr( $str, $mark, $maxLen - $mark );
 	}
 }
+/** @deprecated class alias since 1.43 */
+class_alias( FormatJson::class, 'FormatJson' );

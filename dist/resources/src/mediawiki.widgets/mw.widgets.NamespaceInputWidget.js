@@ -7,23 +7,24 @@
 ( function () {
 
 	/**
-	 * Namespace input widget. Displays a dropdown box with the choice of available namespaces.
+	 * @classdesc Displays a dropdown box with the choice of available namespaces.
 	 *
 	 * @class
 	 * @extends OO.ui.DropdownInputWidget
 	 *
 	 * @constructor
+	 * @description Create an instance of `mw.widgets.NamespaceInputWidget`.
 	 * @param {Object} [config] Configuration options
-	 * @cfg {string|null} [includeAllValue] Value for "all namespaces" option, if any
-	 * @cfg {boolean} [userLang=false] Display namespaces in user language
-	 * @cfg {number[]} [exclude] List of namespace numbers to exclude from the selector
+	 * @param {string|null} [config.includeAllValue] Value for "all namespaces" option, if any
+	 * @param {boolean} [config.userLang=false] Display namespaces in user language
+	 * @param {number[]} [config.exclude] List of namespace numbers to exclude from the selector
 	 */
 	mw.widgets.NamespaceInputWidget = function MwWidgetsNamespaceInputWidget( config ) {
 		// Configuration initialization
-		config = $.extend( {}, config, { options: this.constructor.static.getNamespaceDropdownOptions( config ) } );
+		config = Object.assign( {}, config, { options: this.constructor.static.getNamespaceDropdownOptions( config ) } );
 
 		// Parent constructor
-		mw.widgets.NamespaceInputWidget.parent.call( this, config );
+		mw.widgets.NamespaceInputWidget.super.call( this, config );
 
 		// Initialization
 		this.$element.addClass( 'mw-widget-namespaceInputWidget' );
@@ -36,22 +37,29 @@
 	/* Static methods */
 
 	/**
+	 * @typedef {Object} mw.widgets.NamespaceInputWidget~DropdownOptions
+	 * @property {any} data
+	 * @property {string} label
+	 */
+
+	/**
 	 * Get a list of namespace options, sorted by ID.
 	 *
+	 * @method getNamespaceDropdownOptions
 	 * @param {Object} [config] Configuration options
-	 * @return {Object[]} Dropdown options
+	 * @return {DropdownOptions[]} Dropdown options
+	 * @memberof mw.widgets.NamespaceInputWidget
 	 */
 	mw.widgets.NamespaceInputWidget.static.getNamespaceDropdownOptions = function ( config ) {
-		var options,
-			exclude = config.exclude || [],
+		const exclude = config.exclude || [],
 			mainNamespace = mw.config.get( 'wgNamespaceIds' )[ '' ];
 
-		var namespaces = config.userLang ?
+		const namespaces = config.userLang ?
 			require( './data.json' ).formattedNamespaces :
 			mw.config.get( 'wgFormattedNamespaces' );
 
 		// eslint-disable-next-line no-jquery/no-map-util
-		options = $.map( namespaces, function ( name, ns ) {
+		const options = $.map( namespaces, ( name, ns ) => {
 			if ( ns < mainNamespace || exclude.indexOf( Number( ns ) ) !== -1 ) {
 				return null; // skip
 			}
@@ -60,10 +68,10 @@
 				name = mw.msg( 'blanknamespace' );
 			}
 			return { data: ns, label: name };
-		} ).sort( function ( a, b ) {
+		} ).sort(
 			// wgFormattedNamespaces is an object, and so technically doesn't have to be ordered
-			return a.data - b.data;
-		} );
+			( a, b ) => a.data - b.data
+		);
 
 		if ( config.includeAllValue !== null && config.includeAllValue !== undefined ) {
 			options.unshift( {

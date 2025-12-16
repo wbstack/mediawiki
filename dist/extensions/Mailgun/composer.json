@@ -7,10 +7,10 @@
 		"nyholm/psr7": "^1.4"
 	},
 	"require-dev": {
-		"mediawiki/mediawiki-codesniffer": "39.0.0",
-		"mediawiki/minus-x": "1.1.1",
+		"mediawiki/mediawiki-codesniffer": "45.0.0",
+		"mediawiki/minus-x": "1.1.3",
 		"php-parallel-lint/php-console-highlighter": "1.0.0",
-		"php-parallel-lint/php-parallel-lint": "1.3.2"
+		"php-parallel-lint/php-parallel-lint": "1.4.0"
 	},
 	"scripts": {
 		"test": [
@@ -25,5 +25,10 @@
 		"phpcs": "phpcs -sp --cache"
 	},
 	"prepend-autoloader": false,
-	"optimize-autoloader": true
+	"optimize-autoloader": true,
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	}
 }

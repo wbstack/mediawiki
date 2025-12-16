@@ -7,6 +7,7 @@ use CirrusSearch\ElasticaErrorHandler;
 use CirrusSearch\Maintenance\Validators\MappingValidator;
 use CirrusSearch\SearchConfig;
 use CirrusSearch\Util;
+use MediaWiki\Config\ConfigException;
 
 /**
  * Update the search configuration on the search backend.
@@ -144,6 +145,9 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	 */
 	private $safeToOptimizeAnalysisConfig;
 
+	/** @var bool State flag indicating if we should attempt deleting the index we created */
+	private $canCleanupCreatedIndex = false;
+
 	public function __construct() {
 		parent::__construct();
 		$this->addDescription( "Update the configuration or contents of one search index. This always " .
@@ -189,17 +193,11 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 		$maintenance->addOption( 'fieldsToDelete', 'List of of comma separated field names to delete ' .
 			'while reindexing documents (defaults to empty)', false, true );
 		$maintenance->addOption( 'justMapping', 'Just try to update the mapping.' );
+		$maintenance->addOption( 'ignoreIndexChanged', 'Skip checking if the new index is different ' .
+			'from the old index.', false, false );
 	}
 
 	public function execute() {
-		global $wgLanguageCode,
-			$wgCirrusSearchPhraseSuggestUseText,
-			$wgCirrusSearchPrefixSearchStartsWithAnyWord,
-			$wgCirrusSearchBannedPlugins,
-			$wgCirrusSearchOptimizeIndexForExperimentalHighlighter,
-			$wgCirrusSearchRefreshInterval,
-			$wgCirrusSearchMasterTimeout;
-
 		$this->disablePoolCountersAndLogging();
 
 		$utils = new ConfigUtils( $this->getConnection()->getClient(), $this );
@@ -214,13 +212,14 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 			$this->getOption( 'reindexAcceptableCountDeviation', '5%' ) );
 		$this->reindexChunkSize = $this->getOption( 'reindexChunkSize', 100 );
 		$this->printDebugCheckConfig = $this->getOption( 'debugCheckConfig', false );
-		$this->langCode = $wgLanguageCode;
-		$this->prefixSearchStartsWithAny = $wgCirrusSearchPrefixSearchStartsWithAnyWord;
-		$this->phraseSuggestUseText = $wgCirrusSearchPhraseSuggestUseText;
-		$this->bannedPlugins = $wgCirrusSearchBannedPlugins;
-		$this->optimizeIndexForExperimentalHighlighter = $wgCirrusSearchOptimizeIndexForExperimentalHighlighter;
-		$this->masterTimeout = $wgCirrusSearchMasterTimeout;
-		$this->refreshInterval = $wgCirrusSearchRefreshInterval;
+		$this->langCode = $this->getSearchConfig()->get( "LanguageCode" );
+		$this->prefixSearchStartsWithAny = $this->getSearchConfig()->get( "CirrusSearchPrefixSearchStartsWithAnyWord" );
+		$this->phraseSuggestUseText = $this->getSearchConfig()->get( "CirrusSearchPhraseSuggestUseText" );
+		$this->bannedPlugins = $this->getSearchConfig()->get( "CirrusSearchBannedPlugins" );
+		$this->optimizeIndexForExperimentalHighlighter = $this->getSearchConfig()
+			->get( "CirrusSearchOptimizeIndexForExperimentalHighlighter" );
+		$this->masterTimeout = $this->getSearchConfig()->get( "CirrusSearchMasterTimeout" );
+		$this->refreshInterval = $this->getSearchConfig()->get( "CirrusSearchRefreshInterval" );
 
 		if ( $this->indexSuffix === Connection::ARCHIVE_INDEX_SUFFIX ) {
 			if ( !$this->getSearchConfig()->get( 'CirrusSearchEnableArchive' ) ) {
@@ -235,15 +234,15 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 
 		$this->initMappingConfigBuilder();
 
-		try{
+		try {
 			$indexSuffixes = $this->getConnection()->getAllIndexSuffixes( null );
 			if ( !in_array( $this->indexSuffix, $indexSuffixes ) ) {
 				$this->fatalError( 'indexSuffix option must be one of ' .
 					implode( ', ', $indexSuffixes ) );
 			}
 
-			$utils->checkElasticsearchVersion();
-			$this->availablePlugins = $utils->scanAvailablePlugins( $this->bannedPlugins );
+			$this->unwrap( $utils->checkElasticsearchVersion() );
+			$this->availablePlugins = $this->unwrap( $utils->scanAvailablePlugins( $this->bannedPlugins ) );
 
 			if ( $this->getOption( 'justAllocation', false ) ) {
 				$this->validateShardAllocation();
@@ -256,12 +255,32 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 			}
 
 			$this->initAnalysisConfig();
-			$this->indexIdentifier = $utils->pickIndexIdentifierFromOption(
-				$this->getOption( 'indexIdentifier', 'current' ), $this->getIndexAliasName() );
+			$this->indexIdentifier = $this->unwrap( $utils->pickIndexIdentifierFromOption(
+				$this->getOption( 'indexIdentifier', 'current' ), $this->getIndexAliasName() ) );
+			// At this point everything is initialized and we start to mutate the cluster
+			// This creates the index if needed, such as when --indexIdentifier=now is provided.
 			$this->validateIndex();
+			// Compares analyzers against expected. If the index is newly
+			// created this should do nothing. If the index was not created
+			// this may fail the build if it needs to be recreated.
 			$this->validateAnalyzers();
+			// Compares mapping against expected. Same behavior as analyzers,
+			// but some mapping changes can be applied to a live index.
 			$this->validateMapping();
+			// If we have a replacement index, check that it is actually different
+			// from the live index in some way. If they are the same then do nothing.
+			if ( !$this->validateIndexHasChanged() ) {
+				$this->cleanupCreatedIndex( "Cleaning up unnecessary index" );
+				// Orchestration needs some way to know that we are refusing to
+				// create the index. Simplest way is to signal with an arbitrary
+				// exit code.
+				$this->fatalError( "Use --ignoreIndexChanged to do it anyways", 10 );
+			}
+			// Makes sure the index is part of the production aliases. This will
+			// reindex into the new index if necessary, promote the new index,
+			// and delete the old index.
 			$this->validateAlias();
+			// Flag the index version information in metadata
 			$this->updateVersions();
 		} catch ( \Elastica\Exception\Connection\HttpException $e ) {
 			$message = $e->getMessage();
@@ -306,9 +325,9 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 
 	private function validateIndex() {
 		if ( $this->startOver ) {
-			$this->createIndex( true, "Blowing away index to start over..." );
+			$this->createIndex( true, "Blowing away index to start over...\n" );
 		} elseif ( !$this->getIndex()->exists() ) {
-			$this->createIndex( false, "Creating index..." );
+			$this->createIndex( false, "Creating index...\n" );
 		}
 
 		$this->validateIndexSettings();
@@ -319,32 +338,29 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	 * @param string $msg
 	 */
 	private function createIndex( $rebuild, $msg ) {
-		global $wgCirrusSearchAllFields, $wgCirrusSearchExtraIndexSettings;
-
+		$this->canCleanupCreatedIndex = true;
+		$index = $this->getIndex();
 		$indexCreator = new \CirrusSearch\Maintenance\IndexCreator(
-			$this->getIndex(),
+			$index,
+			new ConfigUtils( $index->getClient(), $this ),
 			$this->analysisConfig,
-			$this->similarityConfig
+			$this->mapping,
+			$this->similarityConfig,
 		);
 
 		$this->outputIndented( $msg );
 
-		$status = $indexCreator->createIndex(
+		$this->unwrap( $indexCreator->createIndex(
 			$rebuild,
 			$this->getMaxShardsPerNode(),
 			$this->getShardCount(),
 			$this->getReplicaCount(),
 			$this->refreshInterval,
 			$this->getMergeSettings(),
-			$wgCirrusSearchAllFields['build'],
-			$wgCirrusSearchExtraIndexSettings
-		);
+			$this->getSearchConfig()->get( "CirrusSearchExtraIndexSettings" )
+		) );
 
-		if ( !$status->isOK() ) {
-			$this->fatalError( $status->getMessage()->text() );
-		} else {
-			$this->output( "ok\n" );
-		}
+		$this->outputIndented( "Index created.\n" );
 	}
 
 	/**
@@ -365,10 +381,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	private function validateIndexSettings() {
 		$validators = $this->getIndexSettingsValidators();
 		foreach ( $validators as $validator ) {
-			$status = $validator->validate();
-			if ( !$status->isOK() ) {
-				$this->fatalError( $status->getMessage()->text() );
-			}
+			$this->unwrap( $validator->validate() );
 		}
 	}
 
@@ -376,10 +389,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 		$validator = new \CirrusSearch\Maintenance\Validators\AnalyzersValidator(
 			$this->getIndex(), $this->analysisConfig, $this );
 		$validator->printDebugCheckConfig( $this->printDebugCheckConfig );
-		$status = $validator->validate();
-		if ( !$status->isOK() ) {
-			$this->fatalError( $status->getMessage()->text() );
-		}
+		$this->unwrap( $validator->validate() );
 	}
 
 	private function validateMapping() {
@@ -392,10 +402,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 			$this
 		);
 		$validator->printDebugCheckConfig( $this->printDebugCheckConfig );
-		$status = $validator->validate();
-		if ( !$status->isOK() ) {
-			$this->fatalError( $status->getMessage()->text() );
-		}
+		$this->unwrap( $validator->validate() );
 	}
 
 	private function validateAlias() {
@@ -403,6 +410,9 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 		// Since validate the specific alias first as that can cause reindexing
 		// and we want the all index to stay with the old index during reindexing
 		$this->validateSpecificAlias();
+		// At this point the index is live and under no circumstances should it be
+		// automatically deleted.
+		$this->canCleanupCreatedIndex = false;
 
 		if ( $this->indexSuffix !== Connection::ARCHIVE_INDEX_SUFFIX ) {
 			// Do not add the archive index to the global alias
@@ -416,6 +426,8 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	private function validateSpecificAlias() {
 		$connection = $this->getConnection();
 
+		$fieldsToCleanup = array_filter( explode( ',', $this->getOption( 'fieldsToDelete', '' ) ) );
+		$fieldsToCleanup = array_merge( $fieldsToCleanup, $this->getSearchConfig()->get( "CirrusSearchIndexFieldsToCleanup" ) );
 		$reindexer = new Reindexer(
 			$this->getSearchConfig(),
 			$connection,
@@ -423,7 +435,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 			$this->getIndex(),
 			$this->getOldIndex(),
 			$this,
-			array_filter( explode( ',', $this->getOption( 'fieldsToDelete', '' ) ) )
+			$fieldsToCleanup
 		);
 
 		$validator = new \CirrusSearch\Maintenance\Validators\SpecificAliasValidator(
@@ -441,10 +453,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 			$this->reindexAndRemoveOk,
 			$this
 		);
-		$status = $validator->validate();
-		if ( !$status->isOK() ) {
-			$this->fatalError( $status->getMessage()->text() );
-		}
+		$this->unwrap( $validator->validate() );
 	}
 
 	public function validateAllAlias() {
@@ -456,27 +465,32 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 			$this->getIndexAliasName(),
 			$this
 		);
-		$status = $validator->validate();
-		if ( !$status->isOK() ) {
-			$this->fatalError( $status->getMessage()->text() );
+		$this->unwrap( $validator->validate() );
+	}
+
+	public function validateIndexHasChanged(): bool {
+		if ( $this->getOption( 'ignoreIndexChanged' ) ) {
+			return true;
 		}
+		$validator = new \CirrusSearch\Maintenance\Validators\IndexHasChangedValidator(
+			$this->getConnection()->getClient(),
+			$this->getOldIndex(),
+			$this->getIndex(),
+			$this,
+		);
+		return $this->unwrap( $validator->validate() );
 	}
 
 	/**
 	 * @return \CirrusSearch\Maintenance\Validators\Validator
 	 */
 	private function getShardAllocationValidator() {
-		global $wgCirrusSearchIndexAllocation;
 		return new \CirrusSearch\Maintenance\Validators\ShardAllocationValidator(
-			$this->getIndex(), $wgCirrusSearchIndexAllocation, $this );
+			$this->getIndex(), $this->getSearchConfig()->get( "CirrusSearchIndexAllocation" ), $this );
 	}
 
 	protected function validateShardAllocation() {
-		$validator = $this->getShardAllocationValidator();
-		$status = $validator->validate();
-		if ( !$status->isOK() ) {
-			$this->fatalError( $status->getMessage()->text() );
-		}
+		$this->unwrap( $this->getShardAllocationValidator()->validate() );
 	}
 
 	/**
@@ -494,7 +508,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	}
 
 	/**
-	 * @throws \ConfigException
+	 * @throws ConfigException
 	 */
 	protected function initMappingConfigBuilder() {
 		$configFlags = 0;
@@ -557,12 +571,12 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	 * @return array
 	 */
 	private function getMergeSettings() {
-		global $wgCirrusSearchMergeSettings;
+		$mergeSettings = $this->getSearchConfig()->get( "CirrusSearchMergeSettings" );
 
-		return $wgCirrusSearchMergeSettings[$this->indexSuffix]
+		return $mergeSettings[$this->indexSuffix]
 			// If there aren't configured merge settings for this index type
 			// default to the content type.
-			?? $wgCirrusSearchMergeSettings['content']
+			?? $mergeSettings['content']
 			// It's also fine to not specify merge settings.
 			?? [];
 	}
@@ -595,10 +609,45 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 		$this->analysisConfig = $analysisConfigBuilder->buildConfig();
 		if ( $this->safeToOptimizeAnalysisConfig ) {
 			$filter = new AnalysisFilter();
-			list( $this->analysisConfig, $this->mapping ) = $filter
-				->filterAnalysis( $this->analysisConfig, $this->mapping );
+			$deduplicate = $this->getSearchConfig()->get( 'CirrusSearchDeduplicateAnalysis' );
+			// A bit adhoc, this is the list of analyzers that should not be renamed, because
+			// they are referenced at query time.
+			$protected = [ 'token_reverse' ];
+			[ $this->analysisConfig, $this->mapping ] = $filter
+				->filterAnalysis( $this->analysisConfig, $this->mapping, $deduplicate, $protected );
 		}
 		$this->similarityConfig = $analysisConfigBuilder->buildSimilarityConfig();
+	}
+
+	private function cleanupCreatedIndex( $msg ) {
+		if ( $this->canCleanupCreatedIndex && $this->getIndex()->exists() ) {
+			$utils = new ConfigUtils( $this->getConnection()->getClient(), $this );
+			$indexName = $this->getSpecificIndexName();
+			$status = $utils->isIndexLive( $indexName );
+			if ( !$status->isGood() ) {
+				$this->output( (string)$status );
+			} elseif ( $status->getValue() === false ) {
+				$this->output( "$msg $indexName\n" );
+				$this->getIndex()->delete();
+			}
+		}
+	}
+
+	/**
+	 * Output a message and terminate the current script.
+	 *
+	 * @param string $msg Error Message
+	 * @param int $exitCode PHP exit status. Should be in range 1-254
+	 * @return never
+	 */
+	protected function fatalError( $msg, $exitCode = 1 ) {
+		try {
+			$this->cleanupCreatedIndex( "Cleaning up incomplete index" );
+		} catch ( \Elastica\Exception\ExceptionInterface $e ) {
+			$this->output( "Exception thrown while cleaning up created index: $e\n" );
+		} finally {
+			parent::fatalError( $msg, $exitCode );
+		}
 	}
 }
 

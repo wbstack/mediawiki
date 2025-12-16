@@ -2,32 +2,33 @@
 
 namespace MediaWiki\Extension\TemplateSandbox;
 
-use Content;
 use InvalidArgumentException;
+use MediaWiki\Content\Content;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Output\OutputPage;
 use MediaWiki\Page\PageReference;
+use MediaWiki\Parser\ParserOptions;
 use MediaWiki\Revision\MutableRevisionRecord;
 use MediaWiki\Revision\SlotRecord;
-use OutputPage;
-use ParserOptions;
-use RequestContext;
-use Title;
+use MediaWiki\Title\Title;
 use Wikimedia\ScopedCallback;
 
 /**
  * Business logic class for TemplateSandbox
  */
 class Logic {
+	/** @var int */
 	private static $counter = 0;
 
-	/** Prefixes to search for sandbox templates */
+	/** @var string[] Prefixes to search for sandbox templates */
 	private $prefixes = [];
 
-	/** Title to replace with $content */
+	/** @var Title|null Title to replace with $content */
 	private $title = null;
 
-	/** Content to replace $title */
+	/** @var Content|null Content to replace $title */
 	private $content = null;
 
 	/**
@@ -51,12 +52,10 @@ class Logic {
 	 * @return ScopedCallback to uninstall
 	 */
 	public function setupForParse( ParserOptions $popt ) {
-		global $wgHooks;
-
-		$id = 'TemplateSandbox.' . ++self::$counter;
+		$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
 
 		$inHook = false;
-		$wgHooks['TitleExists'][$id] = function ( $title, &$exists ) use ( &$inHook ) {
+		$hookReset = $hookContainer->scopedRegister( 'TitleExists', function ( $title, &$exists ) use ( &$inHook ) {
 			if ( $exists || $inHook ) {
 				return;
 			}
@@ -78,7 +77,7 @@ class Logic {
 			} finally {
 				$inHook = false;
 			}
-		};
+		} );
 
 		$oldCurrentRevisionRecordCallback = $popt->setCurrentRevisionRecordCallback(
 			function ( $title, $parser = false ) use ( &$oldCurrentRevisionRecordCallback ) {
@@ -107,9 +106,8 @@ class Logic {
 
 		MediaWikiServices::getInstance()->getLinkCache()->clear();
 
-		return new ScopedCallback( static function () use ( $id ) {
-			global $wgHooks;
-			unset( $wgHooks['TitleExists'][$id] );
+		return new ScopedCallback( static function () use ( $hookReset ) {
+			ScopedCallback::consume( $hookReset );
 			MediaWikiServices::getInstance()->getLinkCache()->clear();
 		} );
 	}

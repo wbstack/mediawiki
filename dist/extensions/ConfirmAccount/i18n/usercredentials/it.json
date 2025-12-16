@@ -3,6 +3,7 @@
 		"authors": [
 			"Beta16",
 			"Darth Kule",
+			"Dream Indigo",
 			"Melos",
 			"Pietrodn",
 			"Stefano-c"
@@ -27,5 +28,5 @@
 	"usercredentials-xff": "X-Forwarded-For originale:",
 	"usercredentials-agent": "User-Agent originale:",
 	"usercredentials-member": "Diritti:",
-	"usercredentials-badid": "Nessuna credenziale trovata per questo utente.\nControlla che il nome sia scritto correttamente."
+	"usercredentials-badid": "Nessuna credenziale trovata per quest'utente.\nControlla che il nome sia scritto correttamente."
 }

@@ -35,16 +35,16 @@ class MultiClusterAssignment implements ClusterAssignment {
 	private function evalGroupStrategy( array $groupConfig ) {
 		// Determine which group this wiki belongs to
 		switch ( $groupConfig['type'] ) {
-		case 'constant':
-			return $groupConfig['group'];
-		case 'roundrobin':
-			$wikiId = $this->config->getWikiId();
-			$mod = count( $groupConfig['groups'] );
-			Assert::precondition( $mod > 0, "At least one replica group must be defined for roundrobin" );
-			$idx = crc32( $wikiId ) % $mod;
-			return $groupConfig['groups'][$idx];
-		default:
-			throw new \RuntimeException( "Unknown replica group type: {$groupConfig['type']}" );
+			case 'constant':
+				return $groupConfig['group'];
+			case 'roundrobin':
+				$wikiId = $this->config->getWikiId();
+				$mod = count( $groupConfig['groups'] );
+				Assert::precondition( $mod > 0, "At least one replica group must be defined for roundrobin" );
+				$idx = crc32( $wikiId ) % $mod;
+				return $groupConfig['groups'][$idx];
+			default:
+				throw new \RuntimeException( "Unknown replica group type: {$groupConfig['type']}" );
 		}
 	}
 
@@ -75,14 +75,24 @@ class MultiClusterAssignment implements ClusterAssignment {
 	}
 
 	/**
+	 * @param string $updateGroup UpdateGroup::* constant
 	 * @return string[] List of CirrusSearch cluster names to write to.
 	 */
-	public function getWritableClusters(): array {
+	public function getWritableClusters( string $updateGroup ): array {
 		$clusters = $this->config->get( 'CirrusSearchWriteClusters' );
-		if ( $clusters !== null ) {
+		if ( $clusters === null ) {
+			// No explicitly configured set of write clusters. Write to all known replicas.
+			return $this->getAllKnownClusters();
+		}
+		if ( count( $clusters ) === 0 || isset( $clusters[0] ) ) {
+			// Simple list of writable clusters
 			return $clusters;
 		}
-		// No explicitly configured set of write clusters. Write to all known replicas.
+		// Writable clusters defined per update group
+		return $clusters[$updateGroup] ?? $clusters['default'];
+	}
+
+	public function getAllKnownClusters(): array {
 		if ( $this->clusters === null ) {
 			$this->clusters = $this->initClusters();
 		}
@@ -93,10 +103,24 @@ class MultiClusterAssignment implements ClusterAssignment {
 	 * Check if a cluster is configured to accept writes
 	 *
 	 * @param string $cluster
+	 * @param string $updateGroup UpdateGroup::* constant
 	 * @return bool
 	 */
-	public function canWriteToCluster( $cluster ) {
-		return in_array( $cluster, $this->getWritableClusters() );
+	public function canWriteToCluster( $cluster, $updateGroup ) {
+		return in_array( $cluster, $this->getWritableClusters( $updateGroup ) );
+	}
+
+	/**
+	 * Check if a cluster is defined
+	 *
+	 * @param string $cluster
+	 * @return bool
+	 */
+	public function hasCluster( string $cluster ): bool {
+		if ( $this->clusters === null ) {
+			$this->clusters = $this->initClusters();
+		}
+		return isset( $this->clusters[$cluster] );
 	}
 
 	/**
@@ -122,9 +146,7 @@ class MultiClusterAssignment implements ClusterAssignment {
 		if ( $this->clusters === null ) {
 			$this->clusters = $this->initClusters();
 		}
-		if ( $replica === null ) {
-			$replica = $this->config->get( 'CirrusSearchDefaultCluster' );
-		}
+		$replica ??= $this->config->get( 'CirrusSearchDefaultCluster' );
 		if ( !isset( $this->clusters[$replica] ) ) {
 			$available = implode( ',', array_keys( $this->clusters ) );
 			throw new \RuntimeException( "Missing replica <$replica>, have <$available>" );

@@ -1,0 +1,9 @@
+{
+	"root": true,
+	"extends": [
+		"../../modules/.eslintrc.json"
+	],
+	"globals": {
+		"seleniumUtils": "readonly"
+	}
+}

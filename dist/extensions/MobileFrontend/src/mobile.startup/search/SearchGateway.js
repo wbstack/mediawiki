@@ -1,10 +1,17 @@
-var
+/**
+ * Internal for use inside Minerva only. See {@link module:mobile.startup} for access.
+ *
+ * @module module:mobile.startup/search
+ */
+const
 	pageJSONParser = require( '../page/pageJSONParser' ),
 	util = require( '../util' ),
 	extendSearchParams = require( '../extendSearchParams' );
 
 /**
- * @class SearchGateway
+ * Interact with MediaWiki search API.
+ *
+ * @memberof module:mobile.startup/search
  * @uses mw.Api
  * @param {mw.Api} api
  */
@@ -32,8 +39,8 @@ SearchGateway.prototype = {
 	 * @param {string} query to search for
 	 * @return {Object}
 	 */
-	getApiData: function ( query ) {
-		var prefix = this.generator.prefix,
+	getApiData( query ) {
+		const prefix = this.generator.prefix,
 			data = extendSearchParams( 'search', {
 				generator: this.generator.name
 			} );
@@ -61,7 +68,7 @@ SearchGateway.prototype = {
 	 * @return {Object} a regular expression that can be used to search for that str
 	 * @private
 	 */
-	_createSearchRegEx: function ( str ) {
+	_createSearchRegEx( str ) {
 		// '\[' can be unescaped, but leave it balanced with '`]'
 		// eslint-disable-next-line no-useless-escape
 		str = str.replace( /[-\[\]{}()*+?.,\\^$|#\s]/g, '\\$&' );
@@ -79,8 +86,9 @@ SearchGateway.prototype = {
 	 * @return {string} safe html string with matched terms encapsulated in strong tags
 	 * @private
 	 */
-	_highlightSearchTerm: function ( label, term ) {
+	_highlightSearchTerm( label, term ) {
 		label = util.parseHTML( '<span>' ).text( label ).html();
+		term = term.trim();
 		term = util.parseHTML( '<span>' ).text( term ).html();
 
 		return label.replace( this._createSearchRegEx( term ), '<strong>$1</strong>' );
@@ -96,8 +104,8 @@ SearchGateway.prototype = {
 	 * @return {Object} data needed to create a {Page}
 	 * @private
 	 */
-	_getPage: function ( query, pageInfo ) {
-		var page = pageJSONParser.parse( pageInfo );
+	_getPage( query, pageInfo ) {
+		const page = pageJSONParser.parse( pageInfo );
 
 		// If displaytext is set in the generator result (eg. by Wikibase),
 		// use that as display title.
@@ -123,20 +131,17 @@ SearchGateway.prototype = {
 	 * @return {Array}
 	 * @private
 	 */
-	_processData: function ( query, data ) {
-		var self = this,
-			results = [];
+	_processData( query, data ) {
+		const self = this;
+
+		let results = [];
 
 		if ( data.query ) {
 
 			results = data.query.pages || {};
-			results = Object.keys( results ).map( function ( id ) {
-				return self._getPage( query, results[ id ] );
-			} );
+			results = Object.keys( results ).map( ( id ) => self._getPage( query, results[id] ) );
 			// sort in order of index
-			results.sort( function ( a, b ) {
-				return a.index - b.index;
-			} );
+			results.sort( ( a, b ) => a.index - b.index );
 		}
 
 		return results;
@@ -150,21 +155,23 @@ SearchGateway.prototype = {
 	 * @param {string} query to search for
 	 * @return {jQuery.Deferred}
 	 */
-	search: function ( query ) {
-		var xhr, request,
+	search( query ) {
+		const scriptPath = mw.config.get( 'wgMFScriptPath' ),
 			self = this;
 
 		if ( !this.isCached( query ) ) {
-			xhr = this.api.get( this.getApiData( query ) );
-			request = xhr
-				.then( function ( data, jqXHR ) {
+			const xhr = this.api.get( this.getApiData( query ), scriptPath ? {
+				url: scriptPath
+			} : undefined );
+			const request = xhr
+				.then( ( data, jqXHR ) => {
 					// resolve the Deferred object
 					return {
-						query: query,
+						query,
 						results: self._processData( query, data ),
 						searchId: jqXHR && jqXHR.getResponseHeader( 'x-search-id' )
 					};
-				}, function () {
+				}, () => {
 					// reset cached result, it maybe contains no value
 					self.searchCache[query] = undefined;
 				} );
@@ -172,7 +179,9 @@ SearchGateway.prototype = {
 			// cache the result to prevent the execution of one search query twice
 			// in one session
 			this.searchCache[query] = request.promise( {
-				abort: function () { xhr.abort(); }
+				abort() {
+					xhr.abort();
+				}
 			} );
 		}
 
@@ -187,8 +196,8 @@ SearchGateway.prototype = {
 	 * @param {string} query
 	 * @return {boolean}
 	 */
-	isCached: function ( query ) {
-		return Boolean( this.searchCache[ query ] );
+	isCached( query ) {
+		return Boolean( this.searchCache[query] );
 	}
 };
 

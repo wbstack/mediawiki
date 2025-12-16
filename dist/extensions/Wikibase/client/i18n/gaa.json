@@ -1,10 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Flixtey",
 			"Jwale2",
 			"Mybluberet",
+			"NanaYawBotar",
 			"Owula kpakpo",
 			"Zimosa"
 		]
@@ -15,6 +15,9 @@
 	"wikibase-editlinks": "Tsakemɔ tsalɔi",
 	"wikibase-editlinkstitle": "Tsakemɔ wiemɔisrɔtoi agbɛtsɔɔmɔ",
 	"wikibase-linkitem-addlinks": "Kɛ tsalɔi afata he",
+	"wikibase-linkitem-title": "Kɛ etsa baafai lɛ",
+	"wikibase-linkitem-linkpage": "Kɛ tsa baafa nɛ",
+	"wikibase-linkitem-selectlink": "Ofainɛ halamɔ saiti kɛ baafa ni osumɔɔ ni okɛ baafa nɛɛ abɔ he.",
 	"wikibase-linkitem-input-site": "Wiemɔ:",
 	"wikibase-linkitem-input-page": "Baafa:",
 	"wikibase-rc-hide-wikidata-hide": "Kɛto",

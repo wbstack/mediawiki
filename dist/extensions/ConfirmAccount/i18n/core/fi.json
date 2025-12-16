@@ -8,6 +8,7 @@
 			"Jaakonam",
 			"Mobe",
 			"Nike",
+			"Samoasambia",
 			"Str4nd",
 			"Taleman",
 			"Varusmies"
@@ -17,6 +18,7 @@
 	"requestaccount-loginnotice": "Saadaksesi käyttäjätunnuksen on tehtävä '''[[Special:RequestAccount|käyttäjätunnuspyyntö]]'''.",
 	"action-confirmaccount": "tarkastaa ja hyväksyä tunnuksia",
 	"right-confirmaccount": "Nähdä [[Special:ConfirmAccounts|listan pyydetyistä tunnuksista]]",
+	"right-confirmaccount-notify": "Saa sähköposti-ilmoituksia uusista hyväksytyistä tunnuspyynnöistä",
 	"action-requestips": "nähdä hakijan IP-osoitteita käyttäjätunnuksia käsitellessä",
 	"right-requestips": "Nähdä hakijan IP-osoitteet käyttäjätunnuksia käsiteltäessä",
 	"action-lookupcredentials": "nähdä käyttäjän kirjautumistietoja",

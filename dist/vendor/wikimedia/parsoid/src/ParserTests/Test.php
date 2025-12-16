@@ -73,31 +73,31 @@ class Test extends Item {
 	/** @var bool */
 	public $duplicateChange = false;
 
-	/** @var string */
+	/** @var ?string */
 	public $seed = null;
 
-	/** @var string */
+	/** @var ?string */
 	public $resultWT = null;
 
-	/** @var bool */
+	/** @var ?bool */
 	public $wt2wtPassed = null;
 
-	/** @var string */
+	/** @var ?string */
 	public $wt2wtResult = null;
 
-	/** @var string */
+	/** @var ?string */
 	public $selser = null;
 
-	/** @var string */
+	/** @var ?string */
 	public $changedHTMLStr = null;
 
-	/** @var string */
+	/** @var ?string */
 	public $cachedBODYstr = null;
 
-	/** @var string */
+	/** @var ?string */
 	public $cachedWTstr = null;
 
-	/** @var string */
+	/** @var ?string */
 	public $cachedNormalizedHTML = null;
 
 	/** @var array */
@@ -219,9 +219,6 @@ class Test extends Item {
 		return true; // Trivial match because of a bad test filter
 	}
 
-	/**
-	 * @return string
-	 */
 	public function pageName(): string {
 		if ( !$this->pageName ) {
 			$this->pageName = $this->options['title'] ?? 'Parser test';
@@ -363,7 +360,7 @@ class Test extends Item {
 				'@phan-var Element $node'; // @var Element $node
 				DOMCompat::setInnerHTML( $node, $h );
 			},
-			'remove' => static function ( Node $node, string $optSelector = null ) {
+			'remove' => static function ( Node $node, ?string $optSelector = null ) {
 				// jquery lets us specify an optional selector to further
 				// restrict the removed elements.
 				// text nodes don't have the "querySelectorAll" method, so
@@ -656,8 +653,7 @@ class Test extends Item {
 					) &&
 					// Deleting these wrappers is tantamount to removing the
 					// references-tag encapsulation wrappers, which results in errors.
-					!preg_match( '/\bmw-references-wrap\b/', $node->getAttribute( 'class' ) ?? ''
-					)
+					!DOMUtils::hasClass( $node, 'mw-references-wrap' )
 				);
 		};
 
@@ -886,13 +882,17 @@ class Test extends Item {
 			$haveIntegratedHTML ||
 			isset( $this->sections['html/parsoid+langconv'] ) ||
 			( isset( $opts['parsoid'] ) && !isset( $opts['parsoid']['normalizePhp'] ) );
+		$externalLinkTarget = ( $opts['externallinktarget'] ?? false ) ||
+			isset( $this->config['wgExternalLinkTarget'] ) ||
+			isset( $this->config['wgNoFollowLinks'] ) ||
+			isset( $this->config['wgNoFollowDomainExceptions'] );
 		$normOpts = [
 			'parsoidOnly' => $parsoidOnly,
 			'preserveIEW' => isset( $opts['parsoid']['preserveIEW'] ),
-			'check-referrer' => $opts['check-referrer'] ?? false,
+			'externallinktarget' => $externalLinkTarget,
 		];
 
-		if ( !$normExpected ) {
+		if ( $normExpected === null ) {
 			if ( $haveIntegratedHTML ) {
 				$parsoidHTML = $this->sections['html/parsoid+integrated'];
 			} elseif ( $haveStandaloneHTML ) {
@@ -909,6 +909,18 @@ class Test extends Item {
 		}
 
 		return [ TestUtils::normalizeOut( $actual, $normOpts ), $normExpected ];
+	}
+
+	/**
+	 * Normalize "known failure" output.
+	 *
+	 * This is an extremely light normalization, since the point of the
+	 * known failure file is to catch changes in output, even if we don't
+	 * know what "correct" is.  But we do remove 'about' numbering, since
+	 * that is not guaranteed consistent from run to run.
+	 */
+	public function normalizeKnownFailure( string $out ): string {
+		return TestUtils::normalizeAbout( $out );
 	}
 
 	/**

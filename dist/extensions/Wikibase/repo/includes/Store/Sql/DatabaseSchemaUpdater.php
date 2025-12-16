@@ -4,9 +4,9 @@ declare( strict_types=1 );
 
 namespace Wikibase\Repo\Store\Sql;
 
-use DatabaseUpdater;
+use InvalidArgumentException;
+use MediaWiki\Installer\DatabaseUpdater;
 use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
-use MWException;
 use Onoi\MessageReporter\ObservableMessageReporter;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Services\Lookup\LegacyAdapterItemLookup;
@@ -66,12 +66,12 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 		);
 		if ( !$updater->updateRowExists( __CLASS__ . '::rebuildPropertyTerms' ) ) {
 			$updater->addExtensionUpdate( [
-				[ __CLASS__, 'rebuildPropertyTerms' ]
+				[ __CLASS__, 'rebuildPropertyTerms' ],
 			] );
 		}
 		if ( !$updater->updateRowExists( __CLASS__ . '::rebuildItemTerms' ) ) {
 			$updater->addExtensionUpdate( [
-				[ __CLASS__, 'rebuildItemTerms' ]
+				[ __CLASS__, 'rebuildItemTerms' ],
 			] );
 		}
 
@@ -97,6 +97,11 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 				$this->getUpdateScriptPath( 'patch-wb_changes-change_timestamp', $type )
 			);
 		}
+		$updater->dropExtensionIndex(
+			'wb_id_counters',
+			'wb_id_counters_type',
+			$this->getUpdateScriptPath( 'patch-wb_id_counters-unique-to-pk', $type )
+		);
 
 		$updater->dropExtensionTable( 'wb_changes_dispatch' );
 	}
@@ -114,7 +119,7 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 			// for reasons that do not need explaining at this juncture.
 			$dbUpdater->addExtensionUpdate( [
 				[ __CLASS__, 'fillSubscriptionTable' ],
-				$table
+				$table,
 			] );
 		}
 	}
@@ -173,7 +178,7 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 		$localEntitySourceName = WikibaseRepo::getSettings()->getSetting( 'localEntitySourceName' );
 		$propertySource = WikibaseRepo::getEntitySourceDefinitions()
 			->getDatabaseSourceForEntityType( 'property' );
-		if ( $propertySource->getSourceName() !== $localEntitySourceName ) {
+		if ( $propertySource === null || $propertySource->getSourceName() !== $localEntitySourceName ) {
 			// Foreign properties, skip this part
 			return;
 		}
@@ -214,7 +219,7 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 		$localEntitySourceName = WikibaseRepo::getSettings()->getSetting( 'localEntitySourceName' );
 		$itemSource = WikibaseRepo::getEntitySourceDefinitions()
 			->getDatabaseSourceForEntityType( 'item' );
-		if ( $itemSource->getSourceName() !== $localEntitySourceName ) {
+		if ( $itemSource === null || $itemSource->getSourceName() !== $localEntitySourceName ) {
 			// Foreign items, skip this part
 			return;
 		}
@@ -225,12 +230,11 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 			}
 		);
 
-		$highestId = $updater->getDB()->selectRow(
-				'wb_id_counters',
-				'id_value',
-				[ 'id_type' => 'wikibase-item' ],
-				__METHOD__
-			);
+		$highestId = $updater->getDB()->newSelectQueryBuilder()
+			->select( 'id_value' )
+			->from( 'wb_id_counters' )
+			->where( [ 'id_type' => 'wikibase-item' ] )
+			->caller( __METHOD__ )->fetchRow();
 		if ( $highestId === false ) {
 			// Fresh instance, no need to rebuild anything
 			return;
@@ -276,7 +280,7 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 	private function getScriptPath( $name, $type ) {
 		$types = [
 			$type,
-			'mysql'
+			'mysql',
 		];
 
 		foreach ( $types as $type ) {
@@ -287,7 +291,7 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 			}
 		}
 
-		throw new MWException( "Could not find schema script '$name'" );
+		throw new InvalidArgumentException( "Could not find schema script '$name'" );
 	}
 
 	/**

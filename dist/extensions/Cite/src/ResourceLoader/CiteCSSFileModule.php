@@ -26,14 +26,9 @@ class CiteCSSFileModule extends FileModule {
 
 		// Get the content language code, and all the fallbacks. The first that
 		// has a ext.cite.style.<lang code>.css file present will be used.
-		$langCodes = array_merge(
-			[ $contLang->getCode() ],
-			$contLang->getFallbackLanguages()
-		);
-		foreach ( $langCodes as $lang ) {
-			$langStyleFile = 'ext.cite.style.' . $lang . '.css';
-			$localPath = $this->getLocalPath( $langStyleFile );
-			if ( file_exists( $localPath ) ) {
+		foreach ( [ $contLang->getCode(), ...$contLang->getFallbackLanguages() ] as $lang ) {
+			$langStyleFile = "ext.cite.style.$lang.less";
+			if ( file_exists( $this->getLocalPath( $langStyleFile ) ) ) {
 				$this->styles[] = $langStyleFile;
 				break;
 			}

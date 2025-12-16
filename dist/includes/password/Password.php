@@ -22,6 +22,11 @@
 
 declare( strict_types = 1 );
 
+namespace MediaWiki\Password;
+
+use InvalidArgumentException;
+use RuntimeException;
+
 /**
  * Represents a password hash for use in authentication
  *
@@ -87,18 +92,16 @@ abstract class Password {
 	 * It is strongly recommended not to call this function directly unless you
 	 * have a reason to. Use the PasswordFactory class instead.
 	 *
-	 * @throws MWException If $config does not contain required parameters
-	 *
 	 * @param PasswordFactory $factory Factory object that created the password
 	 * @param array $config Array of engine configuration options for hashing
 	 * @param string|null $hash The raw hash, including the type
 	 */
-	final public function __construct( PasswordFactory $factory, array $config, string $hash = null ) {
+	final public function __construct( PasswordFactory $factory, array $config, ?string $hash = null ) {
 		if ( !$this->isSupported() ) {
-			throw new Exception( 'PHP support not found for ' . get_class( $this ) );
+			throw new RuntimeException( 'PHP support not found for ' . get_class( $this ) );
 		}
 		if ( !isset( $config['type'] ) ) {
-			throw new Exception( 'Password configuration must contain a type name.' );
+			throw new InvalidArgumentException( 'Password configuration must contain a type name.' );
 		}
 		$this->config = $config;
 		$this->factory = $factory;
@@ -207,3 +210,6 @@ abstract class Password {
 	 */
 	abstract public function crypt( string $password ): void;
 }
+
+/** @deprecated since 1.43 use MediaWiki\\Password\\PasswordFactory */
+class_alias( Password::class, 'Password' );

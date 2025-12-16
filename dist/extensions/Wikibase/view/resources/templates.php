@@ -38,7 +38,7 @@ HTML;
 
 	$templates['wb-section-heading'] =
 <<<HTML
-<h2 class="wb-section-heading section-heading $3" dir="auto"><span class="mw-headline" id="$2">$1</span></h2>
+<h2 class="wb-section-heading section-heading $3" dir="auto" id="$2">$1</h2>
 HTML;
 
 	// empty toc to help MobileFrontend
@@ -145,6 +145,17 @@ HTML;
 <div class="wikibase-descriptionview $1" dir="$4" lang="$5"><div class="wikibase-descriptionview-container"><span class="wikibase-descriptionview-text">$2</span><!-- wikibase-toolbar -->$3</div></div>
 HTML;
 
+	$templates['wikibase-descriptionview-mul'] =
+		<<<HTML
+<div class="wikibase-descriptionview wikibase-descriptionview--mul wb-empty" dir="auto" lang="$3">
+	<div class="wikibase-descriptionview-container">
+		<span class="wikibase-descriptionview-text">
+			<abbr title="$2"><span aria-hidden="true">$1</span></abbr>
+		</span>
+	</div>
+</div>
+HTML;
+
 	$templates['wikibase-aliasesview'] =
 <<<HTML
 <div class="wikibase-aliasesview $1">
@@ -224,6 +235,7 @@ HTML;
 <<<HTML
 <div class="wikibase-sitelinkgroupview$7" data-wb-sitelinks-group="$5">
 	<div class="wikibase-sitelinkgroupview-heading-section">
+		<div class="mw-collapsible-toggle-placeholder"></div>
 		<div class="wikibase-sitelinkgroupview-heading-container">
 			<h3 class="wb-sitelinks-heading" dir="auto" id="$1">$2<span class="wikibase-sitelinkgroupview-counter">$3</span></h3>
 			<!-- wikibase-toolbar -->$6

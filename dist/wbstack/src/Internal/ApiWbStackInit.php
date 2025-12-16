@@ -75,14 +75,17 @@ class ApiWbStackInit extends \ApiBase {
             $user->saveSettings();
         }
 
-        // Add groups to the user
+        // Add user to groups
         $promotions = [
             'sysop',
             'bureaucrat',
             //'interface-admin',
             //'bot'
         ];
-        array_map( [ $user, 'addGroup' ], $promotions );
+        $userGroupManager = $services->getUserGroupManager();
+        foreach ($promotions as $group) {
+            $userGroupManager->addUserToGroup($user, $group, null, true);
+        }
 
         // Send a password reset email (If password not specified)
         $sendResetPasswordEmail = $email && !$password;
@@ -154,6 +157,6 @@ class ApiWbStackInit extends \ApiBase {
 		$updater = $page->newPageUpdater( $user );
         $updater->setContent( SlotRecord::MAIN, $content );
         $updater->setRcPatrolStatus( \RecentChange::PRC_PATROLLED );
-        $updater->saveRevision( $comment, EDIT_NEW );
+        $updater->saveRevision( $comment, EDIT_NEW | EDIT_FORCE_BOT );
     }
 }

@@ -1,14 +1,17 @@
 {
 	"@metadata": {
 		"authors": [
-			"Mjälten",
-			"WikiPhoenix",
 			"Abbe98",
-			"Sabelöga"
+			"Mjälten",
+			"Sabelöga",
+			"WikiPhoenix"
 		]
 	},
+	"datatypes-type-entity-schema": "Entitetsschema",
 	"entityschema-desc": "Lagra eller diskutera scheman för Wikibase-entiteter",
 	"special-newschema": "Skapa ett nytt Entitetsschema",
+	"nstab-entityschema": "Entitetsschema",
+	"tooltip-ca-nstab-entityschema": "Definition av ett Entitetsschema",
 	"entityschema-newschema-label": "Etikett:",
 	"entityschema-newschema-description": "Beskrivning:",
 	"entityschema-newschema-aliases": "Alias, separerade med vertikalstreck:",
@@ -23,7 +26,6 @@
 	"entityschema-error-schemaupdate-failed": "Schemat kunde inte uppdateras",
 	"entityschema-error-schematext-conflict": "Schemat ändrades under tiden. Gå tillbaka till Schemats sida och försök redigera det igen.",
 	"entityschema-error-namebadge-conflict": "Schemat ändrades under tiden. Gå tillbaka till Schemats sida och försök redigera etiketter, beskrivningar och alias på det här språket igen.",
-	"entityschema-error-saving-failed": "Kunde inte spara Schemat med följande meddelande: $1",
 	"entityschema-error-invalid-id": "Detta ID är ogiligt.",
 	"entityschema-error-unsupported-langcode": "Denna språkkod stöds inte.",
 	"entityschema-namebadge-header-language-code": "språkkod",
@@ -50,5 +52,9 @@
 	"entityschema-special-setlabeldescriptionaliases-info": "Du anger etikett, beskrivning och alias på '''$1''' för schema [[$3|$2]].",
 	"entityschema-special-label": "Etikett:",
 	"entityschema-special-description": "Beskrivning:",
-	"entityschema-special-aliases": "Alias, separerade med vertikalstreck:"
+	"entityschema-special-aliases": "Alias, separerade med vertikalstreck:",
+	"wikibase-listdatatypes-entity-schema-head": "Entitetsschema",
+	"wikibase-listdatatypes-entity-schema-body": "Länk till entitetsscheman som lagras i den konfigurerade namnrymden på samma wiki. Värdet måste vara utan namnrymdsprefixet \"EntitySchema:\".",
+	"wikibase-validator-illegal-entity-schema-title": "Värden måste börja med <code>E</code> och resten bör endast vara siffror.",
+	"wikibase-validator-no-such-entity-schema": "Entitetsschema $1 finns inte."
 }

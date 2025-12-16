@@ -3,7 +3,8 @@
 namespace Wikibase\Repo\Parsers;
 
 use DataValues\TimeValue;
-use Language;
+use MediaWiki\Language\Language;
+use MediaWiki\MediaWikiServices;
 use RuntimeException;
 use ValueParsers\CalendarModelParser;
 use ValueParsers\IsoTimestampParser;
@@ -78,10 +79,10 @@ class MwTimeIsoParser extends StringValueParser {
 	 *
 	 * @param ParserOptions|null $options
 	 */
-	public function __construct( ParserOptions $options = null ) {
+	public function __construct( ?ParserOptions $options = null ) {
 		parent::__construct( $options );
 
-		$this->lang = Language::factory( $this->getOption( ValueParser::OPT_LANG ) );
+		$this->lang = MediaWikiServices::getInstance()->getLanguageFactory()->getLanguage( $this->getOption( ValueParser::OPT_LANG ) );
 		$this->isoTimestampParser = new IsoTimestampParser(
 			new CalendarModelParser( $this->options ),
 			$this->options
@@ -100,7 +101,8 @@ class MwTimeIsoParser extends StringValueParser {
 		$reconverted = $this->reconvertOutputString( $value, $this->lang );
 		if ( $reconverted === false && $this->lang->getCode() !== 'en' ) {
 			// Also try English
-			$reconverted = $this->reconvertOutputString( $value, Language::factory( 'en' ) );
+			$enLang = MediaWikiServices::getInstance()->getLanguageFactory()->getLanguage( 'en' );
+			$reconverted = $this->reconvertOutputString( $value, $enLang );
 		}
 		if ( $reconverted !== false ) {
 			return $reconverted;
@@ -242,7 +244,7 @@ class MwTimeIsoParser extends StringValueParser {
 	 * @param Language $lang
 	 * @param string[] $matches
 	 * @param int $precision
-	 * @param boolean $isBceMsg
+	 * @param bool $isBceMsg
 	 *
 	 * @return TimeValue|bool
 	 */
@@ -274,7 +276,7 @@ class MwTimeIsoParser extends StringValueParser {
 	/**
 	 * @param string $msgKey
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	private function isBceMsg( $msgKey ) {
 		return strstr( $msgKey, '-BCE-' );

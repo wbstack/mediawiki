@@ -7,9 +7,11 @@
 			"Calak",
 			"Dalba",
 			"Darafsh",
+			"Ebrahim",
 			"Ebraminio",
 			"FarsiNevis",
 			"Fatemi127",
+			"Havadar-hvac",
 			"Huji",
 			"Iriman",
 			"Jdforrester",
@@ -27,7 +29,7 @@
 			"الناز",
 			"درفش کاویانی",
 			"فلورانس",
-			"Havadar-hvac"
+			"LordProfo"
 		]
 	},
 	"visualeditor-cite-tool-name-book": "کتاب",
@@ -50,12 +52,11 @@
 	"cite-ve-dialog-reference-editing-reused-long": "این ارجاع {{PLURAL:$1|یک|2=دو|$1 بار}} در این صفحه استفاده شده است. تغییرات اینجا بر همهٔ جاهایی که این ارجاع استفاده شده است اعمال می‌شود.",
 	"cite-ve-dialog-reference-options-group-label": "استفاده از این گروه",
 	"cite-ve-dialog-reference-options-group-placeholder": "ارجاعات عمومی",
-	"cite-ve-dialog-reference-options-name-label": "استفاده دوباره با این نام",
 	"cite-ve-dialog-reference-options-responsive-label": "از چیدمان واکنشگرای ستونی استفاده کنید",
 	"cite-ve-dialog-reference-options-section": "گزینه‌ها",
 	"cite-ve-dialog-reference-placeholder": "منبع‌تان را اینجا بچسبانید یا بنویسید، یا از الگوی یادکرد استفاده کنید.",
 	"cite-ve-dialog-reference-title": "منبع",
-	"cite-ve-dialog-reference-useexisting-tool": "استفادهٔ مجدد",
+	"cite-ve-dialog-reference-useexisting-tool": "استفادهٔ دوباره",
 	"cite-ve-dialog-referenceslist-contextitem-description-general": "فهرست منابع عمومی",
 	"cite-ve-dialog-referenceslist-contextitem-description-named": "فهرست منابع برای گروه $1",
 	"cite-ve-dialog-referenceslist-title": "فهرست منابع",
@@ -68,11 +69,10 @@
 	"cite-ve-reference-input-placeholder": "جستجو داخل یادکردهای کنونی",
 	"cite-ve-referenceslist-isempty": "ارجاعی با گروه «$1» در این صفحه برای شامل‌کردن در این فهرست وجود ندارد.",
 	"cite-ve-referenceslist-isempty-default": "ارجاعی در این صفحه برای شامل‌کردن در این فهرست وجود ندارد.",
+	"cite-ve-referenceslist-missing-parent": "زیرارجاع‌هایی وجود دارند که ارجاع مادر آن‌ها موجود نیست",
 	"cite-ve-referenceslist-missingref": "این ارجاع درون یک الگو یا قطعهٔ تولیدی دیگر تعریف شده است و هم‌اکنون تنها می‌توان در حالت متنی آن را ویرایش کرد",
 	"cite-ve-referenceslist-missingref-in-list": "این ارجاع در یک الگو یا سایر بلوک‌های تولیدشده تعریف شده است، برای الان فقط در حالت مبدأ پیش‌نمایش داده می‌شود.",
-	"cite-ve-referenceslist-missingreflist": "این فهرست ارجاع با یک الگو تولید شده‌، و برای الان فقط می‎تواند در حالت مبدأ ویرایش شود.",
+	"cite-ve-referenceslist-missingreflist": "این فهرست ارجاع با یک سند مرجع تولید شده‌، و برای الان فقط می‎تواند در حالت مبدأ ویرایش شود.",
 	"cite-ve-toolbar-group-label": "یادکرد",
-	"cite-ve-othergroup-item": "$1 ارجاع",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "ارجاعات",
-	"visualeditor-internal-list-diff-group-name-mwreference": "نام گروه ارجاع: «$1»"
+	"cite-ve-othergroup-item": "$1 ارجاع"
 }

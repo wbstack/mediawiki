@@ -37,7 +37,7 @@ class SnakList extends ArrayObject {
 	 * @throws InvalidArgumentException
 	 */
 	public function __construct( $snaks = [] ) {
-		if ( !is_array( $snaks ) && !( $snaks instanceof Traversable ) ) {
+		if ( !is_iterable( $snaks ) ) {
 			throw new InvalidArgumentException( '$snaks must be an array or an instance of Traversable' );
 		}
 
@@ -51,7 +51,7 @@ class SnakList extends ArrayObject {
 	 *
 	 * @param string $snakHash
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function hasSnakHash( $snakHash ) {
 		return array_key_exists( $snakHash, $this->offsetHashes );
@@ -74,7 +74,7 @@ class SnakList extends ArrayObject {
 	 *
 	 * @param Snak $snak
 	 *
-	 * @return boolean Indicates if the snak was added or not.
+	 * @return bool Indicates if the snak was added or not.
 	 */
 	public function addSnak( Snak $snak ) {
 		if ( $this->hasSnak( $snak ) ) {
@@ -90,7 +90,7 @@ class SnakList extends ArrayObject {
 	 *
 	 * @param Snak $snak
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function hasSnak( Snak $snak ) {
 		return $this->hasSnakHash( $snak->getHash() );
@@ -204,7 +204,7 @@ class SnakList extends ArrayObject {
 	 *
 	 * @param int|string $index
 	 */
-	public function offsetUnset( $index ) {
+	public function offsetUnset( $index ): void {
 		if ( $this->offsetExists( $index ) ) {
 			/**
 			 * @var Snak $element
@@ -222,7 +222,7 @@ class SnakList extends ArrayObject {
 	 *
 	 * @param Snak $value
 	 */
-	public function append( $value ) {
+	public function append( $value ): void {
 		$this->setElement( null, $value );
 	}
 
@@ -232,7 +232,7 @@ class SnakList extends ArrayObject {
 	 * @param int|string $index
 	 * @param Snak $value
 	 */
-	public function offsetSet( $index, $value ) {
+	public function offsetSet( $index, $value ): void {
 		$this->setElement( $index, $value );
 	}
 
@@ -269,7 +269,7 @@ class SnakList extends ArrayObject {
 	 *
 	 * @return string
 	 */
-	public function serialize() {
+	public function serialize(): string {
 		return serialize( $this->__serialize() );
 	}
 
@@ -278,7 +278,7 @@ class SnakList extends ArrayObject {
 	 *
 	 * @param string $serialized
 	 */
-	public function unserialize( $serialized ) {
+	public function unserialize( $serialized ): void {
 		$serializationData = unserialize( $serialized );
 		$this->__unserialize( $serializationData );
 	}

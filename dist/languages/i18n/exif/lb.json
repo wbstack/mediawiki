@@ -3,7 +3,8 @@
 		"authors": [
 			"Les Meloures",
 			"Robby",
-			"Soued031"
+			"Soued031",
+			"Volvox"
 		]
 	},
 	"exif-imagewidth": "Breet",
@@ -22,7 +23,7 @@
 	"exif-rowsperstrip": "Zuel vun den Zeile pro Strëpp",
 	"exif-stripbytecounts": "Byte pro kompriméiert Strëpp",
 	"exif-jpeginterchangeformat": "Offset zou JPEG SOI",
-	"exif-jpeginterchangeformatlength": "Gréisst vun de JPEG-Daten a Byten",
+	"exif-jpeginterchangeformatlength": "Gréisst vun den JPEG-Daten a Byte",
 	"exif-whitepoint": "Manuell mat Miessung",
 	"exif-primarychromaticities": "Faarwe vun de primäre Faarwen",
 	"exif-ycbcrcoefficients": "YCbCr-Koeffizienten",
@@ -152,7 +153,7 @@
 	"exif-datetimereleased": "Erausginn den",
 	"exif-originaltransmissionref": "Geo-Code vun der Plaz vu wou d'Foto iwwermëttelt gouf",
 	"exif-identifier": "Identifiant",
-	"exif-lens": "Objektiv dat benotzt gouf",
+	"exif-lens": "Objektiv, dat benotzt gouf",
 	"exif-serialnumber": "Seriennummer vun der Kamera",
 	"exif-cameraownername": "Besëtzer vun der Kamera",
 	"exif-label": "Etikett",
@@ -163,7 +164,7 @@
 	"exif-copyrighted": "Copyright Status",
 	"exif-copyrightowner": "Titulaire vun den Auteursrechter",
 	"exif-usageterms": "Benotzungsbedingungen",
-	"exif-webstatement": "Omline Copyright Deklaratioun",
+	"exif-webstatement": "Online-Copyright-Deklaratioun",
 	"exif-originaldocumentid": "Identifikatiounsnummer vum Original-Dokument",
 	"exif-licenseurl": "URL vum Copyright (Lizenz)",
 	"exif-morepermissionsurl": "Alternativ Lizenzinformatiounen",
@@ -260,6 +261,7 @@
 	"exif-customrendered-0": "Standard",
 	"exif-customrendered-1": "Benotzerdefinéiert",
 	"exif-customrendered-2": "HDR (keen Original gespäichert)",
+	"exif-customrendered-3": "HDR (Original gespäichert)",
 	"exif-customrendered-4": "Original (fir HDR)",
 	"exif-customrendered-6": "Panorama",
 	"exif-customrendered-7": "Portrait HDR",
@@ -340,7 +342,7 @@
 	"exif-iimcategory-pol": "Politik",
 	"exif-iimcategory-rel": "Relioun a Glawen",
 	"exif-iimcategory-sci": "Wëssenschaft an Technologie",
-	"exif-iimcategory-soi": "Sozial Themen",
+	"exif-iimcategory-soi": "Sozial Theemen",
 	"exif-iimcategory-spo": "Sport",
 	"exif-iimcategory-war": "Krich, Konflikt an Onrou",
 	"exif-iimcategory-wea": "Wieder",
@@ -350,9 +352,11 @@
 	"exif-urgency-other": "Benotzerdefinéiert Prioritéit ($1)",
 	"exif-firstphotodate": "Datum vun der éischter Foto",
 	"exif-lastphotodate": "Datum vun der leschter Foto",
+	"exif-projectiontype": "Projektiounstyp",
+	"exif-projectiontype-equirectangular": "Equirektangulär",
 	"exif-usepanoramaviewer-true": "Jo",
-	"exif-usepanoramaviewer-false": "Neen",
+	"exif-usepanoramaviewer-false": "Nee",
 	"exif-exposurelockused-true": "Jo",
-	"exif-exposurelockused-false": "Neen",
+	"exif-exposurelockused-false": "Nee",
 	"exif-stitchingsoftware": "Stitching-Software"
 }

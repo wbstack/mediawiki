@@ -20,6 +20,8 @@
  * @file
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * To speed up conversion from 1.4 to 1.5 schema, text rows can refer to the
  * leftover cur table as the backend. This avoids expensively copying hundreds
@@ -50,12 +52,13 @@ class HistoryBlobCurStub {
 	 * @return string|false
 	 */
 	public function getText() {
-		$dbr = wfGetDB( DB_REPLICA );
-		$row = $dbr->selectRow( 'cur', [ 'cur_text' ], [ 'cur_id' => $this->mCurId ], __METHOD__ );
-		if ( !$row ) {
-			return false;
-		}
-		return $row->cur_text;
+		$dbr = MediaWikiServices::getInstance()->getConnectionProvider()->getReplicaDatabase();
+		$row = $dbr->newSelectQueryBuilder()
+			->select( [ 'cur_text' ] )
+			->from( 'cur' )
+			->where( [ 'cur_id' => $this->mCurId ] )
+			->caller( __METHOD__ )->fetchRow();
+		return $row ? $row->cur_text : false;
 	}
 }
 

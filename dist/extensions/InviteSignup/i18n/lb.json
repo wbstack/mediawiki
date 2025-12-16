@@ -3,7 +3,8 @@
 		"authors": [
 			"Les Meloures",
 			"Robby",
-			"Soued031"
+			"Soued031",
+			"Volvox"
 		]
 	},
 	"invitesignup": "Leit op dës Wiki invitéieren",
@@ -17,7 +18,7 @@
 	"is-delete": "Läschen",
 	"is-invalidemail": "<b>$1</b> ass keng valabel E-Mail-Adress.",
 	"is-emailsubj": "Dir sidd invitéiert op {{SITENAME}} matzemaachen",
-	"is-emailbody": "Bonjour,\n\n{{GENDER:$1|$1}} huet Iech invitéiert fir Iech op {{SITENAME}} anzeschreiwen.\nDir kënnt Iech op der Säit $2 aschreiwen.",
+	"is-emailbody": "Moien,\n\n{{GENDER:$1|De(n) $1|D'$1|De Benotzer $1}} huet Iech invitéiert fir Iech op {{SITENAME}} unzemellen.\nDir kënnt Iech op $2 umellen.",
 	"right-invitesignup": "Benotzer invitéiere sech anzeschreiwen",
-	"action-invitesignup": "Benotzer invitéiere sech op dëse Site anzewchreiwen"
+	"action-invitesignup": "Benotzer invitéiere sech op dëse Site anzeschreiwen"
 }

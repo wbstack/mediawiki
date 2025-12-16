@@ -1,0 +1,20 @@
+# Editors
+*~
+*.kate-swp
+.*.swp
+sublime-*
+.project
+.settings
+
+# Install and build artifacts
+/coverage
+/dist
+/docs
+node_modules
+npm-debug.log
+rebaser/config.yaml
+rebaser/rebaser.log
+.eslintcache
+
+# OS
+.DS_Store

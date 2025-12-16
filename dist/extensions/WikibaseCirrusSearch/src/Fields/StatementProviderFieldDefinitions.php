@@ -2,6 +2,7 @@
 
 namespace Wikibase\Search\Elastic\Fields;
 
+use Psr\Log\LoggerInterface;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Repo\Search\Fields\FieldDefinitions;
@@ -42,13 +43,16 @@ class StatementProviderFieldDefinitions implements FieldDefinitions {
 	 */
 	private $allowedQualifierPropertyIdsForQuantityStatements;
 
+	private ?LoggerInterface $logger;
+
 	public function __construct(
 		PropertyDataTypeLookup $propertyDataTypeLookup,
 		array $searchIndexDataFormatters,
 		array $propertyIds,
 		array $indexedTypes,
 		array $excludedIds,
-		array $allowedQualifierPropertyIdsForQuantityStatements
+		array $allowedQualifierPropertyIdsForQuantityStatements,
+		?LoggerInterface $logger = null
 	) {
 		$this->propertyIds = $propertyIds;
 		$this->searchIndexDataFormatters = $searchIndexDataFormatters;
@@ -57,6 +61,7 @@ class StatementProviderFieldDefinitions implements FieldDefinitions {
 		$this->excludedIds = $excludedIds;
 		$this->allowedQualifierPropertyIdsForQuantityStatements =
 			$allowedQualifierPropertyIdsForQuantityStatements;
+		$this->logger = $logger;
 	}
 
 	/**
@@ -70,18 +75,20 @@ class StatementProviderFieldDefinitions implements FieldDefinitions {
 				$this->propertyIds,
 				$this->indexedTypes,
 				$this->excludedIds,
-				$this->searchIndexDataFormatters
+				$this->searchIndexDataFormatters,
+				$this->logger
 			),
 			StatementCountField::NAME => new StatementCountField(),
 		];
-		if ( !empty( $this->allowedQualifierPropertyIdsForQuantityStatements ) ) {
+		if ( $this->allowedQualifierPropertyIdsForQuantityStatements ) {
 			$fields[StatementQuantityField::NAME] = new StatementQuantityField(
 				$this->propertyDataTypeLookup,
 				$this->propertyIds,
 				$this->indexedTypes,
 				$this->excludedIds,
 				$this->searchIndexDataFormatters,
-				$this->allowedQualifierPropertyIdsForQuantityStatements
+				$this->allowedQualifierPropertyIdsForQuantityStatements,
+				$this->logger
 			);
 		}
 		return $fields;
@@ -92,18 +99,21 @@ class StatementProviderFieldDefinitions implements FieldDefinitions {
 	 * @param PropertyDataTypeLookup $propertyDataTypeLookup
 	 * @param callable[] $searchIndexDataFormatters
 	 * @param SettingsArray $settings
+	 * @param LoggerInterface|null $logger
 	 * @return StatementProviderFieldDefinitions
 	 */
 	public static function newFromSettings(
 		PropertyDataTypeLookup $propertyDataTypeLookup,
 		array $searchIndexDataFormatters,
-		SettingsArray $settings
+		SettingsArray $settings,
+		?LoggerInterface $logger = null
 	) {
 		return new static( $propertyDataTypeLookup, $searchIndexDataFormatters,
 			$settings->getSetting( 'searchIndexProperties' ),
 			$settings->getSetting( 'searchIndexTypes' ),
 			$settings->getSetting( 'searchIndexPropertiesExclude' ),
-			$settings->getSetting( 'searchIndexQualifierPropertiesForQuantity' )
+			$settings->getSetting( 'searchIndexQualifierPropertiesForQuantity' ),
+			$logger
 		);
 	}
 

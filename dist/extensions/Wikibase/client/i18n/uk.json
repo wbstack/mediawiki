@@ -21,14 +21,14 @@
 			"Sergento",
 			"Tkalyn",
 			"Ата",
-			"Максим Підліснюк"
+			"Максим Підліснюк",
+			"Serhio Magpie"
 		]
 	},
 	"wikibase-client-desc": "Клієнт для розширення Wikibase",
 	"tooltip-t-wikibase": "Посилання на пов’язаний елемент сховища даних",
 	"wikibase-after-page-move": "Ваше перейменування тепер має бути [$1 відтворене у мовному посиланні відповідного елементу {{grammar:genitive|{{WBREPONAME}}}}]. Просимо Вас перевірити, чи це так.",
 	"wikibase-after-page-delete": "Посилання на цю сторінку мало бути вилучене [$1 з відповідного елементу {{grammar:genitive|{{WBREPONAME}}}}]. Просимо Вас перевірити, чи це так.",
-	"wikibase-after-page-delete-queued": "Пов'язаний з цією сторінкою [$1 елемент {{grammar:genitive|{{WBREPONAME}}}}] буде автоматично оновлено. Будь ласка, зауважте, що це може відбутися не миттєво.",
 	"wikibase-comment-add": "Елемент {{grammar:genitive|{{WBREPONAME}}}} вже створено.",
 	"wikibase-comment-remove": "Пов'язаний елемент {{grammar:genitive|{{WBREPONAME}}}} видалений. Мовні посилання видалені.",
 	"wikibase-comment-linked": "Елемент {{grammar:genitive|{{WBREPONAME}}}} посилався на цю сторінку.",
@@ -121,6 +121,8 @@
 	"wikibase-sitelinks-link-columnheading": "Пов'язана сторінка",
 	"echo-category-title-wikibase-action": "{{PLURAL:$1|Зв'язок|Зв'язки}} з {{GRAMMAR:instrumental|{{WBREPONAME}}}}",
 	"echo-pref-tooltip-wikibase-action": "Повідомити мене, коли хтось поєднує сторінку, яку {{GENDER:|я створив|я створила}}, з елементом {{GRAMMAR:genitive|{{WBREPONAME}}}}.",
+	"exceeded-entity-limit-category": "{{WBREPONAME}}:Сторінки із завеликою кількість звертань до сутностей",
+	"exceeded-entity-limit-category-desc": "Ця категорія містить сторінки із занадто великою кількістю звертань до сутностей {{WBREPONAME}}.",
 	"notification-header-page-connection": "Сторінку <strong>$3</strong> {{GENDER:$2|поєднано}} з елементом {{PLURAL:$4|-1= {{GRAMMAR:genitive|{{WBREPONAME}}}}|{{GRAMMAR:genitive|{{WBREPONAME}}}} $4}}, де можуть збиратися дані, що стосуються теми.",
 	"notification-bundle-header-page-connection": "<strong>$3</strong> та {{PLURAL:$4|одна інша сторінка|$4 інші сторінки|$4 інших сторінок|100=99+ інших сторінок}} {{GENDER:$2|поєднано}} з елементами {{GRAMMAR:genitive|{{WBREPONAME}}}}, де можуть бути зібрані дані, що найбільш відносяться до обговорення.",
 	"notification-link-text-view-item": "{{GENDER:$1|Переглянути}} елемент",
@@ -153,6 +155,7 @@
 	"wikibase-client-data-bridge-edit-decision-update-description": "Попереднє значення колись було правильним, але тепер є застарілим.",
 	"wikibase-client-data-bridge-references-heading": "Примітки",
 	"wikibase-client-data-bridge-anonymous-edit-warning-heading": "Ви не ввійшли в систему",
+	"wikibase-client-data-bridge-anonymous-edit-warning-tempuser-message": "Ви не ввійшли в систему. Якщо ви <strong>увійдете</strong> або <strong>створите обліковий запис</strong>, ваші зміни будуть підписані вашим іменем користувача, а також ви отримаєте інші переваги.",
 	"wikibase-client-data-bridge-anonymous-edit-warning-message": "<strong>Увага:</strong> ви не авторизовані. Ваша IP-адреса буде публічно видима, якщо ви зробите якісь редагування. Якщо ви <strong>авторизуєтеся</strong> чи <strong>створите обліковий запис</strong>, ваші редагування позначатимуться вашим іменем користувача і ви отримаєте інші переваги.",
 	"wikibase-client-data-bridge-anonymous-edit-warning-proceed": "Редагувати без автентифікації",
 	"wikibase-client-data-bridge-anonymous-edit-warning-login": "Увійти або зареєструватися",

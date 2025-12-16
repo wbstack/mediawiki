@@ -18,7 +18,17 @@
  * @file
  */
 
+namespace MediaWiki\Context;
+
+use MediaWiki\Config\Config;
+use MediaWiki\Language\Language;
+use MediaWiki\Output\OutputPage;
 use MediaWiki\Permissions\Authority;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
+use Skin;
+use WikiPage;
 
 /**
  * Request-dependent objects containers.
@@ -80,3 +90,6 @@ interface MutableContext {
 	public function setSkin( Skin $skin );
 
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( MutableContext::class, 'MutableContext' );

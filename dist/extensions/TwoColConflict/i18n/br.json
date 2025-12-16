@@ -8,7 +8,9 @@
 		]
 	},
 	"twocolconflict": "Tabut kemm dre rannbennad",
+	"twocolconflict-desc": "Diskouez a ra ur skramm kendeuziñ kemmoù skoaz-ouzh-skoaz evit diskoulmañ an tabutoù kemmañ",
 	"twocolconflictprovidesubmittedtext": "Tabut kemmañ :",
+	"twocolconflict-beta-feature-message": "Tabut kemm dre rannbennad",
 	"twocolconflict-beta-feature-description": "Diskwel ar gwel tabut kemm gant ur gwel dre rannbennad araoketoc’h.",
 	"twocolconflict-copy-action": "eilañ testenn glok",
 	"twocolconflict-core-ui-hint-close": "Arabat diskouez se ken",

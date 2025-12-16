@@ -1,7 +1,5 @@
 <?php
 /**
- * Wrapper around a BagOStuff that caches data in memory
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,17 +16,17 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup Cache
  */
+namespace Wikimedia\ObjectCache;
 
 /**
- * Wrapper around a BagOStuff that caches data in memory
+ * Wrap any BagOStuff and add an in-process memory cache to it.
  *
  * The differences between CachedBagOStuff and MultiWriteBagOStuff are:
- * * CachedBagOStuff supports only one "backend".
- * * There's a flag for writes to only go to the in-memory cache.
- * * The in-memory cache is always updated.
- * * Locks go to the backend cache (with MultiWriteBagOStuff, it would wind
+ * - CachedBagOStuff supports only one "backend".
+ * - There's a flag for writes to only go to the in-memory cache.
+ * - The in-memory cache is always updated.
+ * - Locks go to the backend cache (with MultiWriteBagOStuff, it would wind
  *   up going to the HashBagOStuff used for the in-memory cache).
  *
  * @newable
@@ -42,6 +40,7 @@ class CachedBagOStuff extends BagOStuff {
 
 	/**
 	 * @stable to call
+	 *
 	 * @param BagOStuff $backend Permanent backend to use
 	 * @param array $params Parameters for HashBagOStuff
 	 */
@@ -188,9 +187,9 @@ class CachedBagOStuff extends BagOStuff {
 
 	public function deleteObjectsExpiringBefore(
 		$timestamp,
-		callable $progress = null,
+		?callable $progress = null,
 		$limit = INF,
-		string $tag = null
+		?string $tag = null
 	) {
 		$this->procCache->deleteObjectsExpiringBefore( $timestamp, $progress, $limit, $tag );
 
@@ -201,23 +200,6 @@ class CachedBagOStuff extends BagOStuff {
 			func_get_args(),
 			$this
 		);
-	}
-
-	public function makeKeyInternal( $keyspace, $components ) {
-		return $this->genericKeyFromComponents( $keyspace, ...$components );
-	}
-
-	public function makeKey( $collection, ...$components ) {
-		return $this->genericKeyFromComponents( $this->keyspace, $collection, ...$components );
-	}
-
-	public function makeGlobalKey( $collection, ...$components ) {
-		return $this->genericKeyFromComponents( self::GLOBAL_KEYSPACE, $collection, ...$components );
-	}
-
-	protected function convertGenericKey( $key ) {
-		// short-circuit; already uses "generic" keys
-		return $key;
 	}
 
 	public function setMulti( array $valueByKey, $exptime = 0, $flags = 0 ) {
@@ -268,50 +250,12 @@ class CachedBagOStuff extends BagOStuff {
 		);
 	}
 
-	public function incr( $key, $value = 1, $flags = 0 ) {
-		$this->procCache->delete( $key );
-
-		return $this->store->proxyCall(
-			__FUNCTION__,
-			self::ARG0_KEY,
-			self::RES_NONKEY,
-			func_get_args(),
-			$this
-		);
-	}
-
-	public function decr( $key, $value = 1, $flags = 0 ) {
-		$this->procCache->delete( $key );
-
-		return $this->store->proxyCall(
-			__FUNCTION__,
-			self::ARG0_KEY,
-			self::RES_NONKEY,
-			func_get_args(),
-			$this
-		);
-	}
-
 	public function incrWithInit( $key, $exptime, $step = 1, $init = null, $flags = 0 ) {
 		$this->procCache->delete( $key );
 
 		return $this->store->proxyCall(
 			__FUNCTION__,
 			self::ARG0_KEY,
-			self::RES_NONKEY,
-			func_get_args(),
-			$this
-		);
-	}
-
-	public function addBusyCallback( callable $workCallback ) {
-		$this->store->addBusyCallback( $workCallback );
-	}
-
-	public function setNewPreparedValues( array $valueByKey ) {
-		return $this->store->proxyCall(
-			__FUNCTION__,
-			self::ARG0_KEYMAP,
 			self::RES_NONKEY,
 			func_get_args(),
 			$this
@@ -326,3 +270,6 @@ class CachedBagOStuff extends BagOStuff {
 
 	// @codeCoverageIgnoreEnd
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( CachedBagOStuff::class, 'CachedBagOStuff' );

@@ -2,23 +2,24 @@
 
 namespace Wikibase\Repo\RestApi\RouteHandlers;
 
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Rest\Handler;
 use MediaWiki\Rest\RequestInterface;
 use MediaWiki\Rest\Response;
+use MediaWiki\Rest\ResponseInterface;
 use MediaWiki\Rest\SimpleHandler;
 use MediaWiki\Rest\StringStream;
-use Wikibase\Repo\RestApi\Presentation\Presenters\ErrorJsonPresenter;
-use Wikibase\Repo\RestApi\Presentation\Presenters\StatementJsonPresenter;
+use Wikibase\Repo\RestApi\Application\Serialization\StatementSerializer;
+use Wikibase\Repo\RestApi\Application\UseCases\GetStatement\GetStatement;
+use Wikibase\Repo\RestApi\Application\UseCases\GetStatement\GetStatementRequest;
+use Wikibase\Repo\RestApi\Application\UseCases\GetStatement\GetStatementResponse;
+use Wikibase\Repo\RestApi\Application\UseCases\ItemRedirect;
+use Wikibase\Repo\RestApi\Application\UseCases\UseCaseError;
 use Wikibase\Repo\RestApi\RouteHandlers\Middleware\AuthenticationMiddleware;
 use Wikibase\Repo\RestApi\RouteHandlers\Middleware\MiddlewareHandler;
 use Wikibase\Repo\RestApi\RouteHandlers\Middleware\RequestPreconditionCheck;
-use Wikibase\Repo\RestApi\RouteHandlers\Middleware\UnexpectedErrorHandlerMiddleware;
-use Wikibase\Repo\RestApi\UseCases\GetItemStatement\GetItemStatement;
-use Wikibase\Repo\RestApi\UseCases\GetItemStatement\GetItemStatementErrorResponse;
-use Wikibase\Repo\RestApi\UseCases\GetItemStatement\GetItemStatementRequest;
-use Wikibase\Repo\RestApi\UseCases\GetItemStatement\GetItemStatementSuccessResponse;
+use Wikibase\Repo\RestApi\RouteHandlers\Middleware\UserAgentCheckMiddleware;
 use Wikibase\Repo\RestApi\WbRestApi;
-use Wikibase\Repo\WikibaseRepo;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -26,40 +27,42 @@ use Wikimedia\ParamValidator\ParamValidator;
  */
 class GetStatementRouteHandler extends SimpleHandler {
 
-	public const STATEMENT_ID_PATH_PARAM = 'statement_id';
+	private const STATEMENT_ID_PATH_PARAM = 'statement_id';
 
-	private $getItemStatement;
-	private $successPresenter;
-	private $responseFactory;
-	private $middlewareHandler;
+	private GetStatement $getStatement;
+	private StatementSerializer $statementSerializer;
+	private ResponseFactory $responseFactory;
+	private MiddlewareHandler $middlewareHandler;
 
 	public function __construct(
-		GetItemStatement $getItemStatement,
-		StatementJsonPresenter $successPresenter,
+		GetStatement $getStatement,
+		StatementSerializer $statementSerializer,
 		ResponseFactory $responseFactory,
 		MiddlewareHandler $middlewareHandler
 	) {
-		$this->getItemStatement = $getItemStatement;
-		$this->successPresenter = $successPresenter;
+		$this->getStatement = $getStatement;
+		$this->statementSerializer = $statementSerializer;
 		$this->responseFactory = $responseFactory;
 		$this->middlewareHandler = $middlewareHandler;
 	}
 
 	public static function factory(): Handler {
-		$responseFactory = new ResponseFactory( new ErrorJsonPresenter() );
+		$responseFactory = new ResponseFactory();
 		return new self(
-			WbRestApi::getGetItemStatement(),
-			new StatementJsonPresenter( WbRestApi::getSerializerFactory()->newStatementSerializer() ),
+			WbRestApi::getGetStatement(),
+			WbRestApi::getStatementSerializer(),
 			$responseFactory,
 			new MiddlewareHandler( [
-				new UnexpectedErrorHandlerMiddleware( $responseFactory, WikibaseRepo::getLogger() ),
-				new AuthenticationMiddleware(),
+				WbRestApi::getUnexpectedErrorHandlerMiddleware(),
+				new UserAgentCheckMiddleware(),
+				new AuthenticationMiddleware( MediaWikiServices::getInstance()->getUserIdentityUtils() ),
 				WbRestApi::getPreconditionMiddlewareFactory()->newPreconditionMiddleware(
-					function ( RequestInterface $request ): string {
-						return RequestPreconditionCheck::getItemIdPrefixFromStatementId(
-							$request->getPathParam( self::STATEMENT_ID_PATH_PARAM )
-						);
-					}
+					fn( RequestInterface $request ): string => RequestPreconditionCheck::getSubjectIdPrefixFromStatementId(
+						$request->getPathParam( self::STATEMENT_ID_PATH_PARAM )
+					)
+				),
+				WbRestApi::getStatementRedirectMiddlewareFactory()->newStatementRedirectMiddleware(
+					self::STATEMENT_ID_PATH_PARAM
 				),
 			] )
 		);
@@ -73,19 +76,18 @@ class GetStatementRouteHandler extends SimpleHandler {
 	}
 
 	public function runUseCase( string $statementId ): Response {
-		$useCaseResponse = $this->getItemStatement->execute(
-			new GetItemStatementRequest( $statementId )
-		);
-
-		if ( $useCaseResponse instanceof GetItemStatementSuccessResponse ) {
-			$httpResponse = $this->newSuccessHttpResponse( $useCaseResponse );
-		} elseif ( $useCaseResponse instanceof GetItemStatementErrorResponse ) {
-			$httpResponse = $this->responseFactory->newErrorResponse( $useCaseResponse );
-		} else {
-			throw new \LogicException( 'Received an unexpected use case result in ' . __CLASS__ );
+		try {
+			return $this->newSuccessHttpResponse(
+				$this->getStatement->execute(
+					new GetStatementRequest( $statementId )
+				)
+			);
+		} catch ( UseCaseError $e ) {
+			return $this->responseFactory->newErrorResponseFromException( $e );
+		} catch ( ItemRedirect $e ) {
+			return $this->responseFactory
+				->newErrorResponseFromException( UseCaseError::newResourceNotFound( 'statement' ) );
 		}
-
-		return $httpResponse;
 	}
 
 	public function getParamSettings(): array {
@@ -94,7 +96,7 @@ class GetStatementRouteHandler extends SimpleHandler {
 				self::PARAM_SOURCE => 'path',
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => true,
-			]
+			],
 		];
 	}
 
@@ -102,7 +104,14 @@ class GetStatementRouteHandler extends SimpleHandler {
 		return false;
 	}
 
-	private function newSuccessHttpResponse( GetItemStatementSuccessResponse $useCaseResponse ): Response {
+	/**
+	 * Preconditions are checked via {@link PreconditionMiddleware}
+	 */
+	public function checkPreconditions(): ?ResponseInterface {
+		return null;
+	}
+
+	private function newSuccessHttpResponse( GetStatementResponse $useCaseResponse ): Response {
 		$httpResponse = $this->getResponseFactory()->create();
 		$httpResponse->setHeader( 'Content-Type', 'application/json' );
 		$httpResponse->setHeader(
@@ -110,11 +119,8 @@ class GetStatementRouteHandler extends SimpleHandler {
 			wfTimestamp( TS_RFC2822, $useCaseResponse->getLastModified() )
 		);
 		$this->setEtagFromRevId( $httpResponse, $useCaseResponse->getRevisionId() );
-		$httpResponse->setBody(
-			new StringStream(
-				$this->successPresenter->getJson( $useCaseResponse->getStatement() )
-			)
-		);
+		$serializedStatement = $this->statementSerializer->serialize( $useCaseResponse->getStatement() );
+		$httpResponse->setBody( new StringStream( json_encode( $serializedStatement ) ) );
 
 		return $httpResponse;
 	}

@@ -10,7 +10,6 @@ $specialPageAliases = [];
 /** English (English) */
 $specialPageAliases['en'] = [
 	'NewLexeme' => [ 'NewLexeme' ],
-	'NewLexemeAlpha' => [ 'NewLexemeAlpha' ],
 	'MergeLexemes' => [ 'MergeLexemes' ],
 ];
 
@@ -27,7 +26,7 @@ $specialPageAliases['sr-ec'] = [
 ];
 
 /** Serbian Latin (srpski (latinica) */
-	$specialPageAliases['sr-el'] = [
+$specialPageAliases['sr-el'] = [
 	'NewLexeme' => [ 'NovaLeksema' ],
 	'MergeLexemes' => [ 'SpojiLekseme' ],
 ];

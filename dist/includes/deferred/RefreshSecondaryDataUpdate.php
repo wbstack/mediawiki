@@ -20,10 +20,16 @@
  * @file
  */
 
+namespace MediaWiki\Deferred;
+
+use Exception;
+use JobSpecification;
 use MediaWiki\Deferred\LinksUpdate\LinksUpdate;
+use MediaWiki\Page\PageIdentity;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Storage\DerivedPageDataUpdater;
 use MediaWiki\User\UserIdentity;
+use MWExceptionHandler;
 use Wikimedia\Rdbms\ILBFactory;
 
 /**
@@ -39,30 +45,32 @@ class RefreshSecondaryDataUpdate extends DataUpdate
 {
 	/** @var ILBFactory */
 	private $lbFactory;
-	/** @var WikiPage */
+	/** @var PageIdentity */
 	private $page;
 	/** @var DerivedPageDataUpdater */
 	private $updater;
 	/** @var bool */
 	private $recursive;
+	/** @var string|false TS_MW */
+	private $freshness;
 
-	/** @var RevisionRecord|null */
+	/** @var RevisionRecord */
 	private $revisionRecord;
-	/** @var UserIdentity|null */
+	/** @var UserIdentity */
 	private $user;
 
 	/**
 	 * @param ILBFactory $lbFactory
 	 * @param UserIdentity $user
-	 * @param WikiPage $page Page we are updating
+	 * @param PageIdentity $page Page we are updating
 	 * @param RevisionRecord $revisionRecord
 	 * @param DerivedPageDataUpdater $updater
-	 * @param array $options Options map; supports "recursive"
+	 * @param array $options Options map; supports "recursive" (bool) and "freshness" (string|false, TS_MW)
 	 */
 	public function __construct(
 		ILBFactory $lbFactory,
 		UserIdentity $user,
-		WikiPage $page,
+		PageIdentity $page,
 		RevisionRecord $revisionRecord,
 		DerivedPageDataUpdater $updater,
 		array $options
@@ -75,6 +83,7 @@ class RefreshSecondaryDataUpdate extends DataUpdate
 		$this->revisionRecord = $revisionRecord;
 		$this->updater = $updater;
 		$this->recursive = !empty( $options['recursive'] );
+		$this->freshness = $options['freshness'] ?? false;
 	}
 
 	public function getTransactionRoundRequirement() {
@@ -100,7 +109,7 @@ class RefreshSecondaryDataUpdate extends DataUpdate
 		$e = null;
 		foreach ( $updates as $update ) {
 			try {
-				DeferredUpdates::attemptUpdate( $update, $this->lbFactory );
+				DeferredUpdates::attemptUpdate( $update );
 			} catch ( Exception $e ) {
 				// Try as many updates as possible on the first pass
 				MWExceptionHandler::rollbackPrimaryChangesAndLog( $e );
@@ -118,22 +127,16 @@ class RefreshSecondaryDataUpdate extends DataUpdate
 			'job' => new JobSpecification(
 				'refreshLinksPrioritized',
 				[
-					'namespace' => $this->page->getTitle()->getNamespace(),
-					'title' => $this->page->getTitle()->getDBkey(),
-					// Reuse the parser cache if it was saved
-					'rootJobTimestamp' => $this->revisionRecord
-						? $this->revisionRecord->getTimestamp()
-						: null,
+					'namespace' => $this->page->getNamespace(),
+					'title' => $this->page->getDBkey(),
+					// Ensure fresh data are used, for normal data reuse the parser cache if it was saved
+					'rootJobTimestamp' => $this->freshness ?: $this->revisionRecord->getTimestamp(),
 					'useRecursiveLinksUpdate' => $this->recursive,
-					'triggeringUser' => $this->user
-						? [
-							'userId' => $this->user->getId(),
-							'userName' => $this->user->getName()
-						]
-						: null,
-					'triggeringRevisionId' => $this->revisionRecord
-						? $this->revisionRecord->getId()
-						: null,
+					'triggeringUser' => [
+						'userId' => $this->user->getId(),
+						'userName' => $this->user->getName()
+					],
+					'triggeringRevisionId' => $this->revisionRecord->getId(),
 					'causeAction' => $this->getCauseAction(),
 					'causeAgent' => $this->getCauseAgent()
 				],
@@ -142,3 +145,5 @@ class RefreshSecondaryDataUpdate extends DataUpdate
 		];
 	}
 }
+/** @deprecated class alias since 1.42 */
+class_alias( RefreshSecondaryDataUpdate::class, 'RefreshSecondaryDataUpdate' );

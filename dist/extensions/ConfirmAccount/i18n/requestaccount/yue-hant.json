@@ -1,12 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Winston Sung"
+			"Winston Sung",
+			"Yueman"
 		]
 	},
 	"requestaccount": "請求戶口",
 	"requestaccount-login": "請求戶口",
 	"requestaccount-text": "'''完成並遞交下面嘅表格去請求一個用戶戶口'''。\n\n\t請確認你響請求一個戶口之前，先讀過[[{{MediaWiki:Requestaccount-page}}|服務細則]]。\n\n\t一旦個戶口批准咗，你將會收到一個電郵通知訊息，噉個戶口就可以響[[Special:Userlogin]]度用。",
+	"requestaccount-page": "{{ns:project}}:使用條款",
 	"requestaccount-dup": "'''留意: 你已經登入咗做一個已經註冊咗嘅戶口。'''",
 	"requestaccount-acc-text": "當完成請求時，一封確認訊息會發到你嘅電郵地址。\n\t請響封電郵度撳個確認連結去回應佢。同時，當你個戶口開咗之後，你戶口個密碼將會電郵畀你。",
 	"requestaccount-ext-text": "下面嘅資料會保密，而且只係會用響呢次請求度。\n\t你可能需要列示聯絡資料，好似電話號碼等去幫手證明你嘅確認。",
@@ -14,6 +16,7 @@
 	"requestaccount-real": "真名:",
 	"requestaccount-same": "(同真名一樣)",
 	"requestaccount-email": "電郵地址:",
+	"requestaccount-level-0": "作者",
 	"requestaccount-bio": "個人傳記:",
 	"requestaccount-notes": "附加註解:",
 	"requestaccount-urls": "網站一覽，如有者（用新行分開）：",

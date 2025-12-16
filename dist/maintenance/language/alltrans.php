@@ -21,9 +21,9 @@
  * @ingroup MaintenanceLanguage
  */
 
-use MediaWiki\MediaWikiServices;
-
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/../Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script that gets all messages as defined by the
@@ -39,13 +39,15 @@ class AllTrans extends Maintenance {
 	}
 
 	public function execute() {
-		$localisationCache = MediaWikiServices::getInstance()->getLocalisationCache();
+		$localisationCache = $this->getServiceContainer()->getLocalisationCache();
 		$englishMessages = $localisationCache->getItem( 'en', 'messages' );
-		foreach ( array_keys( $englishMessages ) as $key ) {
+		foreach ( $englishMessages as $key => $_ ) {
 			$this->output( "$key\n" );
 		}
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = AllTrans::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

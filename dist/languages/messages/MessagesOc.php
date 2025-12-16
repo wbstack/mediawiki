@@ -1,8 +1,6 @@
 <?php
 /** Occitan (occitan)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -119,6 +117,7 @@ $specialPageAliases = [
 	'Randomredirect'            => [ 'Redireccion_a_l\'azard', 'Redirect_a_l\'azard' ],
 	'Recentchanges'             => [ 'Darrièrs_cambiaments', 'DarrièrsCambiaments', 'Darrièras_Modificacions' ],
 	'Recentchangeslinked'       => [ 'Seguit_dels_ligams' ],
+	'Renameuser'                => [ 'TornarNomenarUtilizaire', 'Tornar_nomenar_Utilizaire' ],
 	'Revisiondelete'            => [ 'Versions_suprimidas' ],
 	'Search'                    => [ 'Recèrca', 'Recercar', 'Cercar' ],
 	'Shortpages'                => [ 'Articles_brèus' ],
@@ -200,7 +199,7 @@ $magicWords = [
 	'img_thumbnail'             => [ '1', 'vinheta', 'thumb', 'thumbnail' ],
 	'img_top'                   => [ '1', 'naut', 'top' ],
 	'img_upright'               => [ '1', 'redreça', 'redreça$1', 'redreça $1', 'upright', 'upright=$1', 'upright $1' ],
-	'language'                  => [ '0', '#LENGA:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#LENGA', '#LANGUAGE' ],
 	'lc'                        => [ '0', 'MINUS:', 'LC:' ],
 	'lcfirst'                   => [ '0', 'INITMINUS:', 'LCFIRST:' ],
 	'localday'                  => [ '1', 'JORNLOCAL', 'LOCALDAY' ],

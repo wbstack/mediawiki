@@ -60,7 +60,7 @@ class ApiEntityLookup {
 	 * @return array the json_decoded part of the wbgetentities API response for the entity.
 	 */
 	private function getEntities( array $ids ) {
-		if ( empty( $ids ) ) {
+		if ( !$ids ) {
 			return [];
 		}
 		Assert::parameterElementType( FederatedPropertyId::class, $ids, '$entityIds' );
@@ -71,7 +71,7 @@ class ApiEntityLookup {
 			'action' => 'wbgetentities',
 			'ids' => implode( '|', $entityIds ),
 			'props' => 'labels|descriptions|datatype',
-			'format' => 'json'
+			'format' => 'json',
 		] );
 
 		// @phan-suppress-next-line PhanTypeArraySuspiciousNullable The API response will be JSON here

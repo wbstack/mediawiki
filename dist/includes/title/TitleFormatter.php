@@ -20,6 +20,9 @@
  * @file
  * @author Daniel Kinzler
  */
+
+namespace MediaWiki\Title;
+
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\Page\PageReference;
 
@@ -35,7 +38,7 @@ use MediaWiki\Page\PageReference;
 interface TitleFormatter {
 	/**
 	 * Returns the title formatted for display.
-	 * Per default, this includes the namespace but not the fragment.
+	 * By default, this includes the namespace but not the fragment.
 	 *
 	 * @note Normalization is applied if $title is not in TitleValue::TITLE_FORM.
 	 *
@@ -96,8 +99,10 @@ interface TitleFormatter {
 	 * @param int $namespace
 	 * @param string $text
 	 *
-	 * @throws InvalidArgumentException
 	 * @return string Namespace name with underscores (not spaces), e.g. 'User_talk'
 	 */
 	public function getNamespaceName( $namespace, $text );
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( TitleFormatter::class, 'TitleFormatter' );

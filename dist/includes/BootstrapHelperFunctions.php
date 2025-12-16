@@ -32,9 +32,7 @@ function wfDetectLocalSettingsFile( ?string $installationPath = null ): string {
 		return MW_CONFIG_FILE;
 	}
 
-	if ( $installationPath === null ) {
-		$installationPath = wfDetectInstallPath();
-	}
+	$installationPath ??= wfDetectInstallPath();
 
 	// We could look for LocalSettings.yaml and LocalSettings.json,
 	// and use them if they exist. But having them in a web accessible
@@ -75,4 +73,23 @@ function wfDetectInstallPath(): string {
 	}
 
 	return MW_INSTALL_PATH;
+}
+
+/**
+ * Check if the operating system is Windows
+ *
+ * @return bool True if it's Windows, false otherwise.
+ */
+function wfIsWindows() {
+	return PHP_OS_FAMILY === 'Windows';
+}
+
+/**
+ * Check if we are running from the commandline
+ *
+ * @since 1.31
+ * @return bool
+ */
+function wfIsCLI() {
+	return PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg';
 }

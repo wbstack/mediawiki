@@ -1,9 +1,12 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Tests\Wikibase\DataModel\Serializers;
 
 use DataValues\Serializers\DataValueSerializer;
 use DataValues\StringValue;
+use Serializers\DispatchableSerializer;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Serializers\SnakSerializer;
 use Wikibase\DataModel\Snak\PropertyNoValueSnak;
@@ -16,56 +19,56 @@ use Wikibase\DataModel\Snak\PropertyValueSnak;
  * @license GPL-2.0-or-later
  * @author Thomas Pellissier Tanon
  */
-class SnakSerializerTest extends DispatchableSerializerTest {
+class SnakSerializerTest extends DispatchableSerializerTestCase {
 
-	protected function buildSerializer() {
+	protected function buildSerializer(): DispatchableSerializer {
 		$serializeWithHash = false;
 		return new SnakSerializer( new DataValueSerializer(), $serializeWithHash );
 	}
 
-	public function serializableProvider() {
+	public function serializableProvider(): array {
 		return [
 			[
-				new PropertyNoValueSnak( 42 )
+				new PropertyNoValueSnak( 42 ),
 			],
 			[
-				new PropertySomeValueSnak( 42 )
+				new PropertySomeValueSnak( 42 ),
 			],
 			[
-				new PropertyValueSnak( 42, new StringValue( 'hax' ) )
+				new PropertyValueSnak( 42, new StringValue( 'hax' ) ),
 			],
 		];
 	}
 
-	public function nonSerializableProvider() {
+	public function nonSerializableProvider(): array {
 		return [
 			[
-				5
+				5,
 			],
 			[
-				[]
+				[],
 			],
 			[
-				new ItemId( 'Q42' )
+				new ItemId( 'Q42' ),
 			],
 		];
 	}
 
-	public function serializationProvider() {
+	public function serializationProvider(): array {
 		return [
 			[
 				[
 					'snaktype' => 'novalue',
 					'property' => 'P42',
 				],
-				new PropertyNoValueSnak( 42 )
+				new PropertyNoValueSnak( 42 ),
 			],
 			[
 				[
 					'snaktype' => 'somevalue',
 					'property' => 'P42',
 				],
-				new PropertySomeValueSnak( 42 )
+				new PropertySomeValueSnak( 42 ),
 			],
 			[
 				[
@@ -74,14 +77,14 @@ class SnakSerializerTest extends DispatchableSerializerTest {
 					'datavalue' => [
 						'value' => 'hax',
 						'type' => 'string',
-					]
+					],
 				],
-				new PropertyValueSnak( 42, new StringValue( 'hax' ) )
+				new PropertyValueSnak( 42, new StringValue( 'hax' ) ),
 			],
 		];
 	}
 
-	public function testSnakSerializationWithHash() {
+	public function testSnakSerializationWithHash(): void {
 		$serializer = new SnakSerializer( new DataValueSerializer() );
 
 		$snak = new PropertyValueSnak( 42, new StringValue( 'hax' ) );

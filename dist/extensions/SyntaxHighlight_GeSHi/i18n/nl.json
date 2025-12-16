@@ -3,12 +3,12 @@
 		"authors": [
 			"Bdijkstra",
 			"Mainframe98",
+			"McDutchie",
 			"PonkoSasuke",
 			"Romaine",
 			"SPQRobin",
 			"Siebrand",
-			"Tvdm",
-			"McDutchie"
+			"Tvdm"
 		]
 	},
 	"syntaxhighlight-desc": "Voorziet in syntaxiskleuring van [http://pygments.org/ Pygments – Python syntax highlighter] middels de tag <code>&lt;syntaxhighlight&gt;</code>",
@@ -21,10 +21,12 @@
 	"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-code": "Code",
 	"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-language": "Taal",
 	"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-none": "(Geen)",
-	"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-showlines": "Regelnummers tonen",
+	"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-showlines": "Regelnummers weergeven",
 	"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-startingline": "Startregelnummer",
 	"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-title": "Codeblok",
 	"syntaxhighlight-error-pygments-invocation-failure": "Fout bij het aanroepen van Pygments",
 	"syntaxhighlight-error-unknown-language": "Onbekende taal \"$1\"",
-	"syntaxhighlight-error-exceeds-size-limit": "Codegrootte van $1 byte{{PLURAL:$1||s}} overschrijdt het toegestane maximum van $2 byte{{PLURAL:$2||s}}"
+	"syntaxhighlight-error-exceeds-size-limit": "Codegrootte van $1 byte{{PLURAL:$1||s}} overschrijdt het toegestane maximum van $2 byte{{PLURAL:$2||s}}",
+	"syntaxhighlight-button-copy": "Kopiëren",
+	"syntaxhighlight-button-copied": "Gekopieerd!"
 }

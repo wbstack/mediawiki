@@ -3,7 +3,7 @@
  * @return {string}
  */
 function lineFeeds( num ) {
-	var out = '';
+	let out = '';
 	num = parseInt( num, 10 );
 	while ( num-- ) {
 		out += '\n';
@@ -16,16 +16,16 @@ function lineFeeds( num ) {
  * @return {string}
  */
 function merger( $selected ) {
-	var textLines = [];
+	const textLines = [];
 
-	$selected.each( function ( index, element ) {
-		var line = $( element ).find( '.mw-twocolconflict-split-editor' ).val()
-				.replace( /[\r\n]+$/, '' ),
-			emptiedByUser = line === '',
-			$extraLineFeeds = $( element ).find( '[name^="mw-twocolconflict-split-linefeeds"]' );
+	$selected.each( ( index, element ) => {
+		let line = $( element ).find( '.mw-twocolconflict-split-editor' ).val()
+			.replace( /[\r\n]+$/, '' );
+		let emptiedByUser = line === '';
+		const $extraLineFeeds = $( element ).find( '[name^="mw-twocolconflict-split-linefeeds"]' );
 
 		if ( $extraLineFeeds.length ) {
-			var counts = $extraLineFeeds.val().split( ',', 2 );
+			const counts = $extraLineFeeds.val().split( ',', 2 );
 			// "Before" and "after" are intentionally flipped, because "before" is very rare
 			if ( 1 in counts ) {
 				if ( counts[ 1 ] === 'was-empty' ) {

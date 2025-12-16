@@ -67,10 +67,12 @@ class CommandLineInc extends Maintenance {
 	public function execute() {
 		global $args, $options;
 
-		$args = $this->mArgs;
-		$options = $this->mOptions;
+		$args = $this->parameters->getArgs();
+		$options = $this->parameters->getOptions();
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = CommandLineInc::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

@@ -1,0 +1,60 @@
+[
+	{
+		"name": "invitesignup",
+		"columns": [
+			{
+				"name": "is_inviter",
+				"type": "integer",
+				"options": {
+					"unsigned": true,
+					"notnull": true
+				}
+			},
+			{
+				"name": "is_invitee",
+				"type": "integer",
+				"options": {
+					"unsigned": true,
+					"notnull": false
+				}
+			},
+			{
+				"name": "is_email",
+				"type": "binary",
+				"options": {
+					"length": 255,
+					"notnull": true
+				}
+			},
+			{
+				"name": "is_when",
+				"type": "mwtimestamp",
+				"options": {
+					"notnull": true
+				}
+			},
+			{
+				"name": "is_used",
+				"type": "mwtimestamp",
+				"options": {
+					"notnull": false
+				}
+			},
+			{
+				"name": "is_hash",
+				"type": "binary",
+				"options": {
+					"length": 40,
+					"notnull": true
+				}
+			},
+			{
+				"name": "is_groups",
+				"type": "blob",
+				"options": {}
+			}
+		],
+		"indexes": [],
+		"pk": [ "is_hash" ]
+	}
+]

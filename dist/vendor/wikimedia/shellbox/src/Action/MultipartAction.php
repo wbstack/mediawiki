@@ -3,6 +3,7 @@
 namespace Shellbox\Action;
 
 use GuzzleHttp\Psr7\MultipartStream;
+use GuzzleHttp\Psr7\Stream;
 use GuzzleHttp\Psr7\Utils;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -191,7 +192,7 @@ abstract class MultipartAction {
 
 		$inputFile = FileUtils::openInputFile( 'php://input' );
 		$multipartReader = new MultipartReader(
-			Utils::streamFor( $inputFile ),
+			new Stream( $inputFile ),
 			$boundary,
 			$this->getConfig( 'secretKey' ) );
 		$preamble = $multipartReader->readPreamble();
@@ -202,7 +203,7 @@ abstract class MultipartAction {
 				'unauthorized requests' );
 		}
 
-		// phpcs:ignore MediaWiki.ControlStructures.AssignmentInControlStructures
+		// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 		while ( ( $headers = $multipartReader->readPartHeaders() ) !== false ) {
 			if ( !isset( $headers['content-disposition'] ) ) {
 				$this->error( 'Part has no Content-Disposition', 400 );

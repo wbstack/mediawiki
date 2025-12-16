@@ -1,20 +1,21 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Cigaryno",
 			"Meno25",
 			"Michel Bakni",
+			"NEHAOUA",
 			"Sonic N800",
 			"ديفيد",
 			"زكريا",
 			"علاء",
-			"محمد أحمد عبد الفتاح",
-			"NEHAOUA",
-			"Amire80"
+			"محمد أحمد عبد الفتاح"
 		]
 	},
 	"advancedsearch-desc": "يمكن الوصول بسهولة إلى إمكانيات البحث المُتقدِّم في [[Special:Search|خاص:بحث]]",
 	"advancedsearch-options-pane-head": "البحث المتقدم:",
+	"advancedsearch-options-pane-preview-list": "مصطلحات البحث المستخدمة حاليًا",
 	"advancedsearch-optgroup-text": "البحث في الصفحة",
 	"advancedsearch-optgroup-structure": "البنية",
 	"advancedsearch-optgroup-files": "الملفات والصور",
@@ -33,6 +34,7 @@
 	"advancedsearch-field-fileh": "طول الملف بالبكسل",
 	"advancedsearch-field-sort": "طريقة الترتيب",
 	"advancedsearch-field-preview-sort": "الترتيب حسب $1",
+	"advancedsearch-help-general-instruction": "تعليمات مفصلة حول $1",
 	"advancedsearch-help-plain": ";الوصف:\n:نتائج البحث عن هذه الكلمات في العنوان أو النص.\n;كُن على دراية بما يأتي:\n* يمكن إدخال كلمات مُتعددة هنا.\n* سيجري تجاهل علامات الترقيم والمحارف المغايرة للأحرف والأرقام (ماخلا النقطتين الرأسيتين والفاصلة).\n* قد تظهر بعض النتائج التي لا تحتوي كلمة أو أكثر من الكلمات البحث.\n* يعتمد البحث على تأصيل الكلمات، مثلاً، البحث عن سيارة يشمل أيضا سيارات.\n;صفحة المساعدة\n:[https://www.mediawiki.org/wiki/Help:CirrusSearch#Full_text_search النص الكامل للبحث]\n;المعادل في البحث العادي:<code>سيارة سريعة للأطفال</code>",
 	"advancedsearch-help-phrase": ";الوصف\n:تجري عمليات البحث عن تتابع معين من المحارف، ولا تؤخد علامات الترقيم بالحسبان.\n;كن على علم بالتالي\n:(فقط صحيح عند استخدام علامات التنصيص، انظر المثال بالأسفل)\n:* افصل عبارات البحث بفاصلة أو فراغ مثال <code>\"good morning\"</code>, <code>\"hello friend!\"</code>.\n:* علامات الترقيم (باستثناء الفاصلة) سيتم تجاهلها.\n:* البحث ليس حساسا لحالة الحروف.\n:* تشذيب الكلمات غير مطبق.\n;صفحة المساعدة\n:[https://www.mediawiki.org/wiki/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers الكلمات والجمل والمعدلات]\n;الصياغة المعادلة في البحث العادي\n:الكلمات في علامات الاقتباس، كمثال <code>\"ابدأ من البداية\".</code>",
 	"advancedsearch-help-or": ";الوصف\n:على الأقل واحدة من مصطلحات البحث ينبغي تضمينها في الصفحة.\n;صفحة المساعدة:\n:[https://www.mediawiki.org/wiki/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers الكلمات والجمل والمعدلات]\n;الصياغة المكافئة في البحث العادي\n:الكلمات ب <code>OR</code> فيما بينها مثل <code>Laptop OR Notebook</code>.",
@@ -75,6 +77,7 @@
 	"advancedsearch-sort-preview-create-timestamp-desc": "تاريخ الإنشاء",
 	"advancedsearch-namespaces-search-in": "البحث في:",
 	"advancedsearch-namespaces-remember": "تذكر الاختيار لعمليات البحث المستقبلية",
+	"advancedsearch-namespaces-pane-preview-list": "عوامل تصفية النطاقات النشطة حاليًا",
 	"advancedsearch-namespaces-preset-all": "الكل",
 	"advancedsearch-namespaces-preset-default": "افتراضي",
 	"advancedsearch-namespaces-preset-general-help": "مساعدة عامة",

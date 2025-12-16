@@ -2,8 +2,8 @@
 
 namespace Wikibase\DataAccess;
 
-use Hooks;
-use Title;
+use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\Title\Title;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\ServiceByTypeDispatcher;
 use Wikibase\Lib\Store\EntityIdLookup;
@@ -26,12 +26,21 @@ class ByTypeDispatchingEntityIdLookup implements EntityIdLookup {
 	/** @var ServiceByTypeDispatcher */
 	private $serviceDispatcher;
 
-	public function __construct( array $entityContentModels, array $lookups, EntityIdLookup $defaultLookup ) {
+	/** @var HookContainer */
+	private $hookContainer;
+
+	public function __construct(
+		array $entityContentModels,
+		array $lookups,
+		EntityIdLookup $defaultLookup,
+		HookContainer $hookContainer
+	) {
 		Assert::parameterElementType( 'string', $entityContentModels, '$entityContentModels' );
 		Assert::parameterElementType( 'string', array_keys( $entityContentModels ), 'keys of $entityContentModels' );
 
 		$this->entityContentModels = $entityContentModels;
 		$this->serviceDispatcher = new ServiceByTypeDispatcher( EntityIdLookup::class, $lookups, $defaultLookup );
+		$this->hookContainer = $hookContainer;
 	}
 
 	public function getEntityIds( array $titles ) {
@@ -64,7 +73,7 @@ class ByTypeDispatchingEntityIdLookup implements EntityIdLookup {
 
 	private function getContentModelForTitle( Title $title ): string {
 		$contentModel = $title->getContentModel();
-		Hooks::run( 'GetEntityContentModelForTitle', [ $title, &$contentModel ] );
+		$this->hookContainer->run( 'GetEntityContentModelForTitle', [ $title, &$contentModel ] );
 		return $contentModel;
 	}
 

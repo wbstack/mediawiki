@@ -1,13 +1,14 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lexeme\Interactors\MergeLexemes;
 
-use IContextSource;
+use MediaWiki\Context\IContextSource;
 use MediaWiki\Permissions\PermissionManager;
-use WatchedItemStoreInterface;
+use MediaWiki\Watchlist\WatchedItemStoreInterface;
 use Wikibase\DataModel\Entity\EntityDocument;
-use Wikibase\Lexeme\DataAccess\Store\MediaWikiLexemeRedirectorFactory;
-use Wikibase\Lexeme\DataAccess\Store\MediaWikiLexemeRepositoryFactory;
+use Wikibase\Lexeme\DataAccess\Store\MediaWikiLexemeRedirector;
 use Wikibase\Lexeme\Domain\Merge\Exceptions\LexemeLoadingException;
 use Wikibase\Lexeme\Domain\Merge\Exceptions\LexemeNotFoundException;
 use Wikibase\Lexeme\Domain\Merge\Exceptions\LexemeSaveFailedException;
@@ -17,76 +18,54 @@ use Wikibase\Lexeme\Domain\Merge\Exceptions\ReferenceSameLexemeException;
 use Wikibase\Lexeme\Domain\Merge\LexemeMerger;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
 use Wikibase\Lexeme\Domain\Model\LexemeId;
-use Wikibase\Lexeme\Domain\Storage\GetLexemeException;
-use Wikibase\Lexeme\Domain\Storage\LexemeRepository;
 use Wikibase\Lib\FormatableSummary;
+use Wikibase\Lib\Store\EntityRevisionLookup;
+use Wikibase\Lib\Store\LookupConstants;
+use Wikibase\Lib\Store\RevisionedUnresolvedRedirectException;
+use Wikibase\Lib\Store\StorageException;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Content\EntityContent;
+use Wikibase\Repo\EditEntity\EditEntityStatus;
 use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\Store\EntityPermissionChecker;
 use Wikibase\Repo\Store\EntityTitleStoreLookup;
 use Wikibase\Repo\SummaryFormatter;
+use Wikimedia\Assert\Assert;
 
 /**
  * @license GPL-2.0-or-later
  */
 class MergeLexemesInteractor {
 
-	/**
-	 * @var SummaryFormatter
-	 */
-	private $summaryFormatter;
-
-	/**
-	 * @var MediaWikiLexemeRepositoryFactory
-	 */
-	private $repoFactory;
-
-	/**
-	 * @var MediaWikiLexemeRedirectorFactory
-	 */
-	private $lexemeRedirectorFactory;
-
+	private SummaryFormatter $summaryFormatter;
+	private EntityRevisionLookup $entityRevisionLookup;
+	private MediaWikiLexemeRedirector $lexemeRedirector;
 	private EntityPermissionChecker $permissionChecker;
-
 	private PermissionManager $permissionManager;
-
-	/**
-	 * @var EntityTitleStoreLookup
-	 */
-	private $entityTitleLookup;
-
-	/**
-	 * @var LexemeMerger
-	 */
-	private $lexemeMerger;
-
-	/**
-	 * @var WatchedItemStoreInterface
-	 */
-	private $watchedItemStore;
-
+	private EntityTitleStoreLookup $entityTitleLookup;
+	private LexemeMerger $lexemeMerger;
+	private WatchedItemStoreInterface $watchedItemStore;
 	private MediaWikiEditEntityFactory $editEntityFactory;
 
 	public function __construct(
 		LexemeMerger $lexemeMerger,
 		SummaryFormatter $summaryFormatter,
-		MediaWikiLexemeRedirectorFactory $lexemeRedirectorFactory,
+		MediaWikiLexemeRedirector $lexemeRedirector,
 		EntityPermissionChecker $permissionChecker,
 		PermissionManager $permissionManager,
 		EntityTitleStoreLookup $entityTitleLookup,
 		WatchedItemStoreInterface $watchedItemStore,
-		MediaWikiLexemeRepositoryFactory $repoFactory,
+		EntityRevisionLookup $entityRevisionLookup,
 		MediaWikiEditEntityFactory $editEntityFactory
 	) {
 		$this->lexemeMerger = $lexemeMerger;
 		$this->summaryFormatter = $summaryFormatter;
-		$this->lexemeRedirectorFactory = $lexemeRedirectorFactory;
+		$this->lexemeRedirector = $lexemeRedirector;
 		$this->permissionChecker = $permissionChecker;
 		$this->permissionManager = $permissionManager;
 		$this->entityTitleLookup = $entityTitleLookup;
 		$this->watchedItemStore = $watchedItemStore;
-		$this->repoFactory = $repoFactory;
+		$this->entityRevisionLookup = $entityRevisionLookup;
 		$this->editEntityFactory = $editEntityFactory;
 	}
 
@@ -95,6 +74,11 @@ class MergeLexemesInteractor {
 	 * @param LexemeId $targetId
 	 * @param string|null $summary - only relevant when called through the API
 	 * @param string[] $tags
+	 *
+	 * @return MergeLexemesStatus Note that the status is only returned
+	 * to wrap the context and saved temp user in a strongly typed container.
+	 * Errors are (currently) reported as exceptions, not as a failed status.
+	 * (It would be nice to fix this at some point and use status consistently.)
 	 *
 	 * @throws MergingException
 	 */
@@ -105,26 +89,29 @@ class MergeLexemesInteractor {
 		?string $summary = null,
 		bool $botEditRequested = false,
 		array $tags = []
-	) {
+	): MergeLexemesStatus {
 		$this->checkCanMerge( $sourceId, $context );
 		$this->checkCanMerge( $targetId, $context );
 
-		$repo = $this->repoFactory->newFromContext( $context, $botEditRequested, $tags );
-
-		// TODO replace repo with an EntityLookup
-		$source = $this->getLexeme( $repo, $sourceId );
-		$target = $this->getLexeme( $repo, $targetId );
+		$source = $this->getLexeme( $sourceId );
+		$target = $this->getLexeme( $targetId );
 
 		$this->validateEntities( $source, $target );
 
 		$this->lexemeMerger->merge( $source, $target );
 
-		$this->attemptSaveMerge( $source, $target, $context, $summary, $botEditRequested, $tags );
+		$mergeStatus = $this->attemptSaveMerge( $source, $target, $context, $summary, $botEditRequested, $tags );
+		$context = $mergeStatus->getContext();
 		$this->updateWatchlistEntries( $sourceId, $targetId );
 
-		$this->lexemeRedirectorFactory
-			->newFromContext( $context, $botEditRequested, $tags )
-			->redirect( $sourceId, $targetId );
+		$redirectStatus = $this->lexemeRedirector
+			->createRedirect( $sourceId, $targetId, $botEditRequested, $tags, $context );
+		$context = $redirectStatus->getContext();
+
+		return MergeLexemesStatus::newMerge(
+			$mergeStatus->getSavedTempUser() ?? $redirectStatus->getSavedTempUser(),
+			$context
+		);
 	}
 
 	private function checkCanMerge( LexemeId $lexemeId, IContextSource $context ): void {
@@ -143,27 +130,29 @@ class MergeLexemesInteractor {
 	/**
 	 * @throws MergingException
 	 */
-	private function getLexeme( LexemeRepository $repo, LexemeId $lexemeId ): Lexeme {
+	private function getLexeme( LexemeId $lexemeId ): Lexeme {
 		try {
-			$lexeme = $repo->getLexemeById( $lexemeId );
-		} catch ( GetLexemeException $ex ) {
+			$revision = $this->entityRevisionLookup->getEntityRevision(
+				$lexemeId,
+				0,
+				LookupConstants::LATEST_FROM_MASTER
+			);
+
+			if ( $revision ) {
+				// @phan-suppress-next-line PhanTypeMismatchReturnSuperType
+				return $revision->getEntity();
+			} else {
+				throw new LexemeNotFoundException( $lexemeId );
+			}
+		} catch ( StorageException | RevisionedUnresolvedRedirectException $ex ) {
 			throw new LexemeLoadingException();
 		}
-
-		if ( $lexeme === null ) {
-			throw new LexemeNotFoundException( $lexemeId );
-		}
-
-		return $lexeme;
 	}
 
 	/**
-	 * @param EntityDocument $fromEntity
-	 * @param EntityDocument $toEntity
-	 *
 	 * @throws ReferenceSameLexemeException
 	 */
-	private function validateEntities( EntityDocument $fromEntity, EntityDocument $toEntity ) {
+	private function validateEntities( EntityDocument $fromEntity, EntityDocument $toEntity ): void {
 		if ( $toEntity->getId()->equals( $fromEntity->getId() ) ) {
 			throw new ReferenceSameLexemeException();
 		}
@@ -171,12 +160,19 @@ class MergeLexemesInteractor {
 
 	/**
 	 * @param string $direction either 'from' or 'to'
-	 * @param LexemeId $id
+	 * @param Lexeme $lexeme
 	 * @param string|null $customSummary
 	 *
 	 * @return Summary
 	 */
-	private function getSummary( $direction, LexemeId $id, $customSummary = null ) {
+	private function getSummary(
+		string $direction,
+		Lexeme $lexeme,
+		?string $customSummary = null
+	): Summary {
+		$id = $lexeme->getId();
+		Assert::parameter( $id !== null, '$lexeme', 'must have a lexeme ID' );
+
 		$summary = new Summary( 'wblmergelexemes', $direction, null, [ $id->getSerialization() ] );
 		$summary->setUserSummary( $customSummary );
 
@@ -190,21 +186,28 @@ class MergeLexemesInteractor {
 		?string $summary,
 		bool $botEditRequested,
 		array $tags
-	) {
-		$this->saveLexeme(
+	): MergeLexemesStatus {
+		$toResult = $this->saveLexeme(
 			$source,
 			$context,
-			$this->getSummary( 'to', $target->getId(), $summary ),
+			$this->getSummary( 'to', $target, $summary ),
 			$botEditRequested,
 			$tags
 		);
+		$context = $toResult->getContext();
 
-		$this->saveLexeme(
+		$fromResult = $this->saveLexeme(
 			$target,
 			$context,
-			$this->getSummary( 'from', $source->getId(), $summary ),
+			$this->getSummary( 'from', $source, $summary ),
 			$botEditRequested,
 			$tags
+		);
+		$context = $fromResult->getContext();
+
+		return MergeLexemesStatus::newMerge(
+			$fromResult->getSavedTempUser() ?? $toResult->getSavedTempUser(),
+			$context
 		);
 	}
 
@@ -214,7 +217,7 @@ class MergeLexemesInteractor {
 		FormatableSummary $summary,
 		bool $botEditRequested,
 		array $tags
-	) {
+	): EditEntityStatus {
 		// TODO: the EntityContent::EDIT_IGNORE_CONSTRAINTS flag does not seem to be used by Lexeme
 		// (LexemeHandler has no onSaveValidators)
 		$flags = EDIT_UPDATE | EntityContent::EDIT_IGNORE_CONSTRAINTS;
@@ -236,9 +239,11 @@ class MergeLexemesInteractor {
 		if ( !$status->isOK() ) {
 			throw new LexemeSaveFailedException( $status->getWikiText() );
 		}
+
+		return $status;
 	}
 
-	private function updateWatchlistEntries( LexemeId $fromId, LexemeId $toId ) {
+	private function updateWatchlistEntries( LexemeId $fromId, LexemeId $toId ): void {
 		$this->watchedItemStore->duplicateAllAssociatedEntries(
 			$this->entityTitleLookup->getTitleForId( $fromId ),
 			$this->entityTitleLookup->getTitleForId( $toId )

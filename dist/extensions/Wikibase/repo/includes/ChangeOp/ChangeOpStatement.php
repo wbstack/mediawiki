@@ -8,6 +8,7 @@ use ValueValidators\Result;
 use Wikibase\DataModel\ByPropertyIdArray;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
+use Wikibase\DataModel\PropertyIdProvider;
 use Wikibase\DataModel\Services\Statement\GuidGenerator;
 use Wikibase\DataModel\Services\Statement\StatementGuidParser;
 use Wikibase\DataModel\Services\Statement\StatementGuidParsingException;
@@ -85,16 +86,8 @@ class ChangeOpStatement extends ChangeOpBase {
 		$this->index = $index;
 	}
 
-	/**
-	 * @see ChangeOp::apply
-	 *
-	 * @param EntityDocument $entity
-	 * @param Summary|null $summary
-	 *
-	 * @throws InvalidArgumentException
-	 * @throws ChangeOpException
-	 */
-	public function apply( EntityDocument $entity, Summary $summary = null ) {
+	/** @inheritDoc */
+	public function apply( EntityDocument $entity, ?Summary $summary = null ) {
 		if ( !( $entity instanceof StatementListProvider ) ) {
 			throw new InvalidArgumentException( '$entity must be a StatementListProvider' );
 		}
@@ -114,6 +107,7 @@ class ChangeOpStatement extends ChangeOpBase {
 			$statements = $this->addStatementToGroup( $entityStatements, $this->index );
 			$entityStatements->clear();
 			foreach ( $statements as $statement ) {
+				// @phan-suppress-next-line PhanTypeMismatchArgumentSuperType
 				$entityStatements->addStatement( $statement );
 			}
 		} else {
@@ -131,8 +125,12 @@ class ChangeOpStatement extends ChangeOpBase {
 	 * @throws ChangeOpException
 	 */
 	private function validateStatementGuid( EntityId $entityId ) {
+		$statementGuid = $this->statement->getGuid();
+		if ( $statementGuid === null ) {
+			throw new ChangeOpException( 'Statement does not have a GUID' );
+		}
 		try {
-			$guid = $this->guidParser->parse( $this->statement->getGuid() );
+			$guid = $this->guidParser->parse( $statementGuid );
 		} catch ( StatementGuidParsingException $ex ) {
 			throw new ChangeOpException( 'Statement GUID can not be parsed' );
 		}
@@ -198,7 +196,7 @@ class ChangeOpStatement extends ChangeOpBase {
 	 * @param StatementList $statements
 	 * @param int $index
 	 *
-	 * @return Statement[]
+	 * @return PropertyIdProvider[]
 	 */
 	private function addStatementToGroup( StatementList $statements, $index ) {
 		// If we fail with the user supplied index and the index is greater than or equal 0

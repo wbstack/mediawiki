@@ -1,8 +1,5 @@
 <?php
 /**
- * Remove old objects from the parser cache.
- * This only works when the parser cache is in an SQL database.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -19,18 +16,23 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup Maintenance
  */
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 use MediaWiki\MainConfigNames;
-use MediaWiki\MediaWikiServices;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 
 /**
- * Maintenance script to remove old objects from the parser cache.
+ * Remove expired objects from the parser cache database.
  *
+ * By default, this does not need to be run. The default parser cache
+ * backend is CACHE_DB (SqlBagOStuff), and by default that automatically
+ * performs incremental purges in the background of write requests.
+ *
+ * @see {@link MediaWiki\MainConfigSchema::ParserCacheType}
  * @ingroup Maintenance
  */
 class PurgeParserCache extends Maintenance {
@@ -41,7 +43,9 @@ class PurgeParserCache extends Maintenance {
 	/** @var null|float */
 	private $lastTimestamp;
 
+	/** @var int */
 	private $tmpCount = 0;
+	/** @var float */
 	private $usleep = 0;
 
 	public function __construct() {
@@ -90,7 +94,7 @@ class PurgeParserCache extends Maintenance {
 
 		$this->output( "Deleting objects expiring before " . $humanDate . "\n" );
 
-		$pc = MediaWikiServices::getInstance()->getParserCache()->getCacheStorage();
+		$pc = $this->getServiceContainer()->getParserCache()->getCacheStorage();
 		$success = $pc->deleteObjectsExpiringBefore(
 			$timestamp,
 			[ $this, 'showProgressAndWait' ],
@@ -140,5 +144,7 @@ class PurgeParserCache extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = PurgeParserCache::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

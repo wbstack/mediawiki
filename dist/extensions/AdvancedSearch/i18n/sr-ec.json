@@ -3,15 +3,17 @@
 		"authors": [
 			"BadDog",
 			"Kizule",
+			"Milicevic01",
 			"Obsuser",
+			"Zenfiric",
 			"Zoranzoki21",
 			"Милан Јелисавчић",
-			"Milicevic01",
-			"Zenfiric"
+			"Aca"
 		]
 	},
 	"advancedsearch-desc": "Лак приступ напредним могућностима претраге на [[Special:Search|Посебно:Претражи]]",
 	"advancedsearch-options-pane-head": "Напредна претрага:",
+	"advancedsearch-options-pane-preview-list": "Актуелни термини који се претражују",
 	"advancedsearch-optgroup-text": "Претрага у тексту странице",
 	"advancedsearch-optgroup-structure": "Структура",
 	"advancedsearch-optgroup-files": "Датотеке и слике",
@@ -30,6 +32,7 @@
 	"advancedsearch-field-fileh": "Висина датотеке у пикселима",
 	"advancedsearch-field-sort": "Начин ређања",
 	"advancedsearch-field-preview-sort": "Поређај према $1",
+	"advancedsearch-help-general-instruction": "Детаљно упутство за $1",
 	"advancedsearch-help-plain": ";Опис\n:Претражује ове речи у наслову или тексту.\n;Имати на уму следеће:\n:* Више речи може да се унесе овде.\n:* Интерпункцијски знаци и други неалфанумерички карактери (са изузетком двотачке и зареза) биће игнорисани.\n:* Можда буде резултата који не садрже један или више ваших термина за претрагу.\n:* Стемовање речи се примењује. Пример: Ако се унесе ''дан'', претрага ће такође узети у обзир и ''дани''. Стемовање речи је језички специфично.\n;Страница за помоћ\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Претрага пуног текста]\n;Еквивалент синтаксе у нормалној претрази\n:<code>дани у седмици</code>",
 	"advancedsearch-help-phrase": ";Опис\n:Претражује специфичну секвенцу карактера. Интерпункцијски знаци се игноришу.\n;Имати на уму следеће:\n:(само валидно када се користе знаци навода, видети пример испод) \n:* Раздвојити фразе претраге зарезом или размаком, нпр. <code>\"добро јутро\"</code>, <code>\"здраво пријатељу!\"</code>.\n:* Интерпункцијски знаци и други неалфанумерички карактери (са изузетком двотачке и зареза) биће игнорисани.\n:* Претрага није осетљива на велико/мало слово.\n:* Стемовање речи се не примењује.\n;Страница за помоћ\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Речи, фразе и модификатори]\n;Еквивалент синтаксе у нормалној претрази\n:Речу под знацима навода, на пример <code>\"Почети на почетку\"</code>.",
 	"advancedsearch-help-or": ";Опис\n:Најмање један од темина претраге мора да буде укључен у страници.\n;Страница за помоћ\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Речи, фразе и модификатори]\n;Еквивалент синтаксе у нормалној претрази\n:Речи са <code>OR</code> између истих, на пример <code>лаптоп OR нотбук</code>.",
@@ -69,6 +72,7 @@
 	"advancedsearch-sort-preview-create-timestamp-desc": "датуму прављења",
 	"advancedsearch-namespaces-search-in": "Претрага по именским просторима:",
 	"advancedsearch-namespaces-remember": "Запамти избор за будуће претраге",
+	"advancedsearch-namespaces-pane-preview-list": "Тренутно активни филтери за именске просторе",
 	"advancedsearch-namespaces-preset-all": "Све",
 	"advancedsearch-namespaces-preset-default": "Подразумевано",
 	"advancedsearch-namespaces-preset-general-help": "Општа помоћ",

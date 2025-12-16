@@ -2,9 +2,9 @@
 
 namespace Wikibase\Repo\Hooks;
 
+use MediaWiki\Title\Title;
 use Psr\Log\LoggerInterface;
 use Skin;
-use Title;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\DataModel\Services\Lookup\EntityLookupException;
@@ -72,7 +72,7 @@ class SidebarBeforeOutputHookHandler {
 			'id' => 't-wb-concept-uri',
 			'text' => $skin->msg( 'wikibase-concept-uri' )->text(),
 			'href' => $this->baseConceptUri . $entityId->getSerialization(),
-			'title' => $skin->msg( 'wikibase-concept-uri-tooltip' )->text()
+			'title' => $skin->msg( 'wikibase-concept-uri-tooltip' )->text(),
 		];
 	}
 
@@ -111,7 +111,7 @@ class SidebarBeforeOutputHookHandler {
 		} catch ( EntityLookupException $error ) {
 			$this->logger->warning( 'Could not lookup entity for id {id}: {exception}', [
 				'id' => $entityId->getSerialization(),
-				'exception' => $error->getMessage()
+				'exception' => $error->getMessage(),
 			] );
 
 			return null;

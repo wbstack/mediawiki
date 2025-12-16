@@ -1,13 +1,43 @@
 {
 	"@metadata": {
 		"authors": [
-			"Toghrul Rahimli",
-			"NMW03"
+			"NMW03",
+			"Nemoralis",
+			"Toghrul Rahimli"
 		]
 	},
 	"codemirror-desc": "Vikimətn redaktorunda kodun rəngli olmasını təmin edir",
 	"codemirror-toggle-label": "Kodun rənglənməsi",
+	"codemirror-toggle-label-short": "Sintaksis",
+	"codemirror-prefs-summary": "Siz [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Extension:CodeMirror yardım səhifəsini] oxumaqla bu funksiya haqqında ətraflı öyrənə bilərsiniz.",
+	"codemirror-prefs-enable": "Vikimətn üçün sintaksisin vurğulanmasını aktivləşdirin",
+	"codemirror-v6-prefs-colorblind": "Rəng korlarına uyğun sxemdən istifadə edin",
 	"codemirror-prefs-colorblind": "Vikimətn redaktə edərkən rəng korluğuna uyğun sintaksis sxemini aktivləşdir",
 	"codemirror-prefs-colorblind-help": "Sintaksis üçün hansısa qadcetdən istifadə etsəniz, bu seçim işləməyəcək.",
-	"prefs-accessibility": "Əlçatanlıq"
+	"codemirror-find": "Tap",
+	"codemirror-next": "Növbətini tap",
+	"codemirror-previous": "Əvvəlkini tap",
+	"codemirror-all": "Hamısı",
+	"codemirror-all-tooltip": "Bütün uyğunluqları seç",
+	"codemirror-match-case": "Sadəcə bu söz",
+	"codemirror-regexp": "Requlyar ifadə",
+	"codemirror-by-word": "Sözlə",
+	"codemirror-replace": "Dəyiş",
+	"codemirror-replace-placeholder": "Dəyiş",
+	"codemirror-replace-all": "Hamısını dəyiş",
+	"codemirror-done": "Oldu",
+	"codemirror-goto-line": "Sətrə get",
+	"codemirror-goto-line-go": "Get",
+	"codemirror-control-character": "$1 nəzarət simvolu",
+	"codemirror-special-char-null": "Boş simvol",
+	"codemirror-special-char-bell": "Zəng simvolu",
+	"codemirror-special-char-backspace": "Backspace",
+	"codemirror-special-char-newline": "Yeni sətir",
+	"codemirror-special-char-vertical-tab": "Şaquli vərəqə",
+	"codemirror-special-char-carriage-return": "Karetin dönüşü simvolu",
+	"codemirror-special-char-escape": "Escape simvolu",
+	"codemirror-special-char-nbsp": "Qırılmayan boşluq",
+	"codemirror-special-char-zero-width-space": "Sıfır genişlikli boşluq",
+	"prefs-accessibility": "Əlçatanlıq",
+	"prefs-syntax-highlighting": "Sintaksis vurğulanması"
 }

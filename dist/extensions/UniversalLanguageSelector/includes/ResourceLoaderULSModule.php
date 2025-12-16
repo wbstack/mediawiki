@@ -21,17 +21,16 @@
 
 namespace UniversalLanguageSelector;
 
-use Language;
-use ResourceLoader;
-use ResourceLoaderContext;
-use ResourceLoaderModule;
+use MediaWiki\Languages\LanguageNameUtils;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\ResourceLoader\Context;
+use MediaWiki\ResourceLoader\Module;
+use MediaWiki\ResourceLoader\ResourceLoader;
 
 /**
  * ResourceLoader module for UniversalLanguageSelector
  */
-class ResourceLoaderULSModule extends ResourceLoaderModule {
-	protected $targets = [ 'desktop', 'mobile' ];
-
+class ResourceLoaderULSModule extends Module {
 	/**
 	 * Get all the dynamic data for the content language to an array.
 	 *
@@ -40,19 +39,19 @@ class ResourceLoaderULSModule extends ResourceLoaderModule {
 	 */
 	private function getData( $languageCode ) {
 		$vars = [];
-		$vars['wgULSLanguages'] = Language::fetchLanguageNames(
+		$vars['wgULSLanguages'] = MediaWikiServices::getInstance()->getLanguageNameUtils()->getLanguageNames(
 			$languageCode,
-			'mwfile'
+			LanguageNameUtils::SUPPORTED
 		);
 		return $vars;
 	}
 
 	/**
 	 * @suppress PhanParamSignatureRealMismatchParamType, UnusedSuppression -- T308443
-	 * @param ResourceLoaderContext $context
+	 * @param Context $context
 	 * @return string JavaScript code
 	 */
-	public function getScript( ResourceLoaderContext $context ) {
+	public function getScript( Context $context ) {
 		$languageCode = $context->getLanguage();
 		return ResourceLoader::makeConfigSetScript( $this->getData( $languageCode ) );
 	}

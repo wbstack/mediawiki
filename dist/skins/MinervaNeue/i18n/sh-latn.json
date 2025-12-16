@@ -1,7 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Winston Sung"
+			"Winston Sung",
+			"BadDog",
+			"Aca"
 		]
 	},
 	"minerva-last-modified-date": "Poslednja izmjena na dan $1, u $2 č.",
@@ -27,7 +29,6 @@
 	"mobile-frontend-meta-data-issues-categories": "O ovoj kategoriji",
 	"mobile-frontend-meta-data-issues-header": "Problemi stranice",
 	"minerva-meta-data-issues-section-header": "Problemi odlomka",
-	"mobile-frontend-notifications-filter": "Filtriraj",
 	"mobile-frontend-pageaction-edit-tooltip": "Uredite uvodni pasus ove stranice",
 	"mobile-frontend-placeholder": "Pretražite projekt {{SITENAME}}",
 	"mobile-frontend-random-button": "Nasumična",
@@ -37,7 +38,7 @@
 	"mobile-frontend-talk-back-to-projectpage": "Nazad na projektnu stranicu \"$1\".",
 	"mobile-frontend-talk-back-to-userpage": "Nazad na stranicu {{GENDER:$1|korisnika|korisnice}} \"$1\".",
 	"mobile-frontend-user-button-tooltip": "Prikaži moje obavijesti",
-	"mobile-frontend-user-newmessages": "Imate nove poruke na Vašoj razgovornoj stranici",
+	"mobile-frontend-user-newmessages": "Imate nove poruke na Vašoj stranici za razgovor",
 	"mobile-frontend-user-page-contributions": "Doprinosi",
 	"mobile-frontend-user-page-member-since": "{{GENDER:$2|Pridružio|Pridružila}} se $1",
 	"mobile-frontend-user-page-talk": "Razgovor",
@@ -51,7 +52,5 @@
 	"skin-minerva-issue-learn-more": "Saznajte više",
 	"skin-minerva-mobile-option-MinervaShowCategories": "Kategorije",
 	"skin-minerva-mobile-option-MinervaShowCategories-description": "Prikaži kategorije stranica",
-	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment": "Poboljšan tretman problema sa stranicom",
-	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment-description": "Problemi sa stranicom (Šablon:ambox) biće umetnuti u članak.",
 	"skin-minerva-recentchanges-warning-enhanced-not-supported": "Nažalost, grupisanje rezultata po stranici nije dostupno na mobilnom uređaju. U tu svrhu, moraćete otvoriti računarski prikaz."
 }

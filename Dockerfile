@@ -1,4 +1,4 @@
-FROM php:7.4-apache
+FROM php:8.1.31-apache
 
 # This file is mostly copied from the community mediawiki-docker image
 # Just with the actual mediawiki install etc removed
@@ -47,7 +47,7 @@ RUN set -eux; \
 		bz2 \
 	; \
 	\
-	pecl install apcu-5.1.20; \
+	pecl install apcu-5.1.27; \
 	# redis added for wbstack
 	pecl install redis-5.3.4; \
 	docker-php-ext-enable \
@@ -117,6 +117,8 @@ RUN set -eux; \
 		echo '</Directory>'; \
 	} > "$APACHE_CONFDIR/conf-available/mediawiki.conf"; \
 	a2enconf mediawiki
+
+RUN sed -i '/<\/VirtualHost>/i \\n\tAllowEncodedSlashes NoDecode' "$APACHE_CONFDIR/sites-enabled/000-default.conf"
 
 ARG INSTALL_XDEBUG=0
 COPY install_xdebug.sh /install_xdebug.sh

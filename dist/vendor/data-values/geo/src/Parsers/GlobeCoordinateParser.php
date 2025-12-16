@@ -7,6 +7,7 @@ namespace DataValues\Geo\Parsers;
 use DataValues\Geo\PackagePrivate\LatLongPrecisionParser;
 use DataValues\Geo\PackagePrivate\Precision;
 use DataValues\Geo\Values\GlobeCoordinateValue;
+use Exception;
 use ValueParsers\ParseException;
 use ValueParsers\ParserOptions;
 use ValueParsers\ValueParser;
@@ -14,9 +15,10 @@ use ValueParsers\ValueParser;
 /**
  * Extends the LatLongParser by adding precision detection support.
  *
- * The object that gets constructed is a GlobeCoordinateValue rather then a LatLongValue.
+ * The object that gets constructed is a GlobeCoordinateValue rather than a LatLongValue.
  *
  * @since 0.1
+ * @api
  *
  * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
@@ -33,14 +35,13 @@ class GlobeCoordinateParser implements ValueParser {
 	 */
 	public const OPT_GLOBE = 'globe';
 
-	private $options;
-	private $latLongPrecisionParser;
+	private ParserOptions $options;
+	private ?LatLongPrecisionParser $latLongPrecisionParser = null;
 
-	public function __construct( ParserOptions $options = null ) {
+	public function __construct( ?ParserOptions $options = null ) {
 		$this->options = $options ?: new ParserOptions();
-
-		$this->options->defaultOption( ValueParser::OPT_LANG, 'en' );
-		$this->options->defaultOption( self::OPT_GLOBE, 'http://www.wikidata.org/entity/Q2' );
+		$this->options = $this->options->withDefaultOption( ValueParser::OPT_LANG, 'en' );
+		$this->options = $this->options->withDefaultOption( self::OPT_GLOBE, 'http://www.wikidata.org/entity/Q2' );
 	}
 
 	/**
@@ -56,7 +57,7 @@ class GlobeCoordinateParser implements ValueParser {
 
 		try {
 			$latLongPrecision = $parser->parse( $value );
-		} catch ( \Exception $ex ) {
+		} catch ( Exception ) {
 			throw new ParseException(
 				'The format of the coordinate could not be determined.',
 				$value,
@@ -71,6 +72,9 @@ class GlobeCoordinateParser implements ValueParser {
 		);
 	}
 
+	/**
+	 * @return LatLongPrecisionParser
+	 */
 	private function getParser() {
 		if ( $this->latLongPrecisionParser === null ) {
 			$this->latLongPrecisionParser = new LatLongPrecisionParser( $this->options );

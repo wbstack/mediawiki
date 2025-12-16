@@ -4,12 +4,12 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Client\Hooks;
 
-use EditPage;
-use Html;
-use IContextSource;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\EditPage\EditPage;
 use MediaWiki\Hook\EditPage__showStandardInputs_optionsHook;
+use MediaWiki\Html\Html;
+use MediaWiki\Output\OutputPage;
 use MessageLocalizer;
-use OutputPage;
 use Wikibase\Client\RepoLinker;
 use Wikibase\Client\Store\ClientStore;
 use Wikibase\Client\Usage\EntityUsage;
@@ -24,33 +24,29 @@ use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
  */
 class EditActionHookHandler implements EditPage__showStandardInputs_optionsHook {
 
-	/**
-	 * @var RepoLinker
-	 */
-	private $repoLinker;
+	private RepoLinker $repoLinker;
 
-	/**
-	 * @var UsageLookup
-	 */
-	private $usageLookup;
+	private bool $isMobileView;
 
-	/**
-	 * @var FallbackLabelDescriptionLookupFactory
-	 */
-	private $labelDescriptionLookupFactory;
+	private UsageLookup $usageLookup;
+
+	private FallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory;
 
 	public function __construct(
 		RepoLinker $repoLinker,
+		bool $isMobileView,
 		UsageLookup $usageLookup,
 		FallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory
 	) {
 		$this->repoLinker = $repoLinker;
+		$this->isMobileView = $isMobileView;
 		$this->usageLookup = $usageLookup;
 		$this->labelDescriptionLookupFactory = $labelDescriptionLookupFactory;
 	}
 
 	public static function factory(
 		FallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory,
+		bool $isMobileView,
 		RepoLinker $repoLinker,
 		ClientStore $store
 	): self {
@@ -58,6 +54,7 @@ class EditActionHookHandler implements EditPage__showStandardInputs_optionsHook 
 
 		return new self(
 			$repoLinker,
+			$isMobileView,
 			$usageLookup,
 			$labelDescriptionLookupFactory
 		);
@@ -90,11 +87,14 @@ class EditActionHookHandler implements EditPage__showStandardInputs_optionsHook 
 			$editor->editFormTextAfterTools .= $output;
 		}
 
-		$out->addModules( 'wikibase.client.action.edit.collapsibleFooter' );
+		// T324991
+		if ( !$this->isMobileView ) {
+			$out->addModules( 'wikibase.client.action.edit.collapsibleFooter' );
+		}
 	}
 
 	/**
-	 * @param string[][] $rowAspects
+	 * @param array[] $rowAspects
 	 * @param IContextSource $context
 	 *
 	 * @return string HTML
@@ -138,7 +138,7 @@ class EditActionHookHandler implements EditPage__showStandardInputs_optionsHook 
 			$entityIds[$entityId] = $entityUsage->getEntityId();
 			$usageAspectsByEntity[$entityId][] = [
 				$entityUsage->getAspect(),
-				$entityUsage->getModifier()
+				$entityUsage->getModifier(),
 			];
 		}
 

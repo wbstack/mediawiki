@@ -5,10 +5,10 @@ namespace CirrusSearch\Search;
 use BaseSearchResultSet;
 use HtmlArmor;
 use ISearchResultSet;
-use LinkBatch;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 use SearchResult;
 use SearchResultSetTrait;
-use Title;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -96,8 +96,8 @@ class ResultSet extends BaseSearchResultSet implements CirrusSearchResultSet {
 	 */
 	public function __construct(
 		$searchContainedSyntax = false,
-		\Elastica\ResultSet $elasticResultSet = null,
-		TitleHelper $titleHelper = null
+		?\Elastica\ResultSet $elasticResultSet = null,
+		?TitleHelper $titleHelper = null
 	) {
 		$this->searchContainedSyntax = $searchContainedSyntax;
 		$this->result = $elasticResultSet;
@@ -142,7 +142,7 @@ class ResultSet extends BaseSearchResultSet implements CirrusSearchResultSet {
 	 */
 	protected function preCacheContainedTitles( \Elastica\ResultSet $resultSet ) {
 		// We can only pull in information about the local wiki
-		$lb = new LinkBatch;
+		$lb = MediaWikiServices::getInstance()->getLinkBatchFactory()->newLinkBatch();
 		foreach ( $resultSet->getResults() as $result ) {
 			if ( !$this->titleHelper->isExternal( $result ) ) {
 				$lb->add( $result->namespace, $result->title );
@@ -182,8 +182,10 @@ class ResultSet extends BaseSearchResultSet implements CirrusSearchResultSet {
 				$this->preCacheContainedTitles( $this->result );
 				foreach ( $this->result->getResults() as $result ) {
 					$transformed = $this->transformOneResult( $result );
-					$this->augmentResult( $transformed );
-					$this->results[] = $transformed;
+					if ( $transformed != null ) {
+						$this->augmentResult( $transformed );
+						$this->results[] = $transformed;
+					}
 				}
 			}
 		}

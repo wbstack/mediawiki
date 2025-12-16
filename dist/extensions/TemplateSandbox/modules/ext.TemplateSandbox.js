@@ -1,4 +1,4 @@
-/** extensions/TemplateSandbox/modules/ext.TemplateSandbox.js **/
+/** extensions/TemplateSandbox/modules/ext.TemplateSandbox.js */
 /* eslint-disable no-jquery/no-global-selector */
 $( function () {
 	var $page = $( '#wpTemplateSandboxPage' );

@@ -109,7 +109,7 @@ CREATE INDEX ls_log_id ON log_search (ls_log_id);
 
 CREATE TABLE change_tag (
   ct_id SERIAL NOT NULL,
-  ct_rc_id INT DEFAULT NULL,
+  ct_rc_id BIGINT DEFAULT NULL,
   ct_log_id INT DEFAULT NULL,
   ct_rev_id INT DEFAULT NULL,
   ct_params TEXT DEFAULT NULL,
@@ -168,17 +168,16 @@ CREATE INDEX rd_ns_title ON redirect (rd_namespace, rd_title, rd_from);
 
 CREATE TABLE pagelinks (
   pl_from INT DEFAULT 0 NOT NULL,
-  pl_namespace INT DEFAULT 0 NOT NULL,
-  pl_title TEXT DEFAULT '' NOT NULL,
+  pl_target_id BIGINT NOT NULL,
   pl_from_namespace INT DEFAULT 0 NOT NULL,
-  PRIMARY KEY(pl_from, pl_namespace, pl_title)
+  PRIMARY KEY(pl_from, pl_target_id)
 );
 
-CREATE INDEX pl_namespace ON pagelinks (pl_namespace, pl_title, pl_from);
+CREATE INDEX pl_target_id ON pagelinks (pl_target_id, pl_from);
 
-CREATE INDEX pl_backlinks_namespace ON pagelinks (
-  pl_from_namespace, pl_namespace,
-  pl_title, pl_from
+CREATE INDEX pl_backlinks_namespace_target_id ON pagelinks (
+  pl_from_namespace, pl_target_id,
+  pl_from
 );
 
 
@@ -229,8 +228,6 @@ CREATE TABLE iwlinks (
 );
 
 CREATE INDEX iwl_prefix_title_from ON iwlinks (iwl_prefix, iwl_title, iwl_from);
-
-CREATE INDEX iwl_prefix_from_title ON iwlinks (iwl_prefix, iwl_from, iwl_title);
 
 
 CREATE TABLE category (
@@ -382,20 +379,6 @@ CREATE TABLE sites (
 
 CREATE UNIQUE INDEX site_global_key ON sites (site_global_key);
 
-CREATE INDEX site_type ON sites (site_type);
-
-CREATE INDEX site_group ON sites (site_group);
-
-CREATE INDEX site_source ON sites (site_source);
-
-CREATE INDEX site_language ON sites (site_language);
-
-CREATE INDEX site_protocol ON sites (site_protocol);
-
-CREATE INDEX site_domain ON sites (site_domain);
-
-CREATE INDEX site_forward ON sites (site_forward);
-
 
 CREATE TABLE user_newtalk (
   user_id INT DEFAULT 0 NOT NULL, user_ip TEXT DEFAULT '' NOT NULL,
@@ -435,21 +418,14 @@ CREATE INDEX pt_timestamp ON protected_titles (pt_timestamp);
 CREATE TABLE externallinks (
   el_id SERIAL NOT NULL,
   el_from INT DEFAULT 0 NOT NULL,
-  el_to TEXT NOT NULL,
-  el_index TEXT NOT NULL,
-  el_index_60 TEXT NOT NULL,
+  el_to_domain_index TEXT DEFAULT '' NOT NULL,
+  el_to_path TEXT DEFAULT NULL,
   PRIMARY KEY(el_id)
 );
 
-CREATE INDEX el_from ON externallinks (el_from, el_to);
+CREATE INDEX el_from ON externallinks (el_from);
 
-CREATE INDEX el_to ON externallinks (el_to, el_from);
-
-CREATE INDEX el_index ON externallinks (el_index);
-
-CREATE INDEX el_index_60 ON externallinks (el_index_60, el_id);
-
-CREATE INDEX el_from_index_60 ON externallinks (el_from, el_index_60, el_id);
+CREATE INDEX el_to_domain_index_to_path ON externallinks (el_to_domain_index, el_to_path);
 
 
 CREATE TABLE ip_changes (
@@ -462,17 +438,6 @@ CREATE TABLE ip_changes (
 CREATE INDEX ipc_rev_timestamp ON ip_changes (ipc_rev_timestamp);
 
 CREATE INDEX ipc_hex_time ON ip_changes (ipc_hex, ipc_rev_timestamp);
-
-
-CREATE TABLE revision_comment_temp (
-  revcomment_rev INT NOT NULL,
-  revcomment_comment_id BIGINT NOT NULL,
-  PRIMARY KEY(
-    revcomment_rev, revcomment_comment_id
-  )
-);
-
-CREATE UNIQUE INDEX revcomment_rev ON revision_comment_temp (revcomment_rev);
 
 
 CREATE TABLE page_props (
@@ -553,10 +518,6 @@ CREATE INDEX cl_sortkey ON categorylinks (
 
 CREATE INDEX cl_timestamp ON categorylinks (cl_to, cl_timestamp);
 
-CREATE INDEX cl_collation_ext ON categorylinks (
-  cl_collation, cl_to, cl_type, cl_from
-);
-
 
 CREATE TABLE logging (
   log_id SERIAL NOT NULL,
@@ -612,7 +573,7 @@ CREATE TABLE uploadstash (
   us_status VARCHAR(50) NOT NULL,
   us_chunk_inx INT DEFAULT NULL,
   us_props TEXT DEFAULT NULL,
-  us_size INT NOT NULL,
+  us_size BIGINT NOT NULL,
   us_sha1 VARCHAR(31) NOT NULL,
   us_mime VARCHAR(255) DEFAULT NULL,
   us_media_type US_MEDIA_TYPE_ENUM DEFAULT NULL,
@@ -638,7 +599,7 @@ CREATE TABLE filearchive (
   fa_deleted_user INT DEFAULT NULL,
   fa_deleted_timestamp TIMESTAMPTZ DEFAULT NULL,
   fa_deleted_reason_id BIGINT NOT NULL,
-  fa_size INT DEFAULT 0,
+  fa_size BIGINT DEFAULT 0,
   fa_width INT DEFAULT 0,
   fa_height INT DEFAULT 0,
   fa_metadata TEXT DEFAULT NULL,
@@ -677,7 +638,7 @@ CREATE TABLE text (
 
 CREATE TABLE oldimage (
   oi_name TEXT DEFAULT '' NOT NULL, oi_archive_name TEXT DEFAULT '' NOT NULL,
-  oi_size INT DEFAULT 0 NOT NULL, oi_width INT DEFAULT 0 NOT NULL,
+  oi_size BIGINT DEFAULT 0 NOT NULL, oi_width INT DEFAULT 0 NOT NULL,
   oi_height INT DEFAULT 0 NOT NULL, oi_bits INT DEFAULT 0 NOT NULL,
   oi_description_id BIGINT NOT NULL,
   oi_actor BIGINT NOT NULL, oi_timestamp TIMESTAMPTZ NOT NULL,
@@ -711,44 +672,58 @@ CREATE TABLE objectcache (
 CREATE INDEX exptime ON objectcache (exptime);
 
 
-CREATE TABLE ipblocks (
-  ipb_id SERIAL NOT NULL,
-  ipb_address TEXT NOT NULL,
-  ipb_user INT DEFAULT 0 NOT NULL,
-  ipb_by_actor BIGINT NOT NULL,
-  ipb_reason_id BIGINT NOT NULL,
-  ipb_timestamp TIMESTAMPTZ NOT NULL,
-  ipb_auto SMALLINT DEFAULT 0 NOT NULL,
-  ipb_anon_only SMALLINT DEFAULT 0 NOT NULL,
-  ipb_create_account SMALLINT DEFAULT 1 NOT NULL,
-  ipb_enable_autoblock SMALLINT DEFAULT 1 NOT NULL,
-  ipb_expiry TIMESTAMPTZ NOT NULL,
-  ipb_range_start TEXT NOT NULL,
-  ipb_range_end TEXT NOT NULL,
-  ipb_deleted SMALLINT DEFAULT 0 NOT NULL,
-  ipb_block_email SMALLINT DEFAULT 0 NOT NULL,
-  ipb_allow_usertalk SMALLINT DEFAULT 0 NOT NULL,
-  ipb_parent_block_id INT DEFAULT NULL,
-  ipb_sitewide SMALLINT DEFAULT 1 NOT NULL,
-  PRIMARY KEY(ipb_id)
+CREATE TABLE block (
+  bl_id SERIAL NOT NULL,
+  bl_target INT NOT NULL,
+  bl_by_actor BIGINT NOT NULL,
+  bl_reason_id BIGINT NOT NULL,
+  bl_timestamp TIMESTAMPTZ NOT NULL,
+  bl_anon_only SMALLINT DEFAULT 0 NOT NULL,
+  bl_create_account SMALLINT DEFAULT 1 NOT NULL,
+  bl_enable_autoblock SMALLINT DEFAULT 1 NOT NULL,
+  bl_expiry TIMESTAMPTZ NOT NULL,
+  bl_deleted SMALLINT DEFAULT 0 NOT NULL,
+  bl_block_email SMALLINT DEFAULT 0 NOT NULL,
+  bl_allow_usertalk SMALLINT DEFAULT 0 NOT NULL,
+  bl_parent_block_id INT DEFAULT NULL,
+  bl_sitewide SMALLINT DEFAULT 1 NOT NULL,
+  PRIMARY KEY(bl_id)
 );
 
-CREATE UNIQUE INDEX ipb_address_unique ON ipblocks (ipb_address, ipb_user, ipb_auto);
+CREATE INDEX bl_timestamp ON block (bl_timestamp);
 
-CREATE INDEX ipb_user ON ipblocks (ipb_user);
+CREATE INDEX bl_target ON block (bl_target);
 
-CREATE INDEX ipb_range ON ipblocks (ipb_range_start, ipb_range_end);
+CREATE INDEX bl_expiry ON block (bl_expiry);
 
-CREATE INDEX ipb_timestamp ON ipblocks (ipb_timestamp);
+CREATE INDEX bl_parent_block_id ON block (bl_parent_block_id);
 
-CREATE INDEX ipb_expiry ON ipblocks (ipb_expiry);
 
-CREATE INDEX ipb_parent_block_id ON ipblocks (ipb_parent_block_id);
+CREATE TABLE block_target (
+  bt_id SERIAL NOT NULL,
+  bt_address TEXT DEFAULT NULL,
+  bt_user INT DEFAULT NULL,
+  bt_user_text TEXT DEFAULT NULL,
+  bt_auto SMALLINT DEFAULT 0 NOT NULL,
+  bt_range_start TEXT DEFAULT NULL,
+  bt_range_end TEXT DEFAULT NULL,
+  bt_ip_hex TEXT DEFAULT NULL,
+  bt_count INT DEFAULT 0 NOT NULL,
+  PRIMARY KEY(bt_id)
+);
+
+CREATE INDEX bt_address ON block_target (bt_address);
+
+CREATE INDEX bt_ip_user_text ON block_target (bt_ip_hex, bt_user_text);
+
+CREATE INDEX bt_range ON block_target (bt_range_start, bt_range_end);
+
+CREATE INDEX bt_user ON block_target (bt_user);
 
 
 CREATE TABLE image (
   img_name TEXT DEFAULT '' NOT NULL,
-  img_size INT DEFAULT 0 NOT NULL,
+  img_size BIGINT DEFAULT 0 NOT NULL,
   img_width INT DEFAULT 0 NOT NULL,
   img_height INT DEFAULT 0 NOT NULL,
   img_metadata TEXT NOT NULL,
@@ -777,7 +752,7 @@ CREATE INDEX img_media_mime ON image (
 
 
 CREATE TABLE recentchanges (
-  rc_id SERIAL NOT NULL,
+  rc_id BIGSERIAL NOT NULL,
   rc_timestamp TIMESTAMPTZ NOT NULL,
   rc_actor BIGINT NOT NULL,
   rc_namespace INT DEFAULT 0 NOT NULL,
@@ -899,6 +874,7 @@ CREATE TABLE "user" (
   user_registration TIMESTAMPTZ DEFAULT NULL,
   user_editcount INT DEFAULT NULL,
   user_password_expires TIMESTAMPTZ DEFAULT NULL,
+  user_is_temp SMALLINT DEFAULT 0 NOT NULL,
   PRIMARY KEY(user_id)
 );
 
@@ -911,21 +887,22 @@ CREATE INDEX user_email ON "user" (user_email);
 
 CREATE TABLE user_autocreate_serial (
   uas_shard INT NOT NULL,
+  uas_year SMALLINT NOT NULL,
   uas_value INT NOT NULL,
-  PRIMARY KEY(uas_shard)
+  PRIMARY KEY(uas_shard, uas_year)
 );
 
 
 CREATE TABLE revision (
-  rev_id SERIAL NOT NULL,
+  rev_id BIGSERIAL NOT NULL,
   rev_page INT NOT NULL,
-  rev_comment_id BIGINT DEFAULT 0 NOT NULL,
-  rev_actor BIGINT DEFAULT 0 NOT NULL,
+  rev_comment_id BIGINT NOT NULL,
+  rev_actor BIGINT NOT NULL,
   rev_timestamp TIMESTAMPTZ NOT NULL,
   rev_minor_edit SMALLINT DEFAULT 0 NOT NULL,
   rev_deleted SMALLINT DEFAULT 0 NOT NULL,
   rev_len INT DEFAULT NULL,
-  rev_parent_id INT DEFAULT NULL,
+  rev_parent_id BIGINT DEFAULT NULL,
   rev_sha1 TEXT DEFAULT '' NOT NULL,
   PRIMARY KEY(rev_id)
 );
@@ -943,11 +920,10 @@ CREATE INDEX rev_page_actor_timestamp ON revision (
 
 CREATE TABLE searchindex (
   si_page INT NOT NULL,
-  si_title VARCHAR(255) DEFAULT '' NOT NULL,
-  si_text TEXT NOT NULL
+  si_title TEXT NOT NULL,
+  si_text TEXT NOT NULL,
+  PRIMARY KEY(si_page)
 );
-
-CREATE UNIQUE INDEX si_page ON searchindex (si_page);
 
 CREATE INDEX si_title ON searchindex (si_title);
 

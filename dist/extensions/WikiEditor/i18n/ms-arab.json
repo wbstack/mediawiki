@@ -16,8 +16,6 @@
 	"wikieditor-toolbar-file-format-none": "تياد",
 	"wikieditor-toolbar-tool-file-cancel": "بطل",
 	"wikieditor-toolbar-tool-file-upload": "موات ناءيق",
-	"wikieditor-toolbar-tool-reference": "روجوعن",
-	"wikieditor-toolbar-tool-reference-cancel": "بطل",
 	"wikieditor-toolbar-tool-big": "بسر",
 	"wikieditor-toolbar-tool-table": "جدوال",
 	"wikieditor-toolbar-tool-table-preview": "ڤرا‌‌ليهت",
@@ -25,6 +23,5 @@
 	"wikieditor-toolbar-tool-replace-close": "توتوڤ",
 	"wikieditor-toolbar-section-help": "بنتوان",
 	"wikieditor-realtimepreview-preview": "ڤرا‌‌ليهت",
-	"wikieditor-realtimepreview-reload": "موات سمولا",
-	"wikieditor-realtimepreview-beta-label": "ڤراليهت ماس ڽات"
+	"wikieditor-realtimepreview-reload": "موات سمولا"
 }

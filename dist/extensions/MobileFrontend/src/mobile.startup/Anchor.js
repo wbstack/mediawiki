@@ -1,11 +1,12 @@
-var
+const
 	View = require( './View' ),
 	util = require( './util' );
 
 /**
  * A wrapper for creating an anchor.
  *
- * @extends View
+ * @extends module:mobile.startup/View
+ * @private
  */
 class Anchor extends View {
 	/**
@@ -14,10 +15,11 @@ class Anchor extends View {
 	get isTemplateMode() {
 		return true;
 	}
+
 	/**
 	 * @memberof Anchor
 	 * @instance
-	 * @mixes View#defaults
+	 * @mixes module:mobile.startup/View#defaults
 	 * @property {Object} defaults Default options hash.
 	 * @property {boolean} defaults.progressive is progressive action
 	 * @property {boolean} defaults.destructive is destructive action
@@ -34,14 +36,15 @@ class Anchor extends View {
 			label: undefined
 		};
 	}
+
 	/**
 	 * @inheritdoc
 	 */
 	get template() {
 		return util.template( `
-<a {{#href}}href="{{href}}"{{/href}} class="mw-ui-anchor
-	{{#progressive}} mw-ui-progressive{{/progressive}}
-	{{#destructive}} mw-ui-destructive{{/destructive}}
+<a {{#href}}href="{{href}}"{{/href}} class="mw-mf-anchor
+	{{#progressive}} mw-mf-anchor-progressive{{/progressive}}
+	{{#destructive}} mw-mf-anchor-destructive{{/destructive}}
 	 {{additionalClassNames}}">{{label}}</a>
 	` );
 	}

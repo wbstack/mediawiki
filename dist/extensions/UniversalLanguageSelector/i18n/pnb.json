@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Abbas dhothar",
-			"Xð",
-			"Bgo eiu"
+			"Bgo eiu",
+			"Xð"
 		]
 	},
 	"uls-desc": "بولی ترتیباں",
@@ -55,7 +55,6 @@
 	"ext-uls-setlang-heading": "انٹرفیس بولی بدلو؟",
 	"ext-uls-setlang-accept": "تبدیلی قبول",
 	"ext-uls-setlang-cancel": "نا بدلو",
-	"ext-uls-actions-menu-header": "ہور چݨیاں",
 	"ext-uls-actions-menu-language-settings-item-label": "بولی دیاں سیٹنگاں کھُلھیو",
 	"ext-uls-empty-state-header": "حالیہ کوئی بولیاں نہیں اے",
 	"ext-uls-empty-state-desc": "حالیہ اِتھے کوئی چݨیا نہیں اے",

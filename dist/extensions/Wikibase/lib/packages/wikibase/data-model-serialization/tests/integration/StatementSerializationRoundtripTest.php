@@ -10,6 +10,7 @@ use Wikibase\DataModel\Entity\BasicEntityIdParser;
 use Wikibase\DataModel\Reference;
 use Wikibase\DataModel\ReferenceList;
 use Wikibase\DataModel\Serializers\SerializerFactory;
+use Wikibase\DataModel\Services\Lookup\InMemoryDataTypeLookup;
 use Wikibase\DataModel\Snak\PropertyNoValueSnak;
 use Wikibase\DataModel\Snak\PropertySomeValueSnak;
 use Wikibase\DataModel\Snak\SnakList;
@@ -30,7 +31,10 @@ class StatementSerializationRoundtripTest extends TestCase {
 		$serializerFactory = new SerializerFactory( new DataValueSerializer() );
 		$deserializerFactory = new DeserializerFactory(
 			new DataValueDeserializer(),
-			new BasicEntityIdParser()
+			new BasicEntityIdParser(),
+			new InMemoryDataTypeLookup(),
+			[],
+			[]
 		);
 
 		$serialization = $serializerFactory->newStatementSerializer()->serialize( $statement );
@@ -38,11 +42,11 @@ class StatementSerializationRoundtripTest extends TestCase {
 		$this->assertEquals( $statement->getHash(), $newStatement->getHash() );
 	}
 
-	public function snaksProvider() {
+	public static function snaksProvider() {
 		$statements = [];
 
 		$statements[] = [
-			new Statement( new PropertyNoValueSnak( 42 ) )
+			new Statement( new PropertyNoValueSnak( 42 ) ),
 		];
 
 		$statement = new Statement( new PropertyNoValueSnak( 42 ) );
@@ -65,7 +69,7 @@ class StatementSerializationRoundtripTest extends TestCase {
 		$statement->setQualifiers( new SnakList( [
 			new PropertySomeValueSnak( 42 ),
 			new PropertyNoValueSnak( 42 ),
-			new PropertySomeValueSnak( 24 )
+			new PropertySomeValueSnak( 24 ),
 		] ) );
 		$statements[] = [ $statement ];
 
@@ -74,8 +78,8 @@ class StatementSerializationRoundtripTest extends TestCase {
 			new Reference( [
 				new PropertySomeValueSnak( 42 ),
 				new PropertyNoValueSnak( 42 ),
-				new PropertySomeValueSnak( 24 )
-			] )
+				new PropertySomeValueSnak( 24 ),
+			] ),
 		] ) );
 		$statements[] = [ $statement ];
 

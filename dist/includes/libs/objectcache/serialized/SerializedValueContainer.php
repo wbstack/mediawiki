@@ -1,30 +1,21 @@
 <?php
 
+namespace Wikimedia\ObjectCache\Serialized;
+
+use stdClass;
+
 /**
- * Helper class for segmenting large cache values without relying on serializing classes
+ * Helper class for segmenting large cache values without relying
+ * on serializing classes.
  *
  * @since 1.34
+ * @ingroup Cache
  */
 class SerializedValueContainer {
 	private const SCHEMA = '__svc_schema__';
 	// 64 bit UID
-	private const SCHEMA_UNIFIED = 'DAAIDgoKAQw';
-	// 64 bit UID
 	private const SCHEMA_SEGMENTED = 'CAYCDAgCDw4';
-
-	public const UNIFIED_DATA = '__data__';
 	public const SEGMENTED_HASHES = '__hashes__';
-
-	/**
-	 * @param string $serialized
-	 * @return stdClass
-	 */
-	public static function newUnified( $serialized ) {
-		return (object)[
-			self::SCHEMA => self::SCHEMA_UNIFIED,
-			self::UNIFIED_DATA => $serialized
-		];
-	}
 
 	/**
 	 * @param string[] $segmentHashList Ordered list of hashes for each segment
@@ -41,21 +32,13 @@ class SerializedValueContainer {
 	 * @param mixed $value
 	 * @return bool
 	 */
-	public static function isUnified( $value ) {
-		return (
-			$value instanceof stdClass &&
-			( $value->{self::SCHEMA} ?? null ) === self::SCHEMA_UNIFIED
-		);
-	}
-
-	/**
-	 * @param mixed $value
-	 * @return bool
-	 */
-	public static function isSegmented( $value ) {
+	public static function isSegmented( $value ): bool {
 		return (
 			$value instanceof stdClass &&
 			( $value->{self::SCHEMA} ?? null ) === self::SCHEMA_SEGMENTED
 		);
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( SerializedValueContainer::class, 'SerializedValueContainer' );

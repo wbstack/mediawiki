@@ -6,15 +6,15 @@
 			"Fievarsty",
 			"Fryed-peach",
 			"Otokoume",
-			"Shirayuki",
-			"Ryoya3"
+			"Ryoya3",
+			"Shirayuki"
 		]
 	},
 	"deletebatch": "ページの一括削除",
 	"deletebatch-desc": "[[Special:DeleteBatch|ページを一括削除する]]",
 	"deletebatch-help": "ページを一括削除できます。\nページ毎に削除できる他、ファイル内に列挙したページ群を削除することもできます。\n削除記録に表示される利用者を選択してください。\nアップロードされたファイルでは、ページ名と削除理由 (省略可能) をパイプ記号 (|) で区切って記す必要があります。",
 	"deletebatch-caption": "ページ一覧:",
-	"deletebatch-default-reason": "デフォルトの削除理由:",
+	"deletebatch-default-reason": "既定の削除理由:",
 	"deletebatch-title": "一括削除",
 	"deletebatch-link-back": "特別ページに戻る",
 	"deletebatch-as": "スクリプトを実行する名義:",
@@ -34,7 +34,7 @@
 	"deletebatch-system-username": "ページ削除スクリプト",
 	"action-deletebatch": "ページの一括削除",
 	"right-deletebatch": "ページを一括削除",
-	"action-deletebatch-spoof": "「ページ削除スクリプト」でページを一括削除",
+	"action-deletebatch-spoof": "「ページ削除スクリプト」でのページの一括削除",
 	"right-deletebatch-spoof": "「ページ削除スクリプト」でページを一括削除",
 	"deletebatch-deleting-file-only": "ファイル解説ページ $1 は存在しません。本体ファイルのみを削除しています。この操作は記録されません。"
 }

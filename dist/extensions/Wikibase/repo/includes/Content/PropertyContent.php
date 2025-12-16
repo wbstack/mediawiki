@@ -34,7 +34,7 @@ class PropertyContent extends EntityContent {
 	 * @param EntityHolder|null $propertyHolder
 	 * @throws InvalidArgumentException
 	 */
-	public function __construct( EntityHolder $propertyHolder = null ) {
+	public function __construct( ?EntityHolder $propertyHolder = null ) {
 		parent::__construct( self::CONTENT_MODEL_ID );
 
 		if ( $propertyHolder !== null
@@ -77,6 +77,7 @@ class PropertyContent extends EntityContent {
 			throw new LogicException( 'This content object is empty' );
 		}
 
+		// @phan-suppress-next-line PhanTypeMismatchReturnSuperType
 		return $this->propertyHolder->getEntity( Property::class );
 	}
 
@@ -119,7 +120,7 @@ class PropertyContent extends EntityContent {
 	 *
 	 * Returns false if the entity does not have a DataType set.
 	 *
-	 * @see Content::isValid()
+	 * @inheritDoc
 	 */
 	public function isValid() {
 		// TODO: provide a way to get the data type from the holder directly!

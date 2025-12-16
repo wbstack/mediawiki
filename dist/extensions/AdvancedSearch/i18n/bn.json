@@ -2,14 +2,16 @@
 	"@metadata": {
 		"authors": [
 			"Aftabuzzaman",
+			"Aishik Rehman",
 			"Rasal Lia",
 			"আজিজ",
 			"আফতাবুজ্জামান",
-			"Aishik Rehman"
+			"Bodhisattwa"
 		]
 	},
 	"advancedsearch-desc": "[[Special:Search]]-এ উচ্চতর অনুসন্ধান ক্ষমতায় সহজে প্রবেশাধিকার দেয়",
 	"advancedsearch-options-pane-head": "উচ্চতর অনুসন্ধান:",
+	"advancedsearch-options-pane-preview-list": "বর্তমানে ব্যবহৃত অনুসন্ধান পদ",
 	"advancedsearch-optgroup-text": "পাতার পাঠ্যে সন্ধান করুন",
 	"advancedsearch-optgroup-structure": "কাঠামো",
 	"advancedsearch-optgroup-files": "ফাইল ও চিত্র",
@@ -21,13 +23,14 @@
 	"advancedsearch-field-subpageof": "এই পাতার উপপাতাগুলি",
 	"advancedsearch-field-intitle": "পাতার শিরোনামে রয়েছে",
 	"advancedsearch-field-deepcategory": "এই বিষয়শ্রেণীগুলিতে থাকা পাতাসমূহ",
-	"advancedsearch-field-hastemplate": "এই টেমপ্লেটগুলিসহ পাতাগুলি",
+	"advancedsearch-field-hastemplate": "এই টেমপ্লেটসহ পাতাগুলি",
 	"advancedsearch-field-inlanguage": "এই ভাষায় পাতাগুলি",
 	"advancedsearch-field-filetype": "ফাইলের ধরন",
 	"advancedsearch-field-filew": "পিক্সেলে ফাইল প্রস্থ",
 	"advancedsearch-field-fileh": "পিক্সেলে ফাইল উচ্চতা",
 	"advancedsearch-field-sort": "বাছাইয়ের ক্রম",
 	"advancedsearch-field-preview-sort": "$1 অনুযায়ী বাছাই",
+	"advancedsearch-help-general-instruction": "$1-এর জন্য বিস্তারিত নির্দেশাবলী",
 	"advancedsearch-placeholder-exact-text": "\"গরু ঘাস খায়\"",
 	"advancedsearch-inlanguage-default": "ভাষা নির্বাচন করুন",
 	"advancedsearch-filetype-section-types": "সাধারণ ফাইলের ধরন",
@@ -57,6 +60,7 @@
 	"advancedsearch-sort-preview-create-timestamp-desc": "তৈরির তারিখ",
 	"advancedsearch-namespaces-search-in": "এতে অনুসন্ধান:",
 	"advancedsearch-namespaces-remember": "ভবিষ্যত অনুসন্ধানগুলির জন্য নির্বাচন মনে রাখুন",
+	"advancedsearch-namespaces-pane-preview-list": "বর্তমানে সক্রিয় নামস্থান ছাঁকনি",
 	"advancedsearch-namespaces-preset-all": "সব",
 	"advancedsearch-namespaces-preset-default": "পূর্বনির্ধারিত",
 	"advancedsearch-namespaces-preset-general-help": "সাধারণ সাহায্য",

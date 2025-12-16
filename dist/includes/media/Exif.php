@@ -25,6 +25,7 @@
  * @file
  */
 
+use MediaWiki\Config\ConfigException;
 use Wikimedia\AtEase\AtEase;
 
 /**
@@ -101,7 +102,6 @@ class Exif {
 	 * @param string $file Filename.
 	 * @param string $byteOrder Type of byte ordering either 'BE' (Big Endian)
 	 *   or 'LE' (Little Endian). Default ''.
-	 * @throws MWException
 	 * @todo FIXME: The following are broke:
 	 *   SubjectArea. Need to test the more obscure tags.
 	 *   DigitalZoomRatio = 0/0 is rejected. need to determine if that's valid.
@@ -416,7 +416,7 @@ class Exif {
 			$data = exif_read_data( $this->file, '', true );
 			AtEase::restoreWarnings();
 		} else {
-			throw new MWException( "Internal error: exif_read_data not present. " .
+			throw new ConfigException( "Internal error: exif_read_data not present. " .
 				"\$wgShowEXIF may be incorrectly set or not checked by an extension." );
 		}
 		/**
@@ -492,17 +492,17 @@ class Exif {
 
 			if ( isset( $this->mFilteredExifData['GPSAltitudeRef'] ) ) {
 				switch ( $this->mFilteredExifData['GPSAltitudeRef'] ) {
-				case "\0":
-					// Above sea level
-					break;
-				case "\1":
-					// Below sea level
-					$this->mFilteredExifData['GPSAltitude'] *= -1;
-					break;
-				default:
-					// Invalid
-					unset( $this->mFilteredExifData['GPSAltitude'] );
-					break;
+					case "\0":
+						// Above sea level
+						break;
+					case "\1":
+						// Below sea level
+						$this->mFilteredExifData['GPSAltitude'] *= -1;
+						break;
+					default:
+						// Invalid
+						unset( $this->mFilteredExifData['GPSAltitude'] );
+						break;
 				}
 			}
 		}
@@ -643,21 +643,25 @@ class Exif {
 	 * @param string $prop A GPS coordinate exif tag name (like GPSLongitude)
 	 */
 	private function exifGPStoNumber( $prop ) {
-		$loc =& $this->mFilteredExifData[$prop];
-		$dir =& $this->mFilteredExifData[$prop . 'Ref'];
+		$loc = $this->mFilteredExifData[$prop] ?? null;
+		$dir = $this->mFilteredExifData[$prop . 'Ref'] ?? null;
 		$res = false;
 
-		if ( isset( $loc ) && isset( $dir )
-			&& ( $dir === 'N' || $dir === 'S' || $dir === 'E' || $dir === 'W' )
-		) {
-			[ $num, $denom ] = explode( '/', $loc[0], 2 );
-			$res = (int)$num / (int)$denom;
-			[ $num, $denom ] = explode( '/', $loc[1], 2 );
-			$res += ( (int)$num / (int)$denom ) * ( 1 / 60 );
-			[ $num, $denom ] = explode( '/', $loc[2], 2 );
-			$res += ( (int)$num / (int)$denom ) * ( 1 / 3600 );
+		if ( $loc !== null && in_array( $dir, [ 'N', 'S', 'E', 'W' ] ) ) {
+			if ( is_array( $loc ) && count( $loc ) === 3 ) {
+				[ $num, $denom ] = explode( '/', $loc[0], 2 );
+				$res = (int)$num / (int)$denom;
+				[ $num, $denom ] = explode( '/', $loc[1], 2 );
+				$res += ( (int)$num / (int)$denom ) * ( 1 / 60 );
+				[ $num, $denom ] = explode( '/', $loc[2], 2 );
+				$res += ( (int)$num / (int)$denom ) * ( 1 / 3600 );
+			} elseif ( is_string( $loc ) ) {
+				// This is non-standard, but occurs in the wild (T386208)
+				[ $num, $denom ] = explode( '/', $loc, 2 );
+				$res = (int)$num / (int)$denom;
+			}
 
-			if ( $dir === 'S' || $dir === 'W' ) {
+			if ( $res && ( $dir === 'S' || $dir === 'W' ) ) {
 				// make negative
 				$res *= -1;
 			}
@@ -668,19 +672,12 @@ class Exif {
 		// using !== as $res could potentially be 0
 		if ( $res !== false ) {
 			$this->mFilteredExifData[$prop] = $res;
-			unset( $this->mFilteredExifData[$prop . 'Ref'] );
 		} else {
 			// if invalid
 			unset( $this->mFilteredExifData[$prop] );
-			unset( $this->mFilteredExifData[$prop . 'Ref'] );
 		}
+		unset( $this->mFilteredExifData[$prop . 'Ref'] );
 	}
-
-	/** #@- */
-
-	/** #@+
-	 * @return array
-	 */
 
 	/**
 	 * Get $this->mRawExifData
@@ -697,8 +694,6 @@ class Exif {
 	public function getFilteredData() {
 		return $this->mFilteredExifData;
 	}
-
-	/** #@- */
 
 	/**
 	 * The version of the output format
@@ -779,7 +774,7 @@ class Exif {
 	 * @return bool
 	 */
 	private function isLong( $in ) {
-		if ( !is_array( $in ) && sprintf( '%d', $in ) == $in && $in >= 0 && $in <= 4294967296 ) {
+		if ( !is_array( $in ) && sprintf( '%d', $in ) == $in && $in >= 0 && $in <= 4_294_967_296 ) {
 			$this->debug( $in, __FUNCTION__, true );
 
 			return true;
@@ -854,8 +849,6 @@ class Exif {
 		return false;
 	}
 
-	/** #@- */
-
 	/**
 	 * Validates if a tag has a legal value according to the Exif spec
 	 *
@@ -865,7 +858,7 @@ class Exif {
 	 * @param bool $recursive True if called recursively for array types.
 	 * @return bool
 	 */
-	private function validate( $section, $tag, $val, $recursive = false ) {
+	private function validate( $section, $tag, $val, $recursive = false ): bool {
 		$debug = "tag is '$tag'";
 		$etype = $this->mExifTags[$section][$tag];
 		$ecount = 1;
@@ -880,7 +873,7 @@ class Exif {
 		$count = 1;
 		if ( is_array( $val ) ) {
 			$count = count( $val );
-			if ( $ecount != $count ) {
+			if ( $ecount !== $count ) {
 				$this->debug( $val, __FUNCTION__, "Expected $ecount elements for $tag but got $count" );
 				return false;
 			}
@@ -895,6 +888,12 @@ class Exif {
 
 			return true;
 		}
+
+		// NULL values are considered valid. T315202.
+		if ( $val === null ) {
+			return true;
+		}
+
 		// Does not work if not typecast
 		switch ( (string)$etype ) {
 			case (string)self::BYTE:
@@ -955,7 +954,7 @@ class Exif {
 		if ( !$this->log ) {
 			return;
 		}
-		$type = gettype( $in );
+		$type = get_debug_type( $in );
 		$class = ucfirst( __CLASS__ );
 		if ( is_array( $in ) ) {
 			$in = print_r( $in, true );

@@ -44,64 +44,86 @@ class ParserOutputFlags {
 
 	/**
 	 * @var string No gallery on category page? (__NOGALLERY__).
-	 * @see \ParserOutput::getNoGallery()
-	 * @see \ParserOutput::setNoGallery()
+	 * @see ParserOutput::getNoGallery()
+	 * @see ParserOutput::setNoGallery()
 	 */
 	public const NO_GALLERY = 'mw-NoGallery';
 
 	/**
 	 * @var string Whether OOUI should be enabled.
-	 * @see \ParserOutput::getEnableOOUI()
-	 * @see \ParserOutput::setEnableOOUI()
+	 * @see ParserOutput::getEnableOOUI()
+	 * @see ParserOutput::setEnableOOUI()
 	 */
 	public const ENABLE_OOUI = 'mw-EnableOOUI';
 
 	/**
 	 * @var string Force index policy to be 'index'
-	 * @see \ParserOutput::getIndexPolicy()
-	 * @see \ParserOutput::setIndexPolicy()
+	 * @see ParserOutput::getIndexPolicy()
+	 * @see ParserOutput::setIndexPolicy()
 	 */
 	public const INDEX_POLICY = 'mw-IndexPolicy';
 
 	/**
 	 * @var string Force index policy to be 'noindex'
-	 * @see \ParserOutput::getIndexPolicy()
-	 * @see \ParserOutput::setIndexPolicy()
+	 * @see ParserOutput::getIndexPolicy()
+	 * @see ParserOutput::setIndexPolicy()
 	 */
 	public const NO_INDEX_POLICY = 'mw-NoIndexPolicy';
 
 	/**
 	 * @var string Show a new section link?
-	 * @see \ParserOutput::getNewSection()
-	 * @see \ParserOutput::setNewSection()
+	 * @see ParserOutput::getNewSection()
+	 * @see ParserOutput::setNewSection()
 	 */
 	public const NEW_SECTION = 'mw-NewSection';
 
 	/**
 	 * @var string Hide the new section link?
-	 * @see \ParserOutput::getHideNewSection()
-	 * @see \ParserOutput::setHideNewSection()
+	 * @see ParserOutput::getHideNewSection()
+	 * @see ParserOutput::setHideNewSection()
 	 */
 	public const HIDE_NEW_SECTION = 'mw-HideNewSection';
 
 	/**
 	 * @var string The prevent-clickjacking flag
-	 * @see \ParserOutput::getPreventClickjacking()
-	 * @see \ParserOutput::setPreventClickjacking()
+	 * @see ParserOutput::getPreventClickjacking()
+	 * @see ParserOutput::setPreventClickjacking()
 	 */
 	public const PREVENT_CLICKJACKING = 'mw-PreventClickjacking';
 
 	// These flags are stored in the ParserOutput::$mFlags array
 
 	/**
-	 * @var string Show the table of contents in the skin?
+	 * @var string Show the table of contents in the skin?  This is
+	 *  a /suggestion/ based on whether the TOC is "large enough"
+	 *  and other factors, and is intended mostly for skins which
+	 *  want to match the behavior of the traditional inline ToC.
 	 */
 	public const SHOW_TOC = 'show-toc';
 
 	/**
-	 * @var string Used to suppress language conversion in ToC contents.
+	 * @var string Suppress the table of contents in the skin?
+	 *  This reflects the use of the __NOTOC__ magic word in the
+	 *  article (possibly modified by __TOC__ or __FORCETOC__),
+	 *  and represents an explicit request from the author to
+	 *  hide the TOC.
 	 */
-	public const NO_TOC_CONVERSION = 'no-toc-conversion';
+	public const NO_TOC = 'no-toc';
+
+	/**
+	 * @var string Suppress the section edit links?
+	 *  This reflects the ParserOptions::getSuppressSectionEditLinks()
+	 *  flag and affects the default value of `enableSectionEditLinks`
+	 *  in ParserOutput::getText().
+	 */
+	public const NO_SECTION_EDIT_LINKS = 'no-section-edit-links';
+
+	/**
+	 * @var string Wrap section contents to allow collapsing them?
+	 * This reflects the ParserOptions::getCollapsibleSections()
+	 * flag.
+	 */
+	public const COLLAPSIBLE_SECTIONS = 'collapsible-sections';
 
 	/**
 	 * @var string
@@ -157,16 +179,27 @@ class ParserOutputFlags {
 	 */
 	public const USER_SIGNATURE = 'user-signature';
 
+	/**
+	 * @var string Set when the parse is done in "preview mode", in which
+	 * case various shortcuts are taken to work around the fact that the
+	 * parsed text does not yet have an actual revision ID, revision time,
+	 * etc.
+	 * @see ParserOptions::getIsPreview()
+	 */
+	public const IS_PREVIEW = 'is-preview';
+
 	public static function cases(): array {
 		return [
 			self::NO_GALLERY,
-			self::NO_TOC_CONVERSION,
 			self::ENABLE_OOUI,
 			self::INDEX_POLICY,
 			self::NO_INDEX_POLICY,
 			self::NEW_SECTION,
 			self::HIDE_NEW_SECTION,
 			self::SHOW_TOC,
+			self::NO_TOC,
+			self::NO_SECTION_EDIT_LINKS,
+			self::COLLAPSIBLE_SECTIONS,
 			self::PREVENT_CLICKJACKING,
 			self::VARY_REVISION,
 			self::VARY_REVISION_ID,
@@ -176,6 +209,7 @@ class ParserOutputFlags {
 			self::VARY_PAGE_ID,
 			self::VARY_USER,
 			self::USER_SIGNATURE,
+			self::IS_PREVIEW,
 		];
 	}
 }

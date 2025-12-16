@@ -2,10 +2,8 @@
 
 namespace Wikibase\Repo\Specials;
 
-use MWException;
+use MediaWiki\Title\Title;
 use RuntimeException;
-use Status;
-use Title;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\ItemId;
@@ -13,9 +11,11 @@ use Wikibase\Lib\FormatableSummary;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\UserInputException;
 use Wikibase\Repo\EditEntity\EditEntity;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\EditEntityStatus;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\SummaryFormatter;
 use Wikibase\Repo\WikibaseRepo;
+use Wikimedia\Assert\Assert;
 
 /**
  * Abstract base class for special pages of the WikibaseRepo extension.
@@ -44,7 +44,7 @@ abstract class SpecialWikibaseRepoPage extends SpecialWikibasePage {
 	private $entityTitleLookup;
 
 	/**
-	 * @var MediawikiEditEntityFactory
+	 * @var MediaWikiEditEntityFactory
 	 */
 	private $editEntityFactory;
 
@@ -60,7 +60,7 @@ abstract class SpecialWikibaseRepoPage extends SpecialWikibasePage {
 	 * @param SpecialPageCopyrightView $copyrightView
 	 * @param SummaryFormatter $summaryFormatter
 	 * @param EntityTitleLookup $entityTitleLookup
-	 * @param MediawikiEditEntityFactory $editEntityFactory
+	 * @param MediaWikiEditEntityFactory $editEntityFactory
 	 */
 	public function __construct(
 		$title,
@@ -69,7 +69,7 @@ abstract class SpecialWikibaseRepoPage extends SpecialWikibasePage {
 		SpecialPageCopyrightView $copyrightView,
 		SummaryFormatter $summaryFormatter,
 		EntityTitleLookup $entityTitleLookup,
-		MediawikiEditEntityFactory $editEntityFactory
+		MediaWikiEditEntityFactory $editEntityFactory
 	) {
 		parent::__construct( $title, $restriction );
 		$this->tags = $tags;
@@ -84,7 +84,7 @@ abstract class SpecialWikibaseRepoPage extends SpecialWikibasePage {
 	 * @param int $baseRev
 	 * @return EditEntity
 	 */
-	protected function prepareEditEntity( EntityId $id = null, $baseRev = 0 ) {
+	protected function prepareEditEntity( ?EntityId $id = null, int $baseRev = 0 ): EditEntity {
 		$this->editEntity = $this->editEntityFactory->newEditEntity(
 			$this->getContext(),
 			$id,
@@ -160,7 +160,6 @@ abstract class SpecialWikibaseRepoPage extends SpecialWikibasePage {
 	/**
 	 * @param EntityId $id
 	 *
-	 * @throws MWException
 	 * @return null|Title
 	 */
 	protected function getEntityTitle( EntityId $id ) {
@@ -174,10 +173,10 @@ abstract class SpecialWikibaseRepoPage extends SpecialWikibasePage {
 	 *
 	 * @param EntityDocument $entity
 	 * @param FormatableSummary $summary
-	 * @param string $token
+	 * @param string $token Edit token to check. An empty string is guaranteed to be invalid.
 	 * @param int $flags The edit flags (see WikiPage::doEditContent)
 	 *
-	 * @return Status
+	 * @return EditEntityStatus
 	 */
 	protected function saveEntity(
 		EntityDocument $entity,
@@ -198,11 +197,38 @@ abstract class SpecialWikibaseRepoPage extends SpecialWikibasePage {
 	}
 
 	/**
+	 * Redirect to the page of the entity that was successfully edited.
+	 *
+	 * @param EditEntityStatus $status A status as returned by {@link self::saveEntity()}.
+	 * The status must be {@link StatusValue::isOK() OK}.
+	 */
+	protected function redirectToEntityPage( EditEntityStatus $status ): void {
+		Assert::parameter( $status->isOK(), '$status', 'must be OK' );
+		$title = $this->getEntityTitle( $status->getRevision()->getEntity()->getId() );
+		$savedTempUser = $status->getSavedTempUser();
+		$redirectUrl = '';
+		if ( $savedTempUser !== null ) {
+			$this->getHookRunner()->onTempUserCreatedRedirect(
+				$this->getRequest()->getSession(),
+				$savedTempUser,
+				$title->getPrefixedDBkey(),
+				'',
+				'',
+				$redirectUrl
+			);
+		}
+		if ( !$redirectUrl ) {
+			$redirectUrl = $title->getFullURL();
+		}
+		$this->getOutput()->redirect( $redirectUrl );
+	}
+
+	/**
 	 * @param string|null $saveMessageKey Defaults to "wikibase-<special page name>-submit".
 	 *
 	 * @return string HTML
 	 */
-	protected function getCopyrightHTML( $saveMessageKey = null ) {
+	protected function getCopyrightHTML( ?string $saveMessageKey = null ) {
 		if ( $saveMessageKey === null ) {
 			$saveMessageKey = 'wikibase-' . strtolower( $this->getName() ) . '-submit';
 		}

@@ -2,17 +2,18 @@
 	"@metadata": {
 		"authors": [
 			"Danmichaelo",
+			"EdoAug",
 			"Fredrilj",
 			"Imre Eilertsen",
 			"Jeblad",
 			"Jon Harald Søby",
 			"Orf3us",
-			"Pmt",
-			"EdoAug"
+			"Pmt"
 		]
 	},
 	"advancedsearch-desc": "Enkel tilgang til avanserte søkemuligheter på [[Special:Search]]",
 	"advancedsearch-options-pane-head": "Avansert søk:",
+	"advancedsearch-options-pane-preview-list": "Søkeord i bruk",
 	"advancedsearch-optgroup-text": "Søk i sidetekst",
 	"advancedsearch-optgroup-structure": "Struktur",
 	"advancedsearch-optgroup-files": "Filer og bilder",
@@ -31,6 +32,7 @@
 	"advancedsearch-field-fileh": "Filhøyde i piksler",
 	"advancedsearch-field-sort": "Sorteringsrekkefølge",
 	"advancedsearch-field-preview-sort": "Sorter etter $1",
+	"advancedsearch-help-general-instruction": "Detaljert veiledning for $1",
 	"advancedsearch-help-plain": "; Beskrivelse\n: Søker etter disse ordene i tittelen eller teksten\n; Vær obs på følgende\n:* Flere ord kan skrives inn her.\n:* Tegnsetting og andre ikke-alfanumeriske tegn (med unntak av kolon og komma) ignoreres.\n:* Det kan forekomme resultater som ikke inneholder ett eller flere av søkeordene.\n:* Ordstammeanalyse brukes. Eksempel: Om ''bil'' skrives inn vil også ''biler'' tas med. Ordstammeanalysen er språkspesifikk. \n; Hjelpeside\n: [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Fulltekstsøk]\n; Tilsvarende syntaks i vanlig søk\n: <code>sesam stasjon tog</code>",
 	"advancedsearch-help-phrase": "; Beskrivelse\n: Søker etter en bestemt tegnsekvens. Tegnsetting ignoreres.\n; Vær obs på følgende\n: (kun gyldig når det brukes hermetegn, se eksempelet nedenfor)\n:* Skill søkefrasene med komma eller mellomrom, f.eks. <code>\"god morgen\"</code>, <code>\"hallo venn!\"</code>.\n:* Tegnsetting og andre ikke-alfanumeriske tegn (med unntak av kolon og komma) ignoreres.\n:* Søk skiller IKKE mellom store og små bokstaver.\n:* Ordstammeanalyse brukes ikke.\n; Hjelpeside:\n: [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Ord, fraser og modifikatorer]\n; Tilsvarende syntaks i vanlig søk\n: Ord i hermetegn, f.eks. <code>\"Begynn med begynnelsen\"</code>.",
 	"advancedsearch-help-or": "; Beskrivelse\n: Minst ett av søkeordene må være inkludert på siden\n; Hjelpeside\n: [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Ord, fraser og modifikatorer]\n; Tilsvarende syntaks i vanlig søk\n: Ord med <code>OR</code> mellom dem, som <code>rullebrett OR skateboard</code>.",
@@ -73,6 +75,7 @@
 	"advancedsearch-sort-preview-create-timestamp-desc": "opprettelsesdato",
 	"advancedsearch-namespaces-search-in": "Søk i:",
 	"advancedsearch-namespaces-remember": "Husk valgene for fremtidige søk",
+	"advancedsearch-namespaces-pane-preview-list": "Gjeldende navneromsfiltre",
 	"advancedsearch-namespaces-preset-all": "Alle",
 	"advancedsearch-namespaces-preset-default": "Standard",
 	"advancedsearch-namespaces-preset-general-help": "Generell hjelp",

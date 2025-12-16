@@ -2,18 +2,19 @@
 	"@metadata": {
 		"authors": [
 			"Alan Mena",
+			"Amire80",
 			"Bombolla",
 			"Fitoschido",
 			"FranSisPac",
 			"Jmarchn",
-			"Mguix",
 			"Leptictidium",
-			"Amire80",
+			"Mguix",
 			"SMP"
 		]
 	},
 	"advancedsearch-desc": "Accés fàcil a capacitats avançades de recerca a [[Special:Search]]",
 	"advancedsearch-options-pane-head": "Cerca avançada:",
+	"advancedsearch-options-pane-preview-list": "Termes de cerca utilitzats actualment",
 	"advancedsearch-optgroup-text": "Cerca dins del text de la pàgina",
 	"advancedsearch-optgroup-structure": "Estructura",
 	"advancedsearch-optgroup-files": "Fitxers i imatges",
@@ -32,6 +33,7 @@
 	"advancedsearch-field-fileh": "Alçària del fitxer en píxels",
 	"advancedsearch-field-sort": "Ordenació",
 	"advancedsearch-field-preview-sort": "Ordenar per $1",
+	"advancedsearch-help-general-instruction": "Instruccions detallades per a $1",
 	"advancedsearch-help-plain": ";Descripció\n:Cerca aquestes paraules en el títol o text.\n;Tingueu en compte el següent\n:* Aquí podeu entrar-hi múltiples paraules.\n:* S'ignoren els signes de puntuació i altres caràcters no alfanumèrics (excepte els dos punts i la coma).\n:* Pot haver-hi resultats que no continguin un o més dels vostres termes de cerca.\n:* Es tenen en compte les paraules derivades d'una mateixa arrel. Exemple: si s'entra ''cotxe'' la cerca també considerarà ''cotxes''. Aquest aspecte és específic de cada llengua.\n;Pàgina d'ajuda\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Cerca de text complet]\n;Sintaxi equivalent en la cerca normal\n::<code>cotxe barri sèsam</code>",
 	"advancedsearch-help-phrase": ";Descripció\n:Cerca una seqüència específica de caràcters. Els signes de puntuació s'ignoren.\n;Tingueu en compte el següent\n(sols vàlid quan s'utilitzen cometes; vegeu l'exemple de més avall)\n:* Separeu les diverses frases que cerqueu amb una coma o un espai, p.ex. <code>\"bon dia\"</code>, <code>\"hola noi!\"</code>.\n:* S'ignoren els signes de puntuació i altres caràcters no alfanumèrics (excepte els dos punts i la coma).\n:* La cerca no distingeix entre majúscules i minúscules.\n:* No es tenen en compte les paraules derivades d'una mateixa arrel.\n;Pàgina d'ajuda\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Paraules, frases i modificadors]\n;Sintaxi equivalent en la cerca normal\n:Paraules entre cometes com, per exemple, <code>\"Comença al començament\"</code>.",
 	"advancedsearch-help-or": ";Descripció\n:Almenys un dels termes de cerca ha de figurar en la pàgina.\n;Pàgina d'ajuda\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Paraules, frases i modificadors]\n;Sintaxi equivalent en la cerca normal\n:Paraules amb <code>OR</code> entre elles com, per exemple, <code>blau OR gris</code>.",
@@ -74,6 +76,7 @@
 	"advancedsearch-sort-preview-create-timestamp-desc": "data de creació",
 	"advancedsearch-namespaces-search-in": "Cerca a:",
 	"advancedsearch-namespaces-remember": "Recorda la selecció per a futures cerques",
+	"advancedsearch-namespaces-pane-preview-list": "Filtres d'espais de noms actualment actius",
 	"advancedsearch-namespaces-preset-all": "Tot",
 	"advancedsearch-namespaces-preset-default": "Per defecte",
 	"advancedsearch-namespaces-preset-general-help": "Ajuda general",

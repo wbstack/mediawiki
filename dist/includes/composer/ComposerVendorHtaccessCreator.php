@@ -18,6 +18,8 @@
  *
  */
 
+namespace MediaWiki\Composer;
+
 /**
  * Creates a .htaccess in the vendor/ directory
  * to prevent web access.
@@ -38,6 +40,8 @@ class ComposerVendorHtaccessCreator {
 			return;
 		}
 
-		file_put_contents( $fname, "Require all denied\n" );
+		file_put_contents( $fname,
+			"Require all denied\n" .
+			"Satisfy All\n" );
 	}
 }

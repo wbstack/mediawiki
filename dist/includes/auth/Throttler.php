@@ -21,13 +21,14 @@
 
 namespace MediaWiki\Auth;
 
-use BagOStuff;
+use InvalidArgumentException;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use Wikimedia\ObjectCache\BagOStuff;
 
 /**
  * A helper class for throttling authentication attempts.
@@ -61,26 +62,29 @@ class Throttler implements LoggerAwareInterface {
 	 *   - warningLimit: the log level will be raised to warning when rejecting an attempt after
 	 *     no less than this many failures.
 	 */
-	public function __construct( array $conditions = null, array $params = [] ) {
+	public function __construct( ?array $conditions = null, array $params = [] ) {
 		$invalidParams = array_diff_key( $params,
 			array_fill_keys( [ 'type', 'cache', 'warningLimit' ], true ) );
 		if ( $invalidParams ) {
-			throw new \InvalidArgumentException( 'unrecognized parameters: '
+			throw new InvalidArgumentException( 'unrecognized parameters: '
 				. implode( ', ', array_keys( $invalidParams ) ) );
 		}
 
+		$services = MediaWikiServices::getInstance();
+		$objectCacheFactory = $services->getObjectCacheFactory();
+
 		if ( $conditions === null ) {
-			$config = MediaWikiServices::getInstance()->getMainConfig();
+			$config = $services->getMainConfig();
 			$conditions = $config->get( MainConfigNames::PasswordAttemptThrottle );
 			$params += [
 				'type' => 'password',
-				'cache' => \ObjectCache::getLocalClusterInstance(),
+				'cache' => $objectCacheFactory->getLocalClusterInstance(),
 				'warningLimit' => 50,
 			];
 		} else {
 			$params += [
 				'type' => 'custom',
-				'cache' => \ObjectCache::getLocalClusterInstance(),
+				'cache' => $objectCacheFactory->getLocalClusterInstance(),
 				'warningLimit' => INF,
 			];
 		}
@@ -113,7 +117,7 @@ class Throttler implements LoggerAwareInterface {
 	 */
 	public function increase( $username = null, $ip = null, $caller = null ) {
 		if ( $username === null && $ip === null ) {
-			throw new \InvalidArgumentException( 'Either username or IP must be set for throttling' );
+			throw new InvalidArgumentException( 'Either username or IP must be set for throttling' );
 		}
 
 		$userKey = $username ? md5( $username ) : null;
@@ -124,17 +128,11 @@ class Throttler implements LoggerAwareInterface {
 
 			// a limit of 0 is used as a disable flag in some throttling configuration settings
 			// throttling the whole world is probably a bad idea
-			if ( !$count || $userKey === null && $ipKey === null ) {
+			if ( !$count || ( $userKey === null && $ipKey === null ) ) {
 				continue;
 			}
 
-			$throttleKey = $this->cache->makeGlobalKey(
-				'throttler',
-				$this->type,
-				$index,
-				$ipKey ?? '',
-				$userKey ?? ''
-			);
+			$throttleKey = $this->getThrottleKey( $this->type, $index, $ipKey, $userKey );
 			$throttleCount = $this->cache->get( $throttleKey );
 			if ( $throttleCount && $throttleCount >= $count ) {
 				// Throttle limited reached
@@ -166,15 +164,32 @@ class Throttler implements LoggerAwareInterface {
 	 *
 	 * @param string|null $username
 	 * @param string|null $ip
-	 * @throws \MWException
 	 */
 	public function clear( $username = null, $ip = null ) {
 		$userKey = $username ? md5( $username ) : null;
 		foreach ( $this->conditions as $index => $specificThrottle ) {
 			$ipKey = isset( $specificThrottle['allIPs'] ) ? null : $ip;
-			$throttleKey = $this->cache->makeGlobalKey( 'throttler', $this->type, $index, $ipKey, $userKey );
+			$throttleKey = $this->getThrottleKey( $this->type, $index, $ipKey, $userKey );
 			$this->cache->delete( $throttleKey );
 		}
+	}
+
+	/**
+	 * Construct a cache key for the throttle counter
+	 * @param string $type
+	 * @param int $index
+	 * @param string|null $ipKey
+	 * @param string|null $userKey
+	 * @return string
+	 */
+	private function getThrottleKey( string $type, int $index, ?string $ipKey, ?string $userKey ): string {
+		return $this->cache->makeGlobalKey(
+			'throttler',
+			$type,
+			$index,
+			$ipKey ?? '',
+			$userKey ?? ''
+		);
 	}
 
 	/**

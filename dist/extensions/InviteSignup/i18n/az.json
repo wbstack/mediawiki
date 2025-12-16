@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nemoralis"
+		]
+	},
+	"invitesignup": "İnsanları bu vikiyə dəvət edin",
+	"is-desc": "E-poçt dəvətləri göndərin",
+	"is-tableth-date": "Tarix",
+	"is-tableth-email": "E-poçt",
+	"is-tableth-inviter": "Dəvət edən",
+	"is-tableth-signup": "Qeydiyyatdan keçib",
+	"is-tableth-groups": "Qruplar",
+	"is-add": "Əlavə et",
+	"is-delete": "Sil",
+	"is-invalidemail": "<b>$1</b> etibarlı e-poçt ünvanı deyil.",
+	"is-emailsubj": "Siz {{SITENAME}} saytına qoşulmağa dəvət olunursunuz",
+	"is-emailbody": "Salam,\n\n{{GENDER:$1|$1}} sizi {{SITENAME}} saytında qeydiyyatdan keçməyə dəvət edib. Siz $2 ünvanında qeydiyyatdan keçə bilərsiniz",
+	"right-invitesignup": "İstifadəçiləri qeydiyyatdan keçməyə dəvət etmək",
+	"action-invitesignup": "istifadəçiləri bu saytda qeydiyyatdan keçməyə dəvət etmək"
+}

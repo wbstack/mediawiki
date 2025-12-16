@@ -21,13 +21,13 @@
  * @ingroup Maintenance
  */
 
-use MediaWiki\MediaWikiServices;
-
 use Wikimedia\AtEase\AtEase;
 use Wikimedia\Rdbms\DBConnRef;
 use Wikimedia\Rdbms\IMaintainableDatabase;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script that performs some operations specific to SQLite database backend.
@@ -54,7 +54,7 @@ class SqliteMaintenance extends Maintenance {
 			return;
 		}
 
-		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
+		$lb = $this->getServiceContainer()->getDBLoadBalancer();
 		$dbw = $lb->getMaintenanceConnectionRef( DB_PRIMARY );
 		if ( $dbw->getType() !== 'sqlite' ) {
 			$this->error( "This maintenance script requires a SQLite database.\n" );
@@ -138,5 +138,7 @@ class SqliteMaintenance extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = SqliteMaintenance::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

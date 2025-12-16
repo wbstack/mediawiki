@@ -1,0 +1,70 @@
+@import 'mediawiki.skin.variables.less';
+
+@ooui-icons: '../../../resources/lib/ooui/themes/wikimediaui/images/icons';
+
+.prepend-with-oojs-icon( @image ) {
+	&::before {
+		content: '';
+
+		/* Copied from .wikibase-toolbar-button .wb-icon */
+		background-size: 15px 15px;
+		width: 15px;
+		height: 15px;
+		display: inline-block;
+		vertical-align: middle;
+		background-position: @background-position-base;
+		@icon-path: '@{ooui-icons}/@{image}';
+		/* @embed */
+		background-image: url( @icon-path );
+		opacity: @opacity-icon-subtle;
+	}
+
+	&:hover::before {
+		// TODO: Icons normally apply `@opacity-icon-base--hover: 0.74` on hover.
+		opacity: 1;
+	}
+}
+
+.entityschema-title {
+	.entityschema-title-label-empty {
+		color: @color-subtle;
+	}
+
+	.entityschema-title-id {
+		color: @color-subtle;
+		font-size: 60%;
+	}
+}
+
+.entityschema-section {
+	display: grid;
+	grid-template-columns: auto max-content;
+}
+
+.entityschema-schema-text-links {
+	grid-column: 2;
+	grid-row: 1;
+	margin-top: 1em;
+	padding: 1em;
+
+	> :not( :first-child )::before {
+		margin-left: 0.5em;
+		content: '|';
+		margin-right: 0.5em;
+	}
+}
+
+.entityschema-text {
+	grid-column: 1;
+	grid-row: 1;
+}
+
+.entityschema-edit-button {
+	.edit-icon {
+		.prepend-with-oojs-icon( 'edit-progressive.svg' );
+	}
+
+	.add-icon {
+		.prepend-with-oojs-icon( 'add-progressive.svg' );
+	}
+}

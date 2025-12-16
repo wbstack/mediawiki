@@ -2,7 +2,7 @@
 /**
  * MediaWiki page data importer.
  *
- * Copyright © 2003,2005 Brion Vibber <brion@pobox.com>
+ * Copyright © 2003,2005 Brooke Vibber <bvibber@wikimedia.org>
  * https://www.mediawiki.org/
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,17 +25,35 @@
  */
 
 use MediaWiki\Cache\CacheKeyHelper;
+use MediaWiki\Config\Config;
+use MediaWiki\Content\Content;
 use MediaWiki\Content\IContentHandlerFactory;
+use MediaWiki\Deferred\DeferredUpdates;
+use MediaWiki\Deferred\SiteStatsUpdate;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
+use MediaWiki\Language\Language;
 use MediaWiki\MainConfigNames;
-use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Page\WikiPageFactory;
-use MediaWiki\Permissions\PermissionManager;
+use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\SlotRecord;
 use MediaWiki\Revision\SlotRoleRegistry;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\ForeignTitle;
+use MediaWiki\Title\ImportTitleFactory;
+use MediaWiki\Title\NaiveForeignTitleFactory;
+use MediaWiki\Title\NaiveImportTitleFactory;
+use MediaWiki\Title\NamespaceAwareForeignTitleFactory;
+use MediaWiki\Title\NamespaceImportTitleFactory;
+use MediaWiki\Title\NamespaceInfo;
+use MediaWiki\Title\SubpageImportTitleFactory;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleFactory;
+use MediaWiki\User\ExternalUserNames;
+use Wikimedia\AtEase\AtEase;
 use Wikimedia\NormalizedException\NormalizedException;
+use Wikimedia\Rdbms\IDBAccessObject;
 
 /**
  * XML file reader for the page data importer.
@@ -46,6 +64,9 @@ use Wikimedia\NormalizedException\NormalizedException;
 class WikiImporter {
 	/** @var XMLReader|null */
 	private $reader;
+
+	/** @var string */
+	private $sourceAdapterId;
 
 	/** @var array|null */
 	private $foreignNamespaces = null;
@@ -86,14 +107,8 @@ class WikiImporter {
 	/** @var int */
 	private $pageOffset = 0;
 
-	/** @var Config */
-	private $config;
-
-	/** @var ImportTitleFactory */
-	private $importTitleFactory;
-
-	/** @var HookRunner */
-	private $hookRunner;
+	private ImportTitleFactory $importTitleFactory;
+	private ExternalUserNames $externalUserNames;
 
 	/** @var array */
 	private $countableCache = [];
@@ -101,51 +116,30 @@ class WikiImporter {
 	/** @var bool */
 	private $disableStatisticsUpdate = false;
 
-	/** @var ExternalUserNames */
-	private $externalUserNames;
+	/**
+	 * Authority used for permission checks only (to ensure that the user performing the import is
+	 * allowed to edit the pages they're importing). To skip the checks, use UltimateAuthority.
+	 *
+	 * If you want to also log the import actions, see ImportReporter.
+	 */
+	private Authority $performer;
 
-	/** @var Language */
-	private $contentLanguage;
-
-	/** @var NamespaceInfo */
-	private $namespaceInfo;
-
-	/** @var TitleFactory */
-	private $titleFactory;
-
-	/** @var WikiPageFactory */
-	private $wikiPageFactory;
-
-	/** @var UploadRevisionImporter */
-	private $uploadRevisionImporter;
-
-	/** @var PermissionManager */
-	private $permissionManager;
-
-	/** @var IContentHandlerFactory */
-	private $contentHandlerFactory;
-
-	/** @var SlotRoleRegistry */
-	private $slotRoleRegistry;
+	private Config $config;
+	private HookRunner $hookRunner;
+	private Language $contentLanguage;
+	private NamespaceInfo $namespaceInfo;
+	private TitleFactory $titleFactory;
+	private WikiPageFactory $wikiPageFactory;
+	private UploadRevisionImporter $uploadRevisionImporter;
+	private IContentHandlerFactory $contentHandlerFactory;
+	private SlotRoleRegistry $slotRoleRegistry;
 
 	/**
 	 * Creates an ImportXMLReader drawing from the source provided
-	 * @param ImportSource $source
-	 * @param Config $config
-	 * @param HookContainer $hookContainer
-	 * @param Language $contentLanguage
-	 * @param NamespaceInfo $namespaceInfo
-	 * @param TitleFactory $titleFactory
-	 * @param WikiPageFactory $wikiPageFactory
-	 * @param UploadRevisionImporter $uploadRevisionImporter
-	 * @param PermissionManager $permissionManager
-	 * @param IContentHandlerFactory $contentHandlerFactory
-	 * @param SlotRoleRegistry $slotRoleRegistry
-	 * @throws MWException
-	 * @suppress PhanStaticCallToNonStatic, UnusedSuppression -- for PHP 7.4 support
 	 */
 	public function __construct(
 		ImportSource $source,
+		Authority $performer,
 		Config $config,
 		HookContainer $hookContainer,
 		Language $contentLanguage,
@@ -153,10 +147,10 @@ class WikiImporter {
 		TitleFactory $titleFactory,
 		WikiPageFactory $wikiPageFactory,
 		UploadRevisionImporter $uploadRevisionImporter,
-		PermissionManager $permissionManager,
 		IContentHandlerFactory $contentHandlerFactory,
 		SlotRoleRegistry $slotRoleRegistry
 	) {
+		$this->performer = $performer;
 		$this->config = $config;
 		$this->hookRunner = new HookRunner( $hookContainer );
 		$this->contentLanguage = $contentLanguage;
@@ -164,44 +158,15 @@ class WikiImporter {
 		$this->titleFactory = $titleFactory;
 		$this->wikiPageFactory = $wikiPageFactory;
 		$this->uploadRevisionImporter = $uploadRevisionImporter;
-		$this->permissionManager = $permissionManager;
 		$this->contentHandlerFactory = $contentHandlerFactory;
 		$this->slotRoleRegistry = $slotRoleRegistry;
 
 		if ( !in_array( 'uploadsource', stream_get_wrappers() ) ) {
 			stream_wrapper_register( 'uploadsource', UploadSourceAdapter::class );
 		}
-		$id = UploadSourceAdapter::registerSource( $source );
+		$this->sourceAdapterId = UploadSourceAdapter::registerSource( $source );
 
-		// Enable the entity loader, as it is needed for loading external URLs via
-		// XMLReader::open (T86036)
-		// phpcs:ignore Generic.PHP.NoSilencedErrors -- suppress deprecation per T268847
-		$oldDisable = @libxml_disable_entity_loader( false );
-		if ( PHP_VERSION_ID >= 80000 ) {
-			// A static call is now preferred, and avoids https://github.com/php/php-src/issues/11548
-			$reader = XMLReader::open(
-				"uploadsource://$id", null, LIBXML_PARSEHUGE );
-			if ( $reader instanceof XMLReader ) {
-				$this->reader = $reader;
-				$status = true;
-			} else {
-				$status = false;
-			}
-		} else {
-			// A static call generated a deprecation warning prior to PHP 8.0
-			$this->reader = new XMLReader;
-			$status = $this->reader->open(
-				"uploadsource://$id", null, LIBXML_PARSEHUGE );
-		}
-		if ( !$status ) {
-			$error = libxml_get_last_error();
-			// phpcs:ignore Generic.PHP.NoSilencedErrors
-			@libxml_disable_entity_loader( $oldDisable );
-			throw new MWException( 'Encountered an internal error while initializing WikiImporter object: ' .
-				$error->message );
-		}
-		// phpcs:ignore Generic.PHP.NoSilencedErrors
-		@libxml_disable_entity_loader( $oldDisable );
+		$this->openReader();
 
 		// Default callbacks
 		$this->setPageCallback( [ $this, 'beforeImportPage' ] );
@@ -570,15 +535,14 @@ class WikiImporter {
 		if ( !$this->disableStatisticsUpdate ) {
 			$page = $this->wikiPageFactory->newFromTitle( $pageIdentity );
 
-			$page->loadPageData( WikiPage::READ_LATEST );
+			$page->loadPageData( IDBAccessObject::READ_LATEST );
 			$rev = $page->getRevisionRecord();
 			if ( $rev === null ) {
 
 				wfDebug( __METHOD__ . ': Skipping article count adjustment for ' . $pageIdentity .
 					' because WikiPage::getRevisionRecord() returned null' );
 			} else {
-				$user = RequestContext::getMain()->getUser();
-				$update = $page->newPageUpdater( $user )->prepareUpdate();
+				$update = $page->newPageUpdater( $this->performer )->prepareUpdate();
 				$countKey = 'title_' . CacheKeyHelper::getKeyForPage( $pageIdentity );
 				$countable = $update->isCountable();
 				if ( array_key_exists( $countKey, $this->countableCache ) &&
@@ -590,8 +554,7 @@ class WikiImporter {
 			}
 		}
 
-		$title = Title::castFromPageIdentity( $pageIdentity );
-		// @phan-suppress-next-line PhanTypeMismatchArgumentNullable castFrom does not return null here
+		$title = Title::newFromPageIdentity( $pageIdentity );
 		return $this->hookRunner->onAfterImportPage( $title, $foreignTitle,
 			$revCount, $sRevCount, $pageInfo );
 	}
@@ -710,10 +673,11 @@ class WikiImporter {
 	/**
 	 * Primary entry point
 	 * @throws Exception
-	 * @throws MWException
 	 * @return bool
 	 */
 	public function doImport() {
+		$this->syntaxCheckXML();
+
 		// Calls to reader->read need to be wrapped in calls to
 		// libxml_disable_entity_loader() to avoid local file
 		// inclusion attacks (T48932).
@@ -732,7 +696,7 @@ class WikiImporter {
 						'message' => $error->message,
 					] );
 				} else {
-					throw new MWException(
+					throw new UnexpectedValueException(
 						"Expected '<mediawiki>' tag, got '<{$this->reader->localName}>' tag."
 					);
 				}
@@ -852,7 +816,7 @@ class WikiImporter {
 	 * @return mixed|false
 	 */
 	private function processLogItem( $logInfo ) {
-		$revision = new WikiRevision( $this->config );
+		$revision = new WikiRevision();
 
 		if ( isset( $logInfo['id'] ) ) {
 			$revision->setID( $logInfo['id'] );
@@ -937,7 +901,7 @@ class WikiImporter {
 					// $title is either an array of two titles or false.
 					if ( is_array( $title ) ) {
 						$this->pageCallback( $title );
-						list( $pageInfo['_title'], $foreignTitle ) = $title;
+						[ $pageInfo['_title'], $foreignTitle ] = $title;
 					} else {
 						$badTitle = true;
 						$skip = true;
@@ -1051,19 +1015,17 @@ class WikiImporter {
 	}
 
 	/**
-	 * @param Title $title
+	 * @param PageIdentity $page
 	 * @param int $revisionId
 	 * @param array $contentInfo
 	 *
 	 * @return Content
-	 * @throws MWException
 	 */
-	private function makeContent( Title $title, $revisionId, $contentInfo ) {
-		$maxArticleSize = MediaWikiServices::getInstance()->getMainConfig()->get(
-			MainConfigNames::MaxArticleSize );
+	private function makeContent( PageIdentity $page, $revisionId, $contentInfo ) {
+		$maxArticleSize = $this->config->get( MainConfigNames::MaxArticleSize );
 
 		if ( !isset( $contentInfo['text'] ) ) {
-			throw new MWException( 'Missing text field in import.' );
+			throw new InvalidArgumentException( 'Missing text field in import.' );
 		}
 
 		// Make sure revisions won't violate $wgMaxArticleSize, which could lead to
@@ -1081,7 +1043,7 @@ class WikiImporter {
 				] ) ) &&
 			strlen( $contentInfo['text'] ) > $maxArticleSize * 1024
 		) {
-			throw new MWException( 'The text of ' .
+			throw new RuntimeException( 'The text of ' .
 				( $revisionId ?
 					"the revision with ID $revisionId" :
 					'a revision'
@@ -1089,8 +1051,10 @@ class WikiImporter {
 		}
 
 		$role = $contentInfo['role'] ?? SlotRecord::MAIN;
-		$model = $contentInfo['model'] ?? $this->getDefaultContentModel( $title, $role );
-		$handler = $this->getContentHandler( $model );
+		$model = $contentInfo['model'] ?? $this->slotRoleRegistry
+			->getRoleHandler( $role )
+			->getDefaultModel( $page );
+		$handler = $this->contentHandlerFactory->getContentHandler( $model );
 
 		$text = $handler->importTransform( $contentInfo['text'] );
 
@@ -1100,11 +1064,10 @@ class WikiImporter {
 	/**
 	 * @param array $pageInfo
 	 * @param array $revisionInfo
-	 * @throws MWException
 	 * @return mixed|false
 	 */
 	private function processRevision( $pageInfo, $revisionInfo ) {
-		$revision = new WikiRevision( $this->config );
+		$revision = new WikiRevision();
 
 		$revId = $revisionInfo['id'] ?? 0;
 		if ( $revId ) {
@@ -1119,7 +1082,7 @@ class WikiImporter {
 
 		foreach ( $revisionInfo['content'] ?? [] as $slotInfo ) {
 			if ( !isset( $slotInfo['role'] ) ) {
-				throw new MWException( "Missing role for imported slot." );
+				throw new RuntimeException( "Missing role for imported slot." );
 			}
 
 			$content = $this->makeContent( $title, $revId, $slotInfo );
@@ -1220,11 +1183,11 @@ class WikiImporter {
 	 * @return mixed
 	 */
 	private function processUpload( $pageInfo, $uploadInfo ) {
-		$revision = new WikiRevision( $this->config );
+		$revision = new WikiRevision();
 		$revId = $pageInfo['id'];
 		$title = $pageInfo['_title'];
 		// T292348: text key may be absent, force addition if null
-		$uploadInfo['text'] = $uploadInfo['text'] ?? '';
+		$uploadInfo['text'] ??= '';
 		$content = $this->makeContent( $title, $revId, $uploadInfo );
 
 		$revision->setTitle( $title );
@@ -1309,7 +1272,6 @@ class WikiImporter {
 		$title = $this->importTitleFactory->createTitleFromForeignTitle(
 			$foreignTitle );
 
-		$commandLineMode = $this->config->get( 'CommandLineMode' );
 		if ( $title === null ) {
 			# Invalid page title? Ignore the page
 			$this->notice( 'import-error-invalid', $foreignTitle->getFullText() );
@@ -1320,37 +1282,77 @@ class WikiImporter {
 		} elseif ( !$title->canExist() ) {
 			$this->notice( 'import-error-special', $title->getPrefixedText() );
 			return false;
-		} elseif ( !$commandLineMode ) {
-			$user = RequestContext::getMain()->getUser();
-
-			if ( !$this->permissionManager->userCan( 'edit', $user, $title ) ) {
-				# Do not import if the importing wiki user cannot edit this page
-				$this->notice( 'import-error-edit', $title->getPrefixedText() );
-
-				return false;
-			}
+		} elseif ( !$this->performer->definitelyCan( 'edit', $title ) ) {
+			# Do not import if the importing wiki user cannot edit this page
+			$this->notice( 'import-error-edit', $title->getPrefixedText() );
+			return false;
 		}
 
 		return [ $title, $foreignTitle ];
 	}
 
 	/**
-	 * @param string $model
-	 * @return ContentHandler
+	 * Open the XMLReader connected to the source adapter id
 	 */
-	private function getContentHandler( $model ) {
-		return $this->contentHandlerFactory->getContentHandler( $model );
+	private function openReader() {
+		// Enable the entity loader, as it is needed for loading external URLs via
+		// XMLReader::open (T86036)
+		// phpcs:ignore Generic.PHP.NoSilencedErrors -- suppress deprecation per T268847
+		$oldDisable = @libxml_disable_entity_loader( false );
+
+		if ( PHP_VERSION_ID >= 80000 ) {
+			// A static call is now preferred, and avoids https://github.com/php/php-src/issues/11548
+			$reader = XMLReader::open(
+				'uploadsource://' . $this->sourceAdapterId, null, LIBXML_PARSEHUGE );
+			if ( $reader instanceof XMLReader ) {
+				$this->reader = $reader;
+				$status = true;
+			} else {
+				$status = false;
+			}
+		} else {
+			// A static call generated a deprecation warning prior to PHP 8.0
+			$this->reader = new XMLReader;
+			$status = $this->reader->open(
+				'uploadsource://' . $this->sourceAdapterId, null, LIBXML_PARSEHUGE );
+		}
+		if ( !$status ) {
+			$error = libxml_get_last_error();
+			// phpcs:ignore Generic.PHP.NoSilencedErrors
+			@libxml_disable_entity_loader( $oldDisable );
+			throw new RuntimeException(
+				'Encountered an internal error while initializing WikiImporter object: ' . $error->message
+			);
+		}
+		// phpcs:ignore Generic.PHP.NoSilencedErrors
+		@libxml_disable_entity_loader( $oldDisable );
 	}
 
 	/**
-	 * @param Title $title
-	 * @param string $role
-	 *
-	 * @return string
+	 * Check the syntax of the given xml
 	 */
-	private function getDefaultContentModel( $title, $role ) {
-		return $this->slotRoleRegistry
-			->getRoleHandler( $role )
-			->getDefaultModel( $title );
+	private function syntaxCheckXML() {
+		if ( !UploadSourceAdapter::isSeekableSource( $this->sourceAdapterId ) ) {
+			return;
+		}
+		AtEase::suppressWarnings();
+		$oldDisable = libxml_disable_entity_loader( false );
+		try {
+			while ( $this->reader->read() );
+			$error = libxml_get_last_error();
+			if ( $error ) {
+				$errorMessage = 'XML error at line ' . $error->line . ': ' . $error->message;
+				wfDebug( __METHOD__ . ': Invalid xml found - ' . $errorMessage );
+				throw new RuntimeException( $errorMessage );
+			}
+		} finally {
+			libxml_disable_entity_loader( $oldDisable );
+			AtEase::restoreWarnings();
+			$this->reader->close();
+		}
+
+		// Reopen for the real import
+		UploadSourceAdapter::seekSource( $this->sourceAdapterId, 0 );
+		$this->openReader();
 	}
 }

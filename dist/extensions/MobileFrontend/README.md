@@ -69,9 +69,9 @@ To run the full test suite run:
 
     npm run precommit
 
-To run only PHP tests:
+To run only PHP tests, from your MediaWiki installation path:
 
-    php ../../tests/phpunit/phpunit.php "tests/phpunit/"
+    composer phpunit:entrypoint -- extensions/MobileFrontend/tests/phpunit/
 
 To run only MobileFrontend JS tests:
 
@@ -100,12 +100,21 @@ See: https://www.mediawiki.org/wiki/Analytics/Kraken/Data_Formats/X-Analytics
 * Type: `Boolean`
 * Default: `false`
 
-#### $wgMFUsePreferredEditor
+#### $wgMFDefaultEditor
 
-Use the user's preferred editor (i.e. visual editor or source editor) on first load. Uses the `visualeditor-editor` user option.
+Default editor when there is no user preference set (mobile-editor).
+One of `source`, `visual`, or `preference` (inherit desktop editor preference).
 
-* Type: `Boolean`
-* Default: `false`
+* Type: `string`
+* Default: `preference`
+
+#### $wgMFFallbackEditor
+
+When MFDefaultEditor is set to `preference` and no desktop preference is set,
+use this editor. Set to `source` or `visual`.
+
+* Type: `string`
+* Default: `visual`
 
 #### $wgMFEnableMobilePreferences
 
@@ -114,26 +123,9 @@ Enable mobile preferences in Special:Preferences (currently only accessible in d
 * Type: `Boolean`
 * Default: `false`
 
-#### $wgMFUseDesktopSpecialHistoryPage
+#### $wgMFUseDesktopSpecialEditWatchlistPage
 
-Enables the desktop version of the history page if set to `true`. If set to
-`false`, the mobile version will be enabled but can still be overridden by the user's
-mobile preferences option.
-
-* Type: `Array`
-* Default:
-```php
-  [
-    // Enable mobile version of history page for all users by default
-    'base' => false,
-    'beta' => false,
-    'amc' => false,
-  ]
-```
-
-#### $wgMFUseDesktopSpecialWatchlistPage
-
-Enables the desktop version of the watchlist page if set to `true`. If set to
+Enables the desktop version of the Special:EditWatchlist page if set to `true`. If set to
 `false`, the mobile version will be enabled but can still be overridden by the user's
 mobile preferences option.
 
@@ -156,28 +148,19 @@ recruit volunteers.
 * Type: `Boolean`
 * Default: `false`
 
-#### $wgMFIsBannerEnabled
+#### $wgMFScriptPath
 
-Whether or not the banner experiment is enabled.
-
-See: <https://www.mediawiki.org/wiki/Reading/Features/Article_lead_image>
-
-* Type: `Boolean`
-* Default: `true`
-
-#### MFScriptPath
-
-When set will override the default search script path
-e.g.
-`https://en.wikipedia.org/w`
-will route queries (e.g. API) to English Wikipedia.
-
-Note, this will make the wiki read only. Non-anonymous HTTP requests will throw CORS error.
-This may also cause compatibility problems with other extensions.
+When set will override the default search script path.
 This should not be used in production, it is strictly for development purposes.
 
 * Type: `string`
 * Default: ''
+
+e.g $wgMFScriptPath = "https://it.wikipedia.org/w/api.php"
+
+When caching this configuration variable, to show Wikidata descriptions please
+update $wgMFEnableWikidataDescriptions and $wgMFDisplayWikibaseDescriptions as these are
+disabled by default.
 
 #### $wgMFMobileFormatterOptions
 
@@ -191,7 +174,25 @@ removed in the near future (hopefully).
 * excludeNamespaces - disable the MobileFormatter for these namespaces. Article HTML for mobile will be the same as desktop.
 
 * Type: `Object`
-* Default: `{ headings: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], maxImages: 1000, maxHeadings: 4000 }`
+* Default:
+```php
+[
+	"excludeNamespaces": [
+		10,
+		-1
+	],
+	"maxImages": 1000,
+	"maxHeadings": 4000,
+	"headings": [
+		"h1",
+		"h2",
+		"h3",
+		"h4",
+		"h5",
+		"h6"
+	]
+]
+```
 
 #### $wgMFSiteStylesRenderBlocking
 
@@ -200,6 +201,15 @@ If set to true, styles inside MediaWiki:Mobile.css will become render blocking.
 This is intended for situations where the [TemplateStyles extension](https://www.mediawiki.org/wiki/Extension:TemplateStyles)
 cannot be used. When enabled, this may increase the time it takes for the mobile
 site to render, depending on how large MediaWiki:Mobile.css is for your wiki.
+
+* Type: `Boolean`
+* Default: `false`
+
+#### $wgMFCustomSiteModules
+
+If set to true, MediaWiki:Mobile.css will be used instead of MediaWiki:Common.css and MediaWiki:<skinname>.css for mobile views.
+
+This is intended for situations where the mobile site is on a different domain.
 
 * Type: `Boolean`
 * Default: `false`
@@ -229,12 +239,16 @@ item will be stripped from the page.
 * Type: `Array`
 * Default:
 ```php
-  [
-    // These rules will be used for all transformations in the beta channel of the site
-    'beta' => [],
-    // These rules will be used for all transformations
-    'base' => [],
-  ]
+[
+  // These rules will be used for all transformations in the beta channel of the site
+	"beta": [],
+  // These rules will be used for all transformations
+	"base": [
+		".navbox",
+		".vertical-navbox",
+		".nomobile"
+	]
+]
 ```
 
 #### $wgMFLazyLoadImages
@@ -253,21 +267,6 @@ viewport.
     'base' => true,
   ]
 ```
-
-#### $wgMFNearbyRange
-
-The range in meters that should be searched to find nearby pages on
-*Special:Nearby* (defaults to 10km).
-
-* Type: `Integer`
-* Default: `10000`
-
-#### $wgMFNearby
-
-Whether geodata related functionality should be enabled.
-
-* Type: `Boolean`
-* Default: `false`
 
 #### $wgMFSearchAPIParams
 
@@ -316,7 +315,7 @@ Pages with smaller parsed HTML size are not cached.  Set to 0 to cache
 everything or to some large value to disable caching completely.
 
 * Type: `Integer`
-* Default: `64 * 1024`
+* Default: `65536`
 
 #### $wgMFAutodetectMobileView
 
@@ -353,36 +352,17 @@ Controls whether tablets should be shown the mobile site. Works only if
 * Type: `Boolean`
 * Default: `true`
 
-#### $wgMobileUrlTemplate
+#### $wgMobileUrlCallback
 
-Template for mobile URLs.
+A callback that takes a domain name, and changes it into a mobile domain name.
+When that is not possible, it should return its input unchanged. On wikifarms,
+the domain name might belong to another wiki.
 
-This will be used to transcode regular URLs into mobile URLs for the mobile
-view.
+For mobile domains to work, some infrastructure outside MediaWiki needs to tag
+requests sent to the mobile domain with the header specified by $wgMFMobileHeader.
 
-It's possible to specify the *mobileness* of the URL in the host portion of the
-URL.
-
-You can either statically or dynamically create the host-portion of your mobile
-URL. To statically create it, just set `$wgMobileUrlTemplate` to the static
-hostname. For example:
-
-```php
-$wgMobileUrlTemplate = "mobile.mydomain.com";
-```
-
-Alternatively, the host definition can include placeholders for different parts
-of the *host* section of a URL. The placeholders are denoted by `%h` and
-followed with a digit that maps to the position of a host-part of the original,
-non-mobile URL. Take the host `en.wikipedia.org` for example.  `%h0` maps to
-`en`, `%h1` maps to `wikipedia`, and `%h2` maps to `org`.  So, if you wanted
-a mobile URL scheme that turned `en.wikipedia.org` into `en.m.wikipedia.org`,
-your URL template would look like:
-
-    %h0.m.%h1.%h2
-
-* Type: `String`
-* Default: `''`
+* Type: `callable` (`string -> string`)
+* Default: `null`
 
 #### $wgMobileFrontendFormatCookieExpiry
 
@@ -430,7 +410,7 @@ Whether beta mode is enabled.
 Whether Advanced mode is available for users.
 
 * Type: `Boolean`
-* Default: `false`
+* Default: `true`
 
 #### $wgMFAmcOutreach
 
@@ -446,7 +426,7 @@ When Amc Outreach is enabled, this option sets the minimum number of edits a use
 * Type: `Number`
 * Default: 100
 
-#### MFBetaFeedbackLink
+#### $wgMFBetaFeedbackLink
 
 Link to feedback page for beta features. If false no feedback link will be shown.
 
@@ -523,7 +503,6 @@ Set which features will use Wikibase descriptions, e.g.
 ```php
 $wgMFDisplayWikibaseDescriptions = [
   'search' => true,
-  'nearby' => true,
   'watchlist' => false,
   'tagline' => true,
 ];
@@ -534,7 +513,6 @@ $wgMFDisplayWikibaseDescriptions = [
 ```php
   [
     'search' => false,
-    'nearby' => false,
     'watchlist' => false,
     'tagline' => false,
   ]
@@ -549,36 +527,7 @@ $wgMFSpecialPageTaglines = [
 ```
 
 * Type: `Array`
-* Default:
-```php
-  [
-    "MobileOptions" => "mobile-frontend-settings-tagline"
-  ]
-```
-
-
-#### $wgMFStripResponsiveImages
-
-Whether to strip `srcset` attributes from all images on mobile renderings. This
-is a sort of brute-force bandwidth optimization at the cost of making images
-fuzzier on most devices.
-
-* Type: `Boolean`
-* Default: `true`
-
-#### $wgMFResponsiveImageWhitelist
-
-Whitelist of source file mime types to retain srcset attributes on when using
-$wgMFStripResponsiveImages. Defaults to allow rasterized SVGs since they
-usually are diagrams that compress well and benefit from the higher resolution.
-
-* Type: `Array`
-* Default:
-```php
-  [
-    "image/svg+xml",
-  ]
-```
+* Default: `[]`
 
 #### $wgMFNamespacesWithLeadParagraphs
 
@@ -603,3 +552,80 @@ preferences.
 
 * Type: `Boolean`
 * Default: `true`
+
+#### $wgMFEditNoticesConflictingGadgetName
+
+Internal name of the 'edit notices on mobile' gadget,
+which conflicts with showEditNotices in EditorOverlay.
+showEditNotices will not run when the user has this gadget enabled.
+
+* Type: `string`
+* Default: `"EditNoticesOnMobile"`
+
+#### $wgMFEnableFontChanger
+
+Enable the font-size options for users.
+
+* Type: `Array`
+* Default:
+```php
+[
+	"base" => true,
+	"beta" => true
+]
+```
+
+#### $wgMFEnableManifest
+
+Add a webapp-manifest link to mobile view output.
+
+* Type: `Boolean`
+* Default: `true`
+
+#### $wgMFEnableVEWikitextEditor
+
+Eanble VisualEditor's wikitext editor as a replacement for MobileFrontend's source editor.
+
+* Type: `Boolean`
+* Default: `false`
+
+#### $wgMFLazyLoadSkipSmallImages
+
+Skip lazy-loading transform on small-dimension images.
+
+* Type: `Boolean`
+* Default: `false`
+
+#### $wgMFLogWrappedInfoboxes
+
+Log when finding infoboxes wrapped with container.
+
+* Type: `Boolean`
+* Default: `true`
+
+#### $wgMFManifestBackgroundColor
+
+Background color to use in webapp-manifest.
+
+* Type: `string`
+* Default: `"#fff"`
+
+#### $wgMFManifestThemeColor
+
+Theme color to use in webapp-manifest.
+
+* Type: `string`
+* Default: `"#eaecf0"`
+
+#### $wgMFShowFirstParagraphBeforeInfobox
+
+Move first paragraph in articles to before infobox.
+
+* Type: `Array`
+* Default:
+```php
+[
+	"base" => true,
+	"beta" => true
+]
+```

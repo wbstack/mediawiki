@@ -43,7 +43,7 @@ class DOMCompat {
 	 * Tab, LF, FF, CR, space
 	 * @see https://infra.spec.whatwg.org/#ascii-whitespace
 	 */
-	private static $ASCII_WHITESPACE = "\t\r\f\n ";
+	private const ASCII_WHITESPACE = "\t\r\f\n ";
 
 	/**
 	 * Create a new empty document.
@@ -83,7 +83,8 @@ class DOMCompat {
 		}
 		foreach ( $document->documentElement->childNodes as $element ) {
 			/** @var Element $element */
-			if ( self::nodeName( $element ) === 'body' || self::nodeName( $element ) === 'frameset' ) {
+			$nodeName = self::nodeName( $element );
+			if ( $nodeName === 'body' || $nodeName === 'frameset' ) {
 				// Caching!
 				$document->body = $element;
 				// @phan-suppress-next-line PhanTypeMismatchReturnSuperType
@@ -168,6 +169,7 @@ class DOMCompat {
 	 * Return the descendant with the specified ID.
 	 * Workaround for https://bugs.php.net/bug.php?id=77686 and other issues related to
 	 * inconsistent indexing behavior.
+	 * XXX: 77686 is fixed in php 8.1.21
 	 * @param Document|DocumentFragment $node
 	 * @param string $id
 	 * @return Element|null
@@ -210,7 +212,7 @@ class DOMCompat {
 	 * and the lack of Element::getElementsByTagName().
 	 * @param Document|Element $node
 	 * @param string $tagName
-	 * @return iterable<Element> Either an array or an HTMLCollection object
+	 * @return (iterable<Element>&\Countable)|array<Element> Either an array or an HTMLCollection object
 	 * @see https://dom.spec.whatwg.org/#dom-document-getelementsbytagname
 	 * @see https://dom.spec.whatwg.org/#dom-element-getelementsbytagname
 	 * @note Note that unlike the spec this method is not guaranteed to return a NodeList
@@ -270,7 +272,7 @@ class DOMCompat {
 	/**
 	 * @param Document|DocumentFragment|Element $node
 	 * @param string $selector
-	 * @return iterable<Element> Either a NodeList or an array
+	 * @return (iterable<Element>&\Countable)|array<Element> Either a NodeList or an array
 	 * @see https://dom.spec.whatwg.org/#dom-parentnode-queryselectorall
 	 * @note Note that unlike the spec this method is not guaranteed to return a NodeList
 	 *   (which cannot be freely constructed in PHP), just a traversable containing Elements.
@@ -355,6 +357,7 @@ class DOMCompat {
 
 	/**
 	 * Get innerHTML.
+	 * @see DOMUtils::getFragmentInnerHTML() for the fragment version
 	 * @param Element $element
 	 * @return string
 	 * @see https://w3c.github.io/DOM-Parsing/#dom-innerhtml-innerhtml
@@ -366,6 +369,7 @@ class DOMCompat {
 	/**
 	 * Set innerHTML.
 	 * @see https://w3c.github.io/DOM-Parsing/#dom-innerhtml-innerhtml
+	 * @see DOMUtils::setFragmentInnerHTML() for the fragment version
 	 * @param Element $element
 	 * @param string $html
 	 */
@@ -373,15 +377,15 @@ class DOMCompat {
 		$domBuilder = new class( [
 			'suppressHtmlNamespace' => true,
 		] ) extends DOMBuilder {
-				/** @inheritDoc */
-				protected function createDocument(
-					string $doctypeName = null,
-					string $public = null,
-					string $system = null
-				) {
-					// @phan-suppress-next-line PhanTypeMismatchReturn
-					return DOMCompat::newDocument( $doctypeName === 'html' );
-				}
+			/** @inheritDoc */
+			protected function createDocument(
+				?string $doctypeName = null,
+				?string $public = null,
+				?string $system = null
+			) {
+				// @phan-suppress-next-line PhanTypeMismatchReturn
+				return DOMCompat::newDocument( $doctypeName === 'html' );
+			}
 		};
 		$treeBuilder = new TreeBuilder( $domBuilder );
 		$dispatcher = new Dispatcher( $treeBuilder );
@@ -413,6 +417,27 @@ class DOMCompat {
 	}
 
 	/**
+	 * Return the value of an element attribute.
+	 *
+	 * Unlike PHP's version, this is spec-compliant and returns `null` if
+	 * the attribute is not present, allowing the caller to distinguish
+	 * between "the attribute exists but has the empty string as its value"
+	 * and "the attribute does not exist".
+	 *
+	 * @param Element $element
+	 * @param string $attributeName
+	 * @return ?string The attribute value, or `null` if the attribute does
+	 *   not exist on the element.
+	 * @see https://dom.spec.whatwg.org/#dom-element-getattribute
+	 */
+	public static function getAttribute( $element, string $attributeName ): ?string {
+		if ( !$element->hasAttribute( $attributeName ) ) {
+			return null;
+		}
+		return $element->getAttribute( $attributeName );
+	}
+
+	/**
 	 * Return the class list of this element.
 	 * @param Element $node
 	 * @return TokenList
@@ -428,7 +453,7 @@ class DOMCompat {
 	 * @see https://infra.spec.whatwg.org/#strip-and-collapse-ascii-whitespace
 	 */
 	private static function stripAndCollapseASCIIWhitespace( string $text ): string {
-		$ws = self::$ASCII_WHITESPACE;
+		$ws = self::ASCII_WHITESPACE;
 		return preg_replace( "/[$ws]+/", ' ', trim( $text, $ws ) );
 	}
 
@@ -469,7 +494,7 @@ class DOMCompat {
 	 * https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/replaceChildren
 	 *
 	 * @param Document|DocumentFragment|Element $parentNode
-	 * @param array<string|Node> ...$nodes
+	 * @param string|Node ...$nodes
 	 */
 	public static function replaceChildren(
 		$parentNode, ...$nodes

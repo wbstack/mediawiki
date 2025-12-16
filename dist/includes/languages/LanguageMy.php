@@ -19,6 +19,8 @@
  * @author Niklas Laxström, 2008
  */
 
+use MediaWiki\Language\Language;
+
 /**
  * Burmese (Myanmasa)
  *
@@ -27,11 +29,10 @@
 class LanguageMy extends Language {
 
 	/**
-	 * @param string $number
-	 * @param bool|null $noSeparators
+	 * @param string|int|float $number
 	 * @return string
 	 */
-	public function formatNum( $number, $noSeparators = null ) {
+	public function formatNum( $number ) {
 		/* NO-op. Cannot use
 		 * $separatorTransformTable = [ ',' => '' ]
 		 * That would break when parsing and doing strstr '' => 'foo';

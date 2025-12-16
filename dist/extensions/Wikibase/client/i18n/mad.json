@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Boesenbergia",
-			"NoiX180"
+			"NoiX180",
+			"Munajad.MH"
 		]
 	},
 	"tooltip-t-wikibase": "Pranala ghâbây manyambhung butèr dâ' lombhung data",
@@ -10,15 +11,16 @@
 	"wikibase-dataitem": "Butèr è {{WBREPONAME}}",
 	"wikibase-editlinks": "Beccè' interwiki",
 	"wikibase-editlinkstitle": "Beccè' pranala interwiki",
+	"wikibase-addlinkstitle": "Tambâ pranala interwiki",
 	"wikibase-linkitem-addlinks": "Tambâ interwiki",
 	"wikibase-linkitem-title": "Panyambhung bi' kaca",
-	"wikibase-linkitem-linkpage": "Panyambhung bi' kaca",
+	"wikibase-linkitem-linkpage": "Sambhungaghi bi' kaca",
 	"wikibase-linkitem-selectlink": "Mara pèlè situs bân kaca sè terro èsambhungaghina bi' kaca rèya.",
-	"wikibase-linkitem-input-site": "Bhâsa",
+	"wikibase-linkitem-input-site": "Bhâsa:",
 	"wikibase-linkitem-input-page": "Kaca:",
 	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
 	"wikibase-rc-hide-wikidata-hide": "Pangètek",
-	"wikibase-rc-hide-wikidata-show": "Angghâlaghi",
+	"wikibase-rc-hide-wikidata-show": "Angghâllaghi",
 	"wikibase-rc-wikibase-edit-letter": "D",
 	"wikibase-rc-wikibase-edit-title": "Beccè'an {{WBREPONAME}}",
 	"wikibase-otherprojects": "Ḍâlem proyèk laèn"

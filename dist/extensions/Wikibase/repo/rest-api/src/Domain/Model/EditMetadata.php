@@ -7,14 +7,14 @@ namespace Wikibase\Repo\RestApi\Domain\Model;
  */
 class EditMetadata {
 
-	private $tags;
-	private $isBot;
-	private $comment;
+	private array $tags;
+	private bool $isBot;
+	private EditSummary $summary;
 
-	public function __construct( array $tags, bool $isBot, ?string $comment ) {
+	public function __construct( array $tags, bool $isBot, EditSummary $summary ) {
 		$this->tags = $tags;
 		$this->isBot = $isBot;
-		$this->comment = $comment;
+		$this->summary = $summary;
 	}
 
 	public function getTags(): array {
@@ -25,8 +25,8 @@ class EditMetadata {
 		return $this->isBot;
 	}
 
-	public function getComment(): ?string {
-		return $this->comment;
+	public function getSummary(): EditSummary {
+		return $this->summary;
 	}
 
 }

@@ -1,9 +1,10 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\MediaWiki;
 
-use Language;
-use Message;
+use MediaWiki\Message\Message;
 use MessageLocalizer;
 
 /**
@@ -11,18 +12,14 @@ use MessageLocalizer;
  */
 class SpecificLanguageMessageLocalizer implements MessageLocalizer {
 
-	/** @var Language */
-	private $language;
+	private string $languageCode;
 
-	/**
-	 * @param string $languageCode
-	 */
-	public function __construct( $languageCode ) {
-		$this->language = Language::factory( $languageCode );
+	public function __construct( string $languageCode ) {
+		$this->languageCode = $languageCode;
 	}
 
-	public function msg( $key, ...$params ) {
-		$message = new Message( $key, [], $this->language );
+	public function msg( $key, ...$params ): Message {
+		$message = ( new Message( $key, [] ) )->inLanguage( $this->languageCode );
 
 		if ( $params ) {
 			// we use ->params() instead of the $params constructor parameter

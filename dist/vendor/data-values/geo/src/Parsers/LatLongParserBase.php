@@ -29,35 +29,35 @@ abstract class LatLongParserBase implements ValueParser {
 	public const OPT_WEST_SYMBOL = 'west';
 
 	/**
-	 * The symbol to use as separator between latitude and longitude.
+	 * The symbol to use as a separator between latitude and longitude.
 	 */
 	public const OPT_SEPARATOR_SYMBOL = 'separator';
 
-	/**
-	 * @var ParserOptions
-	 */
-	private $options;
+	private ParserOptions $options;
 
-	public function __construct( ParserOptions $options = null ) {
+	public function __construct( ?ParserOptions $options = null ) {
 		$this->options = $options ?: new ParserOptions();
 
-		$this->options->defaultOption( ValueParser::OPT_LANG, 'en' );
+		$this->defaultOption( ValueParser::OPT_LANG, 'en' );
 
-		$this->options->defaultOption( self::OPT_NORTH_SYMBOL, 'N' );
-		$this->options->defaultOption( self::OPT_EAST_SYMBOL, 'E' );
-		$this->options->defaultOption( self::OPT_SOUTH_SYMBOL, 'S' );
-		$this->options->defaultOption( self::OPT_WEST_SYMBOL, 'W' );
+		$this->defaultOption( self::OPT_NORTH_SYMBOL, 'N' );
+		$this->defaultOption( self::OPT_EAST_SYMBOL, 'E' );
+		$this->defaultOption( self::OPT_SOUTH_SYMBOL, 'S' );
+		$this->defaultOption( self::OPT_WEST_SYMBOL, 'W' );
 
-		$this->options->defaultOption( self::OPT_SEPARATOR_SYMBOL, ',' );
+		$this->defaultOption( self::OPT_SEPARATOR_SYMBOL, ',' );
+	}
+
+	private function defaultOption( string $option, mixed $default ): void {
+		if ( !$this->options->hasOption( $option ) ) {
+			$this->options->setOption( $option, $default );
+		}
 	}
 
 	/**
 	 * Parses a single coordinate segment (either latitude or longitude) and returns it as a float.
 	 *
-	 * @param string $coordinateSegment
-	 *
 	 * @throws ParseException
-	 * @return float
 	 */
 	abstract protected function getParsedCoordinate( string $coordinateSegment ): float;
 
@@ -77,7 +77,6 @@ abstract class LatLongParserBase implements ValueParser {
 	 * @param string $value
 	 *
 	 * @throws ParseException
-	 * @return LatLongValue
 	 */
 	public function parse( $value ): LatLongValue {
 		if ( !is_string( $value ) ) {
@@ -94,7 +93,7 @@ abstract class LatLongParserBase implements ValueParser {
 			throw new ParseException( 'Not a valid geographical coordinate', $rawValue, static::FORMAT_NAME );
 		}
 
-		list( $latitude, $longitude ) = $normalizedCoordinateSegments;
+		[ $latitude, $longitude ] = $normalizedCoordinateSegments;
 
 		return new LatLongValue(
 			$this->getParsedCoordinate( $latitude ),
@@ -137,7 +136,7 @@ abstract class LatLongParserBase implements ValueParser {
 	 *
 	 * @param string $normalizedCoordinateString
 	 *
-	 * @throws ParseException if unable to split input string into two segments
+	 * @throws ParseException if unable to split the input string into two segments
 	 * @return string[]
 	 */
 	abstract protected function splitString( string $normalizedCoordinateString ): array;
@@ -183,6 +182,10 @@ abstract class LatLongParserBase implements ValueParser {
 		return $coordinateSegment;
 	}
 
+	/**
+	 * @param string $optionName
+	 * @return mixed
+	 */
 	protected function getOption( string $optionName ) {
 		return $this->options->getOption( $optionName );
 	}

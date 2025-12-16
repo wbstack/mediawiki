@@ -1,8 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"Renan"
-		]
-	},
-	"auth_remoteuser-desc": "Registra automaticmen usatores registrat que usa li variabil de circumité <code>REMOTE_USER</code>"
-}

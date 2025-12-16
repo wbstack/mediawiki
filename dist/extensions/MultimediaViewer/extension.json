@@ -1,34 +1,33 @@
 {
 	"name": "MultimediaViewer",
 	"author": [
-		"MarkTraceur (Mark Holmquist)",
-		"Gilles Dubuc",
 		"Gergő Tisza",
-		"Aaron Arcos",
-		"Zeljko Filipin",
+		"Gilles Dubuc",
+		"Mark Holmquist",
+		"Simon Legner",
+		"Ed Sanders",
 		"Pau Giner",
-		"theopolisme",
-		"MatmaRex",
-		"apsdehal",
-		"vldandrew",
-		"Ebrahim Byagowi",
-		"Dereckson",
-		"Brion VIBBER",
-		"Yuki Shira",
-		"Yaroslav Melnychuk",
-		"tonythomas01",
-		"Raimond Spekking",
+		"James D. Forrester",
+		"Željko Filipin",
+		"fomafix",
+		"Volker E",
 		"Kunal Mehta",
-		"Jeff Hall",
-		"Christian Aistleitner",
-		"Amir E. Aharoni"
+		"Umherirrender",
+		"Timo Tijhof",
+		"Aaron Arcos",
+		"Thiemo Kreuz",
+		"Matthias Mullie",
+		"Jon Robson",
+		"Derk-Jan Hartman",
+		"Chris McMahon",
+		"Bartosz Dziewoński"
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:MultimediaViewer",
 	"descriptionmsg": "multimediaviewer-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"MessagesDirs": {
 		"MultimediaViewer": [
@@ -40,31 +39,34 @@
 	},
 	"ResourceModules": {
 		"mmv": {
-			"scripts": [
+			"packageFiles": [
+				{
+					"name": "mmv/config.json",
+					"config": {
+						"useThumbnailGuessing": "MediaViewerUseThumbnailGuessing",
+						"thumbnailBucketSizes": "MediaViewerThumbnailBucketSizes",
+						"imageQueryParameter": "MediaViewerImageQueryParameter",
+						"recordVirtualViewBeaconURI": "MediaViewerRecordVirtualViewBeaconURI",
+						"extensions": "MediaViewerExtensions"
+					}
+				},
+				"mmv/mmv.js",
 				"mmv/logging/mmv.logging.ViewLogger.js",
-				"mmv/model/mmv.model.js",
-				"mmv/model/mmv.model.IwTitle.js",
 				"mmv/model/mmv.model.License.js",
 				"mmv/model/mmv.model.Image.js",
-				"mmv/model/mmv.model.Repo.js",
 				"mmv/model/mmv.model.Thumbnail.js",
 				"mmv/model/mmv.model.TaskQueue.js",
 				"mmv/model/mmv.model.ThumbnailWidth.js",
-				"mmv/mmv.lightboximage.js",
 				"mmv/provider/mmv.provider.Api.js",
 				"mmv/provider/mmv.provider.ImageInfo.js",
-				"mmv/provider/mmv.provider.FileRepoInfo.js",
 				"mmv/provider/mmv.provider.ThumbnailInfo.js",
 				"mmv/provider/mmv.provider.GuessedThumbnailInfo.js",
 				"mmv/provider/mmv.provider.Image.js",
+				"mmv/mmv.HtmlUtils.js",
 				"mmv/mmv.ThumbnailWidthCalculator.js",
 				"mmv/ui/mmv.ui.js",
 				"mmv/ui/mmv.ui.dialog.js",
-				"mmv/ui/mmv.ui.reuse.dialog.js",
-				"mmv/ui/mmv.ui.download.js",
-				"mmv/ui/mmv.ui.download.dialog.js",
 				"mmv/ui/mmv.ui.description.js",
-				"mmv/ui/mmv.ui.viewingOptions.js",
 				"mmv/ui/mmv.ui.canvas.js",
 				"mmv/ui/mmv.ui.canvasButtons.js",
 				"mmv/ui/mmv.ui.permission.js",
@@ -73,14 +75,10 @@
 				"mmv/ui/mmv.ui.truncatableTextField.js",
 				"mmv/ui/mmv.ui.metadataPanel.js",
 				"mmv/ui/mmv.ui.metadataPanelScroller.js",
-				"mmv/mmv.lightboxinterface.js",
-				"mmv/mmv.js"
+				"mmv/mmv.lightboxinterface.js"
 			],
 			"styles": [
 				"mmv/ui/mmv.ui.dialog.less",
-				"mmv/ui/mmv.ui.reuse.dialog.less",
-				"mmv/ui/mmv.ui.download.dialog.less",
-				"mmv/ui/mmv.ui.viewingOptions.less",
 				"mmv/ui/mmv.ui.canvas.less",
 				"mmv/ui/mmv.ui.canvasButtons.less",
 				"mmv/ui/mmv.ui.permission.less",
@@ -94,28 +92,18 @@
 			"dependencies": [
 				"mediawiki.api",
 				"mediawiki.Title",
-				"mediawiki.Uri",
 				"mediawiki.jqueryMsg",
+				"mediawiki.router",
 				"mediawiki.storage",
 				"mediawiki.user",
 				"mediawiki.util",
-				"oojs",
-				"oojs-router",
-				"jquery.fullscreen",
-				"jquery.color",
-				"jquery.tipsy",
 				"mmv.bootstrap",
-				"mmv.head"
+				"mmv.codex"
 			],
 			"messages": [
+				"license-header",
 				"multimediaviewer-file-page",
-				"multimediaviewer-options-learn-more",
-				"multimediaviewer-options-dialog-header",
-				"multimediaviewer-option-submit-button",
-				"multimediaviewer-option-cancel-button",
-				"multimediaviewer-options-text-header",
 				"multimediaviewer-enable-alert",
-				"multimediaviewer-options-text-body",
 				"multimediaviewer-disable-confirmation-header",
 				"multimediaviewer-disable-confirmation-text",
 				"multimediaviewer-enable-dialog-header",
@@ -123,6 +111,7 @@
 				"multimediaviewer-enable-submit-button",
 				"multimediaviewer-enable-confirmation-header",
 				"multimediaviewer-enable-confirmation-text",
+				"multimediaviewer-file-not-found-error",
 				"multimediaviewer-thumbnail-error",
 				"multimediaviewer-thumbnail-error-description",
 				"multimediaviewer-thumbnail-error-retry",
@@ -131,7 +120,6 @@
 				"multimediaviewer-errorreport-privacywarning",
 				"multimediaviewer-download-link",
 				"multimediaviewer-reuse-link",
-				"multimediaviewer-options-tooltip",
 				"multimediaviewer-close-popup-text",
 				"multimediaviewer-fullscreen-popup-text",
 				"multimediaviewer-defullscreen-popup-text",
@@ -172,13 +160,6 @@
 				"multimediaviewer-geoloc-coord",
 				"multimediaviewer-geoloc-coords",
 				"multimediaviewer-geolocation",
-				"multimediaviewer-about-mmv",
-				"multimediaviewer-optout-mmv",
-				"multimediaviewer-optin-mmv",
-				"multimediaviewer-optout-pending-mmv",
-				"multimediaviewer-optin-pending-mmv",
-				"multimediaviewer-optout-help",
-				"multimediaviewer-optin-help",
 				"mypreferences",
 				"multimediaviewer-metadata-error",
 				"multimediaviewer-title-popup-text",
@@ -209,18 +190,48 @@
 				"multimediaviewer-license-default"
 			]
 		},
-		"mmv.ui.ondemandshareddependencies": {
-			"scripts": [
-				"mmv.ui.ondemandshareddependencies/mmv.EmbedFileFormatter.js",
-				"mmv.ui.ondemandshareddependencies/mmv.ui.utils.js"
+		"mmv.codex": {
+			"class": "MediaWiki\\ResourceLoader\\CodexModule",
+			"codexStyleOnly": true,
+			"codexComponents": [
+				"CdxButton",
+				"CdxDialog",
+				"CdxProgressBar",
+				"CdxSelect",
+				"CdxTabs",
+				"CdxTextInput"
+			]
+		},
+		"mmv.ui.reuse": {
+			"packageFiles": [
+				"mmv.ui.reuse/index.js",
+				"mmv.ui.reuse/mmv.ui.reuse.dialog.js",
+				"mmv.ui.reuse/mmv.ui.download.dialog.js",
+				"mmv.ui.reuse/mmv.ui.download.pane.js",
+				"mmv.ui.reuse/mmv.ui.reuse.share.js",
+				"mmv.ui.reuse/mmv.ui.reuse.embed.js",
+				"mmv.ui.reuse/mmv.EmbedFileFormatter.js",
+				"mmv.ui.reuse/mmv.ui.utils.js"
+			],
+			"styles": [
+				"mmv.ui.reuse/mmv.ui.reuse.dialog.less",
+				"mmv.ui.reuse/mmv.ui.download.dialog.less"
 			],
 			"dependencies": [
-				"mmv.head",
-				"mmv",
-				"oojs",
-				"oojs-ui"
+				"mmv.codex",
+				"mediawiki.user",
+				"mediawiki.widgets"
 			],
 			"messages": [
+				"multimediaviewer-copy-button",
+				"multimediaviewer-default-embed-dimensions",
+				"multimediaviewer-original-embed-dimensions",
+				"multimediaviewer-xl-embed-dimensions",
+				"multimediaviewer-large-embed-dimensions",
+				"multimediaviewer-medium-embed-dimensions",
+				"multimediaviewer-small-embed-dimensions",
+				"multimediaviewer-embed-dimensions",
+				"multimediaviewer-embed-dimensions-separated",
 				"multimediaviewer-credit",
 				"multimediaviewer-text-embed-credit-text-bl",
 				"multimediaviewer-text-embed-credit-text-b",
@@ -228,62 +239,17 @@
 				"multimediaviewer-html-embed-credit-text-bl",
 				"multimediaviewer-html-embed-credit-text-b",
 				"multimediaviewer-html-embed-credit-text-l",
-				"multimediaviewer-html-embed-credit-link-text"
-			]
-		},
-		"mmv.ui.download.pane": {
-			"scripts": [
-				"mmv.ui.download.pane/mmv.ui.download.pane.js"
-			],
-			"styles": [
-				"mmv.ui.download.pane/mmv.ui.download.pane.less"
-			],
-			"dependencies": [
-				"mediawiki.ui",
-				"mediawiki.ui.button",
-				"mediawiki.widgets",
-				"mmv",
-				"mmv.ui.ondemandshareddependencies",
-				"oojs",
-				"oojs-ui"
-			],
-			"messages": [
+				"multimediaviewer-html-embed-credit-link-text",
+				"mw-widgets-copytextlayout-copy-success",
+				"multimediaviewer-download",
 				"multimediaviewer-download-preview-link-title",
-				"multimediaviewer-download-original-button-name",
-				"multimediaviewer-download-small-button-name",
-				"multimediaviewer-download-medium-button-name",
-				"multimediaviewer-download-large-button-name",
-				"multimediaviewer-download-xl-button-name",
-				"multimediaviewer-embed-dimensions",
-				"multimediaviewer-embed-dimensions-with-file-format",
 				"multimediaviewer-download-attribution-cta-header",
+				"multimediaviewer-download-link",
 				"multimediaviewer-download-optional-attribution-cta-header",
-				"multimediaviewer-download-attribution-cta",
 				"multimediaviewer-download-attribution-copy",
+				"multimediaviewer-download-attribution",
 				"multimediaviewer-attr-plain",
-				"multimediaviewer-attr-html"
-			]
-		},
-		"mmv.ui.reuse.shareembed": {
-			"scripts": [
-				"mmv.ui.reuse.shareembed/mmv.ui.reuse.tab.js",
-				"mmv.ui.reuse.shareembed/mmv.ui.reuse.share.js",
-				"mmv.ui.reuse.shareembed/mmv.ui.reuse.embed.js"
-			],
-			"styles": [
-				"mmv.ui.reuse.shareembed/mmv.ui.reuse.share.less",
-				"mmv.ui.reuse.shareembed/mmv.ui.reuse.embed.less"
-			],
-			"dependencies": [
-				"jquery.tipsy",
-				"oojs",
-				"oojs-ui",
-				"mediawiki.user",
-				"mediawiki.widgets",
-				"mmv.ui.ondemandshareddependencies"
-			],
-			"messages": [
-				"multimediaviewer-reuse-loading-placeholder",
+				"multimediaviewer-attr-html",
 				"multimediaviewer-share-tab",
 				"multimediaviewer-share-explanation",
 				"multimediaviewer-link-to-file",
@@ -297,51 +263,40 @@
 				"multimediaviewer-embed-explanation",
 				"multimediaviewer-embed-byline",
 				"multimediaviewer-embed-license",
-				"multimediaviewer-embed-via",
-				"multimediaviewer-default-embed-dimensions",
-				"multimediaviewer-original-embed-dimensions",
-				"multimediaviewer-xl-embed-dimensions",
-				"multimediaviewer-large-embed-dimensions",
-				"multimediaviewer-medium-embed-dimensions",
-				"multimediaviewer-small-embed-dimensions",
-				"multimediaviewer-embed-dimensions",
-				"multimediaviewer-embed-dimensions-separated"
+				"multimediaviewer-embed-via"
 			]
 		},
-		"mmv.ui.tipsyDialog": {
-			"scripts": [
-				"mmv.ui.tipsyDialog/mmv.ui.tipsyDialog.js"
-			],
+		"mmv.ui.restriction": {
 			"styles": [
-				"mmv.ui.tipsyDialog/mmv.ui.tipsyDialog.less"
-			],
-			"dependencies": [
-				"mmv",
-				"oojs",
-				"jquery.tipsy"
+				"mmv.ui.restriction/mmv.ui.restriction.less"
 			]
 		},
 		"mmv.bootstrap": {
-			"scripts": [
-				"mmv.bootstrap/mmv.Config.js",
-				"mmv.bootstrap/mmv.HtmlUtils.js",
-				"mmv.bootstrap/mmv.bootstrap.js"
+			"packageFiles": [
+				{
+					"name": "mmv.bootstrap/config.json",
+					"config": {
+						"extensions": "MediaViewerExtensions"
+					}
+				},
+				"mmv.bootstrap/mmv.bootstrap.autostart.js",
+				"mmv.bootstrap/mmv.bootstrap.js",
+				"mmv.bootstrap/mmv.lightboximage.js",
+				"mmv.bootstrap/mmv.Config.js"
 			],
 			"styles": [
 				"mmv.bootstrap/mmv.bootstrap.less"
 			],
 			"dependencies": [
+				"mmv.codex",
 				"mediawiki.api",
-				"mediawiki.ui.button",
-				"mediawiki.ui.icon",
+				"mediawiki.router",
 				"mediawiki.Title",
 				"mediawiki.user",
-				"mediawiki.storage",
-				"mmv.head",
-				"oojs",
-				"oojs-router"
+				"mediawiki.storage"
 			],
 			"messages": [
+				"multimediaviewer-loading",
 				"multimediaviewer-view-expanded",
 				"multimediaviewer-view-config",
 				"multimediaviewer-disable-info-title",
@@ -349,23 +304,12 @@
 			]
 		},
 		"mmv.bootstrap.autostart": {
-			"scripts": [
-				"mmv.bootstrap.autostart/mmv.bootstrap.autostart.js"
-			],
-			"dependencies": [
-				"mmv.head",
-				"mmv.bootstrap"
-			]
+			"deprecated": "Deprecated in 1.43, alias for mmw.bootstrap",
+			"dependencies": "mmv.bootstrap"
 		},
 		"mmv.head": {
-			"scripts": [
-				"mmv.head/base.js",
-				"mmv.head/mmv.head.js"
-			],
-			"dependencies": [
-				"mediawiki.user",
-				"mediawiki.storage"
-			]
+			"deprecated": "Deprecated in 1.43, alias for mmw.bootstrap",
+			"dependencies": "mmv.bootstrap"
 		}
 	},
 	"ResourceFileModulePaths": {
@@ -375,7 +319,8 @@
 	"QUnitTestModule": {
 		"localBasePath": "",
 		"remoteExtPath": "MultimediaViewer",
-		"scripts": [
+		"packageFiles": [
+			"tests/qunit/mmv/index.js",
 			"tests/qunit/mmv/mmv.bootstrap.test.js",
 			"tests/qunit/mmv/mmv.test.js",
 			"tests/qunit/mmv/mmv.lightboxinterface.test.js",
@@ -386,14 +331,11 @@
 			"tests/qunit/mmv/mmv.HtmlUtils.test.js",
 			"tests/qunit/mmv/logging/mmv.logging.ViewLogger.test.js",
 			"tests/qunit/mmv/model/mmv.model.test.js",
-			"tests/qunit/mmv/model/mmv.model.IwTitle.test.js",
 			"tests/qunit/mmv/model/mmv.model.TaskQueue.test.js",
 			"tests/qunit/mmv/model/mmv.model.License.test.js",
 			"tests/qunit/mmv/model/mmv.model.Image.test.js",
-			"tests/qunit/mmv/model/mmv.model.Repo.test.js",
 			"tests/qunit/mmv/provider/mmv.provider.Api.test.js",
 			"tests/qunit/mmv/provider/mmv.provider.ImageInfo.test.js",
-			"tests/qunit/mmv/provider/mmv.provider.FileRepoInfo.test.js",
 			"tests/qunit/mmv/provider/mmv.provider.ThumbnailInfo.test.js",
 			"tests/qunit/mmv/provider/mmv.provider.GuessedThumbnailInfo.test.js",
 			"tests/qunit/mmv/provider/mmv.provider.Image.test.js",
@@ -410,43 +352,42 @@
 			"tests/qunit/mmv/ui/mmv.ui.reuse.dialog.test.js",
 			"tests/qunit/mmv/ui/mmv.ui.reuse.embed.test.js",
 			"tests/qunit/mmv/ui/mmv.ui.reuse.share.test.js",
-			"tests/qunit/mmv/ui/mmv.ui.reuse.tab.test.js",
 			"tests/qunit/mmv/ui/mmv.ui.reuse.utils.test.js",
-			"tests/qunit/mmv/ui/mmv.ui.tipsyDialog.test.js",
 			"tests/qunit/mmv/ui/mmv.ui.truncatableTextField.test.js",
-			"tests/qunit/mmv/ui/mmv.ui.viewingOptions.test.js",
 			"tests/qunit/mmv/mmv.testhelpers.js"
 		],
 		"dependencies": [
-			"mmv.head",
 			"mmv.bootstrap",
 			"mmv",
-			"mmv.ui.ondemandshareddependencies",
-			"mmv.ui.reuse.shareembed",
-			"mmv.ui.download.pane",
-			"mmv.ui.tipsyDialog"
+			"mmv.ui.reuse"
 		]
 	},
 	"Hooks": {
-		"UserGetDefaultOptions": "MediaWiki\\Extension\\MultimediaViewer\\Hooks::onUserGetDefaultOptions",
-		"GetPreferences": "MediaWiki\\Extension\\MultimediaViewer\\Hooks::onGetPreferences",
-		"BeforePageDisplay": "MediaWiki\\Extension\\MultimediaViewer\\Hooks::onBeforePageDisplay",
-		"CategoryPageView": "MediaWiki\\Extension\\MultimediaViewer\\Hooks::onCategoryPageView",
-		"ResourceLoaderGetConfigVars": "MediaWiki\\Extension\\MultimediaViewer\\Hooks::onResourceLoaderGetConfigVars",
+		"UserGetDefaultOptions": "main",
+		"GetPreferences": "main",
+		"BeforePageDisplay": "main",
+		"CategoryPageView": "main",
+		"ResourceLoaderGetConfigVars": "main",
 		"MakeGlobalVariablesScript": "main",
-		"ThumbnailBeforeProduceHTML": "MediaWiki\\Extension\\MultimediaViewer\\Hooks::onThumbnailBeforeProduceHTML"
+		"ThumbnailBeforeProduceHTML": "main"
 	},
 	"HookHandlers": {
 		"main": {
 			"class": "MediaWiki\\Extension\\MultimediaViewer\\Hooks",
 			"services": [
+				"MainConfig",
+				"SpecialPageFactory",
 				"UserOptionsLookup"
+			],
+			"optional_services": [
+				"MobileFrontend.Context"
 			]
 		}
 	},
 	"config": {
 		"MediaViewerExtensions": {
 			"value": {
+				"djvu": "default",
 				"jpg": "default",
 				"jpeg": "default",
 				"gif": "default",
@@ -460,6 +401,18 @@
 		"MediaViewerUseThumbnailGuessing": {
 			"description": "When this is enabled, MediaViewer will try to guess image URLs instead of making an imageinfo API to get them from the server. This speeds up image loading, but will result in 404s when $wgGenerateThumbnailOnParse (so the thumbnails are only generated as a result of the API request). MediaViewer will catch such 404 errors and fall back to the API request, but depending on how the site is set up, the 404 might get cached, or redirected, causing the image load to fail. The safe way to use URL guessing is with a 404 handler: https://www.mediawiki.org/wiki/Manual:Thumb.php#404_Handler",
 			"value": false
+		},
+		"MediaViewerThumbnailBucketSizes": {
+			"description": "Array of preselected widths used to generate thumbnail URLs to avoid arbitrary size requests (see also wgUploadThumbnailRenderMap).",
+			"value": [
+				320,
+				800,
+				1024,
+				1280,
+				1920,
+				2560,
+				2880
+			]
 		},
 		"MediaViewerEnableByDefault": {
 			"description": "If true, Media Viewer will be turned on by default.",

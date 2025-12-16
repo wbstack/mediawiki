@@ -1,6 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
+			"Afalau",
+			"Ceirios",
 			"Cymrodor",
 			"Diafol",
 			"Ham II",
@@ -8,14 +10,19 @@
 			"Lloffiwr",
 			"Macofe",
 			"MuratTheTurkish",
-			"Robin Owain",
-			"Afalau"
+			"Robin Owain"
 		]
 	},
 	"wikibase-entity": "Endid",
 	"wikibase-entity-item": "Eitem",
 	"wikibase-entity-property": "Priodwedd",
 	"wikibase-entity-query": "chwiliad",
+	"nstab-item": "Eitem",
+	"tooltip-ca-nstab-item": "Gweld yr Eitem",
+	"nstab-property": "Priodwedd",
+	"tooltip-ca-nstab-property": "Gweld y Priodwedd",
+	"nstab-query": "Ymholiad",
+	"tooltip-ca-nstab-query": "Gweld yr Ymholiad",
 	"wikibase-edit": "golygu",
 	"wikibase-save": "cadw",
 	"wikibase-publish": "cyhoeddi",
@@ -108,8 +115,6 @@
 	"special-newproperty": "Creu Priodwedd newydd",
 	"wikibase-newproperty-fieldset": "Creu Priodwedd newydd",
 	"wikibase-newproperty-datatype": "Math o ddata:",
-	"wikibase-description-helppage": "Help:Description/cy",
-	"wikibase-label-helppage": "Help:Label/cy",
 	"special-newitem": "Creu Eitem newydd",
 	"wikibase-newitem-fieldset": "Creu Eitem newydd",
 	"wikibase-newentity-language": "Iaith:",
@@ -140,6 +145,7 @@
 	"wikibase-entitydata-title": "Data'r Endid",
 	"special-entitypage": "Tudalen endid",
 	"wikibase-entitypage-title": "Tudalen Endid",
+	"wikibase-api-inconsistent-language": "Canfuwyd iaith anghyson.",
 	"wikibase-api-inconsistent-site": "Canfuwyd safle anghyson.",
 	"wikibase-api-invalid-guid": "Guid annilys.",
 	"wikibase-api-invalid-json": "Json annilys yn y cais.",
@@ -148,8 +154,8 @@
 	"wikibase-api-invalid-property-id": "ID Priodwedd annilys.",
 	"wikibase-api-invalid-entity-id": "ID endid annilys.",
 	"wikibase-restoreold": "adfer",
-	"wikibase-entity-summary-restore": "Adfer golygiad $3 gan [[Special:Contributions/$4|{{GENDER:$4|$4}}]]",
-	"wikibase-entity-summary-undo": "Dadwneud golygiad $3 gan [[Special:Contributions/$4|{{GENDER:$4|$4}}]] ([[User talk:$4|talk]])",
+	"wikibase-entity-summary-restore": "Adfer golygiad [[Special:Permalink/$3|$3]] gan [[Special:Contributions/$4|{{GENDER:$4|$4}}]]",
+	"wikibase-entity-summary-undo": "Dadwneud golygiad [[Special:Diff/$3|$3]] gan [[Special:Contributions/$4|{{GENDER:$4|$4}}]] ([[User talk:$4|talk]])",
 	"wikibase-listdatatypes-wikibase-item-head": "Eitem",
 	"wikibase-listdatatypes-wikibase-property-head": "Priodwedd",
 	"wikibase-listdatatypes-commonsmedia-head": "Ffeil gyfrwng ar Gomin Wicifryngau",

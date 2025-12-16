@@ -1,9 +1,15 @@
+/**
+ * @private
+ */
 module.exports = [
+	'acm',
 	'aeb',
 	'aeb-arab',
+	'apc',
 	'ar',
 	'arc',
 	'arq',
+	'ary',
 	'arz',
 	'azb',
 	'bcc',
@@ -14,6 +20,7 @@ module.exports = [
 	'fa',
 	'glk',
 	'he',
+	'hno',
 	'khw',
 	'kk-arab',
 	'kk-cn',
@@ -23,6 +30,7 @@ module.exports = [
 	'lki',
 	'lrc',
 	'luz',
+	'ms-arab',
 	'mzn',
 	'nqo',
 	'pnb',

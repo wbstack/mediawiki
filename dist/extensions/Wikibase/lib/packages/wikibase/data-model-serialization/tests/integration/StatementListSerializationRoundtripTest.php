@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Wikibase\DataModel\Deserializers\DeserializerFactory;
 use Wikibase\DataModel\Entity\BasicEntityIdParser;
 use Wikibase\DataModel\Serializers\SerializerFactory;
+use Wikibase\DataModel\Services\Lookup\InMemoryDataTypeLookup;
 use Wikibase\DataModel\Snak\PropertyNoValueSnak;
 use Wikibase\DataModel\Statement\Statement;
 use Wikibase\DataModel\Statement\StatementList;
@@ -27,7 +28,10 @@ class StatementListSerializationRoundtripTest extends TestCase {
 		$serializerFactory = new SerializerFactory( new DataValueSerializer() );
 		$deserializerFactory = new DeserializerFactory(
 			new DataValueDeserializer(),
-			new BasicEntityIdParser()
+			new BasicEntityIdParser(),
+			new InMemoryDataTypeLookup(),
+			[],
+			[]
 		);
 
 		$serialization = $serializerFactory->newStatementListSerializer()->serialize( $statements );
@@ -36,7 +40,7 @@ class StatementListSerializationRoundtripTest extends TestCase {
 		$this->assertEquals( $statements, $newStatements );
 	}
 
-	public function snaksProvider() {
+	public static function snaksProvider() {
 		$statement = new Statement( new PropertyNoValueSnak( 42 ) );
 		$statement->setGuid( 'test' );
 

@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": []
+	},
+	"advancedsearch-options-pane-head": "اِضٲفی تَلاش:",
+	"advancedsearch-optgroup-text": "صَفہٕ مَتنَس مَنٛز کٔرِو تَلاش",
+	"advancedsearch-optgroup-files": "فَیِلہٕ تہٕ تَصویٖر",
+	"advancedsearch-optgroup-sort": "طَرٕزِ تَرتیٖب",
+	"advancedsearch-field-plain": "یِم لَفٕظ",
+	"advancedsearch-field-filetype": "فَیِلہِ ہُنٛد قٕسٕم",
+	"advancedsearch-filetype-section-image": "تَصویٖر فارمیٹ",
+	"advancedsearch-filetype-section-video": "ویڈیو فارمیٹ",
+	"advancedsearch-filetype-section-audio": "آڈیو فارمیٹ",
+	"advancedsearch-filetype-section-document": "دستاویز فارمیٹ",
+	"advancedsearch-filetype-section-other": "باقٕے فارمیٹ",
+	"advancedsearch-filetype-bitmap": "تَصویٖر",
+	"advancedsearch-filetype-drawing": "نَقٲشی",
+	"advancedsearch-filetype-audio": "آڈیو",
+	"advancedsearch-filetype-video": "ویڈیو",
+	"advancedsearch-filetype-office": "دَفتری",
+	"advancedsearch-filesize-greater-than": "کھوتہٕ زیادٕ",
+	"advancedsearch-filesize-smaller-than": "کھوتہٕ کَم",
+	"advancedsearch-namespaces-preset-all": "سٲری",
+	"advancedsearch-namespaces-preset-default": "اورٕ طَرفہٕ",
+	"advancedsearch-namespaces-preset-general-help": "عَوٲمی مَدَتھ",
+	"advancedsearch-namespaces-preset-discussion": "کتھ",
+	"advancedsearch-namespaces-placeholder": "ناوجاے کٔرِو مُنتَخٕب ...",
+	"prefs-advancedsearch": "تَفصیٖل دار تَلاش"
+}

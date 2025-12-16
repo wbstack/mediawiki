@@ -1,8 +1,11 @@
+'use strict';
+
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
 module.exports = {
 	moduleNameMapper: {
+		'@wikimedia/codex-search': '@wikimedia/codex',
 		'^./templates/(.*).mustache': '<rootDir>/includes/templates/$1.mustache'
 	},
 
@@ -29,10 +32,10 @@ module.exports = {
 	// An object that configures minimum threshold enforcement for coverage results
 	coverageThreshold: {
 		global: {
-			branches: 14,
-			functions: 24,
-			lines: 22,
-			statements: 22
+			branches: 35,
+			functions: 45,
+			lines: 48,
+			statements: 48
 		}
 	},
 
@@ -41,6 +44,10 @@ module.exports = {
 		'js',
 		'json',
 		'vue'
+	],
+
+	modulePathIgnorePatterns: [
+		'<rootDir>/tests/integration-qunit/'
 	],
 
 	// The paths to modules that run some code to configure or

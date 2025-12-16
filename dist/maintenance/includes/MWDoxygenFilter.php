@@ -21,6 +21,8 @@
  * @ingroup Maintenance
  */
 
+namespace MediaWiki\Maintenance;
+
 /**
  * Doxygen filter to show correct member variable types in documentation.
  *
@@ -64,18 +66,18 @@ class MWDoxygenFilter {
 				$output .= $token;
 				continue;
 			}
-			list( $id, $content ) = $token;
+			[ $id, $content ] = $token;
 			switch ( $id ) {
 				case T_DOC_COMMENT:
 					// Escape slashes so that references to namespaces are not
 					// wrongly interpreted as a Doxygen "\command".
 					$content = addcslashes( $content, '\\' );
 					// Look for instances of "@var SomeType".
-					if ( preg_match( '#@var\s+\S+#s', $content ) ) {
+					if ( preg_match( '#@var\s+\S+#', $content ) ) {
 						$buffer = [ 'raw' => $content, 'desc' => null, 'type' => null, 'name' => null ];
 						$buffer['desc'] = preg_replace_callback(
 							// Strip "@var SomeType" part, but remember the type and optional name
-							'#@var\s+(\S+)(\s+)?(\S+)?#s',
+							'#@var\s+(\S+)(\s+)?(\S+)?#',
 							static function ( $matches ) use ( &$buffer ) {
 								$buffer['type'] = $matches[1];
 								$buffer['name'] = $matches[3] ?? null;
@@ -139,3 +141,6 @@ class MWDoxygenFilter {
 		return $output;
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( MWDoxygenFilter::class, 'MWDoxygenFilter' );

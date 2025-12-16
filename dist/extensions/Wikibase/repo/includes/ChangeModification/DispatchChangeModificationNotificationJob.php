@@ -8,8 +8,8 @@ use IJobSpecification;
 use Job;
 use MediaWiki\JobQueue\JobQueueGroupFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 use Psr\Log\LoggerInterface;
-use Title;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\Changes\RepoRevisionIdentifier;
 use Wikibase\Lib\Store\EntityIdLookup;
@@ -52,7 +52,10 @@ abstract class DispatchChangeModificationNotificationJob extends Job {
 		$this->localClientDatabases = $repoSettings->getSetting( 'localClientDatabases' );
 
 		$this->initServices(
-			new ContentHandlerEntityIdLookup( WikibaseRepo::getEntityContentFactory( $mwServices ) ),
+			new ContentHandlerEntityIdLookup(
+				WikibaseRepo::getEntityContentFactory( $mwServices ),
+				$mwServices->getHookContainer()
+			),
 			WikibaseRepo::getLogger( $mwServices ),
 			$mwServices->getJobQueueGroupFactory()
 		);
@@ -107,7 +110,7 @@ abstract class DispatchChangeModificationNotificationJob extends Job {
 	 * @inheritDoc
 	 */
 	public function run(): bool {
-		if ( empty( $this->localClientDatabases ) ) {
+		if ( !$this->localClientDatabases ) {
 			return true;
 		}
 		$entityId = $this->entityIdLookup->getEntityIdForTitle( $this->getTitle() );

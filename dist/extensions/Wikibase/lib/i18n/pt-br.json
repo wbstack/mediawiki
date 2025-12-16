@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"!Silent",
+			"555",
 			"Cainamarques",
 			"Dianakc",
 			"Eduardo Addad de Oliveira",
@@ -14,7 +15,8 @@
 			"O andarilho",
 			"Opraco",
 			"TheEduGobi",
-			555
+			"Stanglavine",
+			"EGobi"
 		]
 	},
 	"specialpages-group-wikibase": "Wikibase",
@@ -30,6 +32,7 @@
 	"wikibase-error-ui-no-external-page": "Uma página \"$2\" não pôde ser encontrada em \"$1\".",
 	"wikibase-error-ui-edit-conflict": "O mesmo valor foi editado enquanto isso, causando um conflito de edição. Por favor, recarregue a página.",
 	"wikibase-language-fallback-transliteration-hint": "$1 (transliterado)",
+	"wikibase-language-name-for-terms-mul": "padrão para todos os idiomas",
 	"wikibase-quantitydetails-amount": "Quantia",
 	"wikibase-quantitydetails-upperbound": "Limite máximo",
 	"wikibase-quantitydetails-lowerbound": "Limite mínimo",
@@ -51,7 +54,7 @@
 	"wikibase-undeserializable-value": "O valor é inválido e não pode ser exibido.",
 	"datatypes-type-string": "String",
 	"datatypes-type-quantity": "Quantidade",
-	"datatypes-type-monolingualtext": "Texto multilíngue",
+	"datatypes-type-monolingualtext": "Texto monolíngue",
 	"datatypes-type-multilingualtext": "Texto multilíngue",
 	"datatypes-type-number": "Número",
 	"datatypes-type-mediawiki-title": "Título do MediaWiki",
@@ -65,8 +68,6 @@
 	"datatypes-type-geo-shape": "Forma geográfica",
 	"datatypes-type-tabular-data": "Dados tabulares",
 	"datatypes-type-external-id": "Identificador externo",
-	"datatypes-type-entity-schema": "Esquema de Entidade",
-	"version-wikibase": "Wikibase",
 	"wikibase-time-calendar-gregorian": "Gregoriano",
 	"wikibase-time-calendar-julian": "Juliano",
 	"wikibase-time-precision-Gannum": "$1 biliões de anos CE",
@@ -82,7 +83,6 @@
 	"wikibase-time-precision-BCE-millennium": "$1. milênio BCE",
 	"wikibase-time-precision-BCE-century": "$1. século BCE",
 	"wikibase-time-precision-BCE-10annum": "$1s BCE",
-	"wikibase-monolingualtext": "<span lang=\"$2\" class=\"wb-monolingualtext-value\">$1</span> <span class=\"wb-monolingualtext-language-name\" dir=\"auto\">($3)</span>",
 	"wikibase-snakformatter-valuetype-mismatch": "O tipo de valor \"$1\" não corresponde ao tipo de propriedade \"$2\".",
 	"wikibase-snakformatter-property-not-found": "Propriedade $1 não encontrada, não pode determinar o tipo de dados a ser usado.",
 	"wikibase-snakformatter-formatting-exception": "Erro de formatação: $1.",

@@ -15,7 +15,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"APIModules": {
 		"templatedata": "MediaWiki\\Extension\\TemplateData\\Api\\ApiTemplateData"
@@ -24,12 +24,21 @@
 		"MediaWiki\\Extension\\TemplateData\\": "includes/"
 	},
 	"Hooks": {
-		"EditPage::showEditForm:fields": "MediaWiki\\Extension\\TemplateData\\Hooks::onEditPageShowEditFormFields",
-		"ParserFirstCallInit": "MediaWiki\\Extension\\TemplateData\\Hooks::onParserFirstCallInit",
-		"MultiContentSave": "MediaWiki\\Extension\\TemplateData\\Hooks::onMultiContentSave",
-		"ResourceLoaderRegisterModules": "MediaWiki\\Extension\\TemplateData\\Hooks::onResourceLoaderRegisterModules",
-		"EditPage::showEditForm:initial": "MediaWiki\\Extension\\TemplateData\\Hooks::onEditPage",
-		"ParserFetchTemplateData": "MediaWiki\\Extension\\TemplateData\\Hooks::onParserFetchTemplateData"
+		"EditPage::showEditForm:fields": "main",
+		"ParserFirstCallInit": "main",
+		"MultiContentSave": "main",
+		"ResourceLoaderRegisterModules": "main",
+		"EditPage::showEditForm:initial": "main",
+		"ParserFetchTemplateData": "main",
+		"OutputPageBeforeHTML": "main"
+	},
+	"HookHandlers": {
+		"main": {
+			"class": "MediaWiki\\Extension\\TemplateData\\Hooks",
+			"services": [
+				"MainConfig"
+			]
+		}
 	},
 	"MessagesDirs": {
 		"TemplateData": [
@@ -73,7 +82,6 @@
 			"styles": "templateDataGenerator.ui.less",
 			"packageFiles": [
 				"init.js",
-				"widgets/AutosizeTextInputWidget.js",
 				"widgets/ParamSelectWidget.js",
 				"widgets/ParamWidget.js",
 				"widgets/ParamImportWidget.js",
@@ -85,6 +93,8 @@
 			],
 			"dependencies": [
 				"mediawiki.api",
+				"mediawiki.language",
+				"mediawiki.user",
 				"oojs-ui-core",
 				"oojs-ui-widgets",
 				"oojs-ui-windows",
@@ -95,11 +105,16 @@
 				"ext.templateData.images",
 				"ext.templateDataGenerator.data",
 				"jquery.uls.data",
-				"jquery.textSelection"
+				"jquery.textSelection",
+				"web2017-polyfills"
 			],
 			"messages": [
 				"comma-separator",
 				"templatedata-doc-no-params-set",
+				"templatedata-doc-param-status-optional",
+				"templatedata-doc-param-status-deprecated",
+				"templatedata-doc-param-status-required",
+				"templatedata-doc-param-status-suggested",
 				"templatedata-doc-param-type-boolean",
 				"templatedata-doc-param-type-content",
 				"templatedata-doc-param-type-date",
@@ -129,7 +144,6 @@
 				"templatedata-modal-button-importParams",
 				"templatedata-modal-button-map",
 				"templatedata-modal-button-removemap",
-				"templatedata-modal-button-restoreparam",
 				"templatedata-modal-button-saveparam",
 				"templatedata-modal-confirmcancel",
 				"templatedata-modal-current-language",
@@ -148,12 +162,12 @@
 				"templatedata-modal-search-input-placeholder",
 				"templatedata-modal-placeholder-mapinfo",
 				"templatedata-modal-placeholder-prompt-map-name",
-				"templatedata-modal-table-param-actions",
 				"templatedata-modal-table-param-aliases",
 				"templatedata-modal-table-param-autovalue",
 				"templatedata-modal-table-param-suggestedvalues",
-				"templatedata-modal-table-param-suggestedvalues-placeholder",
+				"templatedata-modal-placeholder-multiselect",
 				"templatedata-modal-table-param-default",
+				"templatedata-modal-table-param-status",
 				"templatedata-modal-table-param-deprecated",
 				"templatedata-modal-table-param-deprecatedValue",
 				"templatedata-modal-table-param-description",
@@ -165,7 +179,6 @@
 				"templatedata-modal-table-param-required",
 				"templatedata-modal-table-param-suggested",
 				"templatedata-modal-table-param-type",
-				"templatedata-modal-table-param-uneditablefield",
 				"templatedata-modal-title",
 				"templatedata-modal-title-addparam",
 				"templatedata-modal-title-choose-language",
@@ -182,7 +195,7 @@
 		},
 		"ext.templateData.images": {
 			"localBasePath": "modules/ext.templateData.images",
-			"class": "ResourceLoaderImageModule",
+			"class": "MediaWiki\\ResourceLoader\\ImageModule",
 			"selectorWithVariant": ".oo-ui-icon-{name}.oo-ui-image-invert",
 			"selectorWithoutVariant": ".oo-ui-icon-{name}",
 			"variants": {
@@ -221,12 +234,6 @@
 		]
 	},
 	"attributes": {
-		"EventLogging": {
-			"Schemas": {
-				"TemplateDataEditor": "/analytics/legacy/templatedataeditor/1.0.0",
-				"TemplateDataApi": "/analytics/legacy/templatedataapi/1.0.0"
-			}
-		},
 		"VisualEditor": {
 			"PluginModules": [
 				"ext.templateDataGenerator.editPage"

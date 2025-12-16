@@ -2,9 +2,6 @@
 
 namespace MediaWiki\Extension\OAuth\Frontend\Pagers;
 
-use MediaWiki\Extension\OAuth\Backend\Utils;
-use MediaWiki\Extension\OAuth\Frontend\SpecialPages\SpecialMWOAuthManageMyGrants;
-
 /**
  * (c) Aaron Schulz 2013, GPL
  *
@@ -24,12 +21,17 @@ use MediaWiki\Extension\OAuth\Frontend\SpecialPages\SpecialMWOAuthManageMyGrants
  * http://www.gnu.org/copyleft/gpl.html
  */
 
+use MediaWiki\Extension\OAuth\Backend\Utils;
+use MediaWiki\Extension\OAuth\Frontend\SpecialPages\SpecialMWOAuthManageMyGrants;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Pager\ReverseChronologicalPager;
+use MediaWiki\Title\Title;
+use stdClass;
 
 /**
  * Query to list out consumers that have an access token for this user
  */
-class ManageMyGrantsPager extends \ReverseChronologicalPager {
+class ManageMyGrantsPager extends ReverseChronologicalPager {
 	/** @var SpecialMWOAuthManageMyGrants */
 	public $mForm;
 	/** @var array */
@@ -60,14 +62,14 @@ class ManageMyGrantsPager extends \ReverseChronologicalPager {
 	}
 
 	/**
-	 * @return \Title
+	 * @return Title
 	 */
 	public function getTitle() {
 		return $this->mForm->getFullTitle();
 	}
 
 	/**
-	 * @param \stdClass $row
+	 * @param stdClass $row
 	 * @return string
 	 */
 	public function formatRow( $row ) {

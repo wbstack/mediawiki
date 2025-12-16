@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Умар"
+		]
+	},
+	"apihelp-jsonconfig-paramvalue-command-status": "Гойту JsonConfig конфигураци.",
+	"apihelp-jsonconfig-param-content": "$1command=reload -на лелабе хӀара чулацам.",
+	"apihelp-jsonconfig-example-1": "Нисдаран гӀирс гайта",
+	"apihelp-jsonconfig-example-2": "Кхосса [[Data:Brazil/Amazonas.map]]",
+	"apihelp-jsonconfig-example-3": "Карлайаккха [[Data:Brazil/Amazonas.map]]",
+	"apihelp-jsondata-summary": "Локализаци йина JSON хаамаш схьаоьцу.",
+	"apierror-jsonconfig-paramrequired": "ХӀокху командина оьшу <var>$1</var> параметр."
+}

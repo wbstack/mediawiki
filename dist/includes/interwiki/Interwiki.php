@@ -1,7 +1,5 @@
 <?php
 /**
- * Interwiki table entry.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -21,17 +19,20 @@
  */
 
 /**
- * Value object for representing interwiki records.
+ * An interwiki record value object.
+ *
+ * By default, these represent a row in the `interwiki` database table.
+ * See @ref \MediaWiki\Interwiki\ClassicInterwikiLookup for where this is used.
  */
 class Interwiki {
 
 	/** @var string The interwiki prefix, (e.g. "Meatball", or the language prefix "de") */
 	protected $mPrefix;
 
-	/** @var string The URL of the wiki, with "$1" as a placeholder for an article name. */
+	/** @var string The article path URL of the wiki, with "$1" as a placeholder for an article name. */
 	protected $mURL;
 
-	/** @var string The URL of the file api.php */
+	/** @var string The URL to the api.php entry point of the wiki. */
 	protected $mAPI;
 
 	/** @var string The name of the database (for a connection to be established
@@ -62,7 +63,7 @@ class Interwiki {
 	 * @param string|null $title What text to put for the article name
 	 * @return string The URL
 	 * @note Prior to 1.19 The getURL with an argument was broken.
-	 *       If you if you use this arg in an extension that supports MW earlier
+	 *       If you use this arg in an extension that supports MW earlier
 	 *       than 1.19 please wfUrlencode and substitute $1 on your own.
 	 */
 	public function getURL( $title = null ) {

@@ -7,9 +7,9 @@ use Wikimedia\Parsoid\DOM\Element;
 use Wikimedia\Parsoid\DOM\Node;
 use Wikimedia\Parsoid\Html2Wt\DiffUtils;
 use Wikimedia\Parsoid\Html2Wt\SerializerState;
+use Wikimedia\Parsoid\Utils\DiffDOMUtils;
 use Wikimedia\Parsoid\Utils\DOMCompat;
 use Wikimedia\Parsoid\Utils\DOMDataUtils;
-use Wikimedia\Parsoid\Utils\DOMUtils;
 
 class TDHandler extends DOMHandler {
 
@@ -52,13 +52,13 @@ class TDHandler extends DOMHandler {
 			return $state->serializer->wteHandlers->tdHandler( $node, $inWideTD, $state, $text, $opts );
 		};
 
-		$nextTd = DOMUtils::nextNonSepSibling( $node );
+		$nextTd = DiffDOMUtils::nextNonSepSibling( $node );
 		$nextUsesRowSyntax = $nextTd instanceof Element
 			&& ( DOMDataUtils::getDataParsoid( $nextTd )->stx ?? null ) === 'row';
 
 		// For empty cells, emit a single whitespace to make wikitext
 		// more readable as well as to eliminate potential misparses.
-		if ( $nextUsesRowSyntax && !DOMUtils::firstNonDeletedChild( $node ) ) {
+		if ( $nextUsesRowSyntax && !DiffDOMUtils::firstNonDeletedChild( $node ) ) {
 			$state->serializer->emitWikitext( ' ', $node );
 			return $node->nextSibling;
 		}
@@ -66,20 +66,18 @@ class TDHandler extends DOMHandler {
 		$state->serializeChildren( $node, $tdHandler );
 
 		if ( !preg_match( '/\s$/D', $state->currLine->text ) ) {
-			$trailingSpace = null;
+			$trailingSpace = '';
 			if ( $nextUsesRowSyntax ) {
 				$trailingSpace = $this->getTrailingSpace( $state, $node, '' );
 			}
 			// Recover any trimmed whitespace only on unmodified nodes
-			if ( !$trailingSpace ) {
-				$lastChild = DOMUtils::lastNonSepChild( $node );
-				if ( $lastChild && !DiffUtils::hasDiffMarkers( $lastChild, $state->getEnv() ) ) {
-					$trailingSpace = $state->recoverTrimmedWhitespace( $node, false );
+			if ( $trailingSpace === '' ) {
+				$lastChild = DiffDOMUtils::lastNonSepChild( $node );
+				if ( $lastChild && !DiffUtils::hasDiffMarkers( $lastChild ) ) {
+					$trailingSpace = $state->recoverTrimmedWhitespace( $node, false ) ?? '';
 				}
 			}
-			if ( $trailingSpace ) {
-				$state->appendSep( $trailingSpace );
-			}
+			$state->appendSep( $trailingSpace );
 		}
 
 		return $node->nextSibling;
@@ -87,14 +85,9 @@ class TDHandler extends DOMHandler {
 
 	/** @inheritDoc */
 	public function before( Element $node, Node $otherNode, SerializerState $state ): array {
-		if ( DOMCompat::nodeName( $otherNode ) === 'td'
-			&& ( DOMDataUtils::getDataParsoid( $node )->stx ?? null ) === 'row'
-		) {
-			// force single line
-			return [ 'min' => 0, 'max' => $this->maxNLsInTable( $node, $otherNode ) ];
-		} else {
-			return [ 'min' => 1, 'max' => $this->maxNLsInTable( $node, $otherNode ) ];
-		}
+		$forceSingleLine = DOMCompat::nodeName( $otherNode ) === 'td'
+			&& ( DOMDataUtils::getDataParsoid( $node )->stx ?? null ) === 'row';
+		return [ 'min' => $forceSingleLine ? 0 : 1, 'max' => $this->maxNLsInTable( $node, $otherNode ) ];
 	}
 
 	/** @inheritDoc */

@@ -1,13 +1,11 @@
 /**
  * jQuery plugin to update the tooltip to show the correct access key
- *
- * @class jQuery.plugin.accessKeyLabel
  */
 
 // Whether to use 'test-' instead of correct prefix (for unit tests)
-var testMode = false;
+let testMode = false;
 
-var cachedModifiers;
+let cachedModifiers;
 
 /**
  * Find the modifier keys that need to be pressed together with the accesskey to trigger the input.
@@ -25,8 +23,8 @@ function getAccessKeyModifiers( nav ) {
 		return cachedModifiers;
 	}
 
-	var profile = $.client.profile( nav );
-	var accessKeyModifiers;
+	const profile = $.client.profile( nav );
+	let accessKeyModifiers;
 
 	switch ( profile.name ) {
 		// Historical: Opera 8-13 used shift-esc- (Presto engine, no longer supported).
@@ -116,17 +114,18 @@ function getAccessKeyLabel( element ) {
  * @param {HTMLElement} titleElement Element with the title to update (may be the same as `element`)
  */
 function updateTooltipOnElement( element, titleElement ) {
-	var oldTitle = titleElement.title;
+	const oldTitle = titleElement.title;
 	if ( !oldTitle ) {
 		// don't add a title if the element didn't have one before
 		return;
 	}
 
-	var separatorMsg = mw.message( 'word-separator' ).plain();
-	var parts = ( separatorMsg + mw.message( 'brackets' ).plain() ).split( '$1' );
-	var regexp = new RegExp( parts.map( mw.util.escapeRegExp ).join( '.*?' ) + '$' );
-	var newTitle = oldTitle.replace( regexp, '' );
-	var accessKeyLabel = getAccessKeyLabel( element );
+	const separatorMsg = mw.message( 'word-separator' ).plain();
+	const parts = ( separatorMsg + mw.message( 'brackets' ).plain() ).split( '$1' );
+
+	const regexp = new RegExp( parts.map( mw.util.escapeRegExp ).join( '.*?' ) + '$' );
+	let newTitle = oldTitle.replace( regexp, '' );
+	const accessKeyLabel = getAccessKeyLabel( element );
 
 	if ( accessKeyLabel ) {
 		// Should be build the same as in Linker::titleAttrib
@@ -139,7 +138,7 @@ function updateTooltipOnElement( element, titleElement ) {
 
 // HTML elements that can have an associated label
 // https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Content_categories#Form-associated_content
-var labelable = 'button, input, textarea, keygen, meter, output, progress, select';
+const labelable = 'button, input, textarea, keygen, meter, output, progress, select';
 
 /**
  * Update the title for an element to show the correct access key label.
@@ -151,19 +150,19 @@ function updateTooltip( element ) {
 	updateTooltipOnElement( element, element );
 
 	// update associated label if there is one
-	var $element = $( element );
+	const $element = $( element );
 	if ( $element.is( labelable ) ) {
 		// Search it using 'for' attribute
-		var id = element.id.replace( /"/g, '\\"' );
+		const id = element.id.replace( /"/g, '\\"' );
 		if ( id ) {
-			var $label = $( 'label[for="' + id + '"]' );
+			const $label = $( 'label[for="' + id + '"]' );
 			if ( $label.length === 1 ) {
 				updateTooltipOnElement( element, $label[ 0 ] );
 			}
 		}
 
 		// Search it as parent, because the form control can also be inside the label element itself
-		var $labelParent = $element.parents( 'label' );
+		const $labelParent = $element.parents( 'label' );
 		if ( $labelParent.length === 1 ) {
 			updateTooltipOnElement( element, $labelParent[ 0 ] );
 		}
@@ -173,7 +172,17 @@ function updateTooltip( element ) {
 /**
  * Update the titles for all elements in a jQuery selection.
  *
+ * To use this {@link jQuery} plugin, load the `mediawiki.util` module using {@link mw.loader}.
+ *
+ * @memberof module:mediawiki.util
+ * @method
  * @return {jQuery}
+ * @example
+ * // Converts tooltip "[z]" to associated browser shortcut key e.g. "[ctrl-option-z]"
+ * mw.loader.using( 'mediawiki.util' ).then( () => {
+ *     var $a = $('<a href="/wiki/Main_Page" title="Visit the main page [z]" accesskey="z"><span>Main page</span></a>');
+ *     $a.updateTooltipAccessKeys();
+ * } );
  * @chainable
  */
 $.fn.updateTooltipAccessKeys = function () {
@@ -182,12 +191,6 @@ $.fn.updateTooltipAccessKeys = function () {
 	} );
 };
 
-/**
- * getAccessKeyLabel
- *
- * @method updateTooltipAccessKeys_getAccessKeyLabel
- * @inheritdoc #getAccessKeyLabel
- */
 $.fn.updateTooltipAccessKeys.getAccessKeyLabel = getAccessKeyLabel;
 
 /**
@@ -196,6 +199,7 @@ $.fn.updateTooltipAccessKeys.getAccessKeyLabel = getAccessKeyLabel;
  * @method updateTooltipAccessKeys_getAccessKeyPrefix
  * @param {Object} [nav] An object with a 'userAgent' and 'platform' property.
  * @return {string}
+ * @ignore
  */
 $.fn.updateTooltipAccessKeys.getAccessKeyPrefix = function ( nav ) {
 	return getAccessKeyModifiers( nav ) + '-';
@@ -206,12 +210,8 @@ $.fn.updateTooltipAccessKeys.getAccessKeyPrefix = function ( nav ) {
  *
  * @method updateTooltipAccessKeys_setTestMode
  * @param {boolean} mode New mode
+ * @ignore
  */
 $.fn.updateTooltipAccessKeys.setTestMode = function ( mode ) {
 	testMode = mode;
 };
-
-/**
- * @class jQuery
- * @mixins jQuery.plugin.accessKeyLabel
- */

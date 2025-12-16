@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:Wantedcategories
- *
  * Copyright © 2005 Ævar Arnfjörð Bjarmason
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,36 +18,43 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
 
+namespace MediaWiki\Specials;
+
+use HtmlArmor;
 use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\Language\ILanguageConverter;
 use MediaWiki\Languages\LanguageConverterFactory;
-use Wikimedia\Rdbms\ILoadBalancer;
+use MediaWiki\SpecialPage\WantedQueryPage;
+use MediaWiki\Title\Title;
+use Skin;
+use stdClass;
+use Wikimedia\Rdbms\IConnectionProvider;
 
 /**
- * A querypage to list the most wanted categories - implements Special:Wantedcategories
+ * List of the most wanted categories
  *
  * @ingroup SpecialPage
  */
 class SpecialWantedCategories extends WantedQueryPage {
+	/** @var int[] */
 	private $currentCategoryCounts;
 
-	/** @var ILanguageConverter */
-	private $languageConverter;
+	private ILanguageConverter $languageConverter;
 
 	/**
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 * @param LinkBatchFactory $linkBatchFactory
 	 * @param LanguageConverterFactory $languageConverterFactory
 	 */
 	public function __construct(
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		LinkBatchFactory $linkBatchFactory,
 		LanguageConverterFactory $languageConverterFactory
 	) {
 		parent::__construct( 'Wantedcategories' );
-		$this->setDBLoadBalancer( $loadBalancer );
+		$this->setDatabaseProvider( $dbProvider );
 		$this->setLinkBatchFactory( $linkBatchFactory );
 		$this->languageConverter = $languageConverterFactory->getLanguageConverter( $this->getContentLanguage() );
 	}
@@ -62,7 +67,7 @@ class SpecialWantedCategories extends WantedQueryPage {
 				'title' => 'cl_to',
 				'value' => 'COUNT(*)'
 			],
-			'conds' => [ 'page_title IS NULL' ],
+			'conds' => [ 'page_title' => null ],
 			'options' => [ 'GROUP BY' => 'cl_to' ],
 			'join_conds' => [ 'page' => [ 'LEFT JOIN',
 				[ 'page_title = cl_to',
@@ -87,12 +92,11 @@ class SpecialWantedCategories extends WantedQueryPage {
 			$allCategories[] = $row->title;
 		}
 
-		$categoryRes = $db->select(
-			'category',
-			[ 'cat_title', 'cat_pages' ],
-			[ 'cat_title' => $allCategories ],
-			__METHOD__
-		);
+		$categoryRes = $db->newSelectQueryBuilder()
+			->select( [ 'cat_title', 'cat_pages' ] )
+			->from( 'category' )
+			->where( [ 'cat_title' => $allCategories ] )
+			->caller( __METHOD__ )->fetchResultSet();
 		foreach ( $categoryRes as $row ) {
 			$this->currentCategoryCounts[$row->cat_title] = intval( $row->cat_pages );
 		}
@@ -145,3 +149,9 @@ class SpecialWantedCategories extends WantedQueryPage {
 		return 'maintenance';
 	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialWantedCategories::class, 'SpecialWantedCategories' );

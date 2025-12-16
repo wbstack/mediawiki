@@ -6,6 +6,7 @@ use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use TwoColConflict\AnnotatedHtmlDiffFormatter;
 use TwoColConflict\SplitConflictUtils;
+use Wikimedia\Diff\ComplexityException;
 
 /**
  * @license GPL-2.0-or-later
@@ -13,20 +14,9 @@ use TwoColConflict\SplitConflictUtils;
  */
 class ResolutionSuggester {
 
-	/**
-	 * @var RevisionRecord|null
-	 */
-	private $baseRevision;
+	private ?RevisionRecord $baseRevision;
+	private string $contentFormat;
 
-	/**
-	 * @var string
-	 */
-	private $contentFormat;
-
-	/**
-	 * @param RevisionRecord|null $baseRevision
-	 * @param string $contentFormat
-	 */
 	public function __construct( ?RevisionRecord $baseRevision, string $contentFormat ) {
 		$this->baseRevision = $baseRevision;
 		$this->contentFormat = $contentFormat;
@@ -56,11 +46,15 @@ class ResolutionSuggester {
 		array $yourLines
 	): ?TalkPageResolution {
 		$baseLines = $this->getBaseRevisionLines();
-
 		$formatter = new AnnotatedHtmlDiffFormatter();
-		// TODO: preSaveTransform $yourLines, but not $storedLines
-		$diffYourLines = $formatter->format( $baseLines, $yourLines, $yourLines );
-		$diffStoredLines = $formatter->format( $baseLines, $storedLines, $storedLines );
+
+		try {
+			// TODO: preSaveTransform $yourLines, but not $storedLines
+			$diffYourLines = $formatter->format( $baseLines, $yourLines, $yourLines );
+			$diffStoredLines = $formatter->format( $baseLines, $storedLines, $storedLines );
+		} catch ( ComplexityException $ex ) {
+			return null;
+		}
 
 		if ( count( $diffYourLines ) !== count( $diffStoredLines ) ) {
 			return null;
@@ -124,7 +118,7 @@ class ResolutionSuggester {
 	/**
 	 * @return string[]
 	 */
-	private function getBaseRevisionLines() {
+	private function getBaseRevisionLines(): array {
 		if ( !$this->baseRevision ) {
 			return [];
 		}
@@ -150,7 +144,7 @@ class ResolutionSuggester {
 		return [ $before, $after ];
 	}
 
-	private function moveNewlinesUp( array &$diff, int $i, int $count ) {
+	private function moveNewlinesUp( array &$diff, int $i, int $count ): void {
 		if ( $count < 1 || !isset( $diff[$i - 1] ) || $diff[$i - 1]['action'] !== 'add' ) {
 			return;
 		}
@@ -160,7 +154,7 @@ class ResolutionSuggester {
 		$diff[$i]['copytext'] = substr( $diff[$i]['copytext'], $count );
 	}
 
-	private function moveNewlinesDown( array &$diff, int $i, int $count ) {
+	private function moveNewlinesDown( array &$diff, int $i, int $count ): void {
 		if ( $count < 1 || !isset( $diff[$i + 1] ) || $diff[$i + 1]['action'] !== 'add' ) {
 			return;
 		}

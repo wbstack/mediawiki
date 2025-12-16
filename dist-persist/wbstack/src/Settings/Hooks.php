@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 //// CUSTOM Sidebar for WBStack
 // https://www.mediawiki.org/wiki/Manual:Hooks/SkinBuildSidebar
 $wgHooks['SkinBuildSidebar'][] = function ( $skin, &$sidebar ) use ( $wikiInfo ) {
@@ -68,7 +70,8 @@ class WBStackPageUpdateHandler {
                 $options['method'] = 'POST';
                 $options['timeout'] = 5;
                 $options['postData'] = json_encode($data);
-                $request = \MWHttpRequest::factory(
+                $httpRequestFactory = MediaWikiServices::getInstance()->getHttpRequestFactory();
+                $request = $httpRequestFactory->create(
                     'http://' . getenv( 'PLATFORM_API_BACKEND_HOST' ) . '/backend/event/pageUpdateBatch',
                     $options
                 );

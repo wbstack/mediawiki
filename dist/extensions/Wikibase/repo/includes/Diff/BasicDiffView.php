@@ -9,9 +9,9 @@ use Diff\DiffOp\DiffOp;
 use Diff\DiffOp\DiffOpAdd;
 use Diff\DiffOp\DiffOpChange;
 use Diff\DiffOp\DiffOpRemove;
-use Html;
-use MWException;
-use WordLevelDiff;
+use MediaWiki\Html\Html;
+use UnexpectedValueException;
+use Wikimedia\Diff\WordLevelDiff;
 
 /**
  * Class for generating views of DiffOp objects.
@@ -53,7 +53,6 @@ class BasicDiffView implements DiffView {
 	 * @param DiffOp $op
 	 *
 	 * @return string
-	 * @throws MWException
 	 */
 	protected function generateOpHtml( array $path, DiffOp $op ) {
 		if ( $op->isAtomic() ) {
@@ -90,7 +89,7 @@ class BasicDiffView implements DiffView {
 					$wordLevelDiff->closing()[0]
 				 );
 			} else {
-				throw new MWException( 'Invalid diffOp type' );
+				throw new UnexpectedValueException( 'Invalid diffOp type' );
 			}
 		} else {
 			$html = '';
@@ -120,7 +119,7 @@ class BasicDiffView implements DiffView {
 		}
 		if ( $newHtml !== null ) {
 			if ( $oldHtml === null ) {
-				$html .= Html::rawElement( 'td', [ 'colspan' => '2' ], '&nbsp;' );
+				$html .= Html::element( 'td', [ 'colspan' => '2' ], "\u{00A0}" );
 			}
 			$html .= Html::rawElement( 'td', [ 'class' => 'diff-marker', 'data-marker' => '+' ] );
 			$html .= Html::rawElement( 'td', [ 'class' => 'diff-addedline' ],

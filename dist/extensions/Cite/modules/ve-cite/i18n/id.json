@@ -2,7 +2,6 @@
 	"@metadata": {
 		"authors": [
 			"Ahdan",
-			"Amire80",
 			"Bennylin",
 			"Daud I.F. Argana",
 			"Farras",
@@ -12,6 +11,7 @@
 			"Iwan Novirion",
 			"Iyan",
 			"Kenrick95",
+			"Leapofod",
 			"Macofe",
 			"Marwan Mohamad",
 			"McDutchie",
@@ -20,6 +20,7 @@
 			"Presidenvolksraad",
 			"Raynasution",
 			"Rv77ax",
+			"Veracious",
 			"William Surya Permana"
 		]
 	},
@@ -41,9 +42,9 @@
 	"cite-ve-citationneeded-title": "Diperlukan kutipan",
 	"cite-ve-dialog-reference-editing-reused": "Referensi ini dipakai {{PLURAL:$1|sekali\n|$1 kali}} pada halaman ini.",
 	"cite-ve-dialog-reference-editing-reused-long": "Referensi ini dipakai {{PLURAL:$1|sekali|$1 kali}} pada halaman ini. Perubahan yang dilakukan di sini akan diterapkan di semua tempat referensi ini dipakai.",
+	"cite-ve-dialog-reference-editing-extends": "Ini adalah ekstensi referensi lainnya.",
 	"cite-ve-dialog-reference-options-group-label": "Pakai kelompok ini",
 	"cite-ve-dialog-reference-options-group-placeholder": "Referensi umum",
-	"cite-ve-dialog-reference-options-name-label": "Pakai ulang dengan nama ini",
 	"cite-ve-dialog-reference-options-responsive-label": "Gunakan tata letak kolom responsif",
 	"cite-ve-dialog-reference-options-section": "Opsi",
 	"cite-ve-dialog-reference-placeholder": "Tulis atau salin referensi Anda di sini, atau sisipkan templat kutipan.",
@@ -53,7 +54,7 @@
 	"cite-ve-dialog-referenceslist-contextitem-description-named": "Daftar referensi untuk kelompok \"$1\"",
 	"cite-ve-dialog-referenceslist-title": "Daftar referensi",
 	"cite-ve-dialogbutton-citation-educationpopup-text": "Tingkatkan konten anda dengan menambahkan sumber informasi. Anda dapat mengutip dari buku, koran, dan situs.",
-	"cite-ve-dialogbutton-citation-educationpopup-title": "Kutipan",
+	"cite-ve-dialogbutton-citation-educationpopup-title": "Sitasi",
 	"cite-ve-dialogbutton-reference-full-label": "Dasar",
 	"cite-ve-dialogbutton-reference-title": "Referensi",
 	"cite-ve-dialogbutton-reference-tooltip": "Dasar",
@@ -63,9 +64,7 @@
 	"cite-ve-referenceslist-isempty-default": "Tidak ada referensi pada halaman ini yang dapat disertakan dalam daftar ini.",
 	"cite-ve-referenceslist-missingref": "Referensi ini didefinisikan dalam templat atau blok lain, dan saat ini hanya dapat disunting dalam mode sumber.",
 	"cite-ve-referenceslist-missingref-in-list": "Referensi ini didefinisikan dalam templat atau blok lain, dan saat ini hanya dapat dipratinjau dalam mode sumber.",
-	"cite-ve-referenceslist-missingreflist": "Daftar referensi ini dihasilkan oleh templat, dan saat ini hanya dapat disunting dalam mode sumber.",
+	"cite-ve-referenceslist-missingreflist": "Daftar referensi ini dihasilkan oleh templat.",
 	"cite-ve-toolbar-group-label": "Kutip",
-	"cite-ve-othergroup-item": "$1 referensi",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "Referensi",
-	"visualeditor-internal-list-diff-group-name-mwreference": "Nama kelompok referensi: \"$1\""
+	"cite-ve-othergroup-item": "$1 referensi"
 }

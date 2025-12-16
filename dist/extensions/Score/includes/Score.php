@@ -26,19 +26,19 @@
 namespace MediaWiki\Extension\Score;
 
 use Exception;
-use FileBackend;
-use FormatJson;
-use FSFileBackend;
-use Html;
+use MediaWiki\Html\Html;
+use MediaWiki\Json\FormatJson;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
-use Message;
+use MediaWiki\Message\Message;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\PPFrame;
+use MediaWiki\Title\Title;
+use MediaWiki\WikiMap\WikiMap;
 use NullLockManager;
-use Parser;
-use PPFrame;
 use Shellbox\Command\BoxedCommand;
-use Title;
-use WikiMap;
+use Wikimedia\FileBackend\FileBackend;
+use Wikimedia\FileBackend\FSFileBackend;
 use Wikimedia\ScopedCallback;
 
 /**
@@ -58,13 +58,13 @@ class Score {
 	/**
 	 * Supported score languages.
 	 */
-	private static $supportedLangs = [ 'lilypond', 'ABC' ];
+	private const SUPPORTED_LANGS = [ 'lilypond', 'ABC' ];
 
 	/**
 	 * Supported note languages.
 	 * Key is LilyPond filename. Value is language code
 	 */
-	public static $supportedNoteLanguages = [
+	public const SUPPORTED_NOTE_LANGUAGES = [
 		'arabic' => 'ar',
 		'catalan' => 'ca',
 		'deutsch' => 'de',
@@ -82,16 +82,18 @@ class Score {
 	/**
 	 * Default language used for notes.
 	 */
-	public static $defaultNoteLanguage = 'nederlands';
+	private const DEFAULT_NOTE_LANGUAGE = 'nederlands';
 
 	/**
 	 * LilyPond version string.
 	 * It defaults to null and is set the first time it is required.
+	 * @var string|null
 	 */
 	private static $lilypondVersion = null;
 
 	/**
 	 * FileBackend instance cache
+	 * @var FileBackend|null
 	 */
 	private static $backend;
 
@@ -243,17 +245,16 @@ class Score {
 		if ( !self::$backend ) {
 			global $wgScoreDirectory, $wgUploadDirectory;
 			if ( $wgScoreDirectory === false ) {
-				// @phan-suppress-next-line PhanPossiblyUndeclaredVariable
 				$dir = "{$wgUploadDirectory}/lilypond";
 			} else {
 				$dir = $wgScoreDirectory;
 			}
 			self::$backend = new FSFileBackend( [
-				'name'           => 'score-backend',
-				'wikiId'         => WikiMap::getCurrentWikiId(),
-				'lockManager'    => new NullLockManager( [] ),
+				'name' => 'score-backend',
+				'wikiId' => WikiMap::getCurrentWikiId(),
+				'lockManager' => new NullLockManager( [] ),
 				'containerPaths' => [ 'score-render' => $dir ],
-				'fileMode'       => 0777,
+				'fileMode' => 0777,
 				'obResetFunc' => 'wfResetOutputBuffers',
 				'streamMimeFunc' => [ 'StreamFile', 'contentTypeFromPath' ],
 				'statusWrapper' => [ 'Status', 'wrap' ],
@@ -267,10 +268,10 @@ class Score {
 	/**
 	 * Callback for Parser's hook on 'score' tags. Renders the score code.
 	 *
-	 * @param string $code score code.
-	 * @param array $args array of score tag attributes.
-	 * @param Parser $parser Parser of Mediawiki.
-	 * @param PPFrame $frame expansion frame, not used by this extension.
+	 * @param string|null $code Score code.
+	 * @param array $args Array of score tag attributes.
+	 * @param Parser $parser
+	 * @param PPFrame $frame Expansion frame, not used by this extension.
 	 *
 	 * @throws ScoreException
 	 * @return string Image link HTML, and possibly anchor to MIDI file.
@@ -282,15 +283,20 @@ class Score {
 	/**
 	 * Renders the score code (LilyPond, ABC, etc.) in a <score>…</score> tag.
 	 *
-	 * @param string $code score code.
-	 * @param array $args array of score tag attributes.
-	 * @param Parser $parser Parser of Mediawiki.
+	 * @param string|null $code Score code.
+	 * @param array $args Array of score tag attributes.
+	 * @param Parser|null $parser Parser must be set when called during a wiki page parse.
 	 *
 	 * @throws ScoreException
 	 * @return string Image link HTML, and possibly anchor to MIDI file.
 	 */
-	public static function renderScore( $code, array $args, Parser $parser ) {
+	public static function renderScore( $code, array $args, ?Parser $parser = null ) {
 		global $wgTmpDirectory;
+
+		// T388821
+		if ( $code === null ) {
+			return '';
+		}
 
 		try {
 			$baseUrl = self::getBaseUrl();
@@ -316,7 +322,7 @@ class Score {
 			} else {
 				$options['lang'] = 'lilypond';
 			}
-			if ( !in_array( $options['lang'], self::$supportedLangs ) ) {
+			if ( !in_array( $options['lang'], self::SUPPORTED_LANGS, true ) ) {
 				throw new ScoreException( 'score-invalidlang',
 					[ htmlspecialchars( $options['lang'] ) ] );
 			}
@@ -329,7 +335,7 @@ class Score {
 					throw new ScoreException( 'score-midioverridenotfound',
 						[ htmlspecialchars( $args['override_midi'] ) ] );
 				}
-				if ( $parser->getOutput() !== null ) {
+				if ( $parser && $parser->getOutput() !== null ) {
 					$parser->getOutput()->addImage( $file->getName() );
 				}
 
@@ -343,7 +349,9 @@ class Score {
 				$options['audio_storage_path'] = "$baseStoragePath/$audioRel";
 				$options['audio_url'] = "$baseUrl/$audioRel";
 				$options['audio_sha_name'] = "$sha1.mp3";
-				$parser->addTrackingCategory( 'score-deprecated-category' );
+				if ( $parser ) {
+					$parser->addTrackingCategory( 'score-deprecated-category' );
+				}
 			} else {
 				$options['override_midi'] = false;
 			}
@@ -359,13 +367,13 @@ class Score {
 					throw new ScoreException( 'score-notelanguagewithraw' );
 				}
 			} else {
-				$options['note-language'] = self::$defaultNoteLanguage;
+				$options['note-language'] = self::DEFAULT_NOTE_LANGUAGE;
 			}
-			if ( !isset( self::$supportedNoteLanguages[$options['note-language']] ) ) {
+			if ( !isset( self::SUPPORTED_NOTE_LANGUAGES[$options['note-language']] ) ) {
 				throw new ScoreException(
 					'score-invalidnotelanguage', [
 						Message::plaintextParam( $options['note-language'] ),
-						Message::plaintextParam( implode( ', ', array_keys( self::$supportedNoteLanguages ) ) )
+						Message::plaintextParam( implode( ', ', array_keys( self::SUPPORTED_NOTE_LANGUAGES ) ) )
 					]
 				);
 			}
@@ -385,7 +393,9 @@ class Score {
 				}
 				$options['override_audio'] = true;
 				$options['audio_name'] = $overrideAudio;
-				$parser->addTrackingCategory( 'score-deprecated-category' );
+				if ( $parser ) {
+					$parser->addTrackingCategory( 'score-deprecated-category' );
+				}
 			} else {
 				$options['override_audio'] = false;
 			}
@@ -403,7 +413,7 @@ class Score {
 				'code' => $code,
 				'lang' => $options['lang'],
 				'note-language' => $options['note-language'],
-				'raw'  => $options['raw'],
+				'raw' => $options['raw'],
 				'ExtVersion' => self::CACHE_VERSION,
 				'LyVersion' => self::getLilypondVersion(),
 			];
@@ -418,8 +428,7 @@ class Score {
 
 			$html = self::generateHTML( $parser, $code, $options );
 		} catch ( ScoreException $e ) {
-			if ( $parser->getOutput() !== null ) {
-				$parser->getOutput()->addModules( [ 'ext.score.errors' ] );
+			if ( $parser && $parser->getOutput() !== null ) {
 				if ( $e->isTracked() ) {
 					$parser->addTrackingCategory( 'score-error-category' );
 				}
@@ -430,9 +439,7 @@ class Score {
 
 		// Mark the page as using the score extension, it makes easier
 		// to track all those pages.
-		if ( $parser->getOutput() !== null ) {
-			$parser->getOutput()->setPageProperty( 'score', '' );
-			// Transition to a tracking category
+		if ( $parser && $parser->getOutput() !== null ) {
 			$parser->addTrackingCategory( 'score-use-category' );
 		}
 
@@ -442,7 +449,7 @@ class Score {
 	/**
 	 * Generates the HTML code for a score tag.
 	 *
-	 * @param Parser $parser MediaWiki parser.
+	 * @param Parser|null $parser MediaWiki parser, provide when inside parse of wiki page
 	 * @param string $code Score code.
 	 * @param array $options array of rendering options.
 	 * 	The options keys are:
@@ -482,13 +489,14 @@ class Score {
 	 * @throws Exception
 	 * @throws ScoreException if an error occurs.
 	 */
-	private static function generateHTML( Parser $parser, $code, $options ) {
+	private static function generateHTML( ?Parser $parser, $code, $options ) {
 		global $wgScoreOfferSourceDownload, $wgScoreUseSvg;
 
 		$cleanup = new ScopedCallback( function () use ( $options ) {
 			self::eraseDirectory( $options['factory_directory'] );
 		} );
-		if ( $parser->getOutput() !== null ) {
+		if ( $parser && $parser->getOutput() !== null ) {
+			$parser->getOutput()->addModuleStyles( [ 'ext.score.styles' ] );
 			$parser->getOutput()->addModules( [ 'ext.score.popup' ] );
 		}
 
@@ -581,7 +589,7 @@ class Score {
 
 		/* return output link(s) */
 		if ( isset( $existingFiles[$imageFileName] ) ) {
-			list( $width, $height ) = $metaData[$imageFileName]['size'];
+			[ $width, $height ] = $metaData[$imageFileName]['size'];
 			$attribs = [
 				'src' => "{$options['dest_url']}/$imageFileName",
 				'width' => $width,
@@ -603,7 +611,7 @@ class Score {
 					->inContentLanguage()
 					->numParams( $i )
 					->plain();
-				list( $width, $height ) = $metaData[$fileName]['size'];
+				[ $width, $height ] = $metaData[$fileName]['size'];
 				$attribs = [
 					'src' => "{$options['dest_url']}/$fileName",
 					'width' => $width,
@@ -647,7 +655,7 @@ class Score {
 				) .
 				'</div>';
 		}
-		if ( $options['override_audio'] !== false ) {
+		if ( $parser && $options['override_audio'] !== false ) {
 			$link .= $parser->recursiveTagParse( "[[File:{$options['audio_name']}]]" );
 		}
 
@@ -655,7 +663,7 @@ class Score {
 		ScopedCallback::consume( $cleanup );
 
 		$attributes = [
-			'class' => 'mw-ext-score'
+			'class' => 'mw-ext-score noresize'
 		];
 
 		if ( $options['override_midi']
@@ -691,7 +699,7 @@ class Score {
 	private static function generatePngAndMidi( $code, $options, &$metaData ) {
 		global $wgScoreLilyPond, $wgScoreTrim, $wgScoreSafeMode, $wgScoreDisableExec,
 			$wgScoreGhostscript, $wgScoreAbc2Ly, $wgImageMagickConvertCommand, $wgScoreUseSvg,
-			$wgScoreShell, $wgPhpCli, $wgScoreEnvironment, $wgScoreImageMagickConvert;
+			$wgShellboxShell, $wgPhpCli, $wgScoreEnvironment, $wgScoreImageMagickConvert;
 
 		if ( $wgScoreDisableExec ) {
 			throw new ScoreDisabledException();
@@ -711,7 +719,7 @@ class Score {
 		$command = self::boxedCommand()
 			->routeName( 'score-lilypond' )
 			->params(
-				$wgScoreShell,
+				$wgShellboxShell,
 				'scripts/generatePngAndMidi.sh' )
 			->outputFileToFile( 'file.midi', $factoryMidi )
 			->outputGlobToFile( 'file', 'png', $factoryDirectory )
@@ -780,7 +788,7 @@ class Score {
 
 		$needMidi = false;
 		$haveMidi = $result->wasReceived( 'file.midi' );
-		if ( !$options['raw'] || $options['generate_audio'] && !$options['override_midi'] ) {
+		if ( !$options['raw'] || ( $options['generate_audio'] && !$options['override_midi'] ) ) {
 			$needMidi = true;
 			if ( !$haveMidi ) {
 				throw new ScoreException( 'score-nomidi' );
@@ -842,7 +850,7 @@ class Score {
 				'src' => $srcPng,
 				'dst' => $destPng
 			];
-			list( $width, $height ) = self::imageSize( $srcPng );
+			[ $width, $height ] = self::imageSize( $srcPng );
 			$metaData[$dstPngFileName]['size'] = [ $width, $height ];
 			$newFiles[$dstPngFileName] = true;
 
@@ -992,7 +1000,7 @@ class Score {
 	 * @return array of ints (width, height)
 	 */
 	private static function imageSize( $filename ) {
-		list( $width, $height ) = getimagesize( $filename );
+		[ $width, $height ] = getimagesize( $filename );
 		return [ $width, $height ];
 	}
 
@@ -1073,7 +1081,7 @@ LILYPOND;
 	 */
 	private static function generateAudio( $sourceFile, $options, $remoteDest, &$metaData ) {
 		global $wgScoreFluidsynth, $wgScoreSoundfont, $wgScoreLame, $wgScoreDisableExec,
-			$wgScoreEnvironment, $wgScoreShell, $wgPhpCli;
+			$wgScoreEnvironment, $wgShellboxShell, $wgPhpCli;
 
 		if ( $wgScoreDisableExec ) {
 			throw new ScoreDisabledException();
@@ -1088,7 +1096,7 @@ LILYPOND;
 		$command = self::boxedCommand()
 			->routeName( 'score-fluidsynth' )
 			->params(
-				$wgScoreShell,
+				$wgShellboxShell,
 				'scripts/synth.sh'
 			)
 			->environment( [

@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace Wikibase\Lib\Formatters;
 
 use InvalidArgumentException;
-use Language;
+use MediaWiki\Language\Language;
 use ValueFormatters\FormatterOptions;
 use ValueFormatters\ValueFormatter;
 use Wikibase\Lib\LanguageFallbackChainFactory;
@@ -148,20 +148,13 @@ class OutputFormatValueFormatterFactory {
 	 * @param string $format One of the SnakFormatter::FORMAT_... constants.
 	 * @param FormatterOptions $options
 	 *
-	 * @return ValueFormatter[] A map from prefixed type IDs to ValueFormatter instances.
+	 * @return callable[] A map from prefixed type IDs to ValueFormatter factories.
 	 */
 	private function buildDefinedFormatters( $format, FormatterOptions $options ) {
 		$formatters = [];
 
 		foreach ( $this->factoryFunctions as $type => $func ) {
-			$formatter = call_user_func( $func, $format, $options );
-
-			Assert::postcondition(
-				$formatter instanceof ValueFormatter,
-				"Callback for $type did not return a ValueFormatter"
-			);
-
-			$formatters[$type] = $formatter;
+			$formatters[$type] = fn() => $func( $format, $options );
 		}
 
 		return $formatters;

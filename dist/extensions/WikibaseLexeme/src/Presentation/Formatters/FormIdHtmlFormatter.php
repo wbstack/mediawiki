@@ -1,8 +1,11 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lexeme\Presentation\Formatters;
 
-use Html;
+use InvalidArgumentException;
+use MediaWiki\Html\Html;
 use MediaWiki\Languages\LanguageFactory;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\EntityId\EntityIdFormatter;
@@ -27,40 +30,13 @@ class FormIdHtmlFormatter implements EntityIdFormatter {
 	private const GRAMMATICAL_FEATURES_SEPARATOR_I18N =
 		'wikibaselexeme-formidformatter-separator-grammatical-features';
 
-	/**
-	 * @var EntityRevisionLookup
-	 */
-	private $revisionLookup;
-
-	/**
-	 * @var EntityTitleLookup
-	 */
-	private $titleLookup;
-
-	/**
-	 * @var NonExistingEntityIdHtmlFormatter
-	 */
-	private $nonExistingIdFormatter;
-
-	/**
-	 * @var LocalizedTextProvider
-	 */
-	private $localizedTextProvider;
-
-	/**
-	 * @var RedirectedLexemeSubEntityIdHtmlFormatter
-	 */
-	private $redirectedLexemeSubEntityIdHtmlFormatter;
-
-	/**
-	 * @var LabelDescriptionLookup
-	 */
-	private $labelDescriptionLookup;
-
-	/**
-	 * @var LanguageFactory
-	 */
-	private $languageFactory;
+	private EntityRevisionLookup $revisionLookup;
+	private EntityTitleLookup $titleLookup;
+	private NonExistingEntityIdHtmlFormatter $nonExistingIdFormatter;
+	private LocalizedTextProvider $localizedTextProvider;
+	private RedirectedLexemeSubEntityIdHtmlFormatter $redirectedLexemeSubEntityIdHtmlFormatter;
+	private LabelDescriptionLookup $labelDescriptionLookup;
+	private LanguageFactory $languageFactory;
 
 	public function __construct(
 		EntityRevisionLookup $revisionLookup,
@@ -81,17 +57,16 @@ class FormIdHtmlFormatter implements EntityIdFormatter {
 		$this->languageFactory = $languageFactory;
 	}
 
-	/**
-	 * @param EntityId|FormId $formId
-	 *
-	 * @return string Html
-	 */
-	public function formatEntityId( EntityId $formId ) {
+	public function formatEntityId( EntityId $formId ): string {
 		try {
 			$formRevision = $this->revisionLookup->getEntityRevision( $formId );
 			$title = $this->titleLookup->getTitleForId( $formId );
 		} catch ( UnresolvedEntityRedirectException $exception ) {
 			return $this->redirectedLexemeSubEntityIdHtmlFormatter->formatEntityId( $formId );
+		}
+		if ( !( $formId instanceof FormId ) ) {
+			throw new InvalidArgumentException(
+				'Attemped to format a non-Form entity as a Form: ' . $formId->getSerialization() );
 		}
 
 		if ( $formRevision === null || $title === null ) {
@@ -113,24 +88,20 @@ class FormIdHtmlFormatter implements EntityIdFormatter {
 			'a',
 			[
 				'href'  => $title->isLocal() ? $title->getLinkURL() : $title->getFullURL(),
-				'title' => $this->getLinkTitle( $form )
+				'title' => $this->getLinkTitle( $form ),
 			],
 			$representationMarkup
 		);
 	}
 
-	/**
-	 * @param Form $form
-	 * @return string
-	 */
-	private function getLinkTitle( $form ) {
+	private function getLinkTitle( Form $form ): string {
 		$serializedId = $form->getId()->getSerialization();
 		$labels = implode(
 			$this->localizedTextProvider->get( self::GRAMMATICAL_FEATURES_SEPARATOR_I18N ),
 			$this->getLabels( $form )
 		);
 
-		if ( empty( $labels ) ) {
+		if ( $labels === '' ) {
 			$title = $serializedId;
 		} else {
 			$title = $this->localizedTextProvider->get(
@@ -142,11 +113,7 @@ class FormIdHtmlFormatter implements EntityIdFormatter {
 		return $title;
 	}
 
-	/**
-	 * @param Form $form
-	 * @return array
-	 */
-	private function getLabels( $form ) {
+	private function getLabels( Form $form ): array {
 		$labels = [];
 
 		foreach ( $form->getGrammaticalFeatures() as $grammaticalFeaturesId ) {

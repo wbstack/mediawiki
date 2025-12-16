@@ -22,6 +22,10 @@
 
 declare( strict_types = 1 );
 
+namespace MediaWiki\Password;
+
+use RuntimeException;
+
 /**
  * A Bcrypt-hashed password
  *
@@ -48,14 +52,15 @@ class BcryptPassword extends ParameterizedPassword {
 	}
 
 	/**
+	 * @note Callers should make sure that bcrypt is available before calling this method.
+	 *
 	 * @param string $password Password to encrypt
 	 *
 	 * @throws PasswordError If bcrypt has an unknown error
-	 * @throws MWException If bcrypt is not supported by PHP
 	 */
 	public function crypt( string $password ): void {
 		if ( !defined( 'CRYPT_BLOWFISH' ) ) {
-			throw new MWException( 'Bcrypt is not supported.' );
+			throw new RuntimeException( 'Bcrypt is not supported.' );
 		}
 
 		// Either use existing hash or make a new salt
@@ -88,3 +93,6 @@ class BcryptPassword extends ParameterizedPassword {
 		$this->hash = substr( $parts[1], 22 );
 	}
 }
+
+/** @deprecated since 1.43 use MediaWiki\\Password\\BcryptPassword */
+class_alias( BcryptPassword::class, 'BcryptPassword' );

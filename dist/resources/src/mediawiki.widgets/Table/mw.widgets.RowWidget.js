@@ -1,23 +1,24 @@
 /**
- * A RowWidget is used in conjunction with {@link mw.widgets.TableWidget table widgets}
- * and should not be instantiated by themselves. They group together
- * {@link OO.ui.TextInputWidget text input widgets} to form a unified row of
+ * @classdesc Table row widget. A RowWidget is used in conjunction with
+ * {@link mw.widgets.TableWidget table widgets} and should not be instantiated by themselves.
+ * They group together {@link OO.ui.TextInputWidget text input widgets} to form a unified row of
  * editable data.
  *
  * @class
  * @extends OO.ui.Widget
- * @mixins OO.ui.mixin.GroupElement
+ * @mixes OO.ui.mixin.GroupElement
  *
  * @constructor
+ * @description Create an instance of `mw.widgets.RowWidget`.
  * @param {Object} [config] Configuration options
- * @cfg {Array} [data] The data of the cells
- * @cfg {Array} [keys] An array of keys for easy cell selection
- * @cfg {RegExp|Function|string} [validate] Validation pattern to apply on every cell
- * @cfg {number} [index] The row index.
- * @cfg {string} [label] The row label to display. If not provided, the row index will
+ * @param {Array} [config.data] The data of the cells
+ * @param {Array} [config.keys] An array of keys for easy cell selection
+ * @param {RegExp|Function|string} [config.validate] Validation pattern to apply on every cell
+ * @param {number} [config.index] The row index.
+ * @param {string} [config.label] The row label to display. If not provided, the row index will
  * be used be default. If set to null, no label will be displayed.
- * @cfg {boolean} [showLabel=true] Show row label. Defaults to true.
- * @cfg {boolean} [deletable=true] Whether the table should provide deletion UI tools
+ * @param {boolean} [config.showLabel=true] Show row label. Defaults to true.
+ * @param {boolean} [config.deletable=true] Whether the table should provide deletion UI tools
  * for this row or not. Defaults to true.
  */
 mw.widgets.RowWidget = function MwWidgetsRowWidget( config ) {
@@ -101,18 +102,17 @@ OO.mixinClass( mw.widgets.RowWidget, OO.ui.mixin.GroupElement );
 /* Events */
 
 /**
- * @event inputChange
+ * Change when an input contained within the row is updated.
  *
- * Change when an input contained within the row is updated
- *
+ * @event mw.widgets.RowWidget.inputChange
  * @param {number} index The index of the cell that changed
  * @param {string} value The new value of the cell
  */
 
 /**
- * @event deleteButtonClick
+ * Fired when the delete button for the row is pressed.
  *
- * Fired when the delete button for the row is pressed
+ * @event mw.widgets.RowWidget.deleteButtonClick
  */
 
 /* Methods */
@@ -122,7 +122,7 @@ OO.mixinClass( mw.widgets.RowWidget, OO.ui.mixin.GroupElement );
  * @inheritdoc
  */
 mw.widgets.RowWidget.prototype.addItems = function ( items, index ) {
-	var i, len;
+	let i, len;
 
 	OO.ui.mixin.GroupElement.prototype.addItems.call( this, items, index );
 
@@ -136,18 +136,16 @@ mw.widgets.RowWidget.prototype.addItems = function ( items, index ) {
  * @inheritdoc
  */
 mw.widgets.RowWidget.prototype.removeItems = function ( items ) {
-	var i, len, cells;
-
 	OO.ui.mixin.GroupElement.prototype.removeItems.call( this, items );
 
-	cells = this.getItems();
-	for ( i = 0, len = cells.length; i < len; i++ ) {
+	const cells = this.getItems();
+	for ( let i = 0, len = cells.length; i < len; i++ ) {
 		cells[ i ].setData( i );
 	}
 };
 
 /**
- * Get the row index
+ * Get the row index.
  *
  * @return {number} The row index
  */
@@ -156,7 +154,7 @@ mw.widgets.RowWidget.prototype.getIndex = function () {
 };
 
 /**
- * Set the row index
+ * Set the row index.
  *
  * @param {number} index The new index
  */
@@ -171,7 +169,7 @@ mw.widgets.RowWidget.prototype.setIndex = function ( index ) {
  * @return {string} The row label
  */
 mw.widgets.RowWidget.prototype.getLabel = function () {
-	var props = this.model.getRowProperties();
+	const props = this.model.getRowProperties();
 
 	if ( props.label === null ) {
 		return '';
@@ -183,17 +181,22 @@ mw.widgets.RowWidget.prototype.getLabel = function () {
 };
 
 /**
+ * @event mw.widgets.RowWidget.labelUpdate
+ * @param {string} label
+ */
+
+/**
  * Set the label to be displayed on the widget.
  *
  * @param {string} label The new label
- * @fires labelUpdate
+ * @fires mw.widgets.RowWidget.labelUpdate
  */
 mw.widgets.RowWidget.prototype.setLabel = function ( label ) {
 	this.model.setLabel( label );
 };
 
 /**
- * Set the value of a particular cell
+ * Set the value of a particular cell.
  *
  * @param {number} index The cell index
  * @param {string} value The new value
@@ -203,7 +206,7 @@ mw.widgets.RowWidget.prototype.setValue = function ( index, value ) {
 };
 
 /**
- * Insert a cell at a specified index
+ * Insert a cell at a specified index.
  *
  * @param  {string} data The cell data
  * @param  {number} index The index to insert the cell at
@@ -214,7 +217,7 @@ mw.widgets.RowWidget.prototype.insertCell = function ( data, index, key ) {
 };
 
 /**
- * Removes a column at a specified index
+ * Removes a column at a specified index.
  *
  * @param {number} index The index to removeColumn
  */
@@ -223,19 +226,19 @@ mw.widgets.RowWidget.prototype.removeCell = function ( index ) {
 };
 
 /**
- * Clear the field values
+ * Clear the field values.
  */
 mw.widgets.RowWidget.prototype.clear = function () {
 	this.model.clear();
 };
 
 /**
- * Handle model value changes
+ * Handle model value changes.
  *
  * @param {number} index The column index of the updated cell
  * @param {number} value The new value
  *
- * @fires inputChange
+ * @fires mw.widgets.RowWidget.inputChange
  */
 mw.widgets.RowWidget.prototype.onValueChange = function ( index, value ) {
 	this.getItems()[ index ].setValue( value );
@@ -243,7 +246,7 @@ mw.widgets.RowWidget.prototype.onValueChange = function ( index, value ) {
 };
 
 /**
- * Handle model cell insertions
+ * Handle model cell insertions.
  *
  * @param {string} data The initial data
  * @param {number} index The index in which to insert the new cell
@@ -259,7 +262,7 @@ mw.widgets.RowWidget.prototype.onInsertCell = function ( data, index ) {
 };
 
 /**
- * Handle model cell removals
+ * Handle model cell removals.
  *
  * @param {number} index The removed cell index
  */
@@ -268,26 +271,25 @@ mw.widgets.RowWidget.prototype.onRemoveCell = function ( index ) {
 };
 
 /**
- * Handle clear requests
+ * Handle clear requests.
  */
 mw.widgets.RowWidget.prototype.onClear = function () {
-	var i, len,
-		cells = this.getItems();
+	const cells = this.getItems();
 
-	for ( i = 0, len = cells.length; i < len; i++ ) {
+	for ( let i = 0, len = cells.length; i < len; i++ ) {
 		cells[ i ].setValue( '' );
 	}
 };
 
 /**
- * Update model label changes
+ * Update model label changes.
  */
 mw.widgets.RowWidget.prototype.onLabelUpdate = function () {
 	this.labelCell.setLabel( this.getLabel() );
 };
 
 /**
- * React to cell input change
+ * React to cell input change.
  *
  * @private
  * @param {OO.ui.TextInputWidget} input The input that fired the event
@@ -301,17 +303,16 @@ mw.widgets.RowWidget.prototype.onCellChange = function ( input, value ) {
 	// fed from the cells within.
 	// Right now, the table can't know if it's valid or not because the events
 	// don't get passed through.
-	var self = this;
-	input.getValidity().done( function () {
-		self.model.setValue( input.getData(), value );
+	input.getValidity().done( () => {
+		this.model.setValue( input.getData(), value );
 	} );
 };
 
 /**
- * Handle delete button clicks
+ * Handle delete button clicks.
  *
  * @private
- * @fires deleteButtonClick
+ * @fires mw.widgets.RowWidget.deleteButtonClick
  */
 mw.widgets.RowWidget.prototype.onDeleteButtonClick = function () {
 	this.emit( 'deleteButtonClick' );
@@ -332,7 +333,7 @@ mw.widgets.RowWidget.prototype.setDisabled = function ( disabled ) {
 		this.deleteButton.setDisabled( disabled );
 	}
 
-	this.getItems().forEach( function ( cell ) {
+	this.getItems().forEach( ( cell ) => {
 		cell.setDisabled( disabled );
 	} );
 };

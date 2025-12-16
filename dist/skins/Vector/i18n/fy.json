@@ -1,12 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Kening Aldgilles",
 			"PiefPafPier",
 			"Robin van der Vliet",
 			"Robin0van0der0vliet",
-			"SK-luuut"
+			"SK-luuut",
+			"Sjoerddebruin"
 		]
 	},
 	"skinname-vector": "Fektor âld & bewend (2010)",
@@ -25,7 +25,6 @@
 	"vector-language-button-label": "{{PLURAL:$1|$1 taal|$1 talen}}",
 	"vector-no-language-button-label": "Talen tafoegje",
 	"vector-no-language-button-aria-label": "Dit artikel is der allinnich yn dizze taal. It artikel foar oare talen tafoegje",
-	"vector-language-redirect-to-top": "Hjir op {{GRAMMAR:l|{{SITENAME}}}} steane de taalkeppelings boppe-oan 'e side tsjinoer de titel fan 't artikel. [[#p-lang-btn|Nei boppen]].",
 	"vector-language-variant-switcher-label": "Taalfariant feroarje",
 	"vector-action-addsection": "Nij mêd",
 	"vector-action-delete": "Wiskje",
@@ -45,9 +44,7 @@
 	"vector-search-loader": "Laden fan syksuggestjes",
 	"vector-searchsuggest-containing": "Siden sykje mei as ynhâld <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
 	"vector-intro-page": "Help:Yntroduksje",
-	"vector-toc-heading": "Ynhâld",
-	"vector-toc-toggle-position-sidebar": "nei sydbalke ferplakke",
-	"vector-toc-toggle-position-title": "ferbergje",
+	"vector-toc-label": "Ynhâld",
 	"vector-toc-beginning": "Begjin",
 	"vector-toc-toggle-button-label": "Subseksje $1 omklappe",
 	"vector-anon-user-menu-pages": "Siden foar ôfmelde meidoggers",
@@ -56,8 +53,13 @@
 	"vector-main-menu-tooltip": "Haadmenu",
 	"vector-toc-menu-tooltip": "Ynhâldsopjefte",
 	"vector-toc-collapsible-button-label": "Ynhâldsopjefte omklappe",
-	"vector-article-tools-nav-label": "Ark",
 	"vector-site-nav-label": "Webstee",
+	"vector-page-tools-label": "Helpmiddels",
+	"vector-page-tools-general-label": "Algemien",
+	"vector-pin-element-label": "nei sydbalke ferplakke",
+	"vector-unpin-element-label": "ferbergje",
 	"vector-2022-prefs-talkpage": "[[mw:Talk:Reading/Web/Desktop_Improvements|Diskusje]]",
-	"tooltip-vector-anon-user-menu-title": "Mear opsjes"
+	"tooltip-vector-anon-user-menu-title": "Mear opsjes",
+	"vector-prefs-limited-width": "Modus foar breedtebeheining ynskeakelje",
+	"vector-prefs-limited-width-help": "Ferbetteret de lêsberens by in beheinde breedte."
 }

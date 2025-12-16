@@ -26,9 +26,13 @@
  * e.g. immobile_namespace for namespaces which can't be moved
  */
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\StubObject\StubGlobalUser;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script to move a batch of pages.
@@ -67,13 +71,13 @@ class MoveBatch extends Maintenance {
 		} else {
 			$user = User::newFromName( $username );
 		}
-		if ( !$user ) {
+		if ( !$user || !$user->isRegistered() ) {
 			$this->fatalError( "Invalid username" );
 		}
 		StubGlobalUser::setUser( $user );
 
 		# Setup complete, now start
-		$dbw = $this->getDB( DB_PRIMARY );
+		$dbw = $this->getPrimaryDB();
 		for ( $lineNum = 1; !feof( $file ); $lineNum++ ) {
 			$line = fgets( $file );
 			if ( $line === false ) {
@@ -93,11 +97,12 @@ class MoveBatch extends Maintenance {
 
 			$this->output( $source->getPrefixedText() . ' --> ' . $dest->getPrefixedText() );
 			$this->beginTransaction( $dbw, __METHOD__ );
-			$mp = MediaWikiServices::getInstance()->getMovePageFactory()
+			$mp = $this->getServiceContainer()->getMovePageFactory()
 				->newMovePage( $source, $dest );
 			$status = $mp->move( $user, $reason, !$noRedirects );
 			if ( !$status->isOK() ) {
-				$this->output( "\nFAILED: " . $status->getMessage( false, false, 'en' )->text() );
+				$this->output( " FAILED\n" );
+				$this->error( $status );
 			}
 			$this->commitTransaction( $dbw, __METHOD__ );
 			$this->output( "\n" );
@@ -109,5 +114,7 @@ class MoveBatch extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = MoveBatch::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

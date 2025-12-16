@@ -3,6 +3,9 @@ declare( strict_types = 1 );
 
 namespace Wikimedia\Parsoid\Config;
 
+use Wikimedia\Bcp47Code\Bcp47Code;
+use Wikimedia\Parsoid\Core\LinkTarget;
+
 /**
  * Page-level configuration interface for Parsoid
  */
@@ -11,7 +14,7 @@ abstract class PageConfig {
 	/**
 	 * Non-null to record the fact that conversion has been done on
 	 * this page (to the specified variant).
-	 * @var ?string
+	 * @var ?Bcp47Code
 	 */
 	private $htmlVariant = null;
 
@@ -31,34 +34,42 @@ abstract class PageConfig {
 	abstract public function getContentModel(): string;
 
 	/**
-	 * Whether the page has a lintable content model
+	 * Whether to suppress the Table of Contents for this page
+	 * (a function of content model).
 	 * @return bool
 	 */
-	abstract public function hasLintableContentModel(): bool;
+	public function getSuppressTOC(): bool {
+		// This will eventually be abstract; for now default to 'false'
+		return false;
+	}
 
 	/**
-	 * The page's title, as a string.
-	 * @return string With namespace, spaces not underscores
+	 * The page's title, as a LinkTarget.
+	 * @return LinkTarget
 	 */
-	abstract public function getTitle(): string;
+	abstract public function getLinkTarget(): LinkTarget;
 
 	/**
 	 * The page's namespace ID
 	 * @return int
+	 * @deprecated Use ::getLinkTarget()->getNamespace() instead
 	 */
-	abstract public function getNs(): int;
+	public function getNs(): int {
+		return $this->getLinkTarget()->getNamespace();
+	}
 
 	/**
 	 * The page's ID, if any
-	 * @return int 0 if the page doesn't exist
+	 * @return int 0 if the page doesn't (yet?) exist
 	 */
 	abstract public function getPageId(): int;
 
 	/**
-	 * The page's language code
-	 * @return string
+	 * The page's language code.
+	 *
+	 * @return Bcp47Code a BCP-47 language code
 	 */
-	abstract public function getPageLanguage(): string;
+	abstract public function getPageLanguageBcp47(): Bcp47Code;
 
 	/**
 	 * The page's language direction
@@ -116,19 +127,19 @@ abstract class PageConfig {
 
 	/**
 	 * Get the page's language variant
-	 * @return string|null
+	 * @return ?Bcp47Code a BCP-47 language code
 	 */
-	public function getVariant(): ?string {
-		return $this->htmlVariant;
+	public function getVariantBcp47(): ?Bcp47Code {
+		return $this->htmlVariant; # stored as BCP-47
 	}
 
 	/**
 	 * Set the page's language variant.  (Records the fact that
 	 * conversion has been done in the parser pipeline.)
-	 * @param string $htmlVariant
+	 * @param Bcp47Code $htmlVariant a BCP-47 language code
 	 */
-	public function setVariant( $htmlVariant ): void {
-		$this->htmlVariant = $htmlVariant;
+	public function setVariantBcp47( Bcp47Code $htmlVariant ): void {
+		$this->htmlVariant = $htmlVariant; # stored as BCP-47
 	}
 
 	/**

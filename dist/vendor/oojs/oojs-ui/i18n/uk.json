@@ -21,6 +21,7 @@
 			"Ата"
 		]
 	},
+	"ooui-copytextlayout-copy": "Копіювати",
 	"ooui-outline-control-move-down": "Перемістити елемент униз",
 	"ooui-outline-control-move-up": "Перемістити елемент вгору",
 	"ooui-outline-control-remove": "Видалити елемент",
@@ -37,7 +38,6 @@
 	"ooui-combobox-button-label": "Перемкнути опції",
 	"ooui-selectfile-button-select": "Оберіть файл",
 	"ooui-selectfile-button-select-multiple": "Оберіть файли",
-	"ooui-selectfile-not-supported": "Вибір файлу не підтримується",
 	"ooui-selectfile-placeholder": "Жодного файлу не вибрано",
 	"ooui-selectfile-dragdrop-placeholder": "Помістіть файл сюди",
 	"ooui-selectfile-dragdrop-placeholder-multiple": "Перемістіть файли сюди",

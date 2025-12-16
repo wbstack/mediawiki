@@ -81,7 +81,7 @@ class SnakHtmlGeneratorTest extends \PHPUnit\Framework\TestCase {
 		$this->assertStringContainsString( '<SNAK>', $html, 'formatted snak' );
 	}
 
-	public function getSnakHtmlProvider() {
+	public static function getSnakHtmlProvider() {
 		return [
 			[
 				new PropertyNoValueSnak( 1 ),
@@ -94,7 +94,7 @@ class SnakHtmlGeneratorTest extends \PHPUnit\Framework\TestCase {
 			[
 				new PropertyValueSnak( 3, new StringValue( 'chocolate!' ) ),
 				'wikibase-snakview-variation-value',
-			]
+			],
 		];
 	}
 

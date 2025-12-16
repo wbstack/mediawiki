@@ -39,6 +39,8 @@ class TextInputWidget extends InputWidget {
 	 *          For unfortunate historical reasons, this counts the number of UTF-16 code units rather
 	 *          than Unicode codepoints, which means that codepoints outside the Basic Multilingual
 	 *          Plane (e.g. many emojis) count as 2 characters each.
+	 *      - int $config['minLength'] Minimum allowed number of characters to input
+	 *          Same considerations for maxLength apply as mentioned above.
 	 *      - bool|string $config['autocomplete'] If the field should support autocomplete
 	 *          or not (default: true). Can also be an autocomplete type hint.
 	 *      - bool $config['spellcheck'] If the field should support spellcheck
@@ -54,7 +56,7 @@ class TextInputWidget extends InputWidget {
 		parent::__construct( $config );
 
 		// Properties
-		$this->type = $this->getSaneType( $config );
+		$this->type = $this->getValidType( $config );
 
 		// Traits
 		$this->initializeIconElement( $config );
@@ -78,6 +80,9 @@ class TextInputWidget extends InputWidget {
 		}
 		if ( isset( $config['maxLength'] ) ) {
 			$this->input->setAttributes( [ 'maxlength' => $config['maxLength'] ] );
+		}
+		if ( isset( $config['minLength'] ) ) {
+			$this->input->setAttributes( [ 'minlength' => $config['minLength'] ] );
 		}
 		if ( $config['autofocus'] ?? false ) {
 			$this->input->setAttributes( [ 'autofocus' => 'autofocus' ] );
@@ -118,13 +123,13 @@ class TextInputWidget extends InputWidget {
 
 	/** @inheritDoc */
 	protected function getInputElement( $config ) {
-		if ( $this->getSaneType( $config ) === 'number' ) {
+		if ( $this->getValidType( $config ) === 'number' ) {
 			return ( new Tag( 'input' ) )->setAttributes( [
 				'step' => 'any',
 				'type' => 'number',
 			] );
 		} else {
-			return ( new Tag( 'input' ) )->setAttributes( [ 'type' => $this->getSaneType( $config ) ] );
+			return ( new Tag( 'input' ) )->setAttributes( [ 'type' => $this->getValidType( $config ) ] );
 		}
 	}
 
@@ -132,7 +137,7 @@ class TextInputWidget extends InputWidget {
 	 * @param array $config
 	 * @return string
 	 */
-	protected function getSaneType( $config ) {
+	protected function getValidType( $config ) {
 		$allowedTypes = [
 			'password',
 			'email',
@@ -157,6 +162,10 @@ class TextInputWidget extends InputWidget {
 		$maxlength = $this->input->getAttribute( 'maxlength' );
 		if ( $maxlength !== null ) {
 			$config['maxLength'] = $maxlength;
+		}
+		$minLength = $this->input->getAttribute( 'minlength' );
+		if ( $minLength !== null ) {
+			$config['minLength'] = $minLength;
 		}
 		$autofocus = $this->input->getAttribute( 'autofocus' );
 		if ( $autofocus !== null ) {

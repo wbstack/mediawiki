@@ -4,14 +4,15 @@ namespace Wikibase\Repo\Tests\RestApi\RouteHandlers\Middleware;
 
 use Generator;
 use MediaWiki\Rest\Handler;
+use MediaWiki\Rest\Reporter\ErrorReporter;
 use MediaWiki\Rest\Response;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
-use Wikibase\Repo\RestApi\Presentation\Presenters\ErrorJsonPresenter;
+use RuntimeException;
+use Throwable;
+use TypeError;
+use Wikibase\Repo\RestApi\Application\UseCases\UseCaseError;
 use Wikibase\Repo\RestApi\RouteHandlers\Middleware\UnexpectedErrorHandlerMiddleware;
 use Wikibase\Repo\RestApi\RouteHandlers\ResponseFactory;
-use Wikibase\Repo\RestApi\UseCases\ErrorResponse;
 
 /**
  * @covers \Wikibase\Repo\RestApi\RouteHandlers\Middleware\UnexpectedErrorHandlerMiddleware
@@ -22,13 +23,19 @@ use Wikibase\Repo\RestApi\UseCases\ErrorResponse;
  */
 class UnexpectedErrorHandlerMiddlewareTest extends TestCase {
 
+	private ErrorReporter $errorReporter;
+
+	protected function setUp(): void {
+		parent::setUp();
+
+		$this->errorReporter = $this->createStub( ErrorReporter::class );
+	}
+
 	/**
 	 * @dataProvider throwableProvider
 	 */
-	public function testHandlesError( \Throwable $throwable ): void {
-		$middleware = new UnexpectedErrorHandlerMiddleware( new ResponseFactory( new ErrorJsonPresenter() ), new NullLogger() );
-
-		$response = $middleware->run(
+	public function testHandlesError( Throwable $throwable ): void {
+		$response = $this->newMiddleware()->run(
 			$this->createStub( Handler::class ),
 			function () use ( $throwable ): Response {
 				throw $throwable;
@@ -38,7 +45,7 @@ class UnexpectedErrorHandlerMiddlewareTest extends TestCase {
 		$this->assertSame( [ 'en' ], $response->getHeader( 'Content-Language' ) );
 		$responseBody = json_decode( $response->getBody()->getContents() );
 		$this->assertSame(
-			ErrorResponse::UNEXPECTED_ERROR,
+			UseCaseError::UNEXPECTED_ERROR,
 			$responseBody->code
 		);
 	}
@@ -46,37 +53,44 @@ class UnexpectedErrorHandlerMiddlewareTest extends TestCase {
 	public function testGivenNoError_returnsRouteResponse(): void {
 		$expectedResponse = $this->createStub( Response::class );
 
-		$middleware = new UnexpectedErrorHandlerMiddleware( new ResponseFactory( new ErrorJsonPresenter() ), new NullLogger() );
-
-		$response = $middleware->run(
+		$response = $this->newMiddleware()->run(
 			$this->createStub( Handler::class ),
-			function () use ( $expectedResponse ): Response {
-				return $expectedResponse;
-			}
+			fn() => $expectedResponse
 		);
 
 		$this->assertSame( $expectedResponse, $response );
 	}
 
-	public function testLogsExceptions(): void {
-		$exception = new \RuntimeException();
-		$logger = $this->createMock( LoggerInterface::class );
-		$logger->expects( $this->once() )
-			->method( 'debug' )
-			->with( (string)$exception );
+	public function testReportsError(): void {
+		$routeHandler = $this->createStub( Handler::class );
+		$exception = new RuntimeException();
+		$this->errorReporter = $this->createMock( ErrorReporter::class );
+		$this->errorReporter->expects( $this->once() )
+			->method( 'reportError' )
+			->with(
+				$exception,
+				$routeHandler,
+				$this->anything()
+			);
 
-		$middleware = new UnexpectedErrorHandlerMiddleware( new ResponseFactory( new ErrorJsonPresenter() ), $logger );
-		$middleware->run(
-			$this->createStub( Handler::class ),
+		$this->newMiddleware()->run(
+			$routeHandler,
 			function () use ( $exception ): void {
 				throw $exception;
 			}
 		);
 	}
 
-	public function throwableProvider(): Generator {
-		yield [ new \TypeError() ];
-		yield [ new \RuntimeException() ];
+	public static function throwableProvider(): Generator {
+		yield [ new TypeError() ];
+		yield [ new RuntimeException() ];
+	}
+
+	private function newMiddleware(): UnexpectedErrorHandlerMiddleware {
+		return new UnexpectedErrorHandlerMiddleware(
+			new ResponseFactory(),
+			$this->errorReporter
+		);
 	}
 
 }

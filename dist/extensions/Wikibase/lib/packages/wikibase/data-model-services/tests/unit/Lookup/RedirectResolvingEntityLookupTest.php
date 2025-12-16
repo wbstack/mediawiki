@@ -47,18 +47,18 @@ class RedirectResolvingEntityLookupTest extends TestCase {
 
 		$mock->expects( $this->any() )
 			->method( 'getEntity' )
-			->will( $this->returnCallback( [ $this, 'getEntity' ] ) );
+			->willReturnCallback( [ $this, 'getEntity' ] );
 
 		$mock->expects( $this->any() )
 			->method( 'hasEntity' )
-			->will( $this->returnCallback( function ( EntityId $id ) {
+			->willReturnCallback( function ( EntityId $id ) {
 				return $this->getEntity( $id ) !== null;
-			} ) );
+			} );
 
 		return $mock;
 	}
 
-	public function getEntityProvider() {
+	public static function getEntityProvider() {
 		return [
 			'no redirect' => [ new ItemId( 'Q10' ), new ItemId( 'Q10' ) ],
 			'one redirect' => [ new ItemId( 'Q11' ), new ItemId( 'Q10' ) ],
@@ -103,7 +103,7 @@ class RedirectResolvingEntityLookupTest extends TestCase {
 		$lookup->getEntity( $id );
 	}
 
-	public function hasEntityProvider() {
+	public static function hasEntityProvider() {
 		return [
 			'unknown entity' => [ new ItemId( 'Q7' ), false ],
 			'no redirect' => [ new ItemId( 'Q10' ), true ],

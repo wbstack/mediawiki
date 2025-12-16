@@ -3,9 +3,9 @@
 		"authors": [
 			"Arjunaraoc",
 			"Chaduvari",
+			"Tmamatha",
 			"Veeven",
-			"రహ్మానుద్దీన్",
-			"Tmamatha"
+			"రహ్మానుద్దీన్"
 		]
 	},
 	"uls-desc": "భాషను ఎంచుకుని, భాష సెట్టింగులను మార్చుకునేందుకు వాడుకరికి అనేక మార్గాలను చూపిస్తుంది",
@@ -65,7 +65,6 @@
 	"ext-uls-compact-no-results": "మీరు వెతికిన భాషలో ఈ పేజీ లేదు.",
 	"ext-uls-setlang-error": "మీరు ఎంచుకున్న భాషను అప్ డేట్ చేసేటప్పుడు దోషం ఏర్పడింది. \nదోషం: $1",
 	"ext-uls-setlang-unknown-error": "గుర్తించలేని పొరపాటు",
-	"ext-uls-actions-menu-header": "మరిన్ని వికల్పాలు",
 	"ext-uls-actions-menu-language-settings-item-label": "భాషా అమరికలను తెరువు",
 	"ext-uls-empty-state-header": "ఇతర భాషల లింకులు లేవు",
 	"ext-uls-empty-state-header-actions-available": "ఇతర భాషల లింకులు లేవు. కొత్త లింకొకటి చేరుస్తారా?",

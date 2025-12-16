@@ -21,9 +21,13 @@
  * @ingroup Upload
  */
 
+use MediaWiki\Context\RequestContext;
+use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\Authority;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Status\Status;
 
 /**
  * Implements uploading from a HTTP resource.
@@ -33,10 +37,13 @@ use MediaWiki\Permissions\Authority;
  * @author Michael Dale
  */
 class UploadFromUrl extends UploadBase {
+	/** @var string */
 	protected $mUrl;
 
-	protected $mTempPath, $mTmpHandle;
+	/** @var resource|null|false */
+	protected $mTmpHandle;
 
+	/** @var array<string,bool> */
 	protected static $allowedUrls = [];
 
 	/**
@@ -49,8 +56,7 @@ class UploadFromUrl extends UploadBase {
 	 * @return bool|string
 	 */
 	public static function isAllowed( Authority $performer ) {
-		if ( !$performer->isAllowed( 'upload_by_url' )
-		) {
+		if ( !$performer->isAllowed( 'upload_by_url' ) ) {
 			return 'upload_by_url';
 		}
 
@@ -80,7 +86,7 @@ class UploadFromUrl extends UploadBase {
 		if ( !count( $domains ) ) {
 			return true;
 		}
-		$parsedUrl = wfParseUrl( $url );
+		$parsedUrl = wfGetUrlUtils()->parse( $url );
 		if ( !$parsedUrl ) {
 			return false;
 		}
@@ -111,6 +117,49 @@ class UploadFromUrl extends UploadBase {
 		}
 
 		return $valid;
+	}
+
+	/**
+	 * Provides a caching key for an upload from url set of parameters
+	 * Used to set the status of an async job in UploadFromUrlJob
+	 * and retreive it in frontend clients like ApiUpload. Will return the
+	 * empty string if not all parameters are present.
+	 *
+	 * @param array $params
+	 * @return string
+	 */
+	public static function getCacheKey( $params ) {
+		if ( !isset( $params['filename'] ) || !isset( $params['url'] ) ) {
+			return "";
+		} else {
+			// We use sha1 here to ensure we have a fixed-length string of printable
+			// characters. There is no cryptography involved, so we just need a
+			// relatively fast function.
+			return sha1( sprintf( "%s|||%s", $params['filename'], $params['url'] ) );
+		}
+	}
+
+	/**
+	 * Get the caching key from a web request
+	 * @param WebRequest &$request
+	 *
+	 * @return string
+	 */
+	public static function getCacheKeyFromRequest( &$request ) {
+		$uploadCacheKey = $request->getText( 'wpCacheKey', $request->getText( 'key', '' ) );
+		if ( $uploadCacheKey !== '' ) {
+			return $uploadCacheKey;
+		}
+		$desiredDestName = $request->getText( 'wpDestFile' );
+		if ( !$desiredDestName ) {
+			$desiredDestName = $request->getText( 'wpUploadFileURL' );
+		}
+		return self::getCacheKey(
+			[
+				'filename' => $desiredDestName,
+				'url' => trim( $request->getVal( 'wpUploadFileURL' ) )
+			]
+		);
 	}
 
 	/**
@@ -147,7 +196,8 @@ class UploadFromUrl extends UploadBase {
 	public static function isAllowedUrl( $url ) {
 		if ( !isset( self::$allowedUrls[$url] ) ) {
 			$allowed = true;
-			Hooks::runner()->onIsUploadAllowedFromUrl( $url, $allowed );
+			( new HookRunner( MediaWikiServices::getInstance()->getHookContainer() ) )
+				->onIsUploadAllowedFromUrl( $url, $allowed );
 			self::$allowedUrls[$url] = $allowed;
 		}
 
@@ -155,11 +205,18 @@ class UploadFromUrl extends UploadBase {
 	}
 
 	/**
+	 * Get the URL of the file to be uploaded
+	 * @return string
+	 */
+	public function getUrl() {
+		return $this->mUrl;
+	}
+
+	/**
 	 * Entry point for API upload
 	 *
 	 * @param string $name
 	 * @param string $url
-	 * @throws MWException
 	 */
 	public function initialize( $name, $url ) {
 		$this->mUrl = $url;
@@ -193,7 +250,7 @@ class UploadFromUrl extends UploadBase {
 
 		$url = $request->getVal( 'wpUploadFileURL' );
 
-		return !empty( $url )
+		return $url
 			&& MediaWikiServices::getInstance()
 				->getPermissionManager()
 				->userHasRight( $user, 'upload_by_url' );
@@ -214,6 +271,19 @@ class UploadFromUrl extends UploadBase {
 	 * @return Status
 	 */
 	public function fetchFile( $httpOptions = [] ) {
+		$status = $this->canFetchFile();
+		if ( !$status->isGood() ) {
+			return $status;
+		}
+		return $this->reallyFetchFile( $httpOptions );
+	}
+
+	/**
+	 * verify we can actually download the file
+	 *
+	 * @return Status
+	 */
+	public function canFetchFile() {
 		if ( !MWHttpRequest::isValidURI( $this->mUrl ) ) {
 			return Status::newFatal( 'http-invalid-url', $this->mUrl );
 		}
@@ -224,7 +294,7 @@ class UploadFromUrl extends UploadBase {
 		if ( !self::isAllowedUrl( $this->mUrl ) ) {
 			return Status::newFatal( 'upload-copy-upload-invalid-url' );
 		}
-		return $this->reallyFetchFile( $httpOptions );
+		return Status::newGood();
 	}
 
 	/**
@@ -278,9 +348,6 @@ class UploadFromUrl extends UploadBase {
 		$copyUploadProxy = MediaWikiServices::getInstance()->getMainConfig()->get( MainConfigNames::CopyUploadProxy );
 		$copyUploadTimeout = MediaWikiServices::getInstance()->getMainConfig()
 			->get( MainConfigNames::CopyUploadTimeout );
-		if ( $this->mTempPath === false ) {
-			return Status::newFatal( 'tmp-create-error' );
-		}
 
 		// Note the temporary file should already be created by makeTemporaryFile()
 		$this->mTmpHandle = fopen( $this->mTempPath, 'wb' );
@@ -344,7 +411,7 @@ class UploadFromUrl extends UploadBase {
 			wfDebugLog( 'fileupload', 'Download by URL completed successfully.' );
 		} else {
 			// @phan-suppress-next-line PhanPossiblyUndeclaredVariable Always set after loop
-			wfDebugLog( 'fileupload', $status->getWikitext( false, false, 'en' ) );
+			wfDebugLog( 'fileupload', $status->getWikiText( false, false, 'en' ) );
 			wfDebugLog(
 				'fileupload',
 				// @phan-suppress-next-line PhanPossiblyUndeclaredVariable Always set after loop

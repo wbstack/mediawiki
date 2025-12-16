@@ -17,9 +17,9 @@ use Elastica\Query;
 use Elastica\ResultSet;
 use Elastica\Search;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Status\Status;
+use MediaWiki\User\User;
 use SearchSuggestionSet;
-use Status;
-use User;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -144,9 +144,9 @@ class CompletionSuggester extends ElasticsearchIntermediary {
 	 * @param string|null $profileName force the profile to use otherwise SearchProfileService defaults will be used
 	 * @param CirrusDebugOptions|null $debugOptions
 	 */
-	public function __construct( Connection $conn, $limit, $offset = 0, SearchConfig $config = null, array $namespaces = null,
-		User $user = null, $index = false, $profileName = null,
-								 CirrusDebugOptions $debugOptions = null ) {
+	public function __construct( Connection $conn, $limit, $offset = 0, ?SearchConfig $config = null, ?array $namespaces = null,
+		?User $user = null, $index = false, $profileName = null,
+								 ?CirrusDebugOptions $debugOptions = null ) {
 		if ( $config === null ) {
 			// @todo connection has an embedded config ... reuse that? somehow should
 			// at least ensure they are the same.

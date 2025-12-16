@@ -2,16 +2,16 @@
 
 namespace TwoColConflict\ProvideSubmittedText;
 
-use BagOStuff;
-use Html;
-use IBufferingStatsdDataFactory;
 use MediaWiki\EditPage\TextboxBuilder;
+use MediaWiki\Html\Html;
 use MediaWiki\Page\PageIdentity;
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
+use MediaWiki\Title\Title;
 use OOUI\HtmlSnippet;
 use OOUI\MessageWidget;
-use Title;
 use TwoColConflict\TwoColConflictContext;
-use UnlistedSpecialPage;
+use Wikimedia\ObjectCache\BagOStuff;
+use Wikimedia\Stats\StatsFactory;
 
 /**
  * Special page allows users to see their originally submitted text while they
@@ -22,29 +22,19 @@ use UnlistedSpecialPage;
  */
 class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 
-	/** @var TwoColConflictContext */
-	private $twoColConflictContext;
+	private TwoColConflictContext $twoColConflictContext;
+	private SubmittedTextCache $textCache;
+	private StatsFactory $statsFactory;
 
-	/** @var SubmittedTextCache */
-	private $textCache;
-
-	/** @var IBufferingStatsdDataFactory */
-	private $statsdDataFactory;
-
-	/**
-	 * @param TwoColConflictContext $twoColConflictContext
-	 * @param BagOStuff $textCache
-	 * @param IBufferingStatsdDataFactory $statsdDataFactory
-	 */
 	public function __construct(
 		TwoColConflictContext $twoColConflictContext,
 		BagOStuff $textCache,
-		IBufferingStatsdDataFactory $statsdDataFactory
+		StatsFactory $statsFactory
 	) {
 		parent::__construct( 'TwoColConflictProvideSubmittedText' );
 		$this->twoColConflictContext = $twoColConflictContext;
 		$this->textCache = new SubmittedTextCache( $textCache );
-		$this->statsdDataFactory = $statsdDataFactory;
+		$this->statsFactory = $statsFactory;
 	}
 
 	/**
@@ -55,7 +45,9 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 		$out = $this->getOutput();
 		$out->addModuleStyles( 'ext.TwoColConflict.SplitCss' );
 		$out->enableOOUI();
-		$this->statsdDataFactory->increment( 'TwoColConflict.copy.special.load' );
+		$this->statsFactory->getCounter( 'TwoColConflict_copy_special_load_total' )
+			->copyToStatsdAt( 'TwoColConflict.copy.special.load' )
+			->increment();
 
 		$title = Title::newFromDBkey( $subPage ?? '' );
 		if ( !$title ) {
@@ -68,7 +60,7 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 			return;
 		}
 
-		$out->setPageTitle(
+		$out->setPageTitleMsg(
 			$this->msg( 'editconflict', $title->getPrefixedText() )
 		);
 
@@ -88,7 +80,9 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 			return;
 		}
 
-		$this->statsdDataFactory->increment( 'TwoColConflict.copy.special.retrieved' );
+		$this->statsFactory->getCounter( 'TwoColConflict_copy_special_retrieved_total' )
+			->copyToStatsdAt( 'TwoColConflict.copy.special.retrieved' )
+			->increment();
 
 		$html = $this->getHeaderHintsHtml();
 		$html .= $this->getTextHeaderLabelHtml();
@@ -109,7 +103,7 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 		return $out;
 	}
 
-	private function getTextHeaderLabelHtml() {
+	private function getTextHeaderLabelHtml(): string {
 		$html = Html::element(
 			'span',
 			[ 'class' => 'mw-twocolconflict-revision-label' ],
@@ -134,7 +128,7 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 	 * @param PageIdentity $page Used to create the lang="…" and dir="…" attributes
 	 * @return string
 	 */
-	private function getTextAreaHtml( string $text, PageIdentity $page ) {
+	private function getTextAreaHtml( string $text, PageIdentity $page ): string {
 		$builder = new TextboxBuilder();
 		$attribs = $builder->mergeClassesIntoAttributes(
 			[ 'mw-twocolconflict-submitted-text' ],
@@ -156,7 +150,7 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 			);
 	}
 
-	private function getFooterHtml() {
+	private function getFooterHtml(): string {
 		return Html::element( 'p', [], $this->msg( 'twocolconflict-special-footer-hint' )->text() );
 	}
 

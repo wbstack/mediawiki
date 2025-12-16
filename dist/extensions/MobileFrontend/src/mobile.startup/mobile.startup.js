@@ -1,71 +1,188 @@
-var
-	moduleLoader = require( './moduleLoaderSingleton' ),
-	util = require( './util' );
-
-// Expose the entry chunk through libraryTarget and library. This allows
-// arbitrary file access via ResourceLoader like
-// `mfModules['mobile.startup'].moduleLoader.require('mobile.startup/LoadingOverlay')`.
-module.exports = {
-	moduleLoader: moduleLoader,
-	mfExtend: require( './mfExtend' ),
-	time: require( './time' ),
-	util,
-	headers: require( './headers' ),
-	View: require( './View' ),
-	PageGateway: require( './PageGateway' ),
-	LanguageInfo: require( './LanguageInfo' ),
-	Browser: require( './Browser' ),
-	Button: require( './Button' ),
-	Icon: require( './Icon' ),
-	ReferencesGateway: require( './references/ReferencesGateway' ),
-	ReferencesHtmlScraperGateway: require( './references/ReferencesHtmlScraperGateway' ),
-	icons: require( './icons' ),
-	Page: require( './Page' ),
-	currentPage: require( './currentPage' ),
-	PageHTMLParser: require( './PageHTMLParser' ),
-	currentPageHTMLParser: require( './currentPageHTMLParser' ),
-	Anchor: require( './Anchor' ),
-	Skin: require( './Skin' ),
-	OverlayManager: require( './OverlayManager' ),
-	Overlay: require( './Overlay' ),
-	loadingOverlay: require( './loadingOverlay' ),
-	Drawer: require( './Drawer' ),
-	CtaDrawer: require( './CtaDrawer' ),
-	showOnPageReload: require( './showOnPageReload' ),
-	// For Minerva compatibility (access deprecated)
-	toast: require( './showOnPageReload' ),
-	Watchstar: require( './watchstar/watchstar' ),
-	eventBusSingleton: require( './eventBusSingleton' ),
-	promisedView: require( './promisedView' ),
-	Toggler: require( './Toggler' ),
-	toc: {
-		// In case any old version of Minerva is cached.
-		TableOfContents: () => {
-			return {
-				// in the unlikely event old Minerva code got loaded with new MF.
-				$el: util.parseHTML( '<div>' )
-			};
-		}
-	},
-	references: require( './references/references' ),
-	search: {
-		SearchOverlay: require( './search/SearchOverlay' ),
-		SearchGateway: require( './search/SearchGateway' )
-	},
-	lazyImages: {
-		lazyImageLoader: require( './lazyImages/lazyImageLoader' )
-	},
-	languageOverlay: require( './languageOverlay/languageOverlay' ),
-	languageInfoOverlay: require( './languageOverlay/languageInfoOverlay' ),
-	mediaViewer: {
-		overlay: require( './mediaViewer/overlay' )
-	},
-	amcOutreach: require( './amcOutreach/amcOutreach' ),
-	Section: require( './Section' )
+const currentPageHTMLParser = require( './currentPageHTMLParser' );
+const time = require( './time' );
+const LanguageInfo = require( './LanguageInfo' );
+const currentPage = require( './currentPage' );
+const Drawer = require( './Drawer' );
+const CtaDrawer = require( './CtaDrawer' );
+const lazyImageLoader = require( './lazyImages/lazyImageLoader' );
+const icons = require( './icons' );
+const PageHTMLParser = require( './PageHTMLParser' );
+const showOnPageReload = require( './showOnPageReload' );
+const OverlayManager = require( './OverlayManager' );
+const View = require( './View' );
+const Overlay = require( './Overlay' );
+const references = require( './references/references' );
+const search = {
+	SearchOverlay: require( './search/SearchOverlay' ),
+	SearchGateway: require( './search/SearchGateway' )
 };
+const promisedView = require( './promisedView' );
+const headers = require( './headers' );
+const Skin = require( './Skin' );
+const mediaViewer = {
+	overlay: require( './mediaViewer/overlay' )
+};
+const languageInfoOverlay = require( './languageOverlay/languageInfoOverlay' );
+const languageOverlay = require( './languageOverlay/languageOverlay' );
+const amcOutreach = require( './amcOutreach/amcOutreach' );
 
-mw.mobileFrontend = moduleLoader;
+// Expose chunk to temporary variable which will be deleted and exported via ResourceLoader
+// package inside mobile.startup.exports.
 
-// Setup a single export for new modules to fold all of the above lines into.
-// One export to rule them all!
-moduleLoader.define( 'mobile.startup', module.exports );
+/**
+ * The main library for accessing MobileFrontend's stable APIs.
+ *
+ * @module mobile.startup
+ */
+mw._mobileFrontend = {
+	/**
+	 * Internal for use inside Minerva only
+	 *
+	 * @memberof module:mobile.startup
+	 * @type module:mobile.startup/AmcOutreach
+	 */
+
+	amcOutreach,
+	// Internal for use inside GrowthExperiments only.
+	overlayHeader: headers.header,
+	/**
+	 * Internal for use inside Minerva, GrowthExperiments only.
+	 * @type module:mobile.startup/Drawer
+	 */
+	Drawer,
+	// Internal for use inside Minerva only.
+	CtaDrawer,
+	/**
+	 * Internal for use inside Minerva, ExternalGuidance and Echo only.
+	 *
+	 * @memberof module:mobile.startup
+	 * @type module:mobile.startup/View
+	 */
+	View,
+	/**
+	 * Internal for use inside Minerva, ExternalGuidance,
+	 *  GrowthExperiments and Echo only.
+	 *
+	 * @memberof module:mobile.startup
+	 * @type module:mobile.startup/Overlay
+	 */
+	Overlay,
+	/**
+	 * Internal for use inside Minerva only.
+	 *
+	 * @memberof module:mobile.startup
+	 * @type module:mobile.startup/PageHTMLParser
+	 */
+	currentPageHTMLParser,
+	/**
+	 * Internal for use inside Minerva, ExternalGuidance and Echo only.
+	 *
+	 * @memberof module:mobile.startup
+	 * @return {module:mobile.startup/OverlayManager}
+	 */
+	getOverlayManager: () => {
+		return OverlayManager.getSingleton();
+	},
+	/**
+	 * Internal for use inside Minerva only.
+	 * @type module:mobile.startup/Page
+	 * @memberof module:mobile.startup
+	 */
+	currentPage,
+	/**
+	 * Internal for use inside Minerva only.
+	 * @type module:mobile.startup/PageHTMLParser
+	 * @memberof module:mobile.startup
+	 */
+	PageHTMLParser,
+	/**
+	 * Internal for use inside Minerva only.
+	 * @type module:mobile.startup/Icon
+	 * @memberof module:mobile.startup
+	 */
+	spinner: icons.spinner,
+	/**
+	 * Internal for use inside Minerva only.
+	 *
+	 * @memberof module:mobile.startup
+	 * @type module:mobile.startup/mediaViewer
+	 */
+	mediaViewer,
+	/**
+	 * Internal for use inside Minerva only.
+	 *
+	 * @memberof module:mobile.startup
+	 * @type module:mobile.startup/references
+	 */
+	references,
+	/**
+	 * Internal for use inside Minerva only.
+	 *
+	 * @memberof module:mobile.startup
+	 * @type module:mobile.startup/search
+	 */
+	search,
+	/**
+	 * Internal for use inside Minerva only.
+	 *
+	 * @memberof module:mobile.startup
+	 * @type module:mobile.startup/time
+	 */
+	time,
+	// Internal for use inside Echo, GrowthExperiments only.
+	promisedView,
+	/**
+	 * Loads all images on the page, stable to call.
+	 *
+	 * @memberof module:mobile.startup
+	 * @return {jQuery.Deferred}
+	 */
+	loadAllImagesInPage: () => {
+		return lazyImageLoader.loadImages(
+			lazyImageLoader.queryPlaceholders( document.getElementById( 'content' ) )
+		);
+	},
+	/**
+	 * Show a notification on page reload, internal for Minerva
+	 *
+	 * @memberof module:mobile.startup
+	 * @param {string} msg
+	 * @return {jQuery.Deferred}
+	 */
+	notifyOnPageReload: ( msg ) => showOnPageReload( msg ),
+	/**
+	 * Internal for use inside VisualEditor
+	 *
+	 * @memberof module:mobile.startup
+	 * @return {string|undefined}
+	 */
+	license() {
+		const skin = Skin.getSingleton();
+		return skin.getLicenseMsg();
+	},
+	/**
+	 * Internal for use inside Minerva. See {@link module:mobile.startup} for access.
+	 *
+	 * @module mobile.startup/languages
+	 */
+	/**
+	 * Access to language overlays for usage inside Minerva only.
+	 *
+	 * @memberof module:mobile.startup
+	 * @type module:mobile.startup/languages
+	 */
+	languages: {
+		languageOverlay,
+		/**
+		 * Shows information about suggested languages.
+		 *
+		 * @memberof module:mobile.startup/languages
+		 * @param {mw.Api} api
+		 * @param {boolean} showSuggestedLanguage If the suggested languages section
+		 * should be rendered.
+		 */
+		languageInfoOverlay( api, showSuggestedLanguage ) {
+			return languageInfoOverlay( new LanguageInfo( api ), showSuggestedLanguage );
+		}
+	}
+};

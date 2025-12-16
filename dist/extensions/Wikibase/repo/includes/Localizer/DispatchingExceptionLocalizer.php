@@ -1,10 +1,12 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Localizer;
 
 use Exception;
 use InvalidArgumentException;
-use Message;
+use MediaWiki\Message\Message;
 
 /**
  * ExceptionLocalizer implementing localization of some well known types of exceptions
@@ -19,7 +21,7 @@ class DispatchingExceptionLocalizer implements ExceptionLocalizer {
 	/**
 	 * @var ExceptionLocalizer[]
 	 */
-	private $localizers;
+	private array $localizers;
 
 	/**
 	 * @param ExceptionLocalizer[] $localizers
@@ -28,15 +30,7 @@ class DispatchingExceptionLocalizer implements ExceptionLocalizer {
 		$this->localizers = $localizers;
 	}
 
-	/**
-	 * @see ExceptionLocalizer::getExceptionMessage()
-	 *
-	 * @param Exception $exception
-	 *
-	 * @return Message
-	 * @throws InvalidArgumentException
-	 */
-	public function getExceptionMessage( Exception $exception ) {
+	public function getExceptionMessage( Exception $exception ): Message {
 		$localizer = $this->getLocalizerForException( $exception );
 
 		if ( $localizer ) {
@@ -46,26 +40,13 @@ class DispatchingExceptionLocalizer implements ExceptionLocalizer {
 		throw new InvalidArgumentException( 'ExceptionLocalizer not registered for exception type.' );
 	}
 
-	/**
-	 * @see ExceptionLocalizer::getExceptionMessage()
-	 *
-	 * @param Exception $exception
-	 *
-	 * @return bool Always true, since DispatchingExceptionLocalizer is able to provide
-	 *         a Message for any kind of exception.
-	 */
-	public function hasExceptionMessage( Exception $exception ) {
+	public function hasExceptionMessage( Exception $exception ): bool {
 		$localizer = $this->getLocalizerForException( $exception );
 
 		return $localizer ? true : false;
 	}
 
-	/**
-	 * @param Exception $exception
-	 *
-	 * @return ExceptionLocalizer|null
-	 */
-	private function getLocalizerForException( Exception $exception ) {
+	private function getLocalizerForException( Exception $exception ): ?ExceptionLocalizer {
 		foreach ( $this->localizers as $localizer ) {
 			if ( $localizer->hasExceptionMessage( $exception ) ) {
 				return $localizer;

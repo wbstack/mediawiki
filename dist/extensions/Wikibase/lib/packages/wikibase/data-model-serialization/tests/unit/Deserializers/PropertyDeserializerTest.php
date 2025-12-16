@@ -21,14 +21,14 @@ use Wikibase\DataModel\Term\TermList;
  * @author Thomas Pellissier Tanon
  * @author Bene* < benestar.wikimedia@gmail.com >
  */
-class PropertyDeserializerTest extends DispatchableDeserializerTest {
+class PropertyDeserializerTest extends DispatchableDeserializerTestCase {
 
 	protected function buildDeserializer() {
 		$entityIdDeserializerMock = $this->createMock( Deserializer::class );
 		$entityIdDeserializerMock->expects( $this->any() )
 			->method( 'deserialize' )
-			->with( $this->equalTo( 'P42' ) )
-			->will( $this->returnValue( new NumericPropertyId( 'P42' ) ) );
+			->with( 'P42' )
+			->willReturn( new NumericPropertyId( 'P42' ) );
 
 		$termListDeserializerMock = $this->createMock( Deserializer::class );
 		$termListDeserializerMock->expects( $this->any() )
@@ -36,10 +36,10 @@ class PropertyDeserializerTest extends DispatchableDeserializerTest {
 			->with( $this->equalTo( [
 				'en' => [
 					'lang' => 'en',
-					'value' => 'foo'
-				]
+					'value' => 'foo',
+				],
 			] ) )
-			->will( $this->returnValue( new TermList( [ new Term( 'en', 'foo' ) ] ) ) );
+			->willReturn( new TermList( [ new Term( 'en', 'foo' ) ] ) );
 
 		$aliasGroupListDeserializerMock = $this->createMock( Deserializer::class );
 		$aliasGroupListDeserializerMock->expects( $this->any() )
@@ -47,12 +47,11 @@ class PropertyDeserializerTest extends DispatchableDeserializerTest {
 			->with( $this->equalTo( [
 				'en' => [
 					'lang' => 'en',
-					'values' => [ 'foo', 'bar' ]
-				]
+					'values' => [ 'foo', 'bar' ],
+				],
 			] ) )
-			->will( $this->returnValue(
-				new AliasGroupList( [ new AliasGroup( 'en', [ 'foo', 'bar' ] ) ] ) )
-			);
+			->willReturn(
+				new AliasGroupList( [ new AliasGroup( 'en', [ 'foo', 'bar' ] ) ] ) );
 
 		$statement = new Statement( new PropertyNoValueSnak( 42 ) );
 		$statement->setGuid( 'test' );
@@ -65,14 +64,14 @@ class PropertyDeserializerTest extends DispatchableDeserializerTest {
 					[
 						'mainsnak' => [
 							'snaktype' => 'novalue',
-							'property' => 'P42'
+							'property' => 'P42',
 						],
 						'type' => 'statement',
-						'rank' => 'normal'
-					]
-				]
+						'rank' => 'normal',
+					],
+				],
 			] ) )
-			->will( $this->returnValue( new StatementList( $statement ) ) );
+			->willReturn( new StatementList( $statement ) );
 
 		return new PropertyDeserializer(
 			$entityIdDeserializerMock,
@@ -86,8 +85,8 @@ class PropertyDeserializerTest extends DispatchableDeserializerTest {
 		return [
 			[
 				[
-					'type' => 'property'
-				]
+					'type' => 'property',
+				],
 			],
 		];
 	}
@@ -95,15 +94,15 @@ class PropertyDeserializerTest extends DispatchableDeserializerTest {
 	public function nonDeserializableProvider() {
 		return [
 			[
-				5
+				5,
 			],
 			[
-				[]
+				[],
 			],
 			[
 				[
-					'type' => 'item'
-				]
+					'type' => 'item',
+				],
 			],
 		];
 	}
@@ -116,8 +115,8 @@ class PropertyDeserializerTest extends DispatchableDeserializerTest {
 				$property,
 				[
 					'type' => 'property',
-					'datatype' => 'string'
-				]
+					'datatype' => 'string',
+				],
 			],
 		];
 
@@ -127,8 +126,8 @@ class PropertyDeserializerTest extends DispatchableDeserializerTest {
 			[
 				'type' => 'property',
 				'datatype' => 'string',
-				'id' => 'P42'
-			]
+				'id' => 'P42',
+			],
 		];
 
 		$property = Property::newFromType( 'string' );
@@ -141,10 +140,10 @@ class PropertyDeserializerTest extends DispatchableDeserializerTest {
 				'labels' => [
 					'en' => [
 						'lang' => 'en',
-						'value' => 'foo'
-					]
-				]
-			]
+						'value' => 'foo',
+					],
+				],
+			],
 		];
 
 		$property = Property::newFromType( 'string' );
@@ -157,10 +156,10 @@ class PropertyDeserializerTest extends DispatchableDeserializerTest {
 				'descriptions' => [
 					'en' => [
 						'lang' => 'en',
-						'value' => 'foo'
-					]
-				]
-			]
+						'value' => 'foo',
+					],
+				],
+			],
 		];
 
 		$property = Property::newFromType( 'string' );
@@ -173,10 +172,10 @@ class PropertyDeserializerTest extends DispatchableDeserializerTest {
 				'aliases' => [
 					'en' => [
 						'lang' => 'en',
-						'values' => [ 'foo', 'bar' ]
-					]
-				]
-			]
+						'values' => [ 'foo', 'bar' ],
+					],
+				],
+			],
 		];
 
 		$property = Property::newFromType( 'string' );
@@ -191,14 +190,14 @@ class PropertyDeserializerTest extends DispatchableDeserializerTest {
 						[
 							'mainsnak' => [
 								'snaktype' => 'novalue',
-								'property' => 'P42'
+								'property' => 'P42',
 							],
 							'type' => 'statement',
-							'rank' => 'normal'
-						]
-					]
-				]
-			]
+							'rank' => 'normal',
+						],
+					],
+				],
+			],
 		];
 
 		$property = Property::newFromType( 'string' );
@@ -213,14 +212,14 @@ class PropertyDeserializerTest extends DispatchableDeserializerTest {
 						[
 							'mainsnak' => [
 								'snaktype' => 'novalue',
-								'property' => 'P42'
+								'property' => 'P42',
 							],
 							'type' => 'statement',
-							'rank' => 'normal'
-						]
-					]
-				]
-			]
+							'rank' => 'normal',
+						],
+					],
+				],
+			],
 		];
 
 		return $provider;

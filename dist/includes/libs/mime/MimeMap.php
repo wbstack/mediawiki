@@ -21,16 +21,17 @@
 namespace Wikimedia\Mime;
 
 /**
- * MimeMap defines the mapping of MIME types to file extensions and media
- * types.
+ * Map of MIME types to file extensions and media types.
  *
  * @internal
+ * @ingroup Mime
  */
 class MimeMap {
 	/** @var array Map of MIME types to an array of file extensions */
 	public const MIME_EXTENSIONS = [
 		'application/ogg' => [ 'ogx', 'ogg', 'ogm', 'ogv', 'oga', 'spx', 'opus' ],
 		'application/pdf' => [ 'pdf' ],
+		'application/vnd.apple.mpegurl' => [ 'm3u8', 'm3u' ],
 		'application/vnd.ms-opentype' => [ 'otf' ],
 		'application/vnd.oasis.opendocument.chart' => [ 'odc' ],
 		'application/vnd.oasis.opendocument.chart-template' => [ 'otc' ],
@@ -50,6 +51,7 @@ class MimeMap {
 		'application/vnd.oasis.opendocument.text-template' => [ 'ott' ],
 		'application/vnd.oasis.opendocument.text-web' => [ 'oth' ],
 		'application/javascript' => [ 'js' ],
+		'application/x-mpegurl' => [ 'm3u', 'm3u8' ],
 		'application/x-shockwave-flash' => [ 'swf' ],
 		'audio/midi' => [ 'mid', 'midi', 'kar' ],
 		'audio/mpeg' => [ 'mpga', 'mpa', 'mp2', 'mp3' ],
@@ -82,7 +84,7 @@ class MimeMap {
 		'application/octet-stream' => [ 'bin', 'dms', 'lha', 'lzh', 'exe', 'class', 'so', 'dll' ],
 		'application/oda' => [ 'oda' ],
 		'application/postscript' => [ 'ai', 'eps', 'ps' ],
-		'application/rdf+xml' => [ 'rdf' ],
+		'application/rdf+xml' => [ 'rdf', 'owl' ],
 		'application/smil' => [ 'smi', 'smil' ],
 		'application/srgs' => [ 'gram' ],
 		'application/srgs+xml' => [ 'grxml' ],
@@ -136,7 +138,10 @@ class MimeMap {
 		'application/zip' =>
 			[ 'zip', 'jar', 'xpi', 'sxc', 'stc', 'sxd', 'std', 'sxi', 'sti', 'sxm', 'stm', 'sxw', 'stw' ],
 		'application/x-rar' => [ 'rar' ],
-		'font/sfnt' => [ 'ttf' ],
+		'font/collection' => [ 'ttc' ],
+		'font/otf' => [ 'ttf', 'otf' ],
+		'font/sfnt' => [ 'ttf', 'otf' ],
+		'font/ttf' => [ 'ttf', 'otf' ],
 		'application/font-sfnt' => [ 'ttf' ],
 		'font/woff' => [ 'woff' ],
 		'application/font-woff' => [ 'woff' ],
@@ -192,6 +197,7 @@ class MimeMap {
 		'text/vnd.wap.wmlscript' => [ 'wmls' ],
 		'text/xml' => [ 'xml', 'xsl', 'xslt', 'rss', 'rdf' ],
 		'text/x-component' => [ 'htc' ],
+		'text/x-less' => [ 'less' ], // T399672
 		'text/x-setext' => [ 'etx' ],
 		'text/x-sawfish' => [ 'jl' ],
 		'video/mp4' => [ 'mp4', 'm4a', 'm4p', 'm4b', 'm4r', 'm4v' ],
@@ -220,6 +226,8 @@ class MimeMap {
 		'application/vnd.ms-excel.template.macroenabled.12' => [ 'xltm' ],
 		'application/vnd.ms-excel.addin.macroenabled.12' => [ 'xlam' ],
 		'application/vnd.ms-excel.sheet.binary.macroenabled.12' => [ 'xlsb' ],
+		'model/gltf-binary' => [ 'glb' ],
+		'model/gltf+json' => [ 'gltf' ],
 		'model/vnd.dwfx+xps' => [ 'dwfx' ],
 		'application/vnd.ms-xpsdocument' => [ 'xps' ],
 		'chemical/x-mdl-molfile' => [ 'mol' ],
@@ -313,6 +321,8 @@ class MimeMap {
 		MEDIATYPE_MULTIMEDIA => [
 			'application/x-shockwave-flash',
 			'application/ogg',
+			'application/vnd.apple.mpegurl',
+			'application/x-mpegurl',
 			'audio/ogg',
 			'video/ogg',
 			'application/ogg',
@@ -464,6 +474,8 @@ class MimeMap {
 		],
 		MEDIATYPE_3D => [
 			'application/sla',
+			'model/gltf-binary',
+			'model/gltf+json',
 		],
 	];
 
@@ -520,5 +532,10 @@ class MimeMap {
 		'image/jpeg2000' => 'image/jp2',
 		'image/jpeg2000-image' => 'image/jp2',
 		'image/x-jpeg2000-image' => 'image/jp2',
+		'application/csv' => 'text/csv',
+		'application/x-csv' => 'text/csv',
+		'text/x-csv' => 'text/csv',
+		'text/comma-separated-values' => 'text/csv',
+		'text/x-comma-separated-values' => 'text/csv',
 	];
 }

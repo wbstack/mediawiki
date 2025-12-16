@@ -1,7 +1,5 @@
 <?php
 /**
- * Per-process memory cache for storing items.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,13 +16,18 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup Cache
  */
 
+namespace Wikimedia\ObjectCache;
+
+use InvalidArgumentException;
+
 /**
- * Simple store for keeping values in an associative array for the current process.
+ * Store data in a memory for the current request/process only.
  *
- * Data will not persist and is not shared with other processes.
+ * This keeps values in a simple associative array.
+ * Data will not persist and is not shared with other requests
+ * on the same server.
  *
  * @newable
  * @ingroup Cache
@@ -47,13 +50,15 @@ class HashBagOStuff extends MediumSpecificBagOStuff {
 
 	/**
 	 * @stable to call
+	 *
 	 * @param array $params Additional parameters include:
 	 *   - maxKeys : only allow this many keys (using oldest-first eviction)
+	 *
 	 * @phpcs:ignore Generic.Files.LineLength
-	 * @phan-param array{logger?:Psr\Log\LoggerInterface,asyncHandler?:callable,keyspace?:string,reportDupes?:bool,segmentationSize?:int,segmentedValueMaxSize?:int,maxKeys?:int} $params
+	 * @phan-param array{logger?:\Psr\Log\LoggerInterface,asyncHandler?:callable,keyspace?:string,reportDupes?:bool,segmentationSize?:int,segmentedValueMaxSize?:int,maxKeys?:int} $params
 	 */
 	public function __construct( $params = [] ) {
-		$params['segmentationSize'] = $params['segmentationSize'] ?? INF;
+		$params['segmentationSize'] ??= INF;
 		parent::__construct( $params );
 
 		$this->token = microtime( true ) . ':' . mt_rand();
@@ -97,8 +102,7 @@ class HashBagOStuff extends MediumSpecificBagOStuff {
 		];
 
 		if ( count( $this->bag ) > $this->maxCacheKeys ) {
-			reset( $this->bag );
-			$evictKey = key( $this->bag );
+			$evictKey = array_key_first( $this->bag );
 			unset( $this->bag[$evictKey] );
 		}
 
@@ -118,26 +122,6 @@ class HashBagOStuff extends MediumSpecificBagOStuff {
 		unset( $this->bag[$key] );
 
 		return true;
-	}
-
-	public function incr( $key, $value = 1, $flags = 0 ) {
-		return $this->doIncr( $key, $value, $flags );
-	}
-
-	public function decr( $key, $value = 1, $flags = 0 ) {
-		return $this->doIncr( $key, -$value, $flags );
-	}
-
-	private function doIncr( $key, $value = 1, $flags = 0 ) {
-		$n = $this->doGet( $key );
-		if ( $this->isInteger( $n ) ) {
-			$n = max( $n + (int)$value, 0 );
-			$this->bag[$key][self::KEY_VAL] = $n;
-
-			return $n;
-		}
-
-		return false;
 	}
 
 	protected function doIncrWithInit( $key, $exptime, $step, $init, $flags ) {
@@ -163,6 +147,7 @@ class HashBagOStuff extends MediumSpecificBagOStuff {
 
 	/**
 	 * @param string $key
+	 *
 	 * @return bool
 	 */
 	protected function expire( $key ) {
@@ -176,28 +161,18 @@ class HashBagOStuff extends MediumSpecificBagOStuff {
 		return true;
 	}
 
-	public function setNewPreparedValues( array $valueByKey ) {
-		// Do not bother staging serialized values as this class does not serialize values
-		return $this->guessSerialSizeOfValues( $valueByKey );
-	}
-
 	/**
 	 * Does this bag have a non-null value for the given key?
 	 *
 	 * @param string $key
+	 *
 	 * @return bool
 	 * @since 1.27
 	 */
 	public function hasKey( $key ) {
 		return isset( $this->bag[$key] );
 	}
-
-	public function makeKeyInternal( $keyspace, $components ) {
-		return $this->genericKeyFromComponents( $keyspace, ...$components );
-	}
-
-	protected function convertGenericKey( $key ) {
-		// short-circuit; already uses "generic" keys
-		return $key;
-	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( HashBagOStuff::class, 'HashBagOStuff' );

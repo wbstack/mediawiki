@@ -1,21 +1,27 @@
 <?php
 
+namespace MediaWiki\Extension\Notifications;
+
+use MediaWiki\Deferred\DeferrableUpdate;
+use MediaWiki\Deferred\DeferredUpdates;
+use MediaWiki\Extension\Notifications\Controller\ModerationController;
+use MediaWiki\Extension\Notifications\Model\Event;
 use MediaWiki\Logger\LoggerFactory;
 
 /**
  * Mark event notifications as deleted at the end of a request.  Used to queue up
  * individual events to mark due to formatting failures.
  */
-class EchoDeferredMarkAsDeletedUpdate implements DeferrableUpdate {
+class DeferredMarkAsDeletedUpdate implements DeferrableUpdate {
 	/**
-	 * @var EchoEvent[]
+	 * @var Event[]
 	 */
 	protected $events = [];
 
 	/**
-	 * @param EchoEvent $event
+	 * @param Event $event
 	 */
-	public static function add( EchoEvent $event ) {
+	public static function add( Event $event ) {
 		static $update;
 		if ( $update === null ) {
 			$update = new self();
@@ -25,22 +31,22 @@ class EchoDeferredMarkAsDeletedUpdate implements DeferrableUpdate {
 	}
 
 	/**
-	 * @param EchoEvent $event
+	 * @param Event $event
 	 */
-	private function addInternal( EchoEvent $event ) {
+	private function addInternal( Event $event ) {
 		$this->events[] = $event;
 	}
 
 	private function filterEventsWithTitleDbLag() {
 		return array_filter(
 			$this->events,
-			static function ( EchoEvent $event ) {
+			static function ( Event $event ) {
 				if ( !$event->getTitle() && $event->getTitle( true ) ) {
 					// It is very likely this event was found
 					// unrenderable because of replica lag.
 					// Do not moderate it at this time.
 					LoggerFactory::getInstance( 'Echo' )->debug(
-						'EchoDeferredMarkAsDeletedUpdate: Event {eventId} was found unrenderable' .
+						'DeferredMarkAsDeletedUpdate: Event {eventId} was found unrenderable' .
 							' but its associated title exists on primary database. Skipping.',
 						[
 							'eventId' => $event->getId(),
@@ -62,13 +68,13 @@ class EchoDeferredMarkAsDeletedUpdate implements DeferrableUpdate {
 		$events = $this->filterEventsWithTitleDbLag();
 
 		$eventIds = array_map(
-			static function ( EchoEvent $event ) {
+			static function ( Event $event ) {
 				return $event->getId();
 			},
 			$events
 		);
 
-		EchoModerationController::moderate( $eventIds, true );
+		ModerationController::moderate( $eventIds, true );
 		$this->events = [];
 	}
 }

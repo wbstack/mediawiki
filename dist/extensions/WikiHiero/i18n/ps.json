@@ -1,10 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ahmed-Najib-Biabani-Ibrahimkhel"
+			"Ahmed-Najib-Biabani-Ibrahimkhel",
+			"شاه زمان پټان"
 		]
 	},
-	"hieroglyphs": "هېروگليف نښې وآزمويئ",
+	"hieroglyphs": "هېروگليپ نښې ازمويل",
 	"wikihiero-category-A": "A: سړی او دندې يې",
 	"wikihiero-category-B": "B: ښځه او دنده يې",
 	"wikihiero-category-E": "E: تيور ژوي",
@@ -18,7 +19,7 @@
 	"wikihiero-category-N": "N: اسمان، زمکه، اوبه",
 	"wikihiero-category-O": "O: ودانۍ، د ودانيو برخې، او نور",
 	"wikihiero-category-P": "P: بېړۍ او د بېړيو برخې",
-	"wikihiero-comment": "تبصره",
+	"wikihiero-comment": "څرگندونه",
 	"wikihiero-eol": "د کرښې پای",
 	"wikihiero-result": "پايله",
 	"wikihiero-submit": "سپارل",
@@ -26,5 +27,5 @@
 	"wikihiero-th-example": "کوډ بېلگه",
 	"wikihiero-th-meaning": "مانا",
 	"wikihiero-th-result": "پايله",
-	"wikihiero-visualeditor-mwhieroinspector-title": "هيروگلېفېکونه"
+	"wikihiero-visualeditor-mwhieroinspector-title": "هيروگلېپونه"
 }

@@ -1,38 +1,40 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\MediaWiki\Actions;
 
+use Article;
+use Diff\DiffOp\Diff\Diff;
 use EntitySchema\MediaWiki\Content\EntitySchemaSlotDiffRenderer;
 use EntitySchema\Presentation\ConfirmationFormRenderer;
 use EntitySchema\Presentation\DiffRenderer;
-use IContextSource;
-use Page;
+use MediaWiki\Context\IContextSource;
 
 /**
  * @license GPL-2.0-or-later
  */
 class UndoViewAction extends AbstractUndoAction {
 
-	/** @var EntitySchemaSlotDiffRenderer */
-	private $slotDiffRenderer;
+	private EntitySchemaSlotDiffRenderer $slotDiffRenderer;
 
 	public function __construct(
-		Page $page,
-		EntitySchemaSlotDiffRenderer $slotDiffRenderer,
-		IContextSource $context = null
+		Article $article,
+		IContextSource $context,
+		EntitySchemaSlotDiffRenderer $slotDiffRenderer
 	) {
-		parent::__construct( $page, $context );
+		parent::__construct( $article, $context );
 		$this->slotDiffRenderer = $slotDiffRenderer;
 	}
 
-	public function getName() {
+	public function getName(): string {
 		return 'edit';
 	}
 
-	public function show() {
+	public function show(): void {
 		$this->getOutput()->enableOOUI();
 
-		$this->getOutput()->setPageTitle(
+		$this->getOutput()->setPageTitleMsg(
 			$this->msg(
 				'entityschema-undo-heading',
 				$this->getTitle()->getTitleValue()->getText()
@@ -58,10 +60,8 @@ class UndoViewAction extends AbstractUndoAction {
 
 	/**
 	 * Shows a form that can be used to confirm the requested undo/restore action.
-	 *
-	 * @param int $undidRevision
 	 */
-	private function showConfirmationForm( $undidRevision = 0 ) {
+	private function showConfirmationForm( int $undidRevision = 0 ): void {
 		$req = $this->getRequest();
 		$renderer = new ConfirmationFormRenderer( $this );
 		$confFormHTML = $renderer->showUndoRestoreConfirmationForm(
@@ -78,9 +78,9 @@ class UndoViewAction extends AbstractUndoAction {
 		$this->getOutput()->addHTML( $confFormHTML );
 	}
 
-	private function displayUndoDiff( $diff ) {
+	private function displayUndoDiff( Diff $diff ): void {
 
-		$helper = new DiffRenderer( $this );
+		$helper = new DiffRenderer( $this, $this->slotDiffRenderer );
 		$this->getOutput()->addHTML(
 			$helper->renderSchemaDiffTable(
 				$this->slotDiffRenderer->renderSchemaDiffRows( $diff ),

@@ -2,28 +2,24 @@
 
 namespace Kartographer;
 
-use Parser;
-use PPFrame;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\PPFrame;
 
-class MediaWikiWikitextParser implements WikitextParser {
+/**
+ * @license MIT
+ */
+class MediaWikiWikitextParser extends WikitextParser {
 
-	/** @var Parser */
-	private $parser;
+	private Parser $parser;
+	private ?PPFrame $frame;
 
-	/** @var PPFrame|null */
-	private $frame;
-
-	/**
-	 * @param Parser $parser
-	 * @param PPFrame|null $frame
-	 */
-	public function __construct( Parser $parser, PPFrame $frame = null ) {
+	public function __construct( Parser $parser, ?PPFrame $frame = null ) {
 		$this->parser = $parser;
 		$this->frame = $frame;
 	}
 
 	/** @inheritDoc */
-	public function parseWikitext( string $wikiText ): string {
+	protected function parse( string $wikiText ): string {
 		$wikiText = $this->parser->recursiveTagParseFully( $wikiText, $this->frame ?: false );
 		return trim( Parser::stripOuterParagraph( $wikiText ) );
 	}

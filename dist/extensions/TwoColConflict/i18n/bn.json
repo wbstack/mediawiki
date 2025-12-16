@@ -2,13 +2,13 @@
 	"@metadata": {
 		"authors": [
 			"Aftabuzzaman",
+			"Aishik Rehman",
 			"Bodhisattwa",
 			"Elias Ahmmad",
 			"YahyA",
 			"Yahya",
-			"আফতাবুজ্জামান",
 			"আজিজ",
-			"Aishik Rehman"
+			"আফতাবুজ্জামান"
 		]
 	},
 	"twocolconflict": "অনুচ্ছেদ ভিত্তিক সম্পাদনা দ্বন্দ্ব",
@@ -30,8 +30,8 @@
 	"twocolconflict-special-textarea-hint": "আপনি আপনার সম্পাদিত সংস্করণের উৎস দেখতে পারেন ও অনুলিপি করতে পারেন:",
 	"twocolconflict-special-malformed-title": "শিরোনাম অনুপস্থিত অথবা অবৈধ।",
 	"twocolconflict-special-expired": "এখানে দেখার মতো কিছু নেই। অর্থাৎ, সম্ভবত আপনি এর আগে কোনও সম্পাদনা দ্বন্দ্বে পড়েছিলেন, কিন্তু এটি কিছুক্ষণ আগে ছিল এবং আপনার অস্থায়ীভাবে সঞ্চিত পাঠ্যের মেয়াদ শেষ হয়ে গেছে।",
-	"twocolconflict-split-header-hint": "আপনি [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface এই পাতায়] আপনার মতামত দিয়ে এই বৈশিষ্ট্যটিকে আরও উন্নত করতে সাহায্য করতে পারেন।",
-	"twocolconflict-split-header-hint-beta": "এই বেটা বৈশিষ্ট্য ব্যবহার করার জন্য আপনাকে ধন্যবাদ। আপনি এটিকে আরও উন্নত করতে সাহায্য করতে পারেন, যদি আপনি [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface এই পাতায়] মতামত দেন।",
+	"twocolconflict-split-header-hint": "আপনি [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface প্রকল্পের আলাপ পাতায়] আপনার মতামত দিয়ে এই বৈশিষ্ট্যটিকে আরও উন্নত করতে সাহায্য করতে পারেন।",
+	"twocolconflict-split-header-hint-beta": "এই বেটা বৈশিষ্ট্য ব্যবহার করার জন্য আপনাকে ধন্যবাদ। আপনি [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface প্রকল্পের আলাপ পাতায়] আপনার মতামত দিয়ে এই বৈশিষ্ট্যটিকে আরও উন্নত করতে সাহায্য করতে পারেন।",
 	"twocolconflict-split-header-overview": "আপনি যখন সম্পাদনা করছিলেন, আরেকজন ব্যবহারকারী এক‌ই পাতা সম্পাদনা করে আপনার আগে প্রকাশ করেছেন। দয়া করে দুইটি সংস্করণ‌ই পর্যবেক্ষণ করুন এবং তাদের একত্রিত করুন। শুধুমাত্র নির্বাচিত বাক্সের ভেতরের পাঠ্যগুলিই সংরক্ষিত হবে যখন আপনি \"{{int:publishchanges}}\" ক্লিক করবেন।",
 	"twocolconflict-split-your-version-header": "আপনার সংস্করণ",
 	"twocolconflict-split-current-version-header": "$1 অনুযায়ী সর্বশেষ সংস্করণ",

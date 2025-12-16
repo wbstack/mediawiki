@@ -1,8 +1,6 @@
 <?php
 /** Hawaiian (Hawai`i)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -95,7 +93,7 @@ $magicWords = [
 	'img_middle'                => [ '1', 'waena', 'middle' ],
 	'img_none'                  => [ '1', 'ʻaʻohe', 'aohe', 'none' ],
 	'img_right'                 => [ '1', 'ʻākau', 'ākau', 'akau', 'right' ],
-	'language'                  => [ '0', '#ʻŌLELO', '#ŌLELO', '#OLELO', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#ʻŌLELO', '#ŌLELO', '#OLELO', '#LANGUAGE' ],
 	'namespace'                 => [ '1', 'LEWAINOA', 'NAMESPACE' ],
 	'namespacenumber'           => [ '1', 'HELULEWAINOA', 'NAMESPACENUMBER' ],
 	'numberofactiveusers'       => [ '1', 'HELUMEAHOʻOHANANEI', 'HELUMEAHOOHANANEI', 'NUMBEROFACTIVEUSERS' ],

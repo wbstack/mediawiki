@@ -166,9 +166,7 @@ class EntityChangeTest extends ChangeRowTest {
 		$entityChange->addUserMetadata( $repoUserId, $repoUserText, $centralUserId );
 	}
 
-	// See MockRepoClientCentralIdLookup
-
-	public function provideTestAddUserMetadata() {
+	public static function provideTestAddUserMetadata() {
 		return [
 			[
 				3,

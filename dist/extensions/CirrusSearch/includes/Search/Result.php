@@ -3,8 +3,8 @@
 namespace CirrusSearch\Search;
 
 use CirrusSearch\Search\Fetch\HighlightingTrait;
-use MWTimestamp;
-use Title;
+use MediaWiki\Title\Title;
+use MediaWiki\Utils\MWTimestamp;
 
 /**
  * An individual search result from Elasticsearch.
@@ -67,7 +67,7 @@ class Result extends CirrusSearchResult {
 	 * @param \Elastica\Result $result containing the given search result
 	 * @param TitleHelper|null $titleHelper
 	 */
-	public function __construct( $results, $result, TitleHelper $titleHelper = null ) {
+	public function __construct( $results, $result, ?TitleHelper $titleHelper = null ) {
 		$this->titleHelper = $titleHelper ?: new TitleHelper();
 		parent::__construct( $this->titleHelper->makeTitle( $result ) );
 		$this->namespaceText = $result->namespace_text;
@@ -168,6 +168,16 @@ class Result extends CirrusSearchResult {
 	 */
 	public function getRedirectTitle() {
 		return $this->redirectTitle;
+	}
+
+	protected function clearRedirectTitle(): bool {
+		$this->redirectTitle = null;
+		$this->redirectSnippet = '';
+
+		return !$this->containsHighlight( $this->textSnippet )
+			&& $this->titleSnippet === ''
+			&& $this->sectionSnippet === ''
+			&& $this->categorySnippet === '';
 	}
 
 	/**

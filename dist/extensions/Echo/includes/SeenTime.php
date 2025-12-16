@@ -1,12 +1,20 @@
 <?php
 
+namespace MediaWiki\Extension\Notifications;
+
+use MediaWiki\Deferred\DeferredUpdates;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\CentralId\CentralIdLookup;
+use MediaWiki\User\UserIdentity;
+use UnexpectedValueException;
+use Wikimedia\ObjectCache\BagOStuff;
+use Wikimedia\ObjectCache\CachedBagOStuff;
 
 /**
  * A small wrapper around ObjectCache to manage
  * storing the last time a user has seen notifications
  */
-class EchoSeenTime {
+class SeenTime {
 
 	/**
 	 * Allowed notification types
@@ -14,23 +22,16 @@ class EchoSeenTime {
 	 */
 	private static $allowedTypes = [ 'alert', 'message' ];
 
-	/**
-	 * @var User
-	 */
-	private $user;
+	private UserIdentity $user;
 
 	/**
-	 * @param User $user A logged in user
+	 * @param UserIdentity $user A logged in user
 	 */
-	private function __construct( User $user ) {
+	private function __construct( UserIdentity $user ) {
 		$this->user = $user;
 	}
 
-	/**
-	 * @param User $user
-	 * @return EchoSeenTime
-	 */
-	public static function newFromUser( User $user ) {
+	public static function newFromUser( UserIdentity $user ): self {
 		return new self( $user );
 	}
 
@@ -42,19 +43,20 @@ class EchoSeenTime {
 	 */
 	private static function cache() {
 		static $wrappedCache = null;
+		$services = MediaWikiServices::getInstance();
 
 		// Use a configurable cache backend (T222851) and wrap it with CachedBagOStuff
 		// for an in-process cache (T144534)
 		if ( $wrappedCache === null ) {
-			$cacheConfig = MediaWikiServices::getInstance()->getMainConfig()->get( 'EchoSeenTimeCacheType' );
+			$cacheConfig = $services->getMainConfig()->get( 'EchoSeenTimeCacheType' );
 			if ( $cacheConfig === null ) {
-				// EchoHooks::initEchoExtension sets EchoSeenTimeCacheType to $wgMainStash if it's
+				// Hooks::initEchoExtension sets EchoSeenTimeCacheType to $wgMainStash if it's
 				// null, so this can only happen if $wgMainStash is also null
 				throw new UnexpectedValueException(
 					'Either $wgEchoSeenTimeCacheType or $wgMainStash must be set'
 				);
 			}
-			return new CachedBagOStuff( ObjectCache::getInstance( $cacheConfig ) );
+			$wrappedCache = new CachedBagOStuff( $services->getObjectCacheFactory()->getInstance( $cacheConfig ) );
 		}
 
 		return $wrappedCache;

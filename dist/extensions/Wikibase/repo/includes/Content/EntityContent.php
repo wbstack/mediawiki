@@ -2,16 +2,14 @@
 
 namespace Wikibase\Repo\Content;
 
-use AbstractContent;
-use Content;
 use Diff\Differ\MapDiffer;
 use Diff\DiffOp\Diff\Diff;
 use Diff\Patcher\MapPatcher;
 use Diff\Patcher\PatcherException;
-use Hooks;
 use LogicException;
+use MediaWiki\Content\AbstractContent;
+use MediaWiki\Content\Content;
 use MediaWiki\MediaWikiServices;
-use MWException;
 use RuntimeException;
 use Serializers\Exceptions\SerializationException;
 use Wikibase\DataModel\Entity\EntityDocument;
@@ -98,17 +96,16 @@ abstract class EntityContent extends AbstractContent {
 	 * Returns the entity contained by this entity content.
 	 * Deriving classes typically have a more specific get method as
 	 * for greater clarity and type hinting.
+	 * @note This method cannot be called on redirects (targets will never be resolved)
 	 *
-	 * @throws MWException when it's a redirect (targets will never be resolved)
-	 * @throws LogicException if the content object is empty and does not contain an entity.
 	 * @return EntityDocument
 	 */
 	abstract public function getEntity();
 
 	/**
 	 * Returns a holder for the entity contained in this EntityContent object.
+	 * @note This method cannot be called on redirects (targets will never be resolved)
 	 *
-	 * @throws MWException when it's a redirect (targets will never be resolved)
 	 * @return EntityHolder|null
 	 */
 	abstract public function getEntityHolder();
@@ -145,7 +142,9 @@ abstract class EntityContent extends AbstractContent {
 		$searchTextGenerator = new FingerprintSearchTextGenerator();
 		$text = $searchTextGenerator->generate( $this->getEntity() );
 
-		if ( !Hooks::run( 'WikibaseTextForSearchIndex', [ $this, &$text ] ) ) {
+		if ( !MediaWikiServices::getInstance()->getHookContainer()
+			->run( 'WikibaseTextForSearchIndex', [ $this, &$text ] )
+		) {
 			return '';
 		}
 
@@ -191,7 +190,7 @@ abstract class EntityContent extends AbstractContent {
 	}
 
 	/**
-	 * @return string The wikitext to include when another page includes this  content, or false if
+	 * @return string|false The wikitext to include when another page includes this  content, or false if
 	 *         the content is not includable in a wikitext page.
 	 */
 	public function getWikitextForTransclusion() {
@@ -203,7 +202,6 @@ abstract class EntityContent extends AbstractContent {
 	 *
 	 * @param int $maxLength maximum length of the summary text
 	 * @return string
-	 * @throws MWException
 	 */
 	public function getTextForSummary( $maxLength = 250 ) {
 		if ( $this->isRedirect() ) {
@@ -240,9 +238,10 @@ abstract class EntityContent extends AbstractContent {
 	 * Returns an array structure for the redirect represented by this EntityContent, if any.
 	 *
 	 * @note This may or may not be consistent with what EntityContentCodec does.
-	 *       It it intended to be used primarily for diffing.
+	 *       It is intended to be used primarily for diffing.
+	 * @return string[]
 	 */
-	private function getRedirectData() {
+	private function getRedirectData(): array {
 		// NOTE: keep in sync with getPatchedRedirect
 		$data = [];
 
@@ -263,7 +262,7 @@ abstract class EntityContent extends AbstractContent {
 	 * @note Avoid relying on this method! It bypasses EntityContentCodec, and does
 	 *       not make any guarantees about the structure of the array returned.
 	 *
-	 * @return array|EntityDocument An undefined data structure representing the content. This is
+	 * @return string[]|EntityDocument An undefined data structure representing the content. This is
 	 *  not guaranteed to conform to any serialization structure used in the database or externally.
 	 */
 	public function getNativeData() {
@@ -300,7 +299,7 @@ abstract class EntityContent extends AbstractContent {
 	 *
 	 * @return bool
 	 */
-	public function equals( Content $that = null ) {
+	public function equals( ?Content $that = null ) {
 		if ( $that === $this ) {
 			return true;
 		}

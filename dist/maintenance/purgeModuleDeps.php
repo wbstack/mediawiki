@@ -21,7 +21,9 @@
 
 use Wikimedia\Rdbms\IDatabase;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script to purge the module_deps database cache table for ResourceLoader.
@@ -39,8 +41,11 @@ class PurgeModuleDeps extends Maintenance {
 	public function execute() {
 		$this->output( "Cleaning up module_deps table...\n" );
 
-		$dbw = $this->getDB( DB_PRIMARY );
-		$res = $dbw->select( 'module_deps', [ 'md_module', 'md_skin' ], [], __METHOD__ );
+		$dbw = $this->getPrimaryDB();
+		$res = $dbw->newSelectQueryBuilder()
+			->select( [ 'md_module', 'md_skin' ] )
+			->from( 'module_deps' )
+			->caller( __METHOD__ )->fetchResultSet();
 		$rows = iterator_to_array( $res, false );
 
 		$modDeps = $dbw->tableName( 'module_deps' );
@@ -65,5 +70,7 @@ class PurgeModuleDeps extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = PurgeModuleDeps::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

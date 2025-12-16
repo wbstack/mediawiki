@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:Shortpages
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,39 +16,45 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
 
+namespace MediaWiki\Specials;
+
 use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\Html\Html;
+use MediaWiki\Linker\Linker;
 use MediaWiki\MainConfigNames;
+use MediaWiki\SpecialPage\QueryPage;
+use MediaWiki\Title\NamespaceInfo;
+use MediaWiki\Title\Title;
+use Skin;
+use stdClass;
+use Wikimedia\Rdbms\IConnectionProvider;
 use Wikimedia\Rdbms\IDatabase;
-use Wikimedia\Rdbms\ILoadBalancer;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
- * SpecialShortpages extends QueryPage. It is used to return the shortest
- * pages in the database.
+ * List of the shortest pages in the database.
  *
  * @ingroup SpecialPage
  */
 class SpecialShortPages extends QueryPage {
 
-	/** @var NamespaceInfo */
-	private $namespaceInfo;
+	private NamespaceInfo $namespaceInfo;
 
 	/**
 	 * @param NamespaceInfo $namespaceInfo
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 * @param LinkBatchFactory $linkBatchFactory
 	 */
 	public function __construct(
 		NamespaceInfo $namespaceInfo,
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		LinkBatchFactory $linkBatchFactory
 	) {
 		parent::__construct( 'Shortpages' );
 		$this->namespaceInfo = $namespaceInfo;
-		$this->setDBLoadBalancer( $loadBalancer );
+		$this->setDatabaseProvider( $dbProvider );
 		$this->setLinkBatchFactory( $linkBatchFactory );
 	}
 
@@ -91,51 +95,60 @@ class SpecialShortPages extends QueryPage {
 		$fname = static::class . '::reallyDoQuery';
 		$dbr = $this->getRecacheDB();
 		$query = $this->getQueryInfo();
-		$order = $this->getOrderFields();
+		$conds = isset( $query['conds'] ) ? (array)$query['conds'] : [];
+		$namespaces = $conds['page_namespace'];
+		unset( $conds['page_namespace'] );
 
+		if ( count( $namespaces ) === 1 || !$dbr->unionSupportsOrderAndLimit() ) {
+			return parent::reallyDoQuery( $limit, $offset );
+		}
+
+		// Optimization: Fix slow query on MySQL the case of multiple content namespaces,
+		// by rewriting this as a UNION of separate single namespace queries (T168010).
+		$sqb = $dbr->newSelectQueryBuilder()
+			->select( isset( $query['fields'] ) ? (array)$query['fields'] : [] )
+			->tables( isset( $query['tables'] ) ? (array)$query['tables'] : [] )
+			->where( $conds )
+			->options( isset( $query['options'] ) ? (array)$query['options'] : [] )
+			->joinConds( isset( $query['join_conds'] ) ? (array)$query['join_conds'] : [] );
+		if ( $limit !== false ) {
+			if ( $offset !== false ) {
+				// We need to increase the limit by the offset rather than
+				// using the offset directly, otherwise it'll skip incorrectly
+				// in the subqueries.
+				$sqb->limit( intval( $limit ) + intval( $offset ) );
+			} else {
+				$sqb->limit( intval( $limit ) );
+			}
+		}
+
+		$order = $this->getOrderFields();
 		if ( $this->sortDescending() ) {
 			foreach ( $order as &$field ) {
 				$field .= ' DESC';
 			}
 		}
 
-		$tables = isset( $query['tables'] ) ? (array)$query['tables'] : [];
-		$fields = isset( $query['fields'] ) ? (array)$query['fields'] : [];
-		$conds = isset( $query['conds'] ) ? (array)$query['conds'] : [];
-		$options = isset( $query['options'] ) ? (array)$query['options'] : [];
-		$join_conds = isset( $query['join_conds'] ) ? (array)$query['join_conds'] : [];
+		$uqb = $dbr->newUnionQueryBuilder()->all();
+		foreach ( $namespaces as $namespace ) {
+			$nsSqb = clone $sqb;
+			$nsSqb->orderBy( $order );
+			$nsSqb->andWhere( [ 'page_namespace' => $namespace ] );
+			$uqb->add( $nsSqb );
+		}
 
 		if ( $limit !== false ) {
-			$options['LIMIT'] = intval( $limit );
+			$uqb->limit( intval( $limit ) );
 		}
-
 		if ( $offset !== false ) {
-			$options['OFFSET'] = intval( $offset );
+			$uqb->offset( intval( $offset ) );
 		}
-
-		$namespaces = $conds['page_namespace'];
-		if ( count( $namespaces ) === 1 ) {
-			$options['ORDER BY'] = $order;
-			$res = $dbr->select( $tables, $fields, $conds, $fname,
-				$options, $join_conds
-			);
-		} else {
-			unset( $conds['page_namespace'] );
-			$options['INNER ORDER BY'] = $order;
-			$options['ORDER BY'] = [ 'value' . ( $this->sortDescending() ? ' DESC' : '' ) ];
-			$sql = $dbr->unionConditionPermutations(
-				$tables,
-				$fields,
-				[ 'page_namespace' => $namespaces ],
-				$conds,
-				$fname,
-				$options,
-				$join_conds
-			);
-			$res = $dbr->query( $sql, $fname );
+		$orderBy = 'value';
+		if ( $this->sortDescending() ) {
+			$orderBy .= ' DESC';
 		}
-
-		return $res;
+		$uqb->orderBy( $orderBy );
+		return $uqb->caller( $fname )->fetchResultSet();
 	}
 
 	protected function getOrderFields() {
@@ -160,8 +173,6 @@ class SpecialShortPages extends QueryPage {
 	 * @return string
 	 */
 	public function formatResult( $skin, $result ) {
-		$dm = $this->getLanguage()->getDirMark();
-
 		$title = Title::makeTitleSafe( $result->namespace, $result->title );
 		if ( !$title ) {
 			return Html::element( 'span', [ 'class' => 'mw-invalidtitle' ],
@@ -184,15 +195,25 @@ class SpecialShortPages extends QueryPage {
 			$plink = $linkRenderer->makeKnownLink( $title );
 			$exists = true;
 		}
-
+		$contentLanguage = $this->getContentLanguage();
+		$bdiAttrs = [
+			'dir' => $contentLanguage->getDir(),
+			'lang' => $contentLanguage->getHtmlCode(),
+		];
+		$plink = Html::rawElement( 'bdi', $bdiAttrs, $plink );
 		$size = $this->msg( 'nbytes' )->numParams( $result->value )->escaped();
+		$result = "{$hlinkInParentheses} {$plink} [{$size}]";
 
-		return $exists
-			? "{$hlinkInParentheses} {$dm}{$plink} {$dm}[{$size}]"
-			: "<del>{$hlinkInParentheses} {$dm}{$plink} {$dm}[{$size}]</del>";
+		return $exists ? $result : Html::rawElement( 'del', [], $result );
 	}
 
 	protected function getGroupName() {
 		return 'maintenance';
 	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialShortPages::class, 'SpecialShortPages' );

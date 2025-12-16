@@ -2,9 +2,10 @@
 
 namespace TwoColConflict;
 
-use Diff;
-use MediaWiki\Diff\WordAccumulator;
-use WordLevelDiff;
+use Wikimedia\Diff\ComplexityException;
+use Wikimedia\Diff\Diff;
+use Wikimedia\Diff\WordAccumulator;
+use Wikimedia\Diff\WordLevelDiff;
 
 /**
  * @license GPL-2.0-or-later
@@ -17,6 +18,7 @@ class AnnotatedHtmlDiffFormatter {
 	 * @param string[] $newLines
 	 * @param string[] $preSaveTransformedLines
 	 *
+	 * @throws ComplexityException
 	 * @return array[] List of changes, each of which include an HTML representation of the diff,
 	 *  and the original wikitext. Note the HTML does not use <br> but relies on `white-space:
 	 *  pre-line` being set!
@@ -132,7 +134,7 @@ class AnnotatedHtmlDiffFormatter {
 	 * @param string &$before
 	 * @param string &$after
 	 */
-	private function commonRTrim( string &$before, string &$after ) {
+	private function commonRTrim( string &$before, string &$after ): void {
 		$uncommonBefore = strlen( $before );
 		$uncommonAfter = strlen( $after );
 		while ( $uncommonBefore > 0 &&

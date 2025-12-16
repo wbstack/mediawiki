@@ -1,25 +1,26 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\Presentation;
 
-use Html;
-use Linker;
+use MediaWiki\Html\Html;
+use MediaWiki\Linker\Linker;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use MessageLocalizer;
 use OOUI\ButtonInputWidget;
 use OOUI\ButtonWidget;
 use OOUI\FieldLayout;
 use OOUI\HtmlSnippet;
 use OOUI\TextInputWidget;
-use Title;
-use User;
 
 /**
  * @license GPL-2.0-or-later
  */
 class ConfirmationFormRenderer {
 
-	/** @var MessageLocalizer */
-	private $msgLocalizer;
+	private MessageLocalizer $msgLocalizer;
 
 	public function __construct( MessageLocalizer $msgLocalizer ) {
 		$this->msgLocalizer = $msgLocalizer;
@@ -27,22 +28,14 @@ class ConfirmationFormRenderer {
 
 	/**
 	 * Shows a form that can be used to confirm the requested undo/restore action.
-	 *
-	 * @param array $args
-	 * @param string $formName
-	 * @param Title $title
-	 * @param User $user
-	 * @param int $undidRevision
-	 *
-	 * @return string
 	 */
 	public function showUndoRestoreConfirmationForm(
 		array $args,
-		$formName,
+		string $formName,
 		Title $title,
 		User $user,
-		$undidRevision = 0
-	) {
+		int $undidRevision = 0
+	): string {
 		$args = array_merge(
 			[
 				'action' => 'submit',
@@ -79,7 +72,7 @@ class ConfirmationFormRenderer {
 			'wpEditToken' => $user->getEditToken(),
 			'wpBaseRev' => $title->getLatestRevID(),
 		];
-		if ( !empty( $undidRevision ) ) {
+		if ( $undidRevision ) {
 			$hidden['wpUndidRevision'] = $undidRevision;
 		}
 		foreach ( $hidden as $name => $value ) {
@@ -99,7 +92,7 @@ class ConfirmationFormRenderer {
 	 *
 	 * @return string HTML
 	 */
-	private function getSummaryInput( $labelText ) {
+	private function getSummaryInput( string $labelText ): string {
 		$inputAttrs = [
 				'name' => 'wpSummary',
 				'maxLength' => 200,
@@ -120,9 +113,9 @@ class ConfirmationFormRenderer {
 	/**
 	 * Returns a cancel link back to viewing the entity's page
 	 *
-	 * @return string
+	 * @return string HTML
 	 */
-	private function getCancelLink( Title $title ) {
+	private function getCancelLink( Title $title ): string {
 		return ( new ButtonWidget( [
 			'id' => 'mw-editform-cancel',
 			'href' => $title->getLocalURL(),
@@ -135,7 +128,7 @@ class ConfirmationFormRenderer {
 	/**
 	 * @return string HTML
 	 */
-	private function getEditButton() {
+	private function getEditButton(): string {
 		global $wgEditSubmitButtonLabelPublish;
 		$msgKey = $wgEditSubmitButtonLabelPublish ? 'publishchanges' : 'savearticle';
 		return ( new ButtonInputWidget( [

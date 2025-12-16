@@ -3,17 +3,20 @@
 		"authors": [
 			"Jon Harald Søby",
 			"Kingu",
-			"Telaneo"
+			"Telaneo",
+			"EdoAug"
 		]
 	},
+	"datatypes-type-entity-schema": "Entitetsskjema",
 	"entityschema-desc": "Lagre og diskuter skjemaer for Wikibase-entiteter",
 	"special-newschema": "Opprett nytt entitetsskjema",
+	"nstab-entityschema": "Entitetsskjema",
+	"tooltip-ca-nstab-entityschema": "EntitySchema-definisjon",
 	"entityschema-newschema-label": "Etikett:",
 	"entityschema-newschema-description": "Beskrivelse:",
 	"entityschema-newschema-aliases": "Alias adskilt av vertikalstrek:",
 	"entityschema-newschema-schema-shexc": "Shape Expressions-kode:",
 	"entityschema-newschema-submit": "Opprett",
-	"entityschema-newschema-copyright": "Ved å klikke «$1», godtar du [[$2|bruksvilkårene]] og samtykker ugjenkallelig til å gi ut bidraget ditt under $3.",
 	"entityschema-anonymouseditwarning": "Advarsel: Du er ikke logget inn. IP-adressen din vil logges i skjemaets redigeringshistorikk.",
 	"entityschema-label-edit-placeholder": "fyll inn etikett på $1",
 	"entityschema-description-edit-placeholder": "fyll inn beskrivelse på $1",
@@ -24,7 +27,6 @@
 	"entityschema-error-schemaupdate-failed": "Skjemaet kunne ikke oppdateres.",
 	"entityschema-error-schematext-conflict": "Dette skjemaet har blitt endret i mellomtiden. Gå tilbake til skjemasiden og prøv å redigere det på nytt.",
 	"entityschema-error-namebadge-conflict": "Dette skjemaet ble endret i mellomtiden. Gå tilbake til skjemasiden og prøv å redigere etikettene, beskrivelsene og aliasene på dette språket på nytt.",
-	"entityschema-error-saving-failed": "Lagring av skjemaet mislyktes med følgende beskjed: $1",
 	"entityschema-error-not-post": "Denne handlingen må gjøres med en post-forespørsel.",
 	"entityschema-error-inconsistent-id": "Ikke alle de angitte sideversjonene tilhører den gitte tittelen.",
 	"entityschema-error-wrong-page-revisions": "Den gitte sideversjonen tilhører ikke den gjeldende siden.",
@@ -80,5 +82,9 @@
 	"entityschema-special-setlabeldescriptionaliases-info": "Du setter etikett, beskrivelse og alias på '''$1''' for skjemaet [[$3|$2]].",
 	"entityschema-special-label": "Etikett:",
 	"entityschema-special-description": "Beskrivelse:",
-	"entityschema-special-aliases": "Alias adskilt av vertikalstrek:"
+	"entityschema-special-aliases": "Alias adskilt av vertikalstrek:",
+	"wikibase-listdatatypes-entity-schema-head": "Entitetsskjema",
+	"wikibase-listdatatypes-entity-schema-body": "Lenke til entitetsskjema lagret i konfigurasjonsnavnerommet i samme wiki. Verdien må være uten navneromsprefikset «EntitySchema:»",
+	"wikibase-validator-illegal-entity-schema-title": "Verdien må begynne med <code>E</code> og resten kan kun være sifre.",
+	"wikibase-validator-no-such-entity-schema": "EntitySchema-et $1 finnes ikke."
 }

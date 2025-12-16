@@ -10,11 +10,13 @@ use CirrusSearch\SearchConfig;
 use CirrusSearch\Updater;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
-use MWException;
-use MWTimestamp;
-use Title;
-use WikiMap;
+use MediaWiki\Title\Title;
+use MediaWiki\Utils\MWTimestamp;
+use MediaWiki\WikiMap\WikiMap;
+use Throwable;
+use UnexpectedValueException;
 use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IDBAccessObject;
 use WikiPage;
 
 /**
@@ -49,15 +51,25 @@ class ForceSearchIndex extends Maintenance {
 	public $fromDate = null;
 	/** @var MWTimestamp|null */
 	public $toDate = null;
+	/** @var string|null */
 	public $toId = null;
+	/** @var bool */
 	public $indexUpdates;
+	/** @var bool */
 	public $archive;
+	/** @var string */
 	public $limit;
+	/** @var string */
 	public $queue;
+	/** @var int|null */
 	public $maxJobs;
+	/** @var int|null */
 	public $pauseForJobs;
+	/** @var int|null */
 	public $namespace;
+	/** @var string[] */
 	public $excludeContentTypes;
+	/** @var float */
 	public $lastJobQueueCheckTime = 0;
 
 	/**
@@ -117,8 +129,7 @@ class ForceSearchIndex extends Maintenance {
 			' built from a skipped process. Without this if the entry does not exist then it will' .
 			' be skipped entirely.  Only set this when running the first pass of building the' .
 			' index.  Otherwise, don\'t tempt fate by indexing half complete documents.' );
-		$this->addOption( 'forceParse',
-			'Bypass ParserCache and do a fresh parse of pages from the Content.' );
+		$this->addOption( 'forceParse', '(deprecated)' );
 		$this->addOption( 'skipParse',
 			'Skip parsing the page.  This is really only good for running the second half ' .
 			'of the two phase index build.  If this is specified then the default batch size ' .
@@ -290,10 +301,6 @@ class ForceSearchIndex extends Maintenance {
 			$updateFlags |= BuildDocument::SKIP_LINKS;
 		}
 
-		if ( $this->getOption( 'forceParse' ) ) {
-			$updateFlags |= BuildDocument::FORCE_PARSE;
-		}
-
 		return $updateFlags;
 	}
 
@@ -391,6 +398,9 @@ class ForceSearchIndex extends Maintenance {
 		return true;
 	}
 
+	/**
+	 * @return CallbackIterator
+	 */
 	protected function getDeletesIterator() {
 		$dbr = $this->getDB( DB_REPLICA, [ 'vslow' ] );
 		$it = new BatchRowIterator(
@@ -408,7 +418,7 @@ class ForceSearchIndex extends Maintenance {
 			'EXISTS(select * from archive where ar_title = log_title and ar_namespace = log_namespace)',
 			// Prior to 2010 the logging table contains nulls. As the docs in elasticsearch use the page id
 			// as the document id we cannot handle these old rows.
-			'log_page IS NOT NULL',
+			$dbr->expr( 'log_page', '!=', null ),
 		] );
 
 		$it->setFetchColumns( [ 'log_timestamp', 'log_namespace', 'log_title', 'log_page' ] );
@@ -441,6 +451,9 @@ class ForceSearchIndex extends Maintenance {
 		} );
 	}
 
+	/**
+	 * @return CallbackIterator
+	 */
 	protected function getIdsIterator() {
 		$dbr = $this->getDB( DB_REPLICA, [ 'vslow' ] );
 		$pageQuery = WikiPage::getQueryInfo();
@@ -454,6 +467,9 @@ class ForceSearchIndex extends Maintenance {
 		return $this->wrapDecodeResults( $it, 'page_id' );
 	}
 
+	/**
+	 * @return CallbackIterator
+	 */
 	protected function getUpdatesByDateIterator() {
 		$dbr = $this->getDB( DB_REPLICA, [ 'vslow' ] );
 		$pageQuery = WikiPage::getQueryInfo();
@@ -476,22 +492,25 @@ class ForceSearchIndex extends Maintenance {
 		return $this->wrapDecodeResults( $it, 'rev_timestamp' );
 	}
 
+	/**
+	 * @return CallbackIterator
+	 */
 	protected function getUpdatesByIdIterator() {
 		$dbr = $this->getDB( DB_REPLICA, [ 'vslow' ] );
 		$pageQuery = WikiPage::getQueryInfo();
-		$it = new BatchRowIterator( $dbr,  $pageQuery['tables'], 'page_id', $this->getBatchSize() );
+		$it = new BatchRowIterator( $dbr, $pageQuery['tables'], 'page_id', $this->getBatchSize() );
 		$it->setFetchColumns( $pageQuery['fields'] );
 		$it->addJoinConditions( $pageQuery['joins'] );
 		$it->setCaller( __METHOD__ );
 		$fromId = $this->getOption( 'fromId', 0 );
 		if ( $fromId > 0 ) {
 			$it->addConditions( [
-				'page_id >= ' . $dbr->addQuotes( $fromId ),
+				$dbr->expr( 'page_id', '>=', $fromId ),
 			] );
 		}
 		if ( $this->toId ) {
 			$it->addConditions( [
-				'page_id <= ' . $dbr->addQuotes( $this->toId ),
+				$dbr->expr( 'page_id', '<=', $this->toId ),
 			] );
 		}
 
@@ -507,10 +526,8 @@ class ForceSearchIndex extends Maintenance {
 		// the other has a sane default value.
 		if ( $this->fromDate !== null ) {
 			$it->addConditions( [
-				"{$columnPrefix}_timestamp >= " .
-					$dbr->addQuotes( $dbr->timestamp( $this->fromDate ) ),
-				"{$columnPrefix}_timestamp <= " .
-					$dbr->addQuotes( $dbr->timestamp( $this->toDate ) ),
+				$dbr->expr( "{$columnPrefix}_timestamp", '>=', $dbr->timestamp( $this->fromDate ) ),
+				$dbr->expr( "{$columnPrefix}_timestamp", '<=', $dbr->timestamp( $this->toDate ) ),
 			] );
 		}
 	}
@@ -522,9 +539,8 @@ class ForceSearchIndex extends Maintenance {
 			] );
 		}
 		if ( $this->excludeContentTypes ) {
-			$list = $dbr->makeList( $this->excludeContentTypes, LIST_COMMA );
 			$it->addConditions( [
-				"{$columnPrefix}_content_model NOT IN ($list)",
+				$dbr->expr( "{$columnPrefix}_content_model", '!=', $this->excludeContentTypes ),
 			] );
 		}
 		if ( $this->hasOption( 'useDbIndex' ) ) {
@@ -549,7 +565,7 @@ class ForceSearchIndex extends Maintenance {
 			foreach ( $batch as $row ) {
 				// No need to call Updater::traceRedirects here because we know this is a valid page
 				// because it is in the database.
-				$page = $wikiPageFactory->newFromRow( $row, WikiPage::READ_LATEST );
+				$page = $wikiPageFactory->newFromRow( $row, IDBAccessObject::READ_LATEST );
 
 				// null pages still get attached to keep the counts the same. They will be filtered
 				// later on.
@@ -563,7 +579,7 @@ class ForceSearchIndex extends Maintenance {
 				} elseif ( $endingAtColumn === 'page_id' ) {
 					$endingAt = $row->page_id;
 				} else {
-					throw new \MWException( 'Unknown $endingAtColumn: ' . $endingAtColumn );
+					throw new UnexpectedValueException( 'Unknown $endingAtColumn: ' . $endingAtColumn );
 				}
 			} else {
 				$endingAt = 'unknown';
@@ -587,7 +603,7 @@ class ForceSearchIndex extends Maintenance {
 	private function decidePage( Updater $updater, WikiPage $page ) {
 		try {
 			$content = $page->getContent();
-		} catch ( MWException $ex ) {
+		} catch ( Throwable $ex ) {
 			LoggerFactory::getInstance( 'CirrusSearch' )->warning(
 				"Error deserializing content, skipping page: {pageId}",
 				[ 'pageId' => $page->getTitle()->getArticleID() ]
@@ -619,7 +635,7 @@ class ForceSearchIndex extends Maintenance {
 		// pages are totally possible, as well as fun stuff like redirect loops, we need to use
 		// Updater's redirect tracing logic which is very complete.  Also, it returns null on
 		// self redirects.  Great!
-		list( $page, ) = $updater->traceRedirects( $page->getTitle() );
+		[ $page, ] = $updater->traceRedirects( $page->getTitle() );
 
 		if ( $page != null &&
 			Title::makeTitleSafe( $page->getTitle()->getNamespace(), $page->getTitle()->getText() ) === null
@@ -643,14 +659,22 @@ class ForceSearchIndex extends Maintenance {
 	private function buildChunks( $buildChunks ) {
 		$dbr = $this->getDB( DB_REPLICA, [ 'vslow' ] );
 		if ( $this->toId === null ) {
-			$this->toId = $dbr->selectField( 'page', 'MAX(page_id)', [], __METHOD__ );
+			$this->toId = $dbr->newSelectQueryBuilder()
+				->select( 'MAX(page_id)' )
+				->from( 'page' )
+				->caller( __METHOD__ )
+				->fetchField();
 			if ( $this->toId === false ) {
 				$this->fatalError( "Couldn't find any pages to index." );
 			}
 		}
 		$fromId = $this->getOption( 'fromId' );
 		if ( $fromId === null ) {
-			$fromId = $dbr->selectField( 'page', 'MIN(page_id) - 1', [], __METHOD__ );
+			$fromId = $dbr->newSelectQueryBuilder()
+				->select( 'MIN(page_id) - 1' )
+				->from( 'page' )
+				->caller( __METHOD__ )
+				->fetchField();
 			if ( $fromId === false ) {
 				$this->fatalError( "Couldn't find any pages to index." );
 			}
@@ -661,7 +685,7 @@ class ForceSearchIndex extends Maintenance {
 			);
 		}
 		$builder = new \CirrusSearch\Maintenance\ChunkBuilder();
-		$builder->build( $this->mSelf, $this->mOptions, $buildChunks, $fromId, $this->toId );
+		$builder->build( $this->mSelf, $this->getParameters()->getOptions(), $buildChunks, $fromId, $this->toId );
 	}
 
 	/**

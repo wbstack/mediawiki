@@ -51,11 +51,35 @@ class CustomLogger extends AbstractLogger {
             ];
         }
 
-        $payload[ '@type' ] = 'type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent';
+        /**
+         * log levels according to PSR-3: https://www.php-fig.org/psr/psr-3/#11-basics
+         * debug, info, notice, warning, error, critical, alert, emergency
+         */
+        $logLevelsCloudErrorReporting = ['error', 'critical', 'alert', 'emergency'];
+
+        if (in_array($level, $logLevelsCloudErrorReporting)) {
+            $payload[ '@type' ] = 'type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent';
+        }
+
         $payload[ 'severity' ] = $level;
         $payload[ 'serviceContext' ] = [
             'service' => 'WBaaS MediaWiki',
-            'version' => '1.0.0'
+            'version' => MW_VERSION,
+        ];
+        $payload[ 'context' ] = [
+            'request_uri' => $_SERVER['REQUEST_URI'] ?? '',
+
+            // set in /includes/Defines.php
+            'mediawiki'     => MW_VERSION,
+
+            // set via \WBStack\Info\GlobalSet::forDomain
+            'domain'        => $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain,    
+
+            // https://www.php.net/manual/en/function.phpversion.php
+            'php'           => phpversion(),
+
+            // https://www.php-fig.org/psr/psr-3/#13-context
+            'log_context'       => $context,
         ];
 
         $output = json_encode( $payload );

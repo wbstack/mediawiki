@@ -46,55 +46,106 @@ class AutoLoader {
 		'MediaWiki\\Block\\' => __DIR__ . '/block/',
 		'MediaWiki\\Cache\\' => __DIR__ . '/cache/',
 		'MediaWiki\\ChangeTags\\' => __DIR__ . '/changetags/',
+		'MediaWiki\\Collation\\' => __DIR__ . '/collation/',
+		'MediaWiki\\Composer\\' => __DIR__ . '/composer/',
 		'MediaWiki\\Config\\' => __DIR__ . '/config/',
 		'MediaWiki\\Content\\' => __DIR__ . '/content/',
+		'MediaWiki\\Context\\' => __DIR__ . '/context/',
+		'MediaWiki\\DAO\\' => __DIR__ . '/dao/',
 		'MediaWiki\\DB\\' => __DIR__ . '/db/',
+		'MediaWiki\\Debug\\' => __DIR__ . '/debug/',
+		'MediaWiki\\Deferred\\' => __DIR__ . '/deferred/',
 		'MediaWiki\\Deferred\\LinksUpdate\\' => __DIR__ . '/deferred/LinksUpdate/',
 		'MediaWiki\\Diff\\' => __DIR__ . '/diff/',
 		'MediaWiki\\EditPage\\' => __DIR__ . '/editpage/',
 		'MediaWiki\\Edit\\' => __DIR__ . '/edit/',
+		'MediaWiki\\Exception\\' => __DIR__ . '/exception/',
+		'MediaWiki\\Export\\' => __DIR__ . '/export/',
+		'MediaWiki\\FileBackend\\' => __DIR__ . '/filebackend/',
+		'MediaWiki\\FileBackend\\FSFile\\' => __DIR__ . '/libs/filebackend/fsfile/',
 		'MediaWiki\\FileBackend\\LockManager\\' => __DIR__ . '/filebackend/lockmanager/',
+		'MediaWiki\\FileRepo\\' => __DIR__ . '/filerepo/',
+		'MediaWiki\\FileRepo\\File\\' => __DIR__ . '/filerepo/file/',
+		'MediaWiki\\HTMLForm\\' => __DIR__ . '/htmlform/',
+		'MediaWiki\\HTMLForm\\Field\\' => __DIR__ . '/htmlform/fields/',
 		'MediaWiki\\Http\\' => __DIR__ . '/http/',
 		'MediaWiki\\Installer\\' => __DIR__ . '/installer/',
 		'MediaWiki\\Interwiki\\' => __DIR__ . '/interwiki/',
 		'MediaWiki\\JobQueue\\' => __DIR__ . '/jobqueue/',
+		'MediaWiki\\JobQueue\\Exceptions\\' => __DIR__ . '/jobqueue/exception/',
+		'MediaWiki\\JobQueue\\Jobs\\' => __DIR__ . '/jobqueue/jobs/',
+		'MediaWiki\\JobQueue\\Utils\\' => __DIR__ . '/jobqueue/utils/',
 		'MediaWiki\\Json\\' => __DIR__ . '/json/',
+		'MediaWiki\\Languages\\' => __DIR__ . '/language/',
 		'MediaWiki\\Languages\\Data\\' => __DIR__ . '/languages/data/',
+		'MediaWiki\\Language\\' => __DIR__ . '/language/',
+		'MediaWiki\\Libs\\' => __DIR__ . '/libs/',
+		'MediaWiki\\LinkedData\\' => __DIR__ . '/linkeddata/',
 		'MediaWiki\\Linker\\' => __DIR__ . '/linker/',
 		'MediaWiki\\Logger\\' => __DIR__ . '/debug/logger/',
 		'MediaWiki\\Logger\\Monolog\\' => __DIR__ . '/debug/logger/monolog/',
+		'MediaWiki\\Logging\\' => __DIR__ . '/logging/',
 		'MediaWiki\\Mail\\' => __DIR__ . '/mail/',
+		'MediaWiki\\Maintenance\\' => __DIR__ . '/../maintenance/includes/',
 		'MediaWiki\\Page\\' => __DIR__ . '/page/',
 		'MediaWiki\\Parser\\' => __DIR__ . '/parser/',
+		'MediaWiki\\Password\\' => __DIR__ . '/password/',
+		'MediaWiki\\PoolCounter\\' => __DIR__ . '/poolcounter/',
 		'MediaWiki\\Preferences\\' => __DIR__ . '/preferences/',
+		'MediaWiki\\Profiler\\' => __DIR__ . '/profiler/',
+		'MediaWiki\\RCFeed\\' => __DIR__ . '/recentchanges/RCFeed/',
+		'MediaWiki\\RecentChanges\\' => __DIR__ . '/recentchanges/',
+		'MediaWiki\\Registration\\' => __DIR__ . '/registration/',
+		'MediaWiki\\RevisionList\\' => __DIR__ . '/revisionlist/',
 		'MediaWiki\\Search\\' => __DIR__ . '/search/',
 		'MediaWiki\\Search\\SearchWidgets\\' => __DIR__ . '/search/searchwidgets/',
 		'MediaWiki\\Session\\' => __DIR__ . '/session/',
 		'MediaWiki\\Shell\\' => __DIR__ . '/shell/',
 		'MediaWiki\\Site\\' => __DIR__ . '/site/',
+		'MediaWiki\\Skin\\' => __DIR__ . '/skins/',
 		'MediaWiki\\Sparql\\' => __DIR__ . '/sparql/',
 		'MediaWiki\\SpecialPage\\' => __DIR__ . '/specialpage/',
+		'MediaWiki\\Specials\\' => __DIR__ . '/specials/',
+		'MediaWiki\\Specials\\Contribute\\' => __DIR__ . '/specials/Contribute/',
+		'MediaWiki\\Specials\\Redirects\\' => __DIR__ . '/specials/redirects/',
 		'MediaWiki\\Tidy\\' => __DIR__ . '/tidy/',
+		'MediaWiki\\Title\\' => __DIR__ . '/title/',
 		'MediaWiki\\User\\' => __DIR__ . '/user/',
 		'MediaWiki\\Utils\\' => __DIR__ . '/utils/',
+		'MediaWiki\\Watchlist\\' => __DIR__ . '/watchlist/',
 		'MediaWiki\\Widget\\' => __DIR__ . '/widget/',
+		'MediaWiki\\Xml\\' => __DIR__ . '/xml/',
 		'Wikimedia\\' => __DIR__ . '/libs/',
+		'Wikimedia\\ArrayUtils\\' => __DIR__ . '/libs/',
+		'Wikimedia\\Composer\\' => __DIR__ . '/libs/composer/',
+		'Wikimedia\\DependencyStore\\' => __DIR__ . '/ResourceLoader/dependencystore/',
+		'Wikimedia\\EventRelayer\\' => __DIR__ . '/libs/eventrelayer/',
+		'Wikimedia\\FileBackend\\' => __DIR__ . '/libs/filebackend/',
+		'Wikimedia\\FileBackend\\FileIteration\\' => __DIR__ . '/libs/filebackend/fileiteration/',
+		'Wikimedia\\FileBackend\\FileOpHandle\\' => __DIR__ . '/libs/filebackend/fileophandle/',
+		'Wikimedia\\FileBackend\\FileOps\\' => __DIR__ . '/libs/filebackend/fileop/',
+		'Wikimedia\\FileBackend\\FSFile\\' => __DIR__ . '/libs/filebackend/fsfile/',
+		'Wikimedia\\HashRing\\' => __DIR__ . '/libs/',
+		'Wikimedia\\HtmlArmor\\' => __DIR__ . '/libs/',
 		'Wikimedia\\Http\\' => __DIR__ . '/libs/http/',
+		'Wikimedia\\LightweightObjectStore\\' => __DIR__ . '/libs/objectcache/utils/',
+		'Wikimedia\\MapCacheLRU\\' => __DIR__ . '/libs/',
+		'Wikimedia\\Mime\\' => __DIR__ . '/libs/mime/',
+		'Wikimedia\\NonSerializable\\' => __DIR__ . '/libs/',
+		'Wikimedia\\ObjectCache\\' => __DIR__ . '/libs/objectcache/',
+		'Wikimedia\\Rdbms\\Database\\' => __DIR__ . '/libs/rdbms/database/',
 		'Wikimedia\\Rdbms\\Platform\\' => __DIR__ . '/libs/rdbms/platform/',
+		'Wikimedia\\Rdbms\\Replication\\' => __DIR__ . '/libs/rdbms/database/replication/',
+		'Wikimedia\\StringUtils\\' => __DIR__ . '/libs/',
+		'Wikimedia\\Telemetry\\' => __DIR__ . '/libs/telemetry/',
+		'Wikimedia\\Timing\\' => __DIR__ . '/libs/',
 		'Wikimedia\\UUID\\' => __DIR__ . '/libs/uuid/',
 	];
 
 	/**
-	 * Cache for lower-case version of the content of $wgAutoloadLocalClasses.
-	 * @var array|null
-	 */
-	private static $autoloadLocalClassesLower = null;
-
-	/**
 	 * @var string[] Namespace (ends with \) => Path (ends with /)
-	 * @internal Will become private in 1.40.
 	 */
-	public static $psr4Namespaces = self::CORE_NAMESPACES;
+	private static $psr4Namespaces = self::CORE_NAMESPACES;
 
 	/**
 	 * @var string[] Class => File
@@ -165,7 +216,7 @@ class AutoLoader {
 	 * @return string|null The path containing the class, not null if not found
 	 */
 	public static function find( $className ): ?string {
-		global $wgAutoloadLocalClasses, $wgAutoloadClasses, $wgAutoloadAttemptLowercase;
+		global $wgAutoloadLocalClasses, $wgAutoloadClasses;
 
 		// NOTE: $wgAutoloadClasses is supported for compatibility with old-style extension
 		//       registration files.
@@ -175,28 +226,10 @@ class AutoLoader {
 			$wgAutoloadClasses[$className] ??
 			false;
 
-		if ( !$filename && $wgAutoloadAttemptLowercase ) {
-			// Try a different capitalisation.
-			//
-			// PHP 4 objects are always serialized with the classname coerced to lowercase,
-			// and we are plagued with several legacy uses created by MediaWiki < 1.5, see
-			// https://wikitech.wikimedia.org/wiki/Text_storage_data
-			if ( self::$autoloadLocalClassesLower === null ) {
-				self::$autoloadLocalClassesLower = array_change_key_case( $wgAutoloadLocalClasses, CASE_LOWER );
-			}
-			$lowerClass = strtolower( $className );
-			if ( isset( self::$autoloadLocalClassesLower[$lowerClass] ) ) {
-				if ( function_exists( 'wfDebugLog' ) ) {
-					wfDebugLog( 'autoloader', "Class {$className} was loaded using incorrect case" );
-				}
-				// @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-				$filename = self::$autoloadLocalClassesLower[$lowerClass];
-			}
-		}
-
 		if ( !$filename && strpos( $className, '\\' ) !== false ) {
 			// This class is namespaced, so look in the namespace map
 			$prefix = $className;
+			// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 			while ( ( $pos = strrpos( $prefix, '\\' ) ) !== false ) {
 				// Check to see if this namespace prefix is in the map
 				$prefix = substr( $className, 0, $pos + 1 );
@@ -241,16 +274,8 @@ class AutoLoader {
 		$filename = self::find( $className );
 
 		if ( $filename !== null ) {
-			require $filename;
+			require_once $filename;
 		}
-	}
-
-	/**
-	 * Method to clear the protected class property $autoloadLocalClassesLower.
-	 * Used in tests.
-	 */
-	public static function resetAutoloadLocalClassesLower() {
-		self::$autoloadLocalClassesLower = null;
 	}
 
 	///// Methods used during testing //////////////////////////////////////////////

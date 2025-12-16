@@ -1,11 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
+			"Alshamiri1",
 			"Maroen1990",
 			"Meno25",
 			"Tala Ali",
 			"ديفيد",
-			"Alshamiri1"
+			"عبد الإله صديقي",
+			"محمد أحمد عبد الفتاح",
+			"Lolekek",
+			"123Rkhader",
+			"Mohammed Qays"
 		]
 	},
 	"nstab-data": "البيانات",
@@ -16,7 +21,7 @@
 	"jsonconfig-edit-action-cancel": "إلغاء",
 	"jsonconfig-edit-button-label": "تعديل كجدول",
 	"jsonconfig-edit-dialog-error": "تعذر التحرير كجدول: $1",
-	"jsonconfig-edit-dialog-error-data-inavlid": "البيانات لا تتطابق مع المخطط",
+	"jsonconfig-edit-dialog-error-data-invalid": "البيانات لا تتطابق مع المخطط",
 	"jsonconfig-edit-dialog-error-data-missing": "خاصية <code>data</code> JSON مفقودة أو أنها ليست مصفوفة",
 	"jsonconfig-edit-dialog-error-data-too-large": "مجموعة البيانات كبيرة جدًا بحيث لا يمكن تحريرها كجدول",
 	"jsonconfig-edit-dialog-error-field-name-missing": "يجب أن يكون لكل حقل اسم",
@@ -52,6 +57,8 @@
 	"jsonconfig-type-name-localized": "المترجمة",
 	"jsonconfig-type-name-number": "رقم",
 	"jsonconfig-type-name-boolean": "القيمة المنطقية",
+	"jsonconfig-use-category": "صفحات تستخدم امتداد JsonConfig",
+	"jsonconfig-use-category-desc": "تستخدم هذه الصفحات طريقة <code>mw.ext.data.get</code> التي يوفرها امتداد [[:mw:Extension:JsonConfig|JsonConfig]]. تعتبر طريقة <code>mw.ext.data.get</code> مكلفة.",
 	"jsonconfig-license": "البيانات متاحة تحت $1.",
 	"jsonconfig-license-not-set": "عندما تقوم بتحرير هذه الصفحة، فإنك توافق على تحرير مساهمتك وفقا للترخيص المحدد في حقل \"الترخيص\".",
 	"jsonconfig-license-name-CC0-1.0": "المشاع الإبداعي صفر",
@@ -72,10 +79,11 @@
 	"jsonconfig-license-name-dl-de-by-1.0": "ترخيص البيانات ألمانيا - الإسناد - الإصدار 1.0",
 	"jsonconfig-license-name-dl-de-by-2.0": "رخصة البيانات ألمانيا - الإسناد - الإصدار 2.0",
 	"jsonconfig-license-name-GeoNutzV": "رخصة البيانات الجغرافية ألمانيا",
-	"jsonconfig-license-copyrightwarning": "بحفظ التغييرات، فإنك توافق على [https://foundation.wikimedia.org/wiki/Terms_of_Use شروط الاستخدام]، وتوافق بشكل لا رجعة فيه على نشر مساهمتك بموجب [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
-	"jsonconfig-license-copyrightwarning-license-unset": "بحفظ التغييرات، فإنك توافق على [https://foundation.wikimedia.org/wiki/Terms_of_Use شروط الاستخدام]، وتوافق بشكل لا رجعة فيه على الإفراج عن مساهمتك وفقا للترخيص المحدد في حقل \"الترخيص\".",
+	"jsonconfig-license-copyrightwarning": "بحفظ التغييرات، فإنك توافق على [https://foundation.wikimedia.org/wiki/Terms_of_Use شروط الاستخدام]، وتوافق موافقة لا رجعة فيها على نشر مساهمتك بموجب [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning-license-unset": "من خلال نشر التغييرات، توافق على إطلاق مساهمتك وفقاً للحصول على الترخيص المحدد في حقل <code>licence</code>.",
 	"jsonconfig-license-notice": "'''ملاحظة:''' عندما تحرر هذه الصفحة، فإنك توافق على تحرير مساهمتك بموجب [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
 	"jsonconfig-license-notice-license-unset": "'''ملاحظة:''' عندما تحرر هذه الصفحة، فإنك توافق على تحرير مساهمتك وفقا للترخيص المحدد في حقل \"الترخيص\".",
 	"right-jsonconfig-flush": "معالجة JsonConfig عبر API",
-	"action-jsonconfig-flush": "معالجة JsonConfig عبر API"
+	"action-jsonconfig-flush": "معالجة JsonConfig عبر API",
+	"jsonconfig-blocked-page-creation": "عنوان الصفحة الذي حددته لا يتطابق مع أي من الأنماط التي تم تكوينها لامتداد JSONConfig لهذه الويكي."
 }

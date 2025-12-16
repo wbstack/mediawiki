@@ -1,19 +1,23 @@
 {
 	"@metadata": {
 		"authors": [
-			"Akolpoka"
+			"Akolpoka",
+			"Amoramah"
 		]
 	},
 	"content-model-wikibase-lexeme": "\"Wikibase Lexeme\"",
 	"datatypes-type-wikibase-form": "Biŋe",
 	"datatypes-type-wikibase-lexeme": "\"Lexeme\"",
 	"datatypes-type-wikibase-sense": "Puti'irɛ",
+	"nstab-lexeme": "\"Lexeme\"",
 	"special-mergelexemes": "Lagesɛ \"Lexeme\" bayi",
 	"special-newlexeme": "Maalɛ \"lexeme\" paalɛ",
+	"tooltip-ca-nstab-lexeme": "\"Lexeme\" pa'alegɔ",
 	"wikibase-entity-summary-wblmergelexemes-from": "Lagesɛ \"lexeme\" ze'ele $3",
 	"wikibase-entity-summary-wblmergelexemes-to": "Lagesɛ \"lexeme\" ze'ele $3",
 	"wikibase-lexeme-gloss-empty": "\"Gloss\" ka pa'alɛ",
 	"wikibase-lexeme-lemma-language-not-recognized": "yetɔgum la ka baŋɛ ni.",
+	"wikibase-lexeme-lexicographical-data": "'Lexicographical data'",
 	"wikibase-lexeme-mergelexemes-error-cannot-load": "Ka nyaŋɛ ni zɛ \"lexeme\"",
 	"wikibase-lexeme-mergelexemes-error-conflicting-lemma": "Ka nyaŋɛ n wan lagesɛ \"lexemes\" la, n beleni fu mɛ maalɛ nɔkpe'ene woo yia. Tuure: \"Lexemes\" tari la \"Lemmas\" tɔka tɔka n boi itegɔ yima yima.",
 	"wikibase-lexeme-mergelexemes-error-cross-referencing-statement": "Ka nyaŋɛ lagesɛ \"Lexemes\" n beleni fu mɛ maalɛ nɔkpe'ene woo yia. Tuure: \"Lexemes\" n tɔkɛ taaba n boi sɔsega puan.",
@@ -30,6 +34,7 @@
 	"wikibase-lexeme-mergelexemes-submit": "Lagesɛ \"Lexemes\"",
 	"wikibase-lexeme-mergelexemes-success": "$1 lagesɛ ni mɛ pa'asɛ $2 gee lebese ni.",
 	"wikibase-lexeme-mergelexemes-to-id": "\"ID\" la ti fu yeti fu lagum la",
+	"wikibase-lexeme-randomlexeme": "Ahaya yelebɛa",
 	"wikibase-lexeme-summary-add-form": "\"Form\" paalɛ n pa'asɛ $3 la \n{{PLURAL:$1|representation|representations}}",
 	"wikibase-lexeme-summary-add-form-grammatical-features": "Tɔgum naaŋɔ n pa'asɛ {{PLURAL:$1|feature|features}} \"Form\" $3 la puan",
 	"wikibase-lexeme-summary-add-form-representations": "{{PLURAL:$1|representation|representations}} n pa'asɛ \"Form\" $3 la puan",
@@ -82,6 +87,7 @@
 	"wikibaselexeme-form-description": "$1 bo: $2 ($3): $4",
 	"wikibaselexeme-form-field-language-label": "Yelebɛa itegɔ buuri buuri",
 	"wikibaselexeme-form-field-representation-label": "Tɔgɛ pa'alegɔ",
+	"wikibaselexeme-form-field-required": "Zi'an n nari ni",
 	"wikibaselexeme-form-grammatical-features": "Tɔgum naaŋɔ aŋa",
 	"wikibaselexeme-form-representation-redundant-language": "La kan ta'am iŋɛ ti fu ki'isɛ sɔsega zo'e zo'e la yelebɛa itegɔ la nuu buuri buuri.",
 	"wikibaselexeme-gloss-field-gloss-label": "\"Gloss\"",

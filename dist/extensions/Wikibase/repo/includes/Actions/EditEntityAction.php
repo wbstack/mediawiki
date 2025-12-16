@@ -1,27 +1,34 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Actions;
 
-use Html;
-use IContextSource;
-use Linker;
-use MediaWiki\MediaWikiServices;
+use Article;
+use MediaWiki\CommentStore\CommentStore;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Html\Html;
+use MediaWiki\Linker\Linker;
+use MediaWiki\Permissions\PermissionManager;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
-use MWException;
+use MediaWiki\Status\Status;
 use OOUI\ButtonInputWidget;
 use OOUI\ButtonWidget;
 use OOUI\FieldLayout;
 use OOUI\HtmlSnippet;
 use OOUI\TextInputWidget;
-use Page;
-use Status;
-use WebRequest;
+use RuntimeException;
+use Wikibase\Lib\Summary;
+use Wikibase\Repo\AnonymousEditWarningBuilder;
 use Wikibase\Repo\Content\EntityContent;
 use Wikibase\Repo\Content\EntityContentDiff;
-use Wikibase\Repo\Diff\BasicEntityDiffVisualizer;
 use Wikibase\Repo\Diff\DispatchingEntityDiffVisualizer;
-use Wikibase\Repo\WikibaseRepo;
+use Wikibase\Repo\Diff\EntityDiffVisualizer;
+use Wikibase\Repo\Diff\EntityDiffVisualizerFactory;
+use Wikibase\Repo\SummaryFormatter;
 
 /**
  * Handles the edit action for Wikibase entities.
@@ -36,31 +43,48 @@ use Wikibase\Repo\WikibaseRepo;
 class EditEntityAction extends ViewEntityAction {
 
 	/**
-	 * @var BasicEntityDiffVisualizer
+	 * {@link ObjectFactory} specification for this class,
+	 * to be returned by {@link EntityHandler::getActionOverrides()} implementations.
 	 */
-	private $entityDiffVisualizer;
+	public const SPEC = [
+		'class' => self::class,
+		'services' => [
+			'PermissionManager',
+			'RevisionLookup',
+			'WikibaseRepo.AnonymousEditWarningBuilder',
+			'WikibaseRepo.EntityDiffVisualizerFactory',
+			'WikibaseRepo.SummaryFormatter',
+		],
+	];
 
-	/**
-	 * @see Action::__construct
-	 *
-	 * @param Page $page
-	 * @param IContextSource|null $context
-	 */
-	public function __construct( Page $page, IContextSource $context = null ) {
-		parent::__construct( $page, $context );
+	protected PermissionManager $permissionManager;
+	private RevisionLookup $revisionLookup;
+	private EntityDiffVisualizer $entityDiffVisualizer;
+	private AnonymousEditWarningBuilder $anonymousEditWarningBuilder;
+	private SummaryFormatter $summaryFormatter;
 
+	public function __construct(
+		Article $article,
+		IContextSource $context,
+		PermissionManager $permissionManager,
+		RevisionLookup $revisionLookup,
+		AnonymousEditWarningBuilder $anonymousEditWarningBuilder,
+		EntityDiffVisualizerFactory $entityDiffVisualizerFactory,
+		SummaryFormatter $summaryFormatter
+	) {
+		parent::__construct( $article, $context );
+
+		$this->permissionManager = $permissionManager;
+		$this->revisionLookup = $revisionLookup;
 		$this->entityDiffVisualizer = new DispatchingEntityDiffVisualizer(
-			WikibaseRepo::getEntityDiffVisualizerFactory(),
+			$entityDiffVisualizerFactory,
 			$this->getContext()
 		);
+		$this->anonymousEditWarningBuilder = $anonymousEditWarningBuilder;
+		$this->summaryFormatter = $summaryFormatter;
 	}
 
-	/**
-	 * @see Action::getName()
-	 *
-	 * @return string
-	 */
-	public function getName() {
+	public function getName(): string {
 		return 'edit';
 	}
 
@@ -71,14 +95,15 @@ class EditEntityAction extends ViewEntityAction {
 	 *
 	 * @return bool true if there were permission errors
 	 */
-	protected function showPermissionError( $action ) {
-		$rigor = $this->getRequest()->wasPosted() ? 'secure' : 'full';
-		$pm = MediaWikiServices::getInstance()->getPermissionManager();
-		if ( !$pm->userCan( $action, $this->getUser(), $this->getTitle(), $rigor ) ) {
-			$this->getOutput()->showPermissionsErrorPage(
-				$pm->getPermissionErrors( $action, $this->getUser(), $this->getTitle(), $rigor ),
-				$action
-			);
+	protected function showPermissionError( string $action ): bool {
+		$rigor = $this->getRequest()->wasPosted() ?
+			PermissionManager::RIGOR_SECURE : PermissionManager::RIGOR_FULL;
+
+		$status = $this->permissionManager->getPermissionStatus(
+			$action, $this->getUser(), $this->getTitle(), $rigor );
+
+		if ( !$status->isGood() ) {
+			$this->getOutput()->showPermissionStatus( $status, $action );
 
 			return true;
 		}
@@ -92,9 +117,8 @@ class EditEntityAction extends ViewEntityAction {
 	 *
 	 * @return Status A Status object containing an array with three revision record objects,
 	 *   [ $olderRevision, $newerRevision, $latestRevision ].
-	 * @throws MWException if the page's latest revision cannot be loaded
 	 */
-	protected function loadRevisions() {
+	protected function loadRevisions(): Status {
 		$latestRevId = $this->getTitle()->getLatestRevID();
 
 		if ( $latestRevId === 0 ) {
@@ -102,27 +126,18 @@ class EditEntityAction extends ViewEntityAction {
 			return Status::newFatal( 'missing-article', $this->getTitle()->getPrefixedText(), '' );
 		}
 
-		$latestRevision = MediaWikiServices::getInstance()
-			->getRevisionLookup()
-			->getRevisionById( $latestRevId );
+		$latestRevision = $this->revisionLookup->getRevisionById( $latestRevId );
 
 		if ( !$latestRevId ) {
-			throw new MWException( "latest revision not found: $latestRevId" );
+			throw new RuntimeException( "latest revision not found: $latestRevId" );
 		}
 
 		return $this->getStatus( $this->getRequest(), $latestRevision );
 	}
 
-	/**
-	 * @param WebRequest $req
-	 * @param RevisionRecord $latestRevision
-	 *
-	 * @return Status
-	 */
-	private function getStatus( WebRequest $req, RevisionRecord $latestRevision ) {
-		$revLookup = MediaWikiServices::getInstance()->getRevisionLookup();
+	private function getStatus( WebRequest $req, RevisionRecord $latestRevision ): Status {
 		if ( $req->getCheck( 'restore' ) ) { // nearly the same as undoafter without undo
-			$olderRevision = $revLookup->getRevisionById( $req->getInt( 'restore' ) );
+			$olderRevision = $this->revisionLookup->getRevisionById( $req->getInt( 'restore' ) );
 
 			if ( !$olderRevision ) {
 				return Status::newFatal( 'undo-norev', $req->getInt( 'restore' ) );
@@ -131,27 +146,27 @@ class EditEntityAction extends ViewEntityAction {
 			// ignore undo, even if set
 			$newerRevision = $latestRevision;
 		} elseif ( $req->getCheck( 'undo' ) ) {
-			$newerRevision = $revLookup->getRevisionById( $req->getInt( 'undo' ) );
+			$newerRevision = $this->revisionLookup->getRevisionById( $req->getInt( 'undo' ) );
 
 			if ( !$newerRevision ) {
 				return Status::newFatal( 'undo-norev', $req->getInt( 'undo' ) );
 			}
 
 			if ( $req->getCheck( 'undoafter' ) ) {
-				$olderRevision = $revLookup->getRevisionById( $req->getInt( 'undoafter' ) );
+				$olderRevision = $this->revisionLookup->getRevisionById( $req->getInt( 'undoafter' ) );
 
 				if ( !$olderRevision ) {
 					return Status::newFatal( 'undo-norev', $req->getInt( 'undoafter' ) );
 				}
 			} else {
-				$olderRevision = $revLookup->getPreviousRevision( $newerRevision );
+				$olderRevision = $this->revisionLookup->getPreviousRevision( $newerRevision );
 
 				if ( !$olderRevision ) {
 					return Status::newFatal( 'wikibase-undo-firstrev' );
 				}
 			}
 		} elseif ( $req->getCheck( 'undoafter' ) ) {
-			$olderRevision = $revLookup->getRevisionById( $req->getInt( 'undoafter' ) );
+			$olderRevision = $this->revisionLookup->getRevisionById( $req->getInt( 'undoafter' ) );
 
 			if ( !$olderRevision ) {
 				return Status::newFatal( 'undo-norev', $req->getInt( 'undo' ) );
@@ -192,12 +207,13 @@ class EditEntityAction extends ViewEntityAction {
 
 	/**
 	 * Output an error page showing the given status
-	 *
-	 * @param Status $status The status to report.
 	 */
-	protected function showUndoErrorPage( Status $status ) {
-		$this->getOutput()->prepareErrorPage(
-			$this->msg( 'wikibase-undo-revision-error' ),
+	protected function showUndoErrorPage( Status $status ): void {
+		$this->getOutput()->prepareErrorPage();
+		$this->getOutput()->setPageTitleMsg(
+			$this->msg( 'wikibase-undo-revision-error' )
+		);
+		$this->getOutput()->setHTMLTitle(
 			$this->msg( 'errorpagetitle' )
 		);
 
@@ -211,7 +227,7 @@ class EditEntityAction extends ViewEntityAction {
 	 *
 	 * Calls parent show() action to just display the entity, unless an undo action is requested.
 	 */
-	public function show() {
+	public function show(): void {
 		$req = $this->getRequest();
 
 		if ( $req->getCheck( 'undo' ) || $req->getCheck( 'undoafter' ) || $req->getCheck( 'restore' ) ) {
@@ -221,7 +237,7 @@ class EditEntityAction extends ViewEntityAction {
 		}
 	}
 
-	private function showUndoForm() {
+	private function showUndoForm(): void {
 		$this->getOutput()->enableOOUI();
 		$req = $this->getRequest();
 
@@ -240,7 +256,7 @@ class EditEntityAction extends ViewEntityAction {
 		 * @var RevisionRecord $newerRevision
 		 * @var RevisionRecord $latestRevision
 		 */
-		list( $olderRevision, $newerRevision, $latestRevision ) = $revisions->getValue();
+		[ $olderRevision, $newerRevision, $latestRevision ] = $revisions->getValue();
 
 		/**
 		 * @var EntityContent $olderContent
@@ -260,7 +276,7 @@ class EditEntityAction extends ViewEntityAction {
 
 		$restore = $req->getCheck( 'restore' );
 
-		$this->getOutput()->setPageTitle(
+		$this->getOutput()->setPageTitleMsg(
 			$this->msg(
 				$restore ? 'wikibase-restore-title' : 'wikibase-undo-title',
 				$this->getTitleText(),
@@ -301,29 +317,38 @@ class EditEntityAction extends ViewEntityAction {
 			$this->getOutput()->addHTML( Html::rawElement(
 				'p',
 				[ 'class' => 'warning' ],
-				$this->msg(
-					'wikibase-anonymouseditwarning',
-					$this->msg( 'wikibase-entity-item' )->text()
-				)->parse()
+				$this->anonymousEditWarningBuilder->buildAnonymousEditWarningHTML( $this->getTitle()->getPrefixedText() ),
 			) );
 		}
 
 		$this->displayUndoDiff( $appDiff );
 
 		if ( $restore ) {
-			$this->showConfirmationForm();
+			$autoSummaryLength = mb_strlen( $this->makeSummary( 'restore', $olderRevision, 'x' ) ) - 1;
+			$this->showConfirmationForm( $autoSummaryLength );
 		} else {
-			$this->showConfirmationForm( $newerRevision->getId() );
+			$autoSummaryLength = mb_strlen( $this->makeSummary( 'undo', $newerRevision, 'x' ) ) - 1;
+			$this->showConfirmationForm( $autoSummaryLength, $newerRevision->getId() );
 		}
+	}
+
+	protected function makeSummary( string $actionName, RevisionRecord $revision, string $userSummary ): string {
+		$revUser = $revision->getUser();
+		$revUserText = $revUser ? $revUser->getName() : '';
+
+		$summary = new Summary();
+		$summary->setAction( $actionName );
+		$summary->addAutoCommentArgs( $revision->getId(), $revUserText );
+		$summary->setUserSummary( $userSummary );
+
+		return $this->summaryFormatter->formatSummary( $summary );
 	}
 
 	/**
 	 * Used for overriding the page HTML title with the label, if available, or else the id.
 	 * This is passed via parser output and output page to save overhead on view / edit actions.
-	 *
-	 * @return string
 	 */
-	private function getTitleText() {
+	private function getTitleText(): string {
 		$meta = $this->getOutput()->getProperty( 'wikibase-meta-tags' );
 
 		return $meta['title'] ?? $this->getTitle()->getPrefixedText();
@@ -331,37 +356,36 @@ class EditEntityAction extends ViewEntityAction {
 
 	/**
 	 * Returns a cancel link back to viewing the entity's page
-	 *
-	 * @return string
 	 */
-	private function getCancelLink() {
+	private function getCancelLink(): string {
 		return ( new ButtonWidget( [
 			'id' => 'mw-editform-cancel',
 			'href' => $this->getContext()->getTitle()->getLocalURL(),
 			'label' => $this->msg( 'cancel' )->text(),
 			'framed' => false,
-			'flags' => 'destructive'
+			'flags' => 'destructive',
 		] ) )->toString();
 	}
 
 	/**
 	 * Add style sheets and supporting JS for diff display.
 	 */
-	private function showDiffStyle() {
+	private function showDiffStyle(): void {
 		$this->getOutput()->addModuleStyles( 'mediawiki.diff.styles' );
 	}
 
 	/**
-	 * Generate standard summary input and label (wgSummary), compatible to EditPage.
+	 * Generate standard summary input and label (wgSummary), compatible to \MediaWiki\EditPage\EditPage.
 	 *
 	 * @param string $labelText The html to place inside the label
+	 * @param int $autoSummaryLength
 	 *
 	 * @return string HTML
 	 */
-	private function getSummaryInput( $labelText ) {
+	private function getSummaryInput( string $labelText, int $autoSummaryLength ): string {
 		$inputAttrs = [
 			'name' => 'wpSummary',
-			'maxLength' => 200,
+			'maxLength' => max( CommentStore::COMMENT_CHARACTER_LIMIT - $autoSummaryLength, 0 ),
 			'size' => 60,
 			'spellcheck' => 'true',
 			'accessKey' => $this->msg( 'accesskey-summary' )->plain(),
@@ -378,11 +402,11 @@ class EditEntityAction extends ViewEntityAction {
 		) )->toString();
 	}
 
-	private function displayUndoDiff( EntityContentDiff $diff ) {
+	private function displayUndoDiff( EntityContentDiff $diff ): void {
 		$tableClass = 'diff diff-contentalign-' . $this->getTitle()->getPageLanguage()->alignStart();
 
-		// add common CSS, the diff may include entity links with labels, including fallback indicators
-		$this->getOutput()->addModuleStyles( [ 'wikibase.common' ] );
+		// add Wikibase styles, the diff may include entity links with labels, including fallback indicators
+		$this->getOutput()->addModuleStyles( [ 'wikibase.alltargets' ] );
 
 		$this->getOutput()->addHTML( Html::openElement( 'table', [ 'class' => $tableClass ] ) );
 
@@ -419,7 +443,7 @@ class EditEntityAction extends ViewEntityAction {
 	/**
 	 * @return string HTML
 	 */
-	private function getEditButton() {
+	private function getEditButton(): string {
 		global $wgEditSubmitButtonLabelPublish;
 		$msgKey = $wgEditSubmitButtonLabelPublish ? 'publishchanges' : 'savearticle';
 		return ( new ButtonInputWidget( [
@@ -435,10 +459,8 @@ class EditEntityAction extends ViewEntityAction {
 
 	/**
 	 * Shows a form that can be used to confirm the requested undo/restore action.
-	 *
-	 * @param int $undidRevision
 	 */
-	private function showConfirmationForm( $undidRevision = 0 ) {
+	private function showConfirmationForm( int $autoSummaryLength, int $undidRevision = 0 ): void {
 		$req = $this->getRequest();
 
 		$args = [
@@ -471,7 +493,7 @@ class EditEntityAction extends ViewEntityAction {
 		$this->getOutput()->addHTML( "<div class='editOptions'>\n" );
 
 		$labelText = $this->msg( 'wikibase-summary-generated' )->escaped();
-		$this->getOutput()->addHTML( $this->getSummaryInput( $labelText ) );
+		$this->getOutput()->addHTML( $this->getSummaryInput( $labelText, $autoSummaryLength ) );
 		$this->getOutput()->addHTML( Html::rawElement( 'br' ) );
 		$this->getOutput()->addHTML( "<div class='editButtons'>\n" );
 		$this->getOutput()->addHTML( $this->getEditButton() . "\n" );
@@ -483,7 +505,7 @@ class EditEntityAction extends ViewEntityAction {
 			'wpEditToken' => $this->getUser()->getEditToken(),
 			'wpBaseRev' => $this->getTitle()->getLatestRevID(),
 		];
-		if ( !empty( $undidRevision ) ) {
+		if ( $undidRevision !== 0 ) {
 			$hidden['wpUndidRevision'] = $undidRevision;
 		}
 		foreach ( $hidden as $name => $value ) {
@@ -499,7 +521,7 @@ class EditEntityAction extends ViewEntityAction {
 	 *
 	 * @return bool Always true.
 	 */
-	public function requiresUnblock() {
+	public function requiresUnblock(): bool {
 		return true;
 	}
 
@@ -508,7 +530,7 @@ class EditEntityAction extends ViewEntityAction {
 	 *
 	 * @return bool Always true.
 	 */
-	public function requiresWrite() {
+	public function requiresWrite(): bool {
 		return true;
 	}
 

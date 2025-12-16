@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lexeme\Domain\Model;
 
 use Wikimedia\Assert\Assert;
@@ -16,24 +18,17 @@ class FormId extends LexemeSubEntityId {
 
 	public const PATTERN = '/^L[1-9]\d*-F[1-9]\d*\z/';
 
-	/**
-	 * @param string $serialization
-	 */
-	public function __construct( $serialization ) {
+	public function __construct( string $serialization ) {
 		parent::__construct( $serialization );
 
-		list( , , $id ) = self::splitSerialization( $this->localPart );
 		Assert::parameter(
-			preg_match( self::PATTERN, $id ),
+			preg_match( self::PATTERN, $serialization ),
 			'$serialization',
-			'Form ID must match "' . self::PATTERN . '", given: ' . $id
+			'Form ID must match "' . self::PATTERN . '", given: ' . $serialization
 		);
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getEntityType() {
+	public function getEntityType(): string {
 		return Form::ENTITY_TYPE;
 	}
 

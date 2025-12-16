@@ -1,0 +1,37 @@
+{
+	"@metadata": {
+		"authors": [
+			"Song GK"
+		]
+	},
+	"advancedsearch-optgroup-text": "Giga ba teks lambar",
+	"advancedsearch-optgroup-structure": "Struktur",
+	"advancedsearch-optgroup-files": "Fail enggau gambar",
+	"advancedsearch-field-plain": "Leka-leka jaku tu",
+	"advancedsearch-field-or": "Siti ari leka jaku ntu",
+	"advancedsearch-field-not": "Ukai leka jaku tu",
+	"advancedsearch-field-subpageof": "Sublambar ari lambar tu",
+	"advancedsearch-field-intitle": "Tajuk lambar ngundan",
+	"advancedsearch-field-deepcategory": "Lambar ba kategori tu",
+	"advancedsearch-field-hastemplate": "Lambar enggau templat tu",
+	"advancedsearch-field-inlanguage": "Lambar dalam jaku tu",
+	"advancedsearch-field-filetype": "Bansa fail",
+	"advancedsearch-field-fileh": "Peninggi fail dalam piksel",
+	"advancedsearch-field-preview-sort": "Tusun nitihka $1",
+	"advancedsearch-filetype-section-image": "Format gambar",
+	"advancedsearch-filetype-section-video": "Format video",
+	"advancedsearch-filetype-section-audio": "Format audio",
+	"advancedsearch-filetype-section-document": "Format dokumen",
+	"advancedsearch-filetype-section-other": "Format ke bukai",
+	"advancedsearch-filetype-default": "Pilih bansa fail",
+	"advancedsearch-filetype-bitmap": "Gambar",
+	"advancedsearch-filetype-audio": "Audio",
+	"advancedsearch-filetype-video": "Video",
+	"advancedsearch-filetype-office": "Opis",
+	"advancedsearch-filesize-equals": "sama enggau",
+	"advancedsearch-filesize-greater-than": "besai agi ari",
+	"advancedsearch-filesize-smaller-than": "mit agi ari",
+	"advancedsearch-namespaces-preset-all": "Semua",
+	"advancedsearch-namespaces-preset-general-help": "Bantu Rama",
+	"advancedsearch-namespaces-preset-discussion": "Randau"
+}

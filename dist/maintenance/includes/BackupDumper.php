@@ -2,7 +2,7 @@
 /**
  * Base classes for database-dumping maintenance scripts.
  *
- * Copyright © 2005 Brion Vibber <brion@pobox.com>
+ * Copyright © 2005 Brooke Vibber <bvibber@wikimedia.org>
  * https://www.mediawiki.org/
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,14 +25,23 @@
  * @ingroup Maintenance
  */
 
+namespace MediaWiki\Maintenance;
+
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/../Maintenance.php';
 require_once __DIR__ . '/../../includes/export/WikiExporter.php';
+// @codeCoverageIgnoreEnd
 
+use DumpMultiWriter;
+use DumpOutput;
+use ExportProgressFilter;
 use MediaWiki\MainConfigNames;
-use MediaWiki\MediaWikiServices;
 use MediaWiki\Settings\SettingsBuilder;
+use MediaWiki\WikiMap\WikiMap;
+use WikiExporter;
 use Wikimedia\Rdbms\IMaintainableDatabase;
 use Wikimedia\Rdbms\LoadBalancer;
+use XmlDumpWriter;
 
 /**
  * @ingroup Dump
@@ -74,8 +83,6 @@ abstract class BackupDumper extends Maintenance {
 	protected $revCount = 0;
 	/** @var string|null null means use default */
 	protected $schemaVersion = null;
-	/** @var string|null null means use default */
-	protected $server = null;
 	/** @var DumpMultiWriter|DumpOutput|null Output filters */
 	protected $sink = null;
 	/** @var float */
@@ -140,16 +147,16 @@ abstract class BackupDumper extends Maintenance {
 		$this->stderr = fopen( "php://stderr", "wt" );
 
 		// Built-in output and filter plugins
-		$this->registerOutput( 'file', DumpFileOutput::class );
-		$this->registerOutput( 'gzip', DumpGZipOutput::class );
-		$this->registerOutput( 'bzip2', DumpBZip2Output::class );
-		$this->registerOutput( 'dbzip2', DumpDBZip2Output::class );
-		$this->registerOutput( 'lbzip2', DumpLBZip2Output::class );
-		$this->registerOutput( '7zip', Dump7ZipOutput::class );
+		$this->registerOutput( 'file', \DumpFileOutput::class );
+		$this->registerOutput( 'gzip', \DumpGZipOutput::class );
+		$this->registerOutput( 'bzip2', \DumpBZip2Output::class );
+		$this->registerOutput( 'dbzip2', \DumpDBZip2Output::class );
+		$this->registerOutput( 'lbzip2', \DumpLBZip2Output::class );
+		$this->registerOutput( '7zip', \Dump7ZipOutput::class );
 
-		$this->registerFilter( 'latest', DumpLatestFilter::class );
-		$this->registerFilter( 'notalk', DumpNotalkFilter::class );
-		$this->registerFilter( 'namespace', DumpNamespaceFilter::class );
+		$this->registerFilter( 'latest', \DumpLatestFilter::class );
+		$this->registerFilter( 'notalk', \DumpNotalkFilter::class );
+		$this->registerFilter( 'namespace', \DumpNamespaceFilter::class );
 
 		// These three can be specified multiple times
 		$this->addOption( 'plugin', 'Load a dump plugin class. Specify as <class>[:<file>].',
@@ -160,7 +167,6 @@ abstract class BackupDumper extends Maintenance {
 			'<type>[:<options>]. <types>s: latest, notalk, namespace', false, true, false, true );
 		$this->addOption( 'report', 'Report position and speed after every n pages processed. ' .
 			'Default: 100.', false, true );
-		$this->addOption( 'server', 'Force reading from MySQL server', false, true );
 		$this->addOption( '7ziplevel', '7zip compression level for all 7zip outputs. Used for ' .
 			'-mx option to 7za command.', false, true );
 		// NOTE: we can't know the default schema version yet, since configuration has not been
@@ -176,7 +182,7 @@ abstract class BackupDumper extends Maintenance {
 		}
 	}
 
-	public function finalSetup( SettingsBuilder $settingsBuilder = null ) {
+	public function finalSetup( SettingsBuilder $settingsBuilder ) {
 		parent::finalSetup( $settingsBuilder );
 		// re-declare the --schema-version option to include the default schema version
 		// in the description.
@@ -216,10 +222,6 @@ abstract class BackupDumper extends Maintenance {
 		$register( $this );
 	}
 
-	public function execute() {
-		throw new MWException( 'execute() must be overridden in subclasses' );
-	}
-
 	/**
 	 * Processes arguments and sets $this->$sink accordingly
 	 */
@@ -247,7 +249,7 @@ abstract class BackupDumper extends Maintenance {
 					if ( count( $split ) !== 2 ) {
 						$this->fatalError( 'Invalid output parameter' );
 					}
-					list( $type, $file ) = $split;
+					[ $type, $file ] = $split;
 					if ( $sink !== null ) {
 						$sinks[] = $sink;
 					}
@@ -263,9 +265,7 @@ abstract class BackupDumper extends Maintenance {
 
 					break;
 				case 'filter':
-					if ( $sink === null ) {
-						$sink = new DumpOutput();
-					}
+					$sink ??= new DumpOutput();
 
 					$split = explode( ':', $param, 2 );
 					$key = $split[0];
@@ -303,13 +303,7 @@ abstract class BackupDumper extends Maintenance {
 			$this->reportingInterval = intval( $this->getOption( 'report' ) );
 		}
 
-		if ( $this->hasOption( 'server' ) ) {
-			$this->server = $this->getOption( 'server' );
-		}
-
-		if ( $sink === null ) {
-			$sink = new DumpOutput();
-		}
+		$sink ??= new DumpOutput();
 		$sinks[] = $sink;
 
 		if ( count( $sinks ) > 1 ) {
@@ -329,7 +323,7 @@ abstract class BackupDumper extends Maintenance {
 		$this->initProgress( $history );
 
 		$db = $this->backupDb();
-		$services = MediaWikiServices::getInstance();
+		$services = $this->getServiceContainer();
 		$exporter = $services->getWikiExporterFactory()->getWikiExporter(
 			$db,
 			$history,
@@ -376,7 +370,7 @@ abstract class BackupDumper extends Maintenance {
 
 	/**
 	 * Initialise starting time and maximum revision count.
-	 * We'll make ETA calculations based an progress, assuming relatively
+	 * We'll make ETA calculations based on progress, assuming relatively
 	 * constant per-revision rate.
 	 * @param int $history WikiExporter::CURRENT or WikiExporter::FULL
 	 */
@@ -388,16 +382,16 @@ abstract class BackupDumper extends Maintenance {
 		if ( $this->forcedDb === null ) {
 			$dbr = $this->getDB( DB_REPLICA, [ 'dump' ] );
 		}
-		$this->maxCount = $dbr->selectField( $table, "MAX($field)", '', __METHOD__ );
+		$this->maxCount = $dbr->newSelectQueryBuilder()
+			->select( "MAX($field)" )
+			->from( $table )
+			->caller( __METHOD__ )->fetchField();
 		$this->startTime = microtime( true );
 		$this->lastTime = $this->startTime;
 		$this->ID = getmypid();
 	}
 
 	/**
-	 * @todo Fixme: the --server parameter is currently not respected, as it
-	 * doesn't seem terribly easy to ask the load balancer for a particular
-	 * connection by name.
 	 * @return IMaintainableDatabase
 	 */
 	protected function backupDb() {
@@ -405,7 +399,7 @@ abstract class BackupDumper extends Maintenance {
 			return $this->forcedDb;
 		}
 
-		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+		$lbFactory = $this->getServiceContainer()->getDBLoadBalancerFactory();
 		$this->lb = $lbFactory->newMainLB();
 		$db = $this->lb->getMaintenanceConnectionRef( DB_REPLICA, 'dump' );
 
@@ -431,12 +425,6 @@ abstract class BackupDumper extends Maintenance {
 		if ( isset( $this->lb ) ) {
 			$this->lb->closeAll( __METHOD__ );
 		}
-	}
-
-	protected function backupServer() {
-		global $wgDBserver;
-
-		return $this->server ?: $wgDBserver;
 	}
 
 	public function reportPage() {
@@ -501,3 +489,6 @@ abstract class BackupDumper extends Maintenance {
 		}
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( BackupDumper::class, 'BackupDumper' );

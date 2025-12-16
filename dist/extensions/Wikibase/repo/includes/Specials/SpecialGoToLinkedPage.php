@@ -2,8 +2,8 @@
 
 namespace Wikibase\Repo\Specials;
 
-use HTMLForm;
-use SiteLookup;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Site\SiteLookup;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Entity\ItemId;
@@ -102,7 +102,7 @@ class SpecialGoToLinkedPage extends SpecialWikibasePage {
 	 */
 	private function getArguments( $subPage ) {
 		$request = $this->getRequest();
-		$parts = ( $subPage === '' ) ? [] : explode( '/', $subPage, 2 );
+		$parts = $subPage ? explode( '/', $subPage, 2 ) : [];
 		$sites = array_map(
 			[ $this->stringNormalizer, 'trimToNFC' ],
 			explode( ',', $request->getVal( 'site', $parts[0] ?? '' ) )
@@ -140,7 +140,7 @@ class SpecialGoToLinkedPage extends SpecialWikibasePage {
 		$links = $this->loadLinks( $site, $itemId );
 
 		if ( isset( $links[0] ) ) {
-			list( , $pageName, ) = $links[0];
+			[ , $pageName ] = $links[0];
 			$siteObj = $this->siteLookup->getSite( $site );
 			$url = $siteObj->getPageUrl( $pageName );
 			return $url;
@@ -208,7 +208,7 @@ class SpecialGoToLinkedPage extends SpecialWikibasePage {
 	 */
 	public function execute( $subPage ) {
 		parent::execute( $subPage );
-		list( $sites, $itemString ) = $this->getArguments( $subPage );
+		[ $sites, $itemString ] = $this->getArguments( $subPage );
 
 		if ( $itemString !== '' ) {
 			foreach ( $sites as $site ) {
@@ -239,7 +239,7 @@ class SpecialGoToLinkedPage extends SpecialWikibasePage {
 				'type' => 'text',
 				'id' => 'wb-gotolinkedpage-sitename',
 				'size' => 12,
-				'label-message' => 'wikibase-gotolinkedpage-lookup-site'
+				'label-message' => 'wikibase-gotolinkedpage-lookup-site',
 			],
 			'itemid' => [
 				'name' => 'itemid',
@@ -247,8 +247,8 @@ class SpecialGoToLinkedPage extends SpecialWikibasePage {
 				'type' => 'text',
 				'id' => 'wb-gotolinkedpage-itemid',
 				'size' => 36,
-				'label-message' => 'wikibase-gotolinkedpage-lookup-item'
-			]
+				'label-message' => 'wikibase-gotolinkedpage-lookup-item',
+			],
 		];
 
 		HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )

@@ -2,11 +2,11 @@
 
 namespace JsonConfig;
 
-use FormatJson;
-use Html;
+use MediaWiki\Html\Html;
+use MediaWiki\Json\FormatJson;
 use MediaWiki\Page\PageReference;
-use ParserOptions;
-use ParserOutput;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Parser\ParserOutput;
 
 /**
  * This class is used in case when there is no custom view defined for JCContent object
@@ -77,19 +77,16 @@ class JCDefaultObjContentView extends JCDefaultContentView {
 	 * @return array|null
 	 */
 	public function getValueAttributes( JCValue $jcv ) {
-		$attribs = null;
 		if ( $jcv->error() ) {
-			$attribs = 'mw-jsonconfig-error';
+			return [ 'class' => 'mw-jsonconfig-error' ];
 		} elseif ( $jcv->sameAsDefault() ) {
-			$attribs = 'mw-jsonconfig-same';
+			return [ 'class' => 'mw-jsonconfig-same' ];
 		} elseif ( $jcv->defaultUsed() ) {
-			$attribs = 'mw-jsonconfig-default';
+			return [ 'class' => 'mw-jsonconfig-default' ];
 		} elseif ( $jcv->isUnchecked() ) {
-			$attribs = 'mw-jsonconfig-unknown';
-		} else {
-			return null;
+			return [ 'class' => 'mw-jsonconfig-unknown' ];
 		}
-		return [ 'class' => $attribs ];
+		return null;
 	}
 
 	/**

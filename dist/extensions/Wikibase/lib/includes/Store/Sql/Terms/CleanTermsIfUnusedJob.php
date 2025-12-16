@@ -5,7 +5,7 @@ namespace Wikibase\Lib\Store\Sql\Terms;
 use Job;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * A job to cleanup the wbt_* terms table rows when they may not be needed any more.
@@ -21,7 +21,7 @@ use Title;
  *
  * @todo Execute the cleanup of each table in its own transaction to further reduce lock contention
  *
- * @see @ref md_docs_storage_terms
+ * @see @ref docs_storage_terms
  * @author Addshore
  * @license GPL-2.0-or-later
  */

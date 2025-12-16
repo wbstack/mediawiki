@@ -7,42 +7,44 @@
 ( function () {
 
 	/**
-	 * Select with input widget. Displays an OO.ui.TextInputWidget along with
+	 * @classdesc Select with input widget. Displays an OO.ui.TextInputWidget along with
 	 * an OO.ui.DropdownInputWidget.
 	 * TODO Explain the OTHER option
 	 *
-	 *     mw.loader.using( 'mediawiki.widgets.SelectWithInputWidget', function () {
-	 *       var swi = new mw.widgets.SelectWithInputWidget( {
-	 *         or: true,
-	 *         dropdowninput: {
-	 *           options: [
-	 *             { data: 'other', label: 'Other' },
-	 *             { data: 'a', label: 'First' },
-	 *             { data: 'b', label: 'Second' },
-	 *             { data: 'c', label: 'Third' }
-	 *           ]
-	 *         },
-	 *         textinput: {
-	 *         }
-	 *       } );
+	 * @example
+	 * mw.loader.using( 'mediawiki.widgets.SelectWithInputWidget', function () {
+	 *   let swi = new mw.widgets.SelectWithInputWidget( {
+	 *     or: true,
+	 *     dropdowninput: {
+	 *       options: [
+	 *         { data: 'other', label: 'Other' },
+	 *         { data: 'a', label: 'First' },
+	 *         { data: 'b', label: 'Second' },
+	 *         { data: 'c', label: 'Third' }
+	 *       ]
+	 *     },
+	 *     textinput: {
+	 *     }
+	 *   } );
 	 *
-	 *       $( document.body ).append( swi.$element );
-	 *     } );
+	 *   $( document.body ).append( swi.$element );
+	 * } );
 	 *
 	 * @class mw.widgets.SelectWithInputWidget
 	 * @extends OO.ui.Widget
 	 *
 	 * @constructor
+	 * @description Create an instance of `mw.widgets.SelectWithInputWidget`.
 	 * @param {Object} [config] Configuration options
-	 * @cfg {Object} [dropdowninput] Config for the dropdown
-	 * @cfg {Object} [textinput] Config for the text input
-	 * @cfg {boolean} [or=false] Config for whether the widget is dropdown AND input
+	 * @param {Object} [config.dropdowninput] Config for the dropdown
+	 * @param {Object} [config.textinput] Config for the text input
+	 * @param {boolean} [config.or=false] Config for whether the widget is dropdown AND input
 	 *                           or dropdown OR input
-	 * @cfg {boolean} [required=false] Config for whether input is required
+	 * @param {boolean} [config.required=false] Config for whether input is required
 	 */
 	mw.widgets.SelectWithInputWidget = function MwWidgetsSelectWithInputWidget( config ) {
 		// Config initialization
-		config = $.extend( { or: false, required: false }, config );
+		config = Object.assign( { or: false, required: false }, config );
 
 		// Properties
 		this.textinput = new OO.ui.TextInputWidget( config.textinput );
@@ -52,12 +54,12 @@
 
 		// Events
 		this.dropdowninput.on( 'change', this.onChange.bind( this ) );
-		this.textinput.on( 'change', function () {
+		this.textinput.on( 'change', () => {
 			this.emit( 'change', this.getValue() );
-		}.bind( this ) );
+		} );
 
 		// Parent constructor
-		mw.widgets.SelectWithInputWidget.parent.call( this, config );
+		mw.widgets.SelectWithInputWidget.super.call( this, config );
 
 		// Initialization
 		this.$element
@@ -78,7 +80,7 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.SelectWithInputWidget.static.reusePreInfuseDOM = function ( node, config ) {
-		config = mw.widgets.SelectWithInputWidget.parent.static.reusePreInfuseDOM( node, config );
+		config = mw.widgets.SelectWithInputWidget.super.static.reusePreInfuseDOM( node, config );
 		config.dropdowninput = OO.ui.DropdownInputWidget.static.reusePreInfuseDOM(
 			$( node ).find( '.oo-ui-dropdownInputWidget' ),
 			config.dropdowninput
@@ -94,7 +96,7 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.SelectWithInputWidget.static.gatherPreInfuseState = function ( node, config ) {
-		var state = mw.widgets.SelectWithInputWidget.parent.static.gatherPreInfuseState( node, config );
+		const state = mw.widgets.SelectWithInputWidget.super.static.gatherPreInfuseState( node, config );
 		state.dropdowninput = OO.ui.DropdownInputWidget.static.gatherPreInfuseState(
 			$( node ).find( '.oo-ui-dropdownInputWidget' ),
 			config.dropdowninput
@@ -112,7 +114,7 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.SelectWithInputWidget.prototype.restorePreInfuseState = function ( state ) {
-		mw.widgets.SelectWithInputWidget.parent.prototype.restorePreInfuseState.call( this, state );
+		mw.widgets.SelectWithInputWidget.super.prototype.restorePreInfuseState.call( this, state );
 		this.dropdowninput.restorePreInfuseState( state.dropdowninput );
 		this.textinput.restorePreInfuseState( state.textinput );
 	};
@@ -121,8 +123,8 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.SelectWithInputWidget.prototype.setDisabled = function ( disabled ) {
-		var textinputIsHidden = this.or && this.dropdowninput.getValue() !== 'other';
-		mw.widgets.SelectWithInputWidget.parent.prototype.setDisabled.call( this, disabled );
+		const textinputIsHidden = this.or && this.dropdowninput.getValue() !== 'other';
+		mw.widgets.SelectWithInputWidget.super.prototype.setDisabled.call( this, disabled );
 		this.dropdowninput.setDisabled( disabled );
 		// It is impossible to submit a form with hidden fields failing validation, e.g. one that
 		// is required. However, validity is not checked for disabled fields, as these are not
@@ -140,7 +142,7 @@
 	 * @param {string|undefined} value
 	 */
 	mw.widgets.SelectWithInputWidget.prototype.setValue = function ( value ) {
-		var selectable = false;
+		let selectable = false;
 
 		if ( this.or ) {
 			if ( value !== 'other' ) {

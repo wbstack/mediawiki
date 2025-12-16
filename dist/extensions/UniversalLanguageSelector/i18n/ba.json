@@ -1,13 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
+			"Bashkorttan",
 			"Kaganer",
+			"Sagan",
 			"Азат Хәлилов",
 			"Айбикә",
-			"Ләйсән",
-			"Sagan",
 			"З. ӘЙЛЕ",
-			"Bashkorttan"
+			"Ләйсән"
 		]
 	},
 	"uls-desc": "Ҡатнашыусыға тел һайлау һәм көйләү өсөн бер нисә ысул бирә",
@@ -77,5 +77,6 @@
 	"ext-uls-empty-state-header": "Әлегә телдәр юҡ",
 	"ext-uls-empty-state-desc": "Хәҙерге ваҡытта бер ниндәй ҙә тел юҡ",
 	"ext-uls-empty-state-header-actions-available": "Әлегә телдәр юҡ. Яңыһын өҫтәргәме?",
-	"ext-uls-empty-state-desc-actions-available": "Эстәлекте башҡа телдәргә тәржемә итегеҙ."
+	"ext-uls-empty-state-desc-actions-available": "Эстәлекте башҡа телдәргә тәржемә итегеҙ.",
+	"ext-uls-add-languages-button-label": "Телдәр өҫтәргә"
 }

@@ -2,10 +2,9 @@
 
 namespace Wikibase\Lexeme\DataAccess\Store;
 
-use MWException;
+use MediaWiki\User\User;
 use PermissionsError;
 use UnexpectedValueException;
-use User;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityRedirect;
@@ -150,7 +149,6 @@ class FormStore implements EntityStore {
 	 * @param FormId $formId
 	 * @param int $lastRevId
 	 *
-	 * @throws UnexpectedValueException
 	 * @return bool
 	 */
 	public function userWasLastToEdit( User $user, EntityId $formId, $lastRevId ) {
@@ -165,9 +163,6 @@ class FormStore implements EntityStore {
 	 * @param User $user
 	 * @param FormId $formId
 	 * @param bool $watch
-	 *
-	 * @throws UnexpectedValueException
-	 * @throws MWException
 	 */
 	public function updateWatchlist( User $user, EntityId $formId, $watch ) {
 		Assert::parameterType( FormId::class, $formId, '$formId' );
@@ -181,7 +176,6 @@ class FormStore implements EntityStore {
 	 * @param User $user
 	 * @param FormId $formId
 	 *
-	 * @throws UnexpectedValueException
 	 * @return bool
 	 */
 	public function isWatching( User $user, EntityId $formId ) {

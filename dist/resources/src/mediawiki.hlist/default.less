@@ -7,13 +7,13 @@
 
 /* Generate interpuncts */
 .hlist {
-	dt:after {
+	dt::after {
 		content: '@{msg-colon-separator}';
 	}
 
 	dd,
 	li {
-		&:after {
+		&::after {
 			/* @todo FIXME: Hard coded " .". Is there a message for this? Should there be? */
 			content: ' ·';
 			font-weight: bold;
@@ -23,7 +23,7 @@
 	dd,
 	dt,
 	li {
-		&:last-child:after {
+		&:last-child::after {
 			content: none;
 		}
 
@@ -31,18 +31,18 @@
 		dd,
 		dt,
 		li {
-			&:first-child:before {
+			&:first-child::before {
 				content: '@{msg-parentheses-start}';
 				font-weight: normal;
 			}
 
-			&:last-child:after {
+			&:last-child::after {
 				content: '@{msg-parentheses-end}';
 				font-weight: normal;
 			}
 		}
 
-		ol > li:first-child:before {
+		ol > li:first-child::before {
 			content: '@{msg-parentheses-start}' counter( list-item ) ' ';
 		}
 	}
@@ -54,20 +54,9 @@
 		& > li {
 			counter-increment: list-item;
 
-			&:before {
+			&::before {
 				content: counter( list-item ) ' ';
 			}
 		}
-	}
-}
-
-/* Support hlist styles inside `mw-message-box-*`es */
-.mw-message-box-error .hlist,
-.mw-message-box-warning .hlist,
-.mw-message-box-success .hlist {
-	margin-left: 0;
-
-	& li:after {
-		margin-right: 3px;
 	}
 }

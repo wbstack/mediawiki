@@ -1,7 +1,5 @@
 <?php
 /**
- * Generic interface providing error code and quality-of-service constants for object stores
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,7 +16,6 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup Cache
  */
 
 namespace Wikimedia\LightweightObjectStore;
@@ -26,8 +23,8 @@ namespace Wikimedia\LightweightObjectStore;
 /**
  * Generic interface providing error code and quality-of-service constants for object stores
  *
+ * @internal For use by BagOStuff and WANObjectCache
  * @ingroup Cache
- * @since 1.35
  */
 interface StorageAwareness {
 	/** No storage medium error */
@@ -39,13 +36,10 @@ interface StorageAwareness {
 	/** Storage medium operation failed due to usage limitations or an I/O error */
 	public const ERR_UNEXPECTED = 3;
 
-	/** Emulation/fallback mode; see QOS_EMULATION_*; higher is better */
+	/** @deprecated Since 1.41; Emulation/fallback mode; see QOS_EMULATION_*; higher is better */
 	public const ATTR_EMULATION = 1;
 	/** Durability of writes; see QOS_DURABILITY_* (higher means stronger) */
 	public const ATTR_DURABILITY = 2;
-
-	/** Fallback disk-based SQL store */
-	public const QOS_EMULATION_SQL = 1;
 
 	/** Data is never saved to begin with (blackhole store) */
 	public const QOS_DURABILITY_NONE = 1;

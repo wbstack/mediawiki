@@ -1,7 +1,6 @@
-@import 'mediawiki.ui/variables';
-@import 'mediawiki.mixins.animation';
+@import 'mediawiki.skin.variables.less';
 
-@mw-search-spinner-size: 12px;
+@size-mw-search-spinner: 12px;
 
 .client-js {
 	.mw-search-form-wrapper {
@@ -17,63 +16,38 @@
 		position: absolute;
 		left: 25em;
 		top: 7em;
-		margin-left: -3 * @mw-search-spinner-size / 2;
+		margin-left: (-3 * @size-mw-search-spinner / 2);
 		white-space: nowrap;
-		.animation( mw-search-fadein 1500ms cubic-bezier(1, -0.5, 1, 1); );
+		animation: mw-search-fadein 1500ms cubic-bezier( 1, -0.5, 1, 1 );
 
-		&:before,
-		&:after,
+		&::before,
+		&::after,
 		& .mw-search-spinner-bounce {
 			content: '';
-			background-color: @colorGray7;
+			background-color: #72777d;
 			display: block;
 			float: left;
-			width: @mw-search-spinner-size;
-			height: @mw-search-spinner-size;
-			border-radius: 100%;
-			.animation( mw-search-bounceDelay 1600ms ease-in-out -160ms infinite both );
+			width: @size-mw-search-spinner;
+			height: @size-mw-search-spinner;
+			border-radius: @border-radius-circle;
+			animation: mw-search-bounceDelay 1600ms ease-in-out -160ms infinite both;
 		}
 
-		&:before {
+		&::before {
 			margin-right: 4px;
-			.animation-delay( -330ms );
+			animation-delay: -330ms;
 		}
 
-		&:after {
+		&::after {
 			margin-left: 4px;
-			.animation-delay( 0s );
+			animation-delay: 0s;
 		}
-	}
-
-	.mw-search-profile-tabs {
-		display: none;
 	}
 
 	/* stylelint-disable-next-line selector-max-id */
-	#mw-searchoptions {
+	#mw-searchoptions,
+	.mw-search-profile-tabs {
 		display: none;
-		height: 0;
-		padding: 0;
-		visibility: hidden;
-
-		/* This won't be the last element any more when `.mw-advancedSearch-container` is added */
-		/* stylelint-disable-next-line selector-max-id */
-		&:last-child {
-			display: block;
-		}
-	}
-
-	@-webkit-keyframes mw-search-bounceDelay {
-		0%,
-		50%,
-		100% {
-			-webkit-transform: scale( 0.625 );
-		}
-
-		20% {
-			opacity: 0.87;
-			-webkit-transform: scale( 1 );
-		}
 	}
 
 	@keyframes mw-search-bounceDelay {
@@ -86,16 +60,6 @@
 		20% { // equals 320ms
 			opacity: 0.87;
 			transform: scale( 1 );
-		}
-	}
-
-	@-webkit-keyframes mw-search-fadein {
-		from {
-			opacity: 0;
-		}
-
-		to {
-			opacity: 1;
 		}
 	}
 

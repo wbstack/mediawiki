@@ -19,10 +19,11 @@
  */
 namespace Wikimedia\Rdbms;
 
-use HashBagOStuff;
 use InvalidArgumentException;
 use Psr\Log\NullLogger;
 use Throwable;
+use Wikimedia\ObjectCache\HashBagOStuff;
+use Wikimedia\RequestTimeout\CriticalSectionProvider;
 
 /**
  * Constructs Database objects
@@ -31,6 +32,32 @@ use Throwable;
  * @ingroup Database
  */
 class DatabaseFactory {
+	/** @var string Agent name for query profiling */
+	private $agent;
+	/** @var callable Deprecation logger */
+	private $deprecationLogger;
+	/**
+	 * @var callable|null An optional callback that returns a ScopedCallback instance,
+	 * meant to profile the actual query execution in {@see Database::doQuery}
+	 */
+	private $profiler;
+	/** @var CriticalSectionProvider|null */
+	private $csProvider;
+	/** @var bool Whether this PHP instance is for a CLI script */
+	private $cliMode;
+	/** @var bool Log SQL queries in debug toolbar if set to true */
+	private $debugSql;
+
+	public function __construct( array $params = [] ) {
+		$this->agent = $params['agent'] ?? '';
+		$this->deprecationLogger = $params['deprecationLogger'] ?? static function ( $msg ) {
+			trigger_error( $msg, E_USER_DEPRECATED );
+		};
+		$this->csProvider = $params['criticalSectionProvider'] ?? null;
+		$this->profiler = $params['profiler'] ?? null;
+		$this->cliMode = $params['cliMode'] ?? ( PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg' );
+		$this->debugSql = $params['debugSql'] ?? false;
+	}
 
 	/**
 	 * Construct a Database subclass instance given a database type and parameters
@@ -55,6 +82,9 @@ class DatabaseFactory {
 	 *   - flags : Optional bit field of DBO_* constants that define connection, protocol,
 	 *      buffering, and transaction behavior. It is STRONGLY adviced to leave the DBO_DEFAULT
 	 *      flag in place UNLESS this this database simply acts as a key/value store.
+	 *   - ssl : Whether to use TLS connections.
+	 *   - strictWarnings: Whether to check for warnings and throw an exception if an unacceptable
+	 *       warning is found.
 	 *   - driver: Optional name of a specific DB client driver. For MySQL, there is only the
 	 *      'mysqli' driver; the old one 'mysql' has been removed.
 	 *   - variables: Optional map of session variables to set after connecting. This can be
@@ -63,11 +93,9 @@ class DatabaseFactory {
 	 *   - lbInfo: Optional map of field/values for the managing load balancer instance.
 	 *      The "master" and "replica" fields are used to flag the replication role of this
 	 *      database server and whether methods like getLag() should actually issue queries.
-	 *   - topologicalPrimaryConnRef: lazy-connecting IDatabase handle to the most authoritative
-	 *      primary database server for the cluster that this database belongs to. This handle is
-	 *      used for replication status purposes. This is generally managed by LoadBalancer.
-	 *   - connLogger: Optional PSR-3 logger interface instance.
-	 *   - queryLogger: Optional PSR-3 logger interface instance.
+	 *   - connectTimeout: Optional timeout, in seconds, for connection attempts.
+	 *   - receiveTimeout: Optional timeout, in seconds, for receiving query results.
+	 *   - logger: Optional PSR-3 logger interface instance.
 	 *   - profiler : Optional callback that takes a section name argument and returns
 	 *      a ScopedCallback instance that ends the profile section in its destructor.
 	 *      These will be called in query(), using a simplified version of the SQL that
@@ -96,31 +124,35 @@ class DatabaseFactory {
 				'dbname' => null,
 				'schema' => null,
 				'tablePrefix' => '',
-				'flags' => 0,
 				'variables' => [],
 				'lbInfo' => [],
-				'cliMode' => ( PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg' ),
-				'agent' => '',
 				'serverName' => null,
 				'topologyRole' => null,
 				// Objects and callbacks
-				'topologicalPrimaryConnRef' => $params['topologicalPrimaryConnRef'] ?? null,
 				'srvCache' => $params['srvCache'] ?? new HashBagOStuff(),
-				'profiler' => $params['profiler'] ?? null,
 				'trxProfiler' => $params['trxProfiler'] ?? new TransactionProfiler(),
-				'connLogger' => $params['connLogger'] ?? new NullLogger(),
-				'queryLogger' => $params['queryLogger'] ?? new NullLogger(),
-				'replLogger' => $params['replLogger'] ?? new NullLogger(),
+				'logger' => $params['logger'] ?? new NullLogger(),
 				'errorLogger' => $params['errorLogger'] ?? static function ( Throwable $e ) {
 					trigger_error( get_class( $e ) . ': ' . $e->getMessage(), E_USER_WARNING );
 				},
-				'deprecationLogger' => $params['deprecationLogger'] ?? static function ( $msg ) {
-					trigger_error( $msg, E_USER_DEPRECATED );
-				}
+			];
+
+			$params['flags'] ??= 0;
+			if ( $this->debugSql ) {
+				$params['flags'] |= DBO_DEBUG;
+			}
+
+			$overrides = [
+				'flags' => $this->initConnectionFlags( $params['flags'] ),
+				'cliMode' => $this->cliMode,
+				'agent' => $this->agent,
+				'profiler' => $this->profiler,
+				'deprecationLogger' => $this->deprecationLogger,
+				'criticalSectionProvider' => $this->csProvider,
 			];
 
 			/** @var Database $conn */
-			$conn = new $class( $params );
+			$conn = new $class( array_merge( $params, $overrides ) );
 			if ( $connect === Database::NEW_CONNECTED ) {
 				$conn->initConnection();
 			}
@@ -164,9 +196,9 @@ class DatabaseFactory {
 		// an array can be used, keyed by extension name. In case of an array, the
 		// optional 'driver' parameter can be used to force a specific driver. Otherwise,
 		// we auto-detect the first available driver. For types without built-in support,
-		// an class named "Database<Type>" us used, eg. DatabaseFoo for type 'foo'.
+		// a class named "Database<Type>" is used, eg. DatabaseFoo for type 'foo'.
 		static $builtinTypes = [
-			'mysql' => [ 'mysqli' => DatabaseMysqli::class ],
+			'mysql' => [ 'mysqli' => DatabaseMySQL::class ],
 			'sqlite' => DatabaseSqlite::class,
 			'postgres' => DatabasePostgres::class,
 		];
@@ -204,5 +236,31 @@ class DatabaseFactory {
 		}
 
 		return $class;
+	}
+
+	/**
+	 * @see IDatabase::DBO_DEFAULT
+	 * @param int $flags Bit field of IDatabase::DBO_* constants from configuration
+	 * @return int Bit field of IDatabase::DBO_* constants to use with Database::factory()
+	 */
+	private function initConnectionFlags( int $flags ) {
+		if ( self::fieldHasBit( $flags, IDatabase::DBO_DEFAULT ) ) {
+			// Server is configured to participate in transaction rounds in non-CLI mode
+			if ( $this->cliMode ) {
+				$flags &= ~IDatabase::DBO_TRX;
+			} else {
+				$flags |= IDatabase::DBO_TRX;
+			}
+		}
+		return $flags;
+	}
+
+	/**
+	 * @param int $flags A bitfield of flags
+	 * @param int $bit Bit flag constant
+	 * @return bool Whether the bit field has the specified bit flag set
+	 */
+	private function fieldHasBit( int $flags, int $bit ) {
+		return ( ( $flags & $bit ) === $bit );
 	}
 }

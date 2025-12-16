@@ -4,11 +4,12 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Client\DataAccess\ParserFunctions;
 
-use Language;
+use MediaWiki\Language\Language;
 use MediaWiki\Languages\LanguageConverterFactory;
-use Parser;
-use ParserOutput;
-use Title;
+use MediaWiki\Languages\LanguageFactory;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Title\Title;
 use Wikibase\Client\DataAccess\DataAccessSnakFormatterFactory;
 use Wikibase\Client\DataAccess\PropertyIdResolver;
 use Wikibase\Client\DataAccess\SnaksFinder;
@@ -61,6 +62,11 @@ class StatementGroupRendererFactory {
 	private $langConvFactory;
 
 	/**
+	 * @var LanguageFactory
+	 */
+	private $langFactory;
+
+	/**
 	 * @var bool
 	 */
 	private $allowDataAccessInUserLanguage;
@@ -72,6 +78,7 @@ class StatementGroupRendererFactory {
 		DataAccessSnakFormatterFactory $dataAccessSnakFormatterFactory,
 		UsageAccumulatorFactory $usageAccumulatorFactory,
 		LanguageConverterFactory $langConvFactory,
+		LanguageFactory $langFactory,
 		bool $allowDataAccessInUserLanguage
 	) {
 		$this->propertyLabelResolver = $propertyLabelResolver;
@@ -80,6 +87,7 @@ class StatementGroupRendererFactory {
 		$this->dataAccessSnakFormatterFactory = $dataAccessSnakFormatterFactory;
 		$this->usageAccumulatorFactory = $usageAccumulatorFactory;
 		$this->langConvFactory = $langConvFactory;
+		$this->langFactory = $langFactory;
 		$this->allowDataAccessInUserLanguage = $allowDataAccessInUserLanguage;
 	}
 
@@ -91,7 +99,7 @@ class StatementGroupRendererFactory {
 		Parser $parser,
 		string $type = DataAccessSnakFormatterFactory::TYPE_ESCAPED_PLAINTEXT
 	): StatementGroupRenderer {
-		$usageAccumulator = $this->usageAccumulatorFactory->newFromParserOutput( $parser->getOutput() );
+		$usageAccumulator = $this->usageAccumulatorFactory->newFromParser( $parser );
 
 		if ( $this->allowDataAccessInUserLanguage ) {
 			// Use the user's language.
@@ -185,7 +193,7 @@ class StatementGroupRendererFactory {
 		if ( !isset( $this->languageAwareRenderers[$languageCode] ) ) {
 			$this->languageAwareRenderers[$languageCode] = $this->newLanguageAwareRenderer(
 				$type,
-				Language::factory( $languageCode ),
+				$this->langFactory->getLanguage( $languageCode ),
 				$usageAccumulator,
 				$parserOutput,
 				$title

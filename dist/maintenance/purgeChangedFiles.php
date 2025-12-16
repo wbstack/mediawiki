@@ -21,9 +21,11 @@
  * @ingroup Maintenance
  */
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script that scans the deletion log and purges affected files
@@ -94,21 +96,20 @@ class PurgeChangedFiles extends Maintenance {
 
 		// Find out which actions we should be concerned with
 		$typeOpt = $this->getOption( 'type', 'all' );
-		$validTypes = array_keys( self::$typeMappings );
 		if ( $typeOpt === 'all' ) {
 			// Convert 'all' to all registered types
-			$typeOpt = implode( ',', $validTypes );
+			$typeOpt = implode( ',', array_keys( self::$typeMappings ) );
 		}
 		$typeList = explode( ',', $typeOpt );
 		foreach ( $typeList as $type ) {
-			if ( !in_array( $type, $validTypes ) ) {
+			if ( !isset( self::$typeMappings[$type] ) ) {
 				$this->error( "\nERROR: Unknown type: {$type}\n" );
 				$this->maybeHelp( true );
 			}
 		}
 
 		// Validate the timestamps
-		$dbr = $this->getDB( DB_REPLICA );
+		$dbr = $this->getReplicaDB();
 		$this->startTimestamp = $dbr->timestamp( $this->getOption( 'starttime' ) );
 		$this->endTimestamp = $dbr->timestamp( $this->getOption( 'endtime' ) );
 
@@ -119,7 +120,7 @@ class PurgeChangedFiles extends Maintenance {
 
 		// Turn on verbose when dry-run is enabled
 		if ( $this->hasOption( 'dry-run' ) ) {
-			$this->mOptions['verbose'] = 1;
+			$this->setOption( 'verbose', 1 );
 		}
 
 		$this->verbose( 'Purging files that were: ' . implode( ', ', $typeList ) . "\n" );
@@ -138,24 +139,23 @@ class PurgeChangedFiles extends Maintenance {
 	 * @param string $type Type of change to find
 	 */
 	protected function purgeFromLogType( $type ) {
-		$repo = MediaWikiServices::getInstance()->getRepoGroup()->getLocalRepo();
-		$dbr = $this->getDB( DB_REPLICA );
+		$repo = $this->getServiceContainer()->getRepoGroup()->getLocalRepo();
+		$dbr = $this->getReplicaDB();
 
 		foreach ( self::$typeMappings[$type] as $logType => $logActions ) {
 			$this->verbose( "Scanning for {$logType}/" . implode( ',', $logActions ) . "\n" );
 
-			$res = $dbr->select(
-				'logging',
-				[ 'log_title', 'log_timestamp', 'log_params' ],
-				[
+			$res = $dbr->newSelectQueryBuilder()
+				->select( [ 'log_title', 'log_timestamp', 'log_params' ] )
+				->from( 'logging' )
+				->where( [
 					'log_namespace' => NS_FILE,
 					'log_type' => $logType,
 					'log_action' => $logActions,
-					'log_timestamp >= ' . $dbr->addQuotes( $this->startTimestamp ),
-					'log_timestamp <= ' . $dbr->addQuotes( $this->endTimestamp ),
-				],
-				__METHOD__
-			);
+					$dbr->expr( 'log_timestamp', '>=', $this->startTimestamp ),
+					$dbr->expr( 'log_timestamp', '<=', $this->endTimestamp ),
+				] )
+				->caller( __METHOD__ )->fetchResultSet();
 
 			$bSize = 0;
 			foreach ( $res as $row ) {
@@ -213,12 +213,11 @@ class PurgeChangedFiles extends Maintenance {
 
 	protected function purgeFromArchiveTable( LocalRepo $repo, LocalFile $file ) {
 		$dbr = $repo->getReplicaDB();
-		$res = $dbr->select(
-			'filearchive',
-			[ 'fa_archive_name' ],
-			[ 'fa_name' => $file->getName() ],
-			__METHOD__
-		);
+		$res = $dbr->newSelectQueryBuilder()
+			->select( [ 'fa_archive_name' ] )
+			->from( 'filearchive' )
+			->where( [ 'fa_name' => $file->getName() ] )
+			->caller( __METHOD__ )->fetchResultSet();
 
 		foreach ( $res as $row ) {
 			if ( $row->fa_archive_name === null ) {
@@ -260,5 +259,7 @@ class PurgeChangedFiles extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = PurgeChangedFiles::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

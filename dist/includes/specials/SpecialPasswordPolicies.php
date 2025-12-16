@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:PasswordPolicies
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,14 +16,23 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
 
+namespace MediaWiki\Specials;
+
+use MediaWiki\Html\Html;
 use MediaWiki\MainConfigNames;
+use MediaWiki\Parser\Sanitizer;
+use MediaWiki\Password\UserPasswordPolicy;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\Title;
 use MediaWiki\User\UserGroupManager;
+use MediaWiki\User\UserGroupMembership;
+use MediaWiki\Xml\Xml;
 
 /**
  * This special page lists the defined password policies for user groups.
+ *
  * See also @ref $wgPasswordPolicy.
  *
  * @ingroup SpecialPage
@@ -33,8 +40,7 @@ use MediaWiki\User\UserGroupManager;
  */
 class SpecialPasswordPolicies extends SpecialPage {
 
-	/** @var UserGroupManager */
-	private $userGroupManager;
+	private UserGroupManager $userGroupManager;
 
 	/**
 	 * @param UserGroupManager $userGroupManager
@@ -149,7 +155,13 @@ class SpecialPasswordPolicies extends SpecialPage {
 				// Policy isn't enabled, so no need to display it
 				continue;
 			}
-			$msg = $this->msg( 'passwordpolicies-policy-' . strtolower( $gp ) )->numParams( $val );
+
+			$msg = $this->msg( 'passwordpolicies-policy-' . strtolower( $gp ) );
+
+			if ( is_numeric( $val ) ) {
+				$msg->numParams( $val );
+			}
+
 			$flagMsgs = [];
 			foreach ( array_filter( $flags ) as $flag => $value ) {
 				$flagMsg = $this->msg( 'passwordpolicies-policyflag-' . strtolower( $flag ) );
@@ -182,3 +194,9 @@ class SpecialPasswordPolicies extends SpecialPage {
 		return 'users';
 	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialPasswordPolicies::class, 'SpecialPasswordPolicies' );

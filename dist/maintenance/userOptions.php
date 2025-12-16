@@ -24,11 +24,14 @@
  * @author Antoine Musso <hashar at free dot fr>
  */
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\User\User;
 use MediaWiki\User\UserIdentityValue;
+use Wikimedia\Rdbms\IExpression;
 use Wikimedia\Rdbms\SelectQueryBuilder;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * @ingroup Maintenance
@@ -38,16 +41,23 @@ class UserOptionsMaintenance extends Maintenance {
 	public function __construct() {
 		parent::__construct();
 
-		$this->addDescription( 'Pass through all users and change one of their options.
+		$this->addDescription( 'Pass through all users and change or delete one of their options.
 The new option is NOT validated.' );
 
 		$this->addOption( 'list', 'List available user options and their default value' );
 		$this->addOption( 'usage', 'Report all options statistics or just one if you specify it' );
-		$this->addOption( 'old', 'The value to look for', false, true );
+		$this->addOption(
+			'old',
+			'The value to look for. If it is a default value for the option, pass --old-is-default as well.',
+			false, true, false, true
+		);
+		$this->addOption( 'old-is-default', 'If passed, --old is interpreted as a default value.' );
 		$this->addOption( 'new', 'New value to update users with', false, true );
-		$this->addOption( 'fromuserid', 'Start from this user ID when changing options',
+		$this->addOption( 'delete', 'Delete the option instead of updating' );
+		$this->addOption( 'delete-defaults', 'Delete user_properties row matching the default' );
+		$this->addOption( 'fromuserid', 'Start from this user ID when changing/deleting options',
 			false, true );
-		$this->addOption( 'touserid', 'Do not go beyond this user ID when changing options',
+		$this->addOption( 'touserid', 'Do not go beyond this user ID when changing/deleting options',
 			false, true );
 		$this->addOption( 'nowarn', 'Hides the 5 seconds warning' );
 		$this->addOption( 'dry', 'Do not save user settings back to database' );
@@ -68,6 +78,10 @@ The new option is NOT validated.' );
 			&& $this->hasArg( 0 )
 		) {
 			$this->updateOptions();
+		} elseif ( $this->hasOption( 'delete' ) ) {
+			$this->deleteOptions();
+		} elseif ( $this->hasOption( 'delete-defaults' ) ) {
+			$this->deleteDefaults();
 		} else {
 			$this->maybeHelp( true );
 		}
@@ -77,8 +91,8 @@ The new option is NOT validated.' );
 	 * List default options and their value
 	 */
 	private function listAvailableOptions() {
-		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
-		$def = $userOptionsLookup->getDefaultOptions();
+		$userOptionsLookup = $this->getServiceContainer()->getUserOptionsLookup();
+		$def = $userOptionsLookup->getDefaultOptions( null );
 		ksort( $def );
 		$maxOpt = 0;
 		foreach ( $def as $opt => $value ) {
@@ -96,28 +110,28 @@ The new option is NOT validated.' );
 		$option = $this->getArg( 0 );
 
 		$ret = [];
-		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
+		$userOptionsLookup = $this->getServiceContainer()->getUserOptionsLookup();
 		$defaultOptions = $userOptionsLookup->getDefaultOptions();
 
+		if ( $option && !array_key_exists( $option, $defaultOptions ) ) {
+			$this->fatalError( "Invalid user option. Use --list to see valid choices\n" );
+		}
+
 		// We list user by user_id from one of the replica DBs
-		$dbr = wfGetDB( DB_REPLICA );
-		$result = $dbr->select( 'user',
-			[ 'user_id' ],
-			[],
-			__METHOD__
-		);
+		$dbr = $this->getServiceContainer()->getConnectionProvider()->getReplicaDatabase();
+
+		$result = $dbr->newSelectQueryBuilder()
+			->select( [ 'user_id' ] )
+			->from( 'user' )
+			->caller( __METHOD__ )->fetchResultSet();
 
 		foreach ( $result as $id ) {
 			$user = User::newFromId( $id->user_id );
 
 			// Get the options and update stats
 			if ( $option ) {
-				if ( !array_key_exists( $option, $defaultOptions ) ) {
-					$this->fatalError( "Invalid user option. Use --list to see valid choices\n" );
-				}
-
 				$userValue = $userOptionsLookup->getOption( $user, $option );
-				if ( $userValue <> $defaultOptions[$option] ) {
+				if ( $userValue != $defaultOptions[$option] ) {
 					$ret[$option][$userValue] = ( $ret[$option][$userValue] ?? 0 ) + 1;
 				}
 			} else {
@@ -146,77 +160,236 @@ The new option is NOT validated.' );
 		$dryRun = $this->hasOption( 'dry' );
 		$settingWord = $dryRun ? 'Would set' : 'Setting';
 		$option = $this->getArg( 0 );
+		$fromIsDefault = $this->hasOption( 'old-is-default' );
 		$from = $this->getOption( 'old' );
 		$to = $this->getOption( 'new' );
 
-		if ( !$dryRun ) {
-			$this->warn( $option, $from, $to );
-		}
-
-		$userOptionsManager = MediaWikiServices::getInstance()->getUserOptionsManager();
-		$dbr = wfGetDB( DB_REPLICA );
 		// The fromuserid parameter is inclusive, but iterating is easier with an exclusive
 		// range so convert it.
 		$fromUserId = (int)$this->getOption( 'fromuserid', 1 ) - 1;
 		$toUserId = (int)$this->getOption( 'touserid', 0 ) ?: null;
-		$queryBuilderTemplate = new SelectQueryBuilder( $dbr );
-		$queryBuilderTemplate
+		$fromAsText = implode( '|', $from );
+
+		if ( !$dryRun ) {
+			$forUsers = ( $fromUserId || $toUserId ) ? "some users (ID $fromUserId-$toUserId)" : 'ALL USERS';
+			$this->warn(
+				<<<WARN
+The script is about to change the options for $forUsers in the database.
+Users with option <$option> = '$fromAsText' will be made to use '$to'.
+
+Abort with control-c in the next five seconds....
+WARN
+			);
+		}
+
+		$userOptionsManager = $this->getServiceContainer()->getUserOptionsManager();
+		$tempUserConfig = $this->getServiceContainer()->getTempUserConfig();
+		$dbr = $this->getReplicaDB();
+		$queryBuilderTemplate = $dbr->newSelectQueryBuilder()
 			->table( 'user' )
-			->join( 'user_properties', null, [
+			->leftJoin( 'user_properties', null, [
 				'user_id = up_user',
 				'up_property' => $option,
 			] )
 			->fields( [ 'user_id', 'user_name' ] )
 			// up_value is unindexed so this can be slow, but should be acceptable in a script
-			->where( [ 'up_value' => $from ] )
+			->where( [ 'up_value' => $fromIsDefault ? null : $from ] )
 			// need to order by ID so we can use ID ranges for query continuation
 			// also needed for the fromuserid / touserid parameters to work
 			->orderBy( 'user_id', SelectQueryBuilder::SORT_ASC )
 			->limit( $this->getBatchSize() )
 			->caller( __METHOD__ );
 		if ( $toUserId ) {
-			$queryBuilderTemplate->andWhere( "user_id <= $toUserId " );
+			$queryBuilderTemplate->andWhere( $dbr->expr( 'user_id', '<=', $toUserId ) );
+		}
+
+		if ( $tempUserConfig->isKnown() ) {
+			$queryBuilderTemplate->andWhere(
+				$tempUserConfig->getMatchCondition( $dbr, 'user_name', IExpression::NOT_LIKE )
+			);
 		}
 
 		do {
 			$queryBuilder = clone $queryBuilderTemplate;
-			$queryBuilder->andWhere( "user_id > $fromUserId" );
+			$queryBuilder->andWhere( $dbr->expr( 'user_id', '>', $fromUserId ) );
 			$result = $queryBuilder->fetchResultSet();
 			foreach ( $result as $row ) {
-				$this->output( "$settingWord {$option} for {$row->user_name} from '{$from}' to '{$to}'\n" );
+				$fromUserId = (int)$row->user_id;
+				$oldOptionIsDefault = true;
+
 				$user = UserIdentityValue::newRegistered( $row->user_id, $row->user_name );
-				if ( !$dryRun ) {
+				if ( $fromIsDefault ) {
+					// $user has the default value for $option; skip if it doesn't match
+					// NOTE: This is intentionally a loose comparison. $from is always a string
+					// (coming from the command line), but the default value might be of a
+					// different type.
+					$oldOptionMatchingDefault = null;
+					foreach ( $from as $oldOption ) {
+						$oldOptionIsDefault = $oldOption != $userOptionsManager->getDefaultOption( $option, $user );
+						if ( $oldOptionIsDefault ) {
+							$oldOptionMatchingDefault = $oldOption;
+							break;
+						}
+					}
+					$fromAsText = $oldOptionMatchingDefault ?? $fromAsText;
+				}
+
+				$this->output( "$settingWord {$option} for {$row->user_name} from '{$fromAsText}' to '{$to}'\n" );
+				if ( !$dryRun && $oldOptionIsDefault ) {
 					$userOptionsManager->setOption( $user, $option, $to );
 					$userOptionsManager->saveOptions( $user );
 				}
-				$fromUserId = (int)$row->user_id;
 			}
 			$this->waitForReplication();
 		} while ( $result->numRows() );
 	}
 
 	/**
+	 * Delete occurrences of the option (with the given value, if provided)
+	 */
+	private function deleteOptions() {
+		$dryRun = $this->hasOption( 'dry' );
+		$option = $this->getArg( 0 );
+		$fromUserId = (int)$this->getOption( 'fromuserid', 0 );
+		$toUserId = (int)$this->getOption( 'touserid', 0 ) ?: null;
+		$old = $this->getOption( 'old' );
+
+		if ( !$dryRun ) {
+			$forUsers = ( $fromUserId || $toUserId ) ? "some users (ID $fromUserId-$toUserId)" : 'ALL USERS';
+			$this->warn( <<<WARN
+The script is about to delete '$option' option for $forUsers from user_properties table.
+This action is IRREVERSIBLE.
+
+Abort with control-c in the next five seconds....
+WARN
+			);
+		}
+
+		$dbr = $this->getReplicaDB();
+		$dbw = $this->getPrimaryDB();
+
+		$rowsNum = 0;
+		$rowsInThisBatch = -1;
+		$minUserId = $fromUserId;
+		while ( $rowsInThisBatch != 0 ) {
+			$queryBuilder = $dbr->newSelectQueryBuilder()
+				->select( 'up_user' )
+				->from( 'user_properties' )
+				->where( [ 'up_property' => $option, $dbr->expr( 'up_user', '>', $minUserId ) ] );
+			if ( $this->hasOption( 'touserid' ) ) {
+				$queryBuilder->andWhere( $dbr->expr( 'up_user', '<', $toUserId ) );
+			}
+			if ( $this->hasOption( 'old' ) ) {
+				$queryBuilder->andWhere( [ 'up_value' => $old ] );
+			}
+			// need to order by ID so we can use ID ranges for query continuation
+			$queryBuilder
+				->orderBy( 'up_user', SelectQueryBuilder::SORT_ASC )
+				->limit( $this->getBatchSize() );
+
+			$userIds = $queryBuilder->caller( __METHOD__ )->fetchFieldValues();
+			if ( $userIds === [] ) {
+				// no rows left
+				break;
+			}
+
+			if ( !$dryRun ) {
+				$delete = $dbw->newDeleteQueryBuilder()
+					->deleteFrom( 'user_properties' )
+					->where( [ 'up_property' => $option, 'up_user' => $userIds ] );
+				if ( $this->hasOption( 'old' ) ) {
+					$delete->andWhere( [ 'up_value' => $old ] );
+				}
+				$delete->caller( __METHOD__ )->execute();
+				$rowsInThisBatch = $dbw->affectedRows();
+			} else {
+				$rowsInThisBatch = count( $userIds );
+			}
+
+			$this->waitForReplication();
+			$rowsNum += $rowsInThisBatch;
+			$minUserId = max( $userIds );
+		}
+
+		if ( !$dryRun ) {
+			$this->output( "Done! Deleted $rowsNum rows.\n" );
+		} else {
+			$this->output( "Would delete $rowsNum rows.\n" );
+		}
+	}
+
+	private function deleteDefaults() {
+		$dryRun = $this->hasOption( 'dry' );
+		$option = $this->getArg( 0 );
+		$fromUserId = (int)$this->getOption( 'fromuserid', 0 );
+		$toUserId = (int)$this->getOption( 'touserid', 0 ) ?: null;
+
+		if ( $option === null ) {
+			$this->fatalError( "Option name is required" );
+		}
+
+		if ( !$dryRun ) {
+			$this->warn( <<<WARN
+This script is about to delete all rows in user_properties that match the current
+defaults for the user (including conditional defaults).
+This action is IRREVERSIBLE.
+
+Abort with control-c in the next five seconds....
+WARN
+			);
+		}
+
+		$dbr = $this->getDB( DB_REPLICA );
+		$dbw = $this->getDB( DB_PRIMARY );
+
+		$queryBuilderTemplate = $dbr->newSelectQueryBuilder()
+			->select( [ 'user_id', 'user_name', 'up_value' ] )
+			->from( 'user_properties' )
+			->join( 'user', null, [ 'up_user = user_id' ] )
+			->where( [ 'up_property' => $option ] )
+			->limit( $this->getBatchSize() )
+			->caller( __METHOD__ );
+
+		if ( $toUserId !== null ) {
+			$queryBuilderTemplate->andWhere( $dbr->expr( 'up_user', '<=', $toUserId ) );
+		}
+
+		$userOptionsManager = $this->getServiceContainer()->getUserOptionsManager();
+		do {
+			$queryBuilder = clone $queryBuilderTemplate;
+			$queryBuilder->andWhere( $dbr->expr( 'up_user', '>', $fromUserId ) );
+			$result = $queryBuilder->fetchResultSet();
+			foreach ( $result as $row ) {
+				$fromUserId = (int)$row->user_id;
+
+				// NOTE: If up_value equals to the default, this will drop the row. Otherwise, it
+				// is going to be a no-op.
+				$user = UserIdentityValue::newRegistered( $row->user_id, $row->user_name );
+				$userOptionsManager->setOption( $user, $option, $row->up_value );
+				$userOptionsManager->saveOptions( $user );
+			}
+			$this->waitForReplication();
+		} while ( $result->numRows() );
+
+		$this->output( "Done!\n" );
+	}
+
+	/**
 	 * The warning message and countdown
 	 *
-	 * @param string $option
-	 * @param string $from
-	 * @param string $to
+	 * @param string $message
 	 */
-	private function warn( $option, $from, $to ) {
+	private function warn( string $message ) {
 		if ( $this->hasOption( 'nowarn' ) ) {
 			return;
 		}
 
-		$this->output( <<<WARN
-The script is about to change the options for ALL USERS in the database.
-Users with option <$option> = '$from' will be made to use '$to'.
-
-Abort with control-c in the next five seconds....
-WARN
-		);
+		$this->output( $message );
 		$this->countDown( 5 );
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = UserOptionsMaintenance::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

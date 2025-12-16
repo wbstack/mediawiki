@@ -3,6 +3,7 @@
 		"authors": [
 			"Cekli829",
 			"NMW03",
+			"Nemoralis",
 			"Vago",
 			"Vugar 1981"
 		]
@@ -26,5 +27,5 @@
 	"deletebatch-select-script": "sSəhifə skriptini sil",
 	"deletebatch-select-yourself": "Sən",
 	"deletebatch-no-page": "Zəhmət olmasa, silmək üçün ən azı bir səhifə və ya səhifə yığını olan bir faylı seçin.",
-	"right-deletebatch": "Seçilmiş səhifələri sil"
+	"right-deletebatch": "Toplu səhifə silmək"
 }

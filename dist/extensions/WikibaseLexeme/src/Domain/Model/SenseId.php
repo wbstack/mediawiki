@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lexeme\Domain\Model;
 
 use Wikimedia\Assert\Assert;
@@ -15,23 +17,17 @@ class SenseId extends LexemeSubEntityId {
 
 	public const PATTERN = '/^L[1-9]\d*-S[1-9]\d*\z/';
 
-	/**
-	 * @param string $serialization
-	 */
-	public function __construct( $serialization ) {
+	public function __construct( string $serialization ) {
 		parent::__construct( $serialization );
 
 		Assert::parameter(
-			preg_match( self::PATTERN, $this->localPart ),
+			preg_match( self::PATTERN, $this->serialization ),
 			'$serialization',
-			'Sense ID must match "' . self::PATTERN . '", given: ' . $this->localPart
+			'Sense ID must match "' . self::PATTERN . '", given: ' . $this->serialization
 		);
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getEntityType() {
+	public function getEntityType(): string {
 		return Sense::ENTITY_TYPE;
 	}
 

@@ -22,9 +22,9 @@
 
 namespace MediaWiki\Revision;
 
-use IDBAccessObject;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\Page\PageIdentity;
+use Wikimedia\Rdbms\IDBAccessObject;
 
 /**
  * Service for looking up page revisions.
@@ -35,7 +35,7 @@ use MediaWiki\Page\PageIdentity;
  * @since 1.31
  * @since 1.32 Renamed from MediaWiki\Storage\RevisionLookup
  */
-interface RevisionLookup extends IDBAccessObject {
+interface RevisionLookup {
 
 	/**
 	 * Load a page revision from a given revision ID number.
@@ -52,7 +52,7 @@ interface RevisionLookup extends IDBAccessObject {
 	 *
 	 * @return RevisionRecord|null
 	 */
-	public function getRevisionById( $id, $flags = 0, PageIdentity $page = null );
+	public function getRevisionById( $id, $flags = 0, ?PageIdentity $page = null );
 
 	/**
 	 * Load either the current, or a specified, revision
@@ -92,15 +92,15 @@ interface RevisionLookup extends IDBAccessObject {
 	 * @param LinkTarget|PageIdentity $page Calling with LinkTarget is deprecated since 1.36
 	 * @param string $timestamp
 	 * @param int $flags Bitfield (optional) include:
-	 *      RevisionLookup::READ_LATEST: Select the data from the primary DB
-	 *      RevisionLookup::READ_LOCKING: Select & lock the data from the primary DB
-	 *      Default: RevisionLookup::READ_NORMAL
+	 *      IDBAccessObject::READ_LATEST: Select the data from the primary DB
+	 *      IDBAccessObject::READ_LOCKING: Select & lock the data from the primary DB
+	 *      Default: IDBAccessObject::READ_NORMAL
 	 * @return RevisionRecord|null
 	 */
 	public function getRevisionByTimestamp(
 		$page,
 		string $timestamp,
-		int $flags = RevisionLookup::READ_NORMAL
+		int $flags = IDBAccessObject::READ_NORMAL
 	): ?RevisionRecord;
 
 	/**
@@ -136,7 +136,7 @@ interface RevisionLookup extends IDBAccessObject {
 	 *
 	 * @param int $id
 	 * @param int $flags
-	 * @return string|bool False if not found
+	 * @return string|false False if not found
 	 * @since 1.34 (present earlier in RevisionStore)
 	 */
 	public function getTimestampFromId( $id, $flags = 0 );
@@ -152,7 +152,7 @@ interface RevisionLookup extends IDBAccessObject {
 	 * @param PageIdentity $page the associated page
 	 * @param int $revId current revision of this page
 	 *
-	 * @return RevisionRecord|bool Returns false if missing
+	 * @return RevisionRecord|false Returns false if missing
 	 */
 	public function getKnownCurrentRevision( PageIdentity $page, $revId = 0 );
 

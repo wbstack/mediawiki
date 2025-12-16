@@ -1,11 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
+			"Anzx",
 			"Nayvik",
 			"VASANTH S.N.",
 			"Yogesh",
-			"ಮಲ್ನಾಡಾಚ್ ಕೊಂಕ್ಣೊ",
-			"~aanzx"
+			"~aanzx",
+			"ಮಲ್ನಾಡಾಚ್ ಕೊಂಕ್ಣೊ"
 		]
 	},
 	"wikieditor": "ಮುಂದುವರಿದ ವಿಕಿಪಠ್ಯ ಸಂಪಾದನೆಯ ಅಂತರ್‍ಸಂಪರ್ಕ",
@@ -17,10 +18,6 @@
 	"wikieditor-toolbar-tool-bold-example": "ದಪ್ಪಗಿನ ಅಕ್ಷರ",
 	"wikieditor-toolbar-tool-italic": "ಓರೆಯಾದ",
 	"wikieditor-toolbar-tool-italic-example": "ಓರೆ ಅಕ್ಷರಗಳು",
-	"wikieditor-toolbar-tool-ilink": "ಆಂತರಿಕ ಸಂಪರ್ಕ",
-	"wikieditor-toolbar-tool-ilink-example": "ಸಂಪರ್ಕದ ಹೆಸರು",
-	"wikieditor-toolbar-tool-xlink": "ಬಾಹ್ಯ ಸಂಪರ್ಕ (http:// ಇಂದ ಶುರು ಮಾಡಿ)",
-	"wikieditor-toolbar-tool-xlink-example": "http://www.example.com ಸಂಪರ್ಕ ಶೀರ್ಷಿಕೆ",
 	"wikieditor-toolbar-tool-link": "ಸಂಪರ್ಕ",
 	"wikieditor-toolbar-tool-link-title": "ಸಂಪರ್ಕವನ್ನು ಅಳವಡಿಸಿ",
 	"wikieditor-toolbar-tool-link-insert": "ಸಂಪರ್ಕವನ್ನು ಅಳವಡಿಸಿ",
@@ -32,7 +29,6 @@
 	"wikieditor-toolbar-tool-link-lookslikeinternal-int": "ಆಂತರಿಕ ಸಂಪರ್ಕ",
 	"wikieditor-toolbar-tool-link-lookslikeinternal-ext": "ಬಾಹ್ಯ ಸಂಪರ್ಕ",
 	"wikieditor-toolbar-tool-file": "ಅಳವಡಿಸಲ್ಪಟ್ಟ ಫೈಲು",
-	"wikieditor-toolbar-tool-file-example": "ಉದಾಹರಣೆ.jpg",
 	"wikieditor-toolbar-tool-file-title": "ಕಡತ ಅಳವಡಿಸಿ",
 	"wikieditor-toolbar-file-target": "ಕಡತದ ಹೆಸರು",
 	"wikieditor-toolbar-file-caption": "ತಲೆಬರಹ:",
@@ -40,9 +36,6 @@
 	"wikieditor-toolbar-file-default": "(ಮೂಲಸ್ಥಿತಿ)",
 	"wikieditor-toolbar-tool-file-insert": "ಸೇರ್ಪಡಿಸು",
 	"wikieditor-toolbar-tool-file-cancel": "ರದ್ದುಮಾಡಿ",
-	"wikieditor-toolbar-tool-reference": "ಉಲ್ಲೇಖಗಳು",
-	"wikieditor-toolbar-tool-reference-cancel": "ರದ್ದುಮಾಡಿ",
-	"wikieditor-toolbar-tool-reference-insert": "ಸೇರಿಸು",
 	"wikieditor-toolbar-section-advanced": "ಸುಧಾರಿತ ಸಲಕರಣೆಗಳು",
 	"wikieditor-toolbar-tool-heading": "ತಲೆಬರಹ",
 	"wikieditor-toolbar-tool-heading-1": "ದರ್ಜೆ ೧",
@@ -77,18 +70,16 @@
 	"wikieditor-toolbar-help-page-heading": "ತಲೆಬರಹಗಳು",
 	"wikieditor-toolbar-help-page-list": "ಪಟ್ಟಿಗಳು",
 	"wikieditor-toolbar-help-page-file": "ಕಡತಗಳು",
-	"wikieditor-toolbar-help-page-reference": "ಉಲ್ಲೇಖಗಳು",
 	"wikieditor-toolbar-help-page-discussion": "ಚರ್ಚೆ",
 	"wikieditor-toolbar-help-content-italic-description": "ಓರೆಯಾದ",
 	"wikieditor-toolbar-help-content-bold-description": "ದಪ್ಪ",
 	"wikieditor-toolbar-help-content-ilink-description": "ಆಂತರಿಕ ಸಂಪರ್ಕ",
 	"wikieditor-toolbar-help-content-xlink-description": "ಬಾಹ್ಯ ಸಂಪರ್ಕ",
-	"wikieditor-toolbar-help-content-heading2-syntax": "== ಶೀರ್ಷಿಕೆ ಪಠ್ಯ ==",
-	"wikieditor-toolbar-help-content-heading3-syntax": "== ಶೀರ್ಷಿಕೆ ಪಠ್ಯ ==",
-	"wikieditor-toolbar-help-content-heading4-syntax": "== ಶೀರ್ಷಿಕೆ ಪಠ್ಯ ==",
-	"wikieditor-toolbar-help-content-heading5-syntax": "== ಶೀರ್ಷಿಕೆ ಪಠ್ಯ ==",
+	"wikieditor-toolbar-help-content-heading2-example": "ಶೀರ್ಷಿಕೆ ಪಠ್ಯ",
+	"wikieditor-toolbar-help-content-heading3-example": "== ಶೀರ್ಷಿಕೆ ಪಠ್ಯ ==",
+	"wikieditor-toolbar-help-content-heading4-example": "== ಶೀರ್ಷಿಕೆ ಪಠ್ಯ ==",
+	"wikieditor-toolbar-help-content-heading5-example": "== ಶೀರ್ಷಿಕೆ ಪಠ್ಯ ==",
 	"wikieditor-toolbar-help-content-file-description": "ಅಳವಡಿಸಲ್ಪಟ್ಟ ಫೈಲು",
-	"wikieditor-toolbar-help-content-reference-description": "ಉಲ್ಲೇಖಗಳು",
 	"wikieditor-toolbar-help-content-signaturetimestamp-description": "ಸಮಯಮುದ್ರೆಯೊಂದಿಗೆ ನಿಮ್ಮ ಸಹಿ",
 	"wikieditor-toolbar-help-content-signature-description": "ಸಹಿ"
 }

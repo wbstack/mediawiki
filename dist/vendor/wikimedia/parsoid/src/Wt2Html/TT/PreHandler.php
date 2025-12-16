@@ -105,7 +105,7 @@ class PreHandler extends TokenHandler {
 	private $state;
 	/** @var int */
 	private $preTSR;
-	/** @var array<Token> */
+	/** @var array<Token|string> */
 	private $tokens;
 	/** @var array<Token|string> */
 	private $currLinePreToks;
@@ -189,9 +189,6 @@ class PreHandler extends TokenHandler {
 		}
 	}
 
-	/**
-	 * @param array $opts
-	 */
 	public function resetState( array $opts ): void {
 		$this->reset();
 	}
@@ -323,7 +320,7 @@ class PreHandler extends TokenHandler {
 	 * @return int
 	 */
 	private function initPreTSR( NlTk $nltk ): int {
-		$da = $nltk->dataAttribs;
+		$da = $nltk->dataParsoid;
 		// tsr->end can never be zero, so safe to use tsr->end to check for null/undefined
 		return $da->tsr->end ?? -1;
 	}
@@ -445,7 +442,7 @@ class PreHandler extends TokenHandler {
 	 */
 	private function getUpdatedPreTSR( int $tsr, $token ): int {
 		if ( $token instanceof CommentTk ) {
-			$tsr = isset( $token->dataAttribs->tsr ) ? $token->dataAttribs->tsr->end :
+			$tsr = isset( $token->dataParsoid->tsr ) ? $token->dataParsoid->tsr->end :
 				( ( $tsr === -1 ) ? -1 : WTUtils::decodedCommentLength( $token ) + $tsr );
 		} elseif ( $token instanceof SelfclosingTagTk ) {
 			// meta-tag (cannot compute)

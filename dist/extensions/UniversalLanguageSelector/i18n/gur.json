@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ayire Adongo",
 			"Amoramah",
-			"Atalata Gumah"
+			"Atalata Gumah",
+			"Ayire Adongo"
 		]
 	},
 	"uls-desc": "Bo'ori tuntuna la fɔla zo'e zo'e ti a ta'am loe yeletɔgum gee maalum ŋmɛresɛ yeletɔgum la",
@@ -70,5 +70,6 @@
 	"ext-uls-empty-state-header": "Yeletɔgum nan ka boi",
 	"ext-uls-empty-state-desc": "Yeletɔgum nan ka boi  nananawa",
 	"ext-uls-empty-state-header-actions-available": "Yeletɔgum nan ka boi dikɛ ayima pa'asɛ?",
-	"ext-uls-empty-state-desc-actions-available": "Basɛ ti sɛla n boi bini la bɔna yeletɔgum sisesi puan"
+	"ext-uls-empty-state-desc-actions-available": "Basɛ ti sɛla n boi bini la bɔna yeletɔgum sisesi puan",
+	"ext-uls-add-languages-button-label": "Pa'asɛ yeletɔgum"
 }

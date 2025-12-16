@@ -18,8 +18,9 @@
  * @file
  */
 
-use Wikimedia\WrappedString;
-use Wikimedia\WrappedStringList;
+use MediaWiki\Html\Html;
+use MediaWiki\Message\Message;
+use MediaWiki\Parser\Sanitizer;
 
 /**
  * Extended QuickTemplate with additional MediaWiki-specific helper methods.
@@ -48,34 +49,6 @@ abstract class BaseTemplate extends QuickTemplate {
 	}
 
 	/**
-	 * Create an array of common toolbox items from the data in the quicktemplate
-	 * stored by SkinTemplate and items added by hook to the 'toolbox' section.
-	 * The resulting array is built according to a format intended to be passed
-	 * through makeListItem to generate the html.
-	 *
-	 * @deprecated since 1.35. To add items to the toolbox, use SidebarBeforeOutput
-	 * hook. To get the toolbox only use $this->data['sidebar']['TOOLBOX'], if you are
-	 * extending this class.
-	 * @return array
-	 */
-	public function getToolbox() {
-		wfDeprecated( __METHOD__, '1.35' );
-
-		$toolbox = $this->getSkin()->makeToolbox(
-			$this->data['nav_urls'],
-			$this->data['feeds']
-		);
-
-		// Merge content that might be added to the toolbox section by hook
-		if ( isset( $this->data['sidebar']['TOOLBOX'] ) ) {
-			$toolbox = array_merge( $toolbox, $this->data['sidebar']['TOOLBOX'] ?? [] );
-		}
-
-		return $toolbox;
-	}
-
-	/**
-	 * @deprecated since 1.35 use Skin::getPersonalToolsForMakeListItem
 	 * @return array
 	 */
 	public function getPersonalTools() {
@@ -91,6 +64,7 @@ abstract class BaseTemplate extends QuickTemplate {
 		// Force the rendering of the following portals
 		$sidebar = $this->data['sidebar'];
 		if ( !isset( $sidebar['SEARCH'] ) ) {
+			// @phan-suppress-next-line PhanTypeMismatchDimAssignment False positive
 			$sidebar['SEARCH'] = true;
 		}
 		if ( !isset( $sidebar['TOOLBOX'] ) ) {
@@ -174,44 +148,11 @@ abstract class BaseTemplate extends QuickTemplate {
 	}
 
 	/**
-	 * @deprecated since 1.35 (emits deprecation warnings since 1.37), use Skin::getAfterPortlet directly
-	 * @param string $name
-	 */
-	protected function renderAfterPortlet( $name ) {
-		wfDeprecated( __METHOD__, '1.35' );
-		echo $this->getAfterPortlet( $name );
-	}
-
-	/**
-	 * Allows extensions to hook into known portlets and add stuff to them
+	 * Wrapper for Skin method.
 	 *
-	 * @deprecated since 1.35 (emits deprecation warnings since 1.37), use Skin::getAfterPortlet directly
-	 *
-	 * @param string $name
-	 *
-	 * @return string html
-	 * @since 1.29
-	 */
-	protected function getAfterPortlet( $name ) {
-		wfDeprecated( __METHOD__, '1.35' );
-		$html = '';
-		$content = '';
-		$this->getHookRunner()->onBaseTemplateAfterPortlet( $this, $name, $content );
-		$content .= $this->getSkin()->getAfterPortlet( $name );
-
-		if ( $content !== '' ) {
-			$html = Html::rawElement(
-				'div',
-				[ 'class' => [ 'after-portlet', 'after-portlet-' . $name ] ],
-				$content
-			);
-		}
-
-		return $html;
-	}
-
-	/**
-	 * @deprecated since 1.35 use Skin::makeLink
+	 * @param string $key of link
+	 * @param array $item to render
+	 * @param array $options for link
 	 * @return string
 	 */
 	protected function makeLink( $key, $item, $options = [] ) {
@@ -219,7 +160,11 @@ abstract class BaseTemplate extends QuickTemplate {
 	}
 
 	/**
-	 * @deprecated since 1.35 use Skin::makeListItem
+	 * Wrapper for Skin method.
+	 *
+	 * @param string $key of list item
+	 * @param array $item to render
+	 * @param array $options for list item
 	 * @return string
 	 */
 	public function makeListItem( $key, $item, $options = [] ) {
@@ -227,14 +172,21 @@ abstract class BaseTemplate extends QuickTemplate {
 	}
 
 	/**
-	 * @deprecated since 1.35 use Skin::makeSearchInput
+	 * Wrapper for Skin method.
+	 *
+	 * @param array $attrs
+	 * @return string
 	 */
 	protected function makeSearchInput( $attrs = [] ) {
 		return $this->getSkin()->makeSearchInput( $attrs );
 	}
 
 	/**
-	 * @deprecated since 1.35 use Skin::makeSearchButton
+	 * Wrapper for Skin method.
+	 *
+	 * @param string $mode
+	 * @param array $attrs
+	 * @return string
 	 */
 	protected function makeSearchButton( $mode, $attrs = [] ) {
 		return $this->getSkin()->makeSearchButton( $mode, $attrs );
@@ -247,7 +199,7 @@ abstract class BaseTemplate extends QuickTemplate {
 	 * of footer icons instead of a key/value array of footerlinks arrays broken
 	 * up into categories.
 	 * @param string|null $option
-	 * @return array|mixed
+	 * @return array
 	 */
 	protected function getFooterLinks( $option = null ) {
 		$footerlinks = $this->get( 'footerlinks' );
@@ -426,35 +378,5 @@ abstract class BaseTemplate extends QuickTemplate {
 		}
 		$out .= "</div>\n";
 		return $out;
-	}
-
-	/**
-	 * Output getTrail
-	 * @deprecated 1.39
-	 */
-	protected function printTrail() {
-		wfDeprecated( __METHOD__, '1.39' );
-		echo $this->getTrail();
-	}
-
-	/**
-	 * Get the basic end-page trail including bottomscripts, reporttime, and
-	 * debug stuff. This should be called right before outputting the closing
-	 * body and html tags.
-	 *
-	 * @return string|WrappedStringList HTML
-	 * @since 1.29
-	 * @deprecated 1.39
-	 */
-	public function getTrail() {
-		wfDeprecated( __METHOD__, '1.39' );
-		$skin = $this->getSkin();
-		$options = $skin->getOptions();
-
-		return $options['bodyOnly'] ? '' : WrappedString::join( "\n", [
-			MWDebug::getDebugHTML( $skin->getContext() ),
-			$this->get( 'bottomscripts' ),
-			$this->get( 'reporttime' )
-		] );
 	}
 }

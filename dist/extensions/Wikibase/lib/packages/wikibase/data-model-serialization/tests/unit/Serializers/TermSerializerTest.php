@@ -27,14 +27,14 @@ class TermSerializerTest extends TestCase {
 		$this->assertEquals( $expected, $output );
 	}
 
-	public function serializationProvider() {
+	public static function serializationProvider() {
 		return [
 			[
 				new Term( 'en', 'SomeValue' ),
 				[
 					'language' => 'en',
 					'value' => 'SomeValue',
-				]
+				],
 			],
 			[
 				new TermFallback( 'en', 'SomeValue', 'en-gb', 'en' ),
@@ -42,7 +42,7 @@ class TermSerializerTest extends TestCase {
 					'language' => 'en-gb',
 					'value' => 'SomeValue',
 					'source' => 'en',
-				]
+				],
 			],
 		];
 	}

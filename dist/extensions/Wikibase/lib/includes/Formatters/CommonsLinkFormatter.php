@@ -3,9 +3,9 @@
 namespace Wikibase\Lib\Formatters;
 
 use DataValues\StringValue;
-use Html;
 use InvalidArgumentException;
-use Title;
+use MediaWiki\Html\Html;
+use MediaWiki\Title\Title;
 use ValueFormatters\FormatterOptions;
 use ValueFormatters\ValueFormatter;
 
@@ -25,13 +25,10 @@ class CommonsLinkFormatter implements ValueFormatter {
 	 */
 	private $attributes;
 
-	/**
-	 * @param FormatterOptions|null $options
-	 */
-	public function __construct( FormatterOptions $options = null ) {
+	public function __construct( ?FormatterOptions $options = null ) {
 		// @todo configure from options
 		$this->attributes = [
-			'class' => 'extiw'
+			'class' => 'extiw',
 		];
 	}
 
@@ -59,7 +56,7 @@ class CommonsLinkFormatter implements ValueFormatter {
 		}
 
 		$attributes = array_merge( $this->attributes, [
-			'href' => '//commons.wikimedia.org/wiki/File:' . $title->getPartialURL()
+			'href' => '//commons.wikimedia.org/wiki/File:' . $title->getPartialURL(),
 		] );
 		$html = Html::element( 'a', $attributes, $fileName );
 

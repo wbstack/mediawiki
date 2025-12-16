@@ -19,34 +19,40 @@
  * @ingroup Pager
  */
 
+namespace MediaWiki\Pager;
+
 use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
 use MediaWiki\Linker\LinkRenderer;
-use Wikimedia\Rdbms\ILoadBalancer;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleValue;
+use Wikimedia\Rdbms\IConnectionProvider;
 
 /**
  * @ingroup Pager
  */
 class CategoryPager extends AlphabeticPager {
 
-	/** @var LinkBatchFactory */
-	private $linkBatchFactory;
+	private LinkBatchFactory $linkBatchFactory;
 
 	/**
 	 * @param IContextSource $context
 	 * @param LinkBatchFactory $linkBatchFactory
 	 * @param LinkRenderer $linkRenderer
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 * @param string $from
 	 */
 	public function __construct(
 		IContextSource $context,
 		LinkBatchFactory $linkBatchFactory,
 		LinkRenderer $linkRenderer,
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		$from
 	) {
-		// Set database before parent constructor to avoid setting it there with wfGetDB
-		$this->mDb = $loadBalancer->getConnectionRef( ILoadBalancer::DB_REPLICA );
+		// Set database before parent constructor to avoid setting it there
+		$this->mDb = $dbProvider->getReplicaDatabase();
 		parent::__construct( $context, $linkRenderer );
 		$this->linkBatchFactory = $linkBatchFactory;
 		$from = str_replace( ' ', '_', $from );
@@ -122,3 +128,9 @@ class CategoryPager extends AlphabeticPager {
 	}
 
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( CategoryPager::class, 'CategoryPager' );

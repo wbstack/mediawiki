@@ -69,7 +69,7 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function simpleSiteLinkProvider() {
+	public static function simpleSiteLinkProvider() {
 		$argLists = [];
 
 		$argLists[] = [
@@ -77,15 +77,15 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 				'enwiki',
 				'Wikidata',
 				[
-					new ItemId( 'Q42' )
+					new ItemId( 'Q42' ),
 				]
-			)
+			),
 		];
 		$argLists[] = [
 			new SiteLink(
 				'nlwiki',
 				'Wikidata'
-			)
+			),
 		];
 		$argLists[] = [
 			new SiteLink(
@@ -93,9 +93,9 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 				'Nyan!',
 				[
 					new ItemId( 'Q42' ),
-					new ItemId( 'Q149' )
+					new ItemId( 'Q149' ),
 				]
-			)
+			),
 		];
 		$argLists[] = [
 			new SiteLink(
@@ -103,15 +103,15 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 				'baz bah',
 				[
 					new ItemId( 'Q3' ),
-					new ItemId( 'Q7' )
+					new ItemId( 'Q7' ),
 				]
-			)
+			),
 		];
 
 		return $argLists;
 	}
 
-	public function simpleSiteLinksProvider() {
+	public static function simpleSiteLinksProvider() {
 		$argLists = [];
 
 		$argLists[] = [];
@@ -120,13 +120,13 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 
 		$argLists[] = [
 			new SiteLink( 'enwiki', 'Wikidata' ),
-			new SiteLink( 'nlwiki', 'Wikidata', [ new ItemId( 'Q3' ) ] )
+			new SiteLink( 'nlwiki', 'Wikidata', [ new ItemId( 'Q3' ) ] ),
 		];
 
 		$argLists[] = [
 			new SiteLink( 'enwiki', 'Wikidata' ),
 			new SiteLink( 'nlwiki', 'Wikidata' ),
-			new SiteLink( 'foo bar', 'baz bah', [ new ItemId( 'Q2' ) ] )
+			new SiteLink( 'foo bar', 'baz bah', [ new ItemId( 'Q2' ) ] ),
 		];
 
 		return $argLists;
@@ -198,11 +198,6 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 		$this->assertFalse( $item->getSiteLinkList()->isEmpty() );
 	}
 
-	public function testItemWithoutSitelinksHasNoSitelinks() {
-		$item = new Item();
-		$this->assertTrue( $item->getSiteLinkList()->isEmpty() );
-	}
-
 	private function newStatement() {
 		$statement = new Statement( new PropertyNoValueSnak( 42 ) );
 		$statement->setGuid( 'kittens' );
@@ -243,7 +238,7 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 		$this->assertTrue( $item->getStatements()->isEmpty() );
 	}
 
-	public function equalsProvider() {
+	public static function equalsProvider() {
 		$firstItem = new Item();
 		$firstItem->getStatements()->addNewStatement( new PropertyNoValueSnak( 42 ) );
 
@@ -324,7 +319,7 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 		$this->assertFalse( $secondItem->equals( $firstItem ) );
 	}
 
-	public function cloneProvider() {
+	public static function cloneProvider() {
 		$item = new Item( new ItemId( 'Q1' ) );
 		$item->setLabel( 'en', 'original' );
 		$item->getStatements()->addNewStatement( new PropertyNoValueSnak( 1 ) );
@@ -391,9 +386,7 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 		$this->assertFalse( $original->getSiteLinkList()->isEmpty() );
 	}
 
-	// Below are tests copied from EntityTest
-
-	public function labelProvider() {
+	public static function labelProvider() {
 		return [
 			[ 'en', 'spam' ],
 			[ 'en', 'spam', 'spam' ],
@@ -419,16 +412,8 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( $moarText, $entity->getFingerprint()->getLabel( $languageCode )->getText() );
 	}
 
-	public function descriptionProvider() {
-		return [
-			[ 'en', 'spam' ],
-			[ 'en', 'spam', 'spam' ],
-			[ 'de', 'foo bar baz' ],
-		];
-	}
-
 	/**
-	 * @dataProvider descriptionProvider
+	 * @dataProvider labelProvider
 	 * @param string $languageCode
 	 * @param string $description
 	 * @param string $moarText
@@ -445,7 +430,7 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( $moarText, $entity->getFingerprint()->getDescription( $languageCode )->getText() );
 	}
 
-	public function aliasesProvider() {
+	public static function aliasesProvider() {
 		return [
 			[ [
 				'en' => [ [ 'spam' ] ],
@@ -618,10 +603,10 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 					new Term( 'en', 'foo' ),
 				] ),
 				new TermList( [
-					new Term( 'en', 'foo bar' )
+					new Term( 'en', 'foo bar' ),
 				] ),
 				new AliasGroupList( [
-					new AliasGroup( 'en', [ 'foo', 'bar' ] )
+					new AliasGroup( 'en', [ 'foo', 'bar' ] ),
 				] )
 			),
 			$entity->getFingerprint()
@@ -653,10 +638,10 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 				new Term( 'en', 'english label' ),
 			] ),
 			new TermList( [
-				new Term( 'en', 'english description' )
+				new Term( 'en', 'english description' ),
 			] ),
 			new AliasGroupList( [
-				new AliasGroup( 'en', [ 'first en alias', 'second en alias' ] )
+				new AliasGroup( 'en', [ 'first en alias', 'second en alias' ] ),
 			] )
 		);
 
@@ -673,7 +658,7 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 
 		$this->assertEquals(
 			new TermList( [
-				new Term( 'en', 'foo' )
+				new Term( 'en', 'foo' ),
 			] ),
 			$item->getLabels()
 		);
@@ -685,7 +670,7 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 
 		$this->assertEquals(
 			new TermList( [
-				new Term( 'en', 'foo bar' )
+				new Term( 'en', 'foo bar' ),
 			] ),
 			$item->getDescriptions()
 		);
@@ -697,7 +682,7 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 
 		$this->assertEquals(
 			new AliasGroupList( [
-				new AliasGroup( 'en', [ 'foo', 'bar' ] )
+				new AliasGroup( 'en', [ 'foo', 'bar' ] ),
 			] ),
 			$item->getAliasGroups()
 		);
@@ -744,7 +729,7 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 
 	public function clearableProvider() {
 		return [
-			'empty' => [ new Item( new ItemId( 'Q23' ) ), ],
+			'empty' => [ new Item( new ItemId( 'Q23' ) ) ],
 			'with fingerprint' => [
 				new Item(
 					new ItemId( 'Q42' ),
@@ -756,7 +741,7 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 					new ItemId( 'Q123' ),
 					null,
 					new SiteLinkList( [ new SiteLink( 'enwiki', 'Wikidata' ) ] )
-				)
+				),
 			],
 			'with statement' => [
 				new Item(
@@ -764,8 +749,8 @@ class ItemTest extends \PHPUnit\Framework\TestCase {
 					null,
 					null,
 					new StatementList( $this->newStatement() )
-				)
-			]
+				),
+			],
 		];
 	}
 

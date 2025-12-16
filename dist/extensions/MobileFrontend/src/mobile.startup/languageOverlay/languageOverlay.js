@@ -2,18 +2,19 @@ const
 	m = require( '../moduleLoaderSingleton' ),
 	getDeviceLanguage = require( './getDeviceLanguage' ),
 	Overlay = require( '../Overlay' ),
+	MessageBox = require( '../MessageBox' ),
+	currentPageHTMLParser = require( '../currentPageHTMLParser' )(),
 	promisedView = require( '../promisedView' );
 
 /**
  * @ignore
- * @param {PageGateway} pageGateway
- * getPageLanguages API call.
  * @return {jQuery.Promise} Resolves to LanguageSearcher
  */
-function loadLanguageSearcher( pageGateway ) {
-	return mw.loader.using( 'mobile.languages.structured' ).then( function () {
-		return pageGateway.getPageLanguages( mw.config.get( 'wgPageName' ), mw.config.get( 'wgUserLanguage' ) );
-	} ).then( function ( data ) {
+function loadLanguageSearcher() {
+	return mw.loader.using( 'mobile.languages.structured' ).then( () =>
+		currentPageHTMLParser.getLanguages(
+			mw.config.get( 'wgTitle' )
+		) ).then( ( data ) => {
 		const LanguageSearcher = m.require( 'mobile.languages.structured/LanguageSearcher' );
 
 		return new LanguageSearcher( {
@@ -21,34 +22,41 @@ function loadLanguageSearcher( pageGateway ) {
 			variants: data.variants,
 			showSuggestedLanguages: true,
 			deviceLanguage: getDeviceLanguage( navigator ),
-			onOpen: ( searcher ) => {
-				mw.hook( 'mobileFrontend.languageSearcher.onOpen' ).fire( searcher );
-			},
-			onBannerClick: () => {
-				mw.hook( 'mobileFrontend.languageSearcher.onBannerClick' ).fire();
-			}
+			/**
+			 * Stable for use inside ContentTranslation.
+			 * @event ~'mobileFrontend.languageSearcher.onOpen'
+			 * @memberof Hooks
+			 * @param {Hooks~LanguageSearcher} searcher
+			 */
+			onOpen: ( searcher ) => mw.hook( 'mobileFrontend.languageSearcher.onOpen' ).fire( searcher )
 		} );
-	} );
+	}, () =>
+		new MessageBox( {
+			type: 'error',
+			className: 'content',
+			msg: mw.msg( 'mobile-frontend-languages-structured-overlay-error' )
+		} ) );
 }
 
 /**
- * Factory function that returns a language featured instance of an Overlay
+ * Factory function that returns a language featured instance of an Overlay.
  *
- * @param {PageGateway} pageGateway
- * @return {Overlay}
+ * @function
+ * @memberof module:mobile.startup/languages
+ * @return {module:mobile.startup/Overlay}
  */
-function languageOverlay( pageGateway ) {
+function languageOverlay() {
 	return Overlay.make(
 		{
 			heading: mw.msg( 'mobile-frontend-language-heading' ),
 			className: 'overlay language-overlay'
-		}, promisedView( loadLanguageSearcher( pageGateway ) )
+		}, promisedView( loadLanguageSearcher() )
 	);
 }
 
 // To make knowing when async logic has resolved easier in tests
 languageOverlay.test = {
-	loadLanguageSearcher: loadLanguageSearcher
+	loadLanguageSearcher
 };
 
 module.exports = languageOverlay;

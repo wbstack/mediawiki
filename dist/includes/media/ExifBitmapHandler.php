@@ -22,6 +22,7 @@
  * @ingroup Media
  */
 
+use MediaWiki\Context\IContextSource;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
 
@@ -41,12 +42,12 @@ class ExifBitmapHandler extends BitmapHandler {
 
 	public function convertMetadataVersion( $metadata, $version = 1 ) {
 		// basically flattens arrays.
-		$version = is_int( $version ) ? $version : intval( explode( ';', $version, 2 )[0] );
+		$version = is_int( $version ) ? $version : (int)explode( ';', $version, 2 )[0];
 		if ( $version < 1 || $version >= 2 ) {
 			return $metadata;
 		}
 
-		if ( !isset( $metadata['MEDIAWIKI_EXIF_VERSION'] ) || $metadata['MEDIAWIKI_EXIF_VERSION'] != 2 ) {
+		if ( !isset( $metadata['MEDIAWIKI_EXIF_VERSION'] ) || $metadata['MEDIAWIKI_EXIF_VERSION'] !== 2 ) {
 			return $metadata;
 		}
 
@@ -71,9 +72,11 @@ class ExifBitmapHandler extends BitmapHandler {
 			);
 		}
 
-		// Ignore Location shown if it is not a simple string
-		if ( isset( $metadata['LocationShown'] ) && !is_string( $metadata['LocationShown'] ) ) {
-			unset( $metadata['LocationShown'] );
+		// Ignore Location shown/created if they are not simple strings
+		foreach ( [ 'LocationShown', 'LocationCreated' ] as $metadataKey ) {
+			if ( isset( $metadata[ $metadataKey ] ) && !is_string( $metadata[ $metadataKey ] ) ) {
+				unset( $metadata[ $metadataKey ] );
+			}
 		}
 
 		foreach ( $metadata as &$val ) {
@@ -82,6 +85,7 @@ class ExifBitmapHandler extends BitmapHandler {
 				$val = $formatter->flattenArrayReal( $val, 'ul', true );
 			}
 		}
+		unset( $val );
 		$metadata['MEDIAWIKI_EXIF_VERSION'] = 1;
 
 		return $metadata;
@@ -114,10 +118,10 @@ class ExifBitmapHandler extends BitmapHandler {
 		}
 
 		if ( !isset( $exif['MEDIAWIKI_EXIF_VERSION'] )
-			|| $exif['MEDIAWIKI_EXIF_VERSION'] != Exif::version()
+			|| $exif['MEDIAWIKI_EXIF_VERSION'] !== Exif::version()
 		) {
 			if ( isset( $exif['MEDIAWIKI_EXIF_VERSION'] )
-				&& $exif['MEDIAWIKI_EXIF_VERSION'] == 1
+				&& $exif['MEDIAWIKI_EXIF_VERSION'] === 1
 			) {
 				// back-compatible but old
 				wfDebug( __METHOD__ . ": back-compat version" );
@@ -168,7 +172,7 @@ class ExifBitmapHandler extends BitmapHandler {
 			$rotation = 0;
 		}
 
-		if ( $rotation == 90 || $rotation == 270 ) {
+		if ( $rotation === 90 || $rotation === 270 ) {
 			$width = $info['width'];
 			$info['width'] = $info['height'];
 			$info['height'] = $width;

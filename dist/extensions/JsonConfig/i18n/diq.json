@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Mirzali"
+			"Mirzali",
+			"GolyatGeri"
 		]
 	},
+	"nstab-data": "Dayıt",
 	"jsonconfig-type-name-number": "numre"
 }

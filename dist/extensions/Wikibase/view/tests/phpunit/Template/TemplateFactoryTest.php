@@ -35,13 +35,6 @@ class TemplateFactoryTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( [ 'basic' => '$1' ], $templates );
 	}
 
-	public function testGet() {
-		$template = $this->newInstance()->get( 'basic', [ '<PARAM>' ] );
-		$this->assertSame( 'basic', $template->getKey() );
-		$this->assertSame( [ '<PARAM>' ], $template->getParams() );
-		$this->assertSame( '<PARAM>', $template->plain() );
-	}
-
 	/**
 	 * @dataProvider renderParamsProvider
 	 */
@@ -50,7 +43,7 @@ class TemplateFactoryTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( $expected, $rendered );
 	}
 
-	public function renderParamsProvider() {
+	public static function renderParamsProvider() {
 		return [
 			[ '<PARAM>', '<PARAM>' ],
 			[ [], '$1' ],

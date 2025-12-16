@@ -46,7 +46,7 @@
 					return this.options.value.language;
 				},
 				function () {
-					return wb.getLanguageNameByCode( this.options.value.language );
+					return wb.getLanguageNameByCodeForTerms( this.options.value.language );
 				},
 				'', // label
 				'', // description
@@ -59,6 +59,9 @@
 				$label: '.wikibase-entitytermsforlanguageview-label',
 				$description: '.wikibase-entitytermsforlanguageview-description',
 				$aliases: '.wikibase-entitytermsforlanguageview-aliases'
+			},
+			allLanguageLabels: function () {
+				return {};
 			},
 			value: null
 		},
@@ -166,9 +169,20 @@
 						// * wikibase-description-input-help-message
 						// * wikibase-aliases-input-help-message
 						'wikibase-' + subjectName + '-input-help-message',
-						wb.getLanguageNameByCode( self.options.value.language )
+						wb.getLanguageNameByCodeForTerms( self.options.value.language )
 					)
 				};
+				if ( subjectName === 'label' ) {
+					options.allLanguages = self.options.allLanguageLabels;
+				}
+				// T338302: Indicate to the editor that mul doesn't support descriptions.
+				if ( subjectName === 'description' && self.options.value.language === 'mul' ) {
+					options.placeholderMessage = 'wikibase-description-edit-placeholder-not-applicable';
+					options.accessibilityLabel = mw.msg(
+						'wikibase-description-edit-mul-not-applicable-accessibility-label'
+					);
+					options.readOnly = true;
+				}
 
 				self[ '$' + widgetName ][ widgetName ]( options );
 			} );

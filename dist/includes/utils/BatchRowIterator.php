@@ -1,6 +1,6 @@
 <?php
 
-use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IReadableDatabase;
 
 /**
  * This program is free software; you can redistribute it and/or modify
@@ -33,7 +33,7 @@ use Wikimedia\Rdbms\IDatabase;
 class BatchRowIterator implements RecursiveIterator {
 
 	/**
-	 * @var IDatabase The database to read from
+	 * @var IReadableDatabase
 	 */
 	protected $db;
 
@@ -96,13 +96,12 @@ class BatchRowIterator implements RecursiveIterator {
 	/**
 	 * @stable to call
 	 *
-	 * @param IDatabase $db The database to read from
+	 * @param IReadableDatabase $db
 	 * @param string|array $table The name or names of the table to read from
 	 * @param string|array $primaryKey The name or names of the primary key columns
 	 * @param int $batchSize The number of rows to fetch per iteration
-	 * @throws InvalidArgumentException
 	 */
-	public function __construct( IDatabase $db, $table, $primaryKey, $batchSize ) {
+	public function __construct( IReadableDatabase $db, $table, $primaryKey, $batchSize ) {
 		if ( $batchSize < 1 ) {
 			throw new InvalidArgumentException( 'Batch size must be at least 1 row.' );
 		}
@@ -236,17 +235,16 @@ class BatchRowIterator implements RecursiveIterator {
 			$caller .= " (for {$this->caller})";
 		}
 
-		$res = $this->db->select(
-			$this->table,
-			$this->fetchColumns,
-			$this->buildConditions(),
-			$caller,
-			[
-				'LIMIT' => $this->batchSize,
-				'ORDER BY' => $this->orderBy,
-			] + $this->options,
-			$this->joinConditions
-		);
+		$res = $this->db->newSelectQueryBuilder()
+			->tables( is_array( $this->table ) ? $this->table : [ $this->table ] )
+			->fields( $this->fetchColumns )
+			->where( $this->buildConditions() )
+			->caller( $caller )
+			->limit( $this->batchSize )
+			->orderBy( $this->orderBy )
+			->options( $this->options )
+			->joinConds( $this->joinConditions )
+			->fetchResultSet();
 
 		// The iterator is converted to an array because in addition to
 		// returning it in self::current() we need to use the end value
@@ -258,11 +256,7 @@ class BatchRowIterator implements RecursiveIterator {
 	/**
 	 * Uses the primary key list and the maximal result row from the
 	 * previous iteration to build an SQL condition sufficient for
-	 * selecting the next page of results.  All except the final key use
-	 * `=` conditions while the final key uses a `>` condition
-	 *
-	 * Example output:
-	 *     [ '( foo = 42 AND bar > 7 ) OR ( foo > 42 )' ]
+	 * selecting the next page of results.
 	 *
 	 * @return array The SQL conditions necessary to select the next set
 	 *  of rows in the batched query
@@ -276,50 +270,12 @@ class BatchRowIterator implements RecursiveIterator {
 		$maximumValues = [];
 		foreach ( $this->primaryKey as $alias => $column ) {
 			$name = is_numeric( $alias ) ? $column : $alias;
-			$maximumValues[$column] = $this->db->addQuotes( $maxRow->{$name} );
-		}
-
-		$pkConditions = [];
-		// For example: If we have 3 primary keys
-		// first run through will generate
-		//   col1 = 4 AND col2 = 7 AND col3 > 1
-		// second run through will generate
-		//   col1 = 4 AND col2 > 7
-		// and the final run through will generate
-		//   col1 > 4
-		while ( $maximumValues ) {
-			$pkConditions[] = $this->buildGreaterThanCondition( $maximumValues );
-			array_pop( $maximumValues );
+			$maximumValues[$column] = $maxRow->$name;
 		}
 
 		$conditions = $this->conditions;
-		$conditions[] = sprintf( '( %s )', implode( ' ) OR ( ', $pkConditions ) );
+		$conditions[] = $this->db->buildComparison( '>', $maximumValues );
 
 		return $conditions;
-	}
-
-	/**
-	 * Given an array of column names and their maximum value  generate
-	 * an SQL condition where all keys except the last match $quotedMaximumValues
-	 * exactly and the last column is greater than the matching value in
-	 * $quotedMaximumValues
-	 *
-	 * @param array $quotedMaximumValues The maximum values quoted with
-	 *  $this->db->addQuotes()
-	 * @return string An SQL condition that will select rows where all
-	 *  columns match the maximum value exactly except the last column
-	 *  which must be greater than the provided maximum value
-	 */
-	protected function buildGreaterThanCondition( array $quotedMaximumValues ) {
-		$keys = array_keys( $quotedMaximumValues );
-		$lastColumn = end( $keys );
-		$lastValue = array_pop( $quotedMaximumValues );
-		$conditions = [];
-		foreach ( $quotedMaximumValues as $column => $value ) {
-			$conditions[] = "$column = $value";
-		}
-		$conditions[] = "$lastColumn > $lastValue";
-
-		return implode( ' AND ', $conditions );
 	}
 }

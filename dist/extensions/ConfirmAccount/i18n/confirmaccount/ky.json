@@ -1,16 +1,21 @@
 {
 	"@metadata": {
 		"authors": [
-			"Growingup",
-			"Bosogo"
+			"Bosogo",
+			"Growingup"
 		]
 	},
 	"confirmaccount-email-q": "Электрондук почта",
+	"confirmaccount-leg-user": "Аккаунт",
+	"confirmaccount-leg-person": "Жеке маалымат",
+	"confirmaccount-leg-other": "Башка маалымат",
 	"confirmaccount-name": "Колдонуучунун аты",
 	"confirmaccount-email": "Электрондук почта:",
 	"confirmaccount-pos-0": "автор",
 	"confirmaccount-pos-1": "түзөтүүчү",
+	"confirmaccount-notes": "Кошумча эскертмелер:",
 	"confirmaccount-noreason": "(жок)",
 	"confirmaccount-submit": "Ырастоо",
-	"confirmaccount-wsum": "Кош келиңиз !"
+	"confirmaccount-wsum": "Кош келиңиз!",
+	"confirmaccount-email-subj": "{{SITENAME}} аккаунтуна өтүнүч"
 }

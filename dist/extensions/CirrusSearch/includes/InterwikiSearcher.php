@@ -13,8 +13,9 @@ use CirrusSearch\Search\SearchQuery;
 use CirrusSearch\Search\SearchQueryBuilder;
 use CirrusSearch\Search\TitleHelper;
 use MediaWiki\MediaWikiServices;
-use Status;
-use User;
+use MediaWiki\Status\Status;
+use MediaWiki\User\User;
+use Wikimedia\Stats\StatsFactory;
 
 /**
  * Performs searches using Elasticsearch -- on interwikis!
@@ -50,13 +51,13 @@ class InterwikiSearcher extends Searcher {
 	public function __construct(
 		Connection $connection,
 		SearchConfig $config,
-		array $namespaces = null,
-		User $user = null,
-		CirrusDebugOptions $debugOptions = null,
-		NamespacePrefixParser $namespacePrefixParser = null,
-		InterwikiResolver $interwikiResolver = null,
-		TitleHelper $titleHelper = null,
-		CirrusSearchHookRunner $cirrusSearchHookRunner = null
+		?array $namespaces = null,
+		?User $user = null,
+		?CirrusDebugOptions $debugOptions = null,
+		?NamespacePrefixParser $namespacePrefixParser = null,
+		?InterwikiResolver $interwikiResolver = null,
+		?TitleHelper $titleHelper = null,
+		?CirrusSearchHookRunner $cirrusSearchHookRunner = null
 	) {
 		$maxResults = $config->get( 'CirrusSearchNumCrossProjectSearchResults' );
 		parent::__construct( $connection, 0, $maxResults, $config, $namespaces, $user, false,
@@ -89,8 +90,10 @@ class InterwikiSearcher extends Searcher {
 			$context = SearchContext::fromSearchQuery( $iwQuery,
 				FallbackRunner::create( $iwQuery, $this->interwikiResolver ), $this->cirrusSearchHookRunner );
 			$this->searchContext = $context;
-			$this->setResultsType( new FullTextResultsType( $this->searchContext->getFetchPhaseBuilder(),
-				$query->getParsedQuery()->isQueryOfClass( BasicQueryClassifier::COMPLEX_QUERY ), $this->titleHelper ) );
+			$this->setResultsType( new FullTextResultsType(
+				$this->searchContext->getFetchPhaseBuilder(),
+				$query->getParsedQuery()->isQueryOfClass( BasicQueryClassifier::COMPLEX_QUERY ),
+				$this->titleHelper, [], $this->searchContext->getConfig()->getElement( 'CirrusSearchDeduplicateInMemory' ) === true ) );
 			$this->config = $context->getConfig();
 			$this->limit = $iwQuery->getLimit();
 			$this->offset = $iwQuery->getOffset();
@@ -121,11 +124,7 @@ class InterwikiSearcher extends Searcher {
 			} );
 	}
 
-	/**
-	 * @return string The stats key used for reporting hit/miss rates of the
-	 *  application side query cache.
-	 */
-	protected function getQueryCacheStatsKey() {
-		return 'CirrusSearch.query_cache.interwiki';
+	protected function recordQueryCacheMetrics( StatsFactory $requestStats, string $cacheStatus, ?string $type = null ): void {
+		parent::recordQueryCacheMetrics( $requestStats, $cacheStatus, "interwiki" );
 	}
 }

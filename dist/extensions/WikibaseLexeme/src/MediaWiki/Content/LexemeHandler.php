@@ -1,16 +1,19 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lexeme\MediaWiki\Content;
 
 use Article;
-use IContextSource;
-use Page;
-use Title;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Title\Title;
+use Psr\Container\ContainerInterface;
 use UnexpectedValueException;
+use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityRedirect;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
-use Wikibase\Lexeme\DataAccess\Store\NullLabelDescriptionLookup;
+use Wikibase\Lexeme\DataAccess\Store\LemmaLookup;
 use Wikibase\Lexeme\Domain\Model\Form;
 use Wikibase\Lexeme\Domain\Model\FormId;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
@@ -18,11 +21,13 @@ use Wikibase\Lexeme\Domain\Model\LexemeId;
 use Wikibase\Lexeme\Domain\Model\LexemeSubEntityId;
 use Wikibase\Lexeme\Domain\Model\Sense;
 use Wikibase\Lexeme\Domain\Model\SenseId;
+use Wikibase\Lexeme\MediaWiki\Actions\LexemeHistoryAction;
 use Wikibase\Lexeme\MediaWiki\Actions\ViewLexemeAction;
+use Wikibase\Lexeme\Presentation\Formatters\LexemeTermFormatter;
+use Wikibase\Lexeme\WikibaseLexemeServices;
 use Wikibase\Lib\Store\EntityContentDataCodec;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Repo\Actions\EditEntityAction;
-use Wikibase\Repo\Actions\HistoryEntityAction;
 use Wikibase\Repo\Actions\SubmitEntityAction;
 use Wikibase\Repo\Content\EntityHandler;
 use Wikibase\Repo\Content\EntityHolder;
@@ -30,6 +35,7 @@ use Wikibase\Repo\Content\EntityInstanceHolder;
 use Wikibase\Repo\Search\Fields\FieldDefinitions;
 use Wikibase\Repo\Validators\EntityConstraintProvider;
 use Wikibase\Repo\Validators\ValidatorErrorLocalizer;
+use Wikibase\Repo\WikibaseRepo;
 
 /**
  * @license GPL-2.0-or-later
@@ -37,26 +43,13 @@ use Wikibase\Repo\Validators\ValidatorErrorLocalizer;
  */
 class LexemeHandler extends EntityHandler {
 
-	/**
-	 * @var EntityIdLookup
-	 */
-	private $entityIdLookup;
+	private EntityIdLookup $entityIdLookup;
 
-	/**
-	 * @var EntityLookup
-	 */
-	private $entityLookup;
+	private EntityLookup $entityLookup;
 
-	/**
-	 * @param EntityContentDataCodec $contentCodec
-	 * @param EntityConstraintProvider $constraintProvider
-	 * @param ValidatorErrorLocalizer $errorLocalizer
-	 * @param EntityIdParser $entityIdParser
-	 * @param EntityIdLookup $entityIdLookup
-	 * @param EntityLookup $entityLookup
-	 * @param FieldDefinitions $lexemeFieldDefinitions
-	 * @param callable|null $legacyExportFormatDetector
-	 */
+	private LemmaLookup $lemmaLookup;
+	private LexemeTermFormatter $lexemeTermFormatter;
+
 	public function __construct(
 		EntityContentDataCodec $contentCodec,
 		EntityConstraintProvider $constraintProvider,
@@ -65,7 +58,9 @@ class LexemeHandler extends EntityHandler {
 		EntityIdLookup $entityIdLookup,
 		EntityLookup $entityLookup,
 		FieldDefinitions $lexemeFieldDefinitions,
-		$legacyExportFormatDetector = null
+		LemmaLookup $lemmaLookup,
+		LexemeTermFormatter $lexemeTermFormatter,
+		?callable $legacyExportFormatDetector = null
 	) {
 		parent::__construct(
 			LexemeContent::CONTENT_MODEL_ID,
@@ -80,58 +75,73 @@ class LexemeHandler extends EntityHandler {
 
 		$this->entityIdLookup = $entityIdLookup;
 		$this->entityLookup = $entityLookup;
+		$this->lemmaLookup = $lemmaLookup;
+		$this->lexemeTermFormatter = $lexemeTermFormatter;
+	}
+
+	/**
+	 * This is intended to be used in the entity types wiring.
+	 */
+	public static function factory( ContainerInterface $services, IContextSource $context ): self {
+		return new self(
+			WikibaseRepo::getEntityContentDataCodec( $services ),
+			WikibaseRepo::getEntityConstraintProvider( $services ),
+			WikibaseRepo::getValidatorErrorLocalizer( $services ),
+			WikibaseRepo::getEntityIdParser( $services ),
+			WikibaseRepo::getEntityIdLookup( $services ),
+			WikibaseRepo::getEntityLookup( $services ),
+			WikibaseRepo::getFieldDefinitionsFactory( $services )
+				->getFieldDefinitionsByType( Lexeme::ENTITY_TYPE ),
+			WikibaseLexemeServices::getLemmaLookup( $services ),
+			new LexemeTermFormatter(
+				$context
+					->msg( 'wikibaselexeme-presentation-lexeme-display-label-separator-multiple-lemma' )
+					->escaped()
+			)
+		);
 	}
 
 	/**
 	 * @see ContentHandler::getActionOverrides
-	 *
-	 * @return array
 	 */
-	public function getActionOverrides() {
+	public function getActionOverrides(): array {
 		return [
 			'history' => function (
-				Page $article,
+				Article $article,
 				IContextSource $context
 			) {
-				/** @var Article $article */
-				return new HistoryEntityAction(
+				return new LexemeHistoryAction(
 					$article,
 					$context,
 					$this->entityIdLookup,
-					new NullLabelDescriptionLookup()
+					$this->lemmaLookup,
+					$this->lexemeTermFormatter
 				);
 			},
 			'view' => ViewLexemeAction::class,
-			'edit' => EditEntityAction::class,
-			'submit' => SubmitEntityAction::class,
+			'edit' => EditEntityAction::SPEC,
+			'submit' => SubmitEntityAction::SPEC,
 		];
 	}
 
-	/**
-	 * @return Lexeme
-	 */
-	public function makeEmptyEntity() {
+	public function makeEmptyEntity(): Lexeme {
 		return new Lexeme();
 	}
 
-	public function makeEntityRedirectContent( EntityRedirect $redirect ) {
+	public function makeEntityRedirectContent( EntityRedirect $redirect ): LexemeContent {
 		$title = $this->getTitleForId( $redirect->getTargetId() );
 		return LexemeContent::newFromRedirect( $redirect, $title );
 	}
 
 	/** @inheritDoc */
-	public function supportsRedirects() {
+	public function supportsRedirects(): bool {
 		return true;
 	}
 
 	/**
 	 * @see EntityHandler::newEntityContent
-	 *
-	 * @param EntityHolder|null $entityHolder
-	 *
-	 * @return LexemeContent
 	 */
-	protected function newEntityContent( EntityHolder $entityHolder = null ) {
+	protected function newEntityContent( ?EntityHolder $entityHolder ): LexemeContent {
 		if ( $entityHolder !== null && $entityHolder->getEntityType() === Form::ENTITY_TYPE ) {
 			$formId = $entityHolder->getEntityId();
 			if ( !( $formId instanceof FormId ) ) {
@@ -153,28 +163,20 @@ class LexemeHandler extends EntityHandler {
 
 	/**
 	 * @param string $id
-	 *
-	 * @return LexemeId
 	 */
-	public function makeEntityId( $id ) {
+	public function makeEntityId( $id ): LexemeId {
 		return new LexemeId( $id );
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getEntityType() {
+	public function getEntityType(): string {
 		return Lexeme::ENTITY_TYPE;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getSpecialPageForCreation() {
+	public function getSpecialPageForCreation(): string {
 		return 'NewLexeme';
 	}
 
-	public function getIdForTitle( Title $target ) {
+	public function getIdForTitle( Title $target ): EntityId {
 		$lexemeId = parent::getIdForTitle( $target );
 
 		if ( $target->hasFragment() ) {
@@ -198,7 +200,7 @@ class LexemeHandler extends EntityHandler {
 		return $lexemeId;
 	}
 
-	private function normalizeFragmentToId( Title $target ) {
+	private function normalizeFragmentToId( Title $target ): string {
 		$fragment = $target->getFragment();
 		if ( strpos( $fragment, LexemeSubEntityId::SUBENTITY_ID_SEPARATOR ) === false ) {
 			$fragment = $target->getText() . LexemeSubEntityId::SUBENTITY_ID_SEPARATOR . $fragment;
