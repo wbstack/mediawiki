@@ -1116,6 +1116,7 @@
     - lib/.vscode
   patchUrls:
     - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~1120952/revisions/1/patch?download
+    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~1216829/revisions/1/patch?download
 - name: StopForumSpam
   artifactUrl: https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/archive/5e3aab6e8be0e8effa97f9b454020230b6a70e3d.zip
   artifactLevel: 1
