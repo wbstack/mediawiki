@@ -9,11 +9,18 @@ mkdir -p ${COMPOSER_CACHE_DIR:-$HOME/.cache/composer}
 ## T302558 Pre-installing composer-merge-plugin
 #
 # Because of https://github.com/wikimedia/composer-merge-plugin/issues/202
-# We are required to install the composer-merge plugin separately
-# This avoids the unwanted update that happens on a fresh install
+# We are required to install the composer-merge plugin separately.
+# This avoids the unwanted composer update that happens on a
+# fresh install of the composer-merge-plugin
+#
+# There are a number of people looking at the problem upstream; it may be that
+# in the future this work around can be removed. See:
+# - https://github.com/wikimedia/composer-merge-plugin/issues/252
+# - https://github.com/wikimedia/composer-merge-plugin/pull/257
 #
 # This means for now, the wikimedia/composer-merge-plugin version needs to be defined here
-COMPOSER_MERGE_PLUGIN_VERSION=v2.0.1
+# and should be roughly kept in sync with core composer.json
+COMPOSER_MERGE_PLUGIN_VERSION=v2.1.0
 
 composer_in_docker () {
   docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) -v "$COMPOSER_WORK_DIR":/app \
