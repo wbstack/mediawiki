@@ -29,5 +29,13 @@
 	"templatesandbox-invalid-prefix": "Göstərdiyiniz qaralama prefiksi yanlışdır.",
 	"templatesandbox-prefix-not-local": "Göstərdiyiniz qaralama prefiksi lokal deyil.",
 	"templatesandbox-page-or-revid": "Siz ya səhifənin başlığını, ya da versiya ID nömrəsini daxil etməlisiniz.",
-	"templatesandbox-fail-post": "<em>Sessiya məlumatlarının itirilməsi səbəbindən, JavaScript hücumlarına qarşı ehtiyat tədbiri olaraq önizləmə gizlədilir.</em> \n\n<strong>Bu qanuni bir önizləmə cəhdidirsə, yenidən cəhd edin.</strong> \nƏgər hələ də işləmirsə, [[Special:UserLogout|çıxış edib]] və yenidən daxil olmağa cəhd edin."
+	"templatesandbox-fail-post": "<em>Sessiya məlumatlarının itirilməsi səbəbindən, JavaScript hücumlarına qarşı ehtiyat tədbiri olaraq önizləmə gizlədilir.</em> \n\n<strong>Bu qanuni bir önizləmə cəhdidirsə, yenidən cəhd edin.</strong> \nƏgər hələ də işləmirsə, [[Special:UserLogout|çıxış edib]] və yenidən daxil olmağa cəhd edin.",
+	"templatesandbox-fail-post-anon": "<em>Sayta giriş etmədiyiniz önizləmə JavaScript hücumlarına qarşı ehtiyat tədbiri olaraq gizlədilir.</em> \n\n<strong>Əgər bu problemsiz önizləmə cəhdidirsə, zəhmət olmasa, [[Special:UserLogin|daxil olun]] və yenidən cəhd edin.</strong>",
+	"templatesandbox-anon-limited-preview": "Daxil olmadıqda JavaScript və CSS dəyişikliklərinin önizləməsi qeyri-aktiv edilir. Əgər belə dəyişikliklərə önizləmə lazımdırsa, [[Special:UserLogin|daxil olun]] və yenidən cəhd edin.",
+	"templatesandbox-editform-need-template": "Bu şablonla başqa səhifəyə baxmaq üçün şablon adı göstərilməlidir.",
+	"templatesandbox-editform-need-title": "Bu şablonla başqa səhifəyə baxmaq üçün səhifə başlığı göstərilməlidir.",
+	"templatesandbox-editform-invalid-template": "Göstərdiyiniz şablonun adı etibarsızdır.",
+	"templatesandbox-editform-invalid-title": "Önizləmə üçün göstərdiyiniz başlıq yanlışdır.",
+	"templatesandbox-editform-title-not-exists": "Önizləmə üçün qeyd etdiyiniz başlıq mövcud deyil.",
+	"templatesandbox-failed-replace-section": "Mövcud səhifənin bölməsini əvəz etmək alınmadı."
 }

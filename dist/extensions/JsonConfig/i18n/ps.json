@@ -5,6 +5,15 @@
 			"شاه زمان پټان"
 		]
 	},
+	"nstab-data": "اومتوک",
+	"tooltip-ca-nstab-data": "اومتوک مخ کتل",
+	"jsonconfig-desc": "د جی‌اېس‌او‌اېن ترتيب ته اجازه ورکوي چې په ويکي کې وساتل شي",
+	"jsonconfig-duplicate-field": "له يو ارزښت څخه ډېر \"$1\" وموندل شو",
+	"jsonconfig-edit-action-apply": "پلي‌کول",
+	"jsonconfig-edit-action-cancel": "ناگارل",
+	"jsonconfig-edit-button-label": "د لښتيال په توگه سمول",
+	"jsonconfig-optional-field": "(اختياري)",
+	"jsonconfig-type-abbr-invalid": "(؟)",
 	"jsonconfig-type-name-invalid": "ناسم",
 	"jsonconfig-type-name-number": "شمېره"
 }

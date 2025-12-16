@@ -25,103 +25,76 @@
 
 class MailgunHooks {
 	/**
-	 * Send a mail using Mailgun API
+	 * Implements the AlternateUserMailer hook.
 	 *
-	 * @param array $headers
-	 * @param array $to
-	 * @param MailAddress $from
-	 * @param string $subject
-	 * @param string $body
-	 * @return bool
-	 * @throws Exception
+	 * @param array $headers Associative array of headers
+	 * @param array $to Array of MailAddress recipients
+	 * @param MailAddress $from Single MailAddress sender
+	 * @param string $subject Subject line
+	 * @param string $body Body text
+	 * @return bool|null False to stop other mailers, null to fall back
 	 */
 	public static function onAlternateUserMailer(
 		array $headers,
 		array $to,
 		MailAddress $from,
-		$subject,
-		$body
+		string $subject,
+		string $body
 	) {
-		$conf = RequestContext::getMain()->getConfig();
-
-		$mailgunAPIKey = $conf->get( 'MailgunAPIKey' );
-		$mailgunDomain = $conf->get( 'MailgunDomain' );
-
-		$mailgunEndpoint = "";
-		if ( $conf->has( 'MailgunEndpoint' ) ) {
-			$mailgunEndpoint = $conf->get( 'MailgunEndpoint' );
-		}
-
-		if ( $mailgunAPIKey == "" || $mailgunDomain == "" ) {
-			throw new MWException( "Please update your LocalSettings.php with the correct Mailgun API configurations" );
-		}
-
-		$mailgunConfigurator = new \Mailgun\HttpClient\HttpClientConfigurator();
-		$mailgunConfigurator->setApiKey( $mailgunAPIKey );
-
-		if ( !empty( $mailgunEndpoint ) ) {
-			$mailgunConfigurator->setEndpoint( $mailgunEndpoint );
-		}
-
-		$mailgunTransport = new \Mailgun\Mailgun( $mailgunConfigurator );
-
-		return self::sendBatchMessage( $mailgunTransport, $mailgunDomain, $headers, $to, $from, $subject, $body );
-	}
-
-	/**
-	 * Submit a batch message using Mailgun API
-	 *
-	 * @param \Mailgun\Mailgun $mailgunTransport
-	 * @param string $mailgunDomain
-	 * @param array $headers
-	 * @param array $to
-	 * @param MailAddress $from
-	 * @param string $subject
-	 * @param string $body
-	 * @return false|string
-	 * @throws Exception
-	 */
-	public static function sendBatchMessage(
-		\Mailgun\Mailgun $mailgunTransport,
-		$mailgunDomain,
-		array $headers,
-		array $to,
-		MailAddress $from,
-		$subject,
-		$body
-	) {
-		$message = $mailgunTransport->messages()->getBatchMessage( $mailgunDomain );
-
-		$message->setFromAddress( $from );
-		$message->setSubject( $subject );
-		$message->setTextBody( $body );
-
-		if ( isset( $headers['Return-Path'] ) ) {
-			$message->setReplyToAddress( $headers['Return-Path'] );
-		}
-
-		if ( isset( $headers['X-Mailer'] ) ) {
-			$message->addCustomHeader( "X-Mailer", $headers['X-Mailer'] );
-		}
-
-		if ( isset( $headers['List-Unsubscribe'] ) ) {
-			$message->addCustomHeader( "List-Unsubscribe", $headers['List-Unsubscribe'] );
-		}
-
-		foreach ( $to as $recip ) {
-			try {
-				$message->addToRecipient( $recip, [] );
-			} catch ( Exception $e ) {
-				return $e->getMessage();
-			}
-		}
-
 		try {
-			$message->finalize();
-		} catch ( Exception $e ) {
-			return $e->getMessage();
-		}
+			wfDebugLog( 'mailgun', 'Entered onAlternateUserMailer' );
 
-		return false;
+			$conf     = RequestContext::getMain()->getConfig();
+			$apiKey   = $conf->get( 'MailgunAPIKey' );
+			$domain   = $conf->get( 'MailgunDomain' );
+			$endpoint = $conf->get( 'MailgunEndpoint', '' );
+
+			if ( $apiKey === '' || $domain === '' ) {
+				wfDebugLog( 'mailgun', 'Missing API key or domain' );
+				return null;
+			}
+
+			// Configure Mailgun SDK
+			$configurator = new \Mailgun\HttpClient\HttpClientConfigurator();
+			$configurator->setApiKey( $apiKey );
+			if ( $endpoint !== '' ) {
+				$configurator->setEndpoint( $endpoint );
+			}
+			$mg = new \Mailgun\Mailgun( $configurator );
+
+			// Build recipients list using __toString()
+			$toHeader = implode( ', ', array_map(
+				static fn ( MailAddress $addr ) => (string)$addr,
+				$to
+			) );
+
+			// Build Mailgun parameters
+			$params = [
+				'from'    => (string)$from,
+				'to'      => $toHeader,
+				'subject' => $subject,
+				'text'    => $body,
+			];
+
+			// Add custom headers
+			foreach ( $headers as $name => $value ) {
+				$params["h:{$name}"] = $value;
+			}
+
+			wfDebugLog( 'mailgun', 'Sending via Mailgun: ' . json_encode( $params ) );
+			$response = $mg->messages()->send( $domain, $params );
+
+			wfDebugLog( 'mailgun', 'Mailgun API response ID: ' . $response->getId() );
+			if ( $response->getId() ) {
+				wfDebugLog( 'mailgun', 'Email sent successfully via Mailgun' );
+				// handled, stop other mailers
+				return false;
+			}
+
+			wfDebugLog( 'mailgun', 'Mailgun did not return an ID' );
+
+		} catch ( \Exception $e ) {
+			wfDebugLog( 'mailgun', 'Exception in Mailgun send: ' . $e->getMessage() );
+		}
 	}
 }

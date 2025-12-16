@@ -29,7 +29,7 @@
 	"requestaccount-ext-text": "Aşağıdaki bilgiler gizli tutulmaktadır ve yalnızca bu istek için kullanılacaktır.\nKimlik doğrulamada yardımcı olması için telefon numarası gibi irtibat bilgilerini eklemek isteyebilirsiniz.",
 	"requestaccount-bio-text": "Biyografinize aşağıdaki ilgili bilgileri eklemeyi deneyin.",
 	"requestaccount-bio-text-i": "'''Biyografiniz, kullanıcı sayfanız için ilk içerik olarak ayarlanacaktır.'''\nBu tür bilgileri yayınladığınızdan emin olun.",
-	"requestaccount-real": "Gerçek ad:",
+	"requestaccount-real": "Gerçek ad (isteğe bağlı):",
 	"requestaccount-same": "(gerçek isim ile aynı)",
 	"requestaccount-email": "E-posta adresi:",
 	"requestaccount-reqtype": "Konum:",
