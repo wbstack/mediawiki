@@ -33,6 +33,8 @@
 	"templatesandbox-invalid-prefix": "Antamaasi hiekkalaatikon etuliitettä ei ole.",
 	"templatesandbox-prefix-not-local": "Antamasi hiekkalaatikon etuliite ei sijaitse tällä sivustolla.",
 	"templatesandbox-page-or-revid": "Anna joko sivun otsikko tai versiotunniste.",
+	"templatesandbox-fail-post": "<em>Istuntotietojen menetyksen vuoksi esikatselu on piilotettu varotoimenpiteenä JavaScript-hyökkäyksien torjumiseksi.</em>\n\n<strong>Jos olet oikealla asialla, yritä uudelleen.</strong> \nJos se ei senkään jälkeen toimi, kokeile [[Special:UserLogout|kirjautua ulos]] ja kirjautua takaisin sisään.",
+	"templatesandbox-fail-post-anon": "<em>Koska et ole kirjautunut sisään, esikatselu on piilotettu JavaScript-hyökkäyksien torjumiseksi.</em>\n\n<strong>Jos olet oikealla asialla, [[Special:UserLogin|kirjaudu sisään]] ja yritä uudelleen.</strong>",
 	"templatesandbox-editform-need-template": "Esikatsellaksesi toista sivua tällä mallineella, täytyy mallineen nimi olla annettuna.",
 	"templatesandbox-editform-need-title": "Esikatsellaksesi toista sivua tällä mallineella, täytyy sivun otsikko olla annettuna.",
 	"templatesandbox-editform-invalid-template": "Antamasi mallineen nimi ei kelpaa.",

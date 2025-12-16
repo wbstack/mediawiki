@@ -11,7 +11,8 @@
 			"Jeeputer",
 			"Mjbmr",
 			"Reza1615",
-			"Taha"
+			"Taha",
+			"LordProfo"
 		]
 	},
 	"confirmaccounts": "تأیید درخواست‌های حساب",
@@ -80,7 +81,7 @@
 	"confirmaccount-submit": "تأیید",
 	"confirmaccount-needreason": "شما باید یک دلیل در جعبهٔ نظر زیر ارائه دهید.",
 	"confirmaccount-canthold": "این درخواست پیش از این یا نگه داشته شده یا حذف شده.",
-	"confirmaccount-badaction": "یک عمل معتبر (قبول،رد،نگه‌داشتن) باید به منظور ادامه دادن، تعیین شود.",
+	"confirmaccount-badaction": "برای ادامه دادن، یک کنش معتبر (پذیرفتن، رد کردن، نگه‌داشتن) باید تعیین شود.",
 	"confirmaccount-acc": "درخواست حساب تأیید شد؛\n\tایجاد حساب کاربری تازهٔ [[User:$1|$1]].",
 	"confirmaccount-rej": "درخواست حساب، رد شد.",
 	"confirmaccount-viewing": "(currently {{GENDER:$1|being}} مشاهده شده توسط [[User:$1|$1]])",

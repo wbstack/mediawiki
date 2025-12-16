@@ -2,13 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"JeffreyKim",
-			"Ktchankt"
+			"Ktchankt",
+			"SaldırganSincap"
 		]
 	},
 	"templatesandbox-apihelp-prefix": "範本沙盒前綴，同[[Special:TemplateSandbox]]一樣。",
 	"templatesandbox-apihelp-title": "用<var>$1templatesandboxtext</var>去解析頁面，而唔係用呢度命名嘅頁面內容。",
 	"templatesandbox-apihelp-text": "用呢個頁面內容嚟解析頁面，而唔係用<var>$1templatesandboxtitle</var>命名嘅頁面。",
-	"templatesandbox-apihelp-contentmodel": "<var>$1templatesandboxtext<var>嘅內容模型。",
-	"templatesandbox-apihelp-contentformat": "內容格式係<var>$1templatesandboxtext<var>。",
-	"templatesandbox-apierror-titleandtext": "參數<var>$1templatesandboxtitle</var>同<var>$1templatesandboxtext<var>必須同時指定，或者兩者都係省略。"
+	"templatesandbox-apihelp-contentmodel": "<var>$1templatesandboxtext</var>嘅內容模型。",
+	"templatesandbox-apihelp-contentformat": "內容格式係<var>$1templatesandboxtext</var>。",
+	"templatesandbox-apierror-titleandtext": "參數<var>$1templatesandboxtitle</var>同<var>$1templatesandboxtext</var>必須同時指定，或者兩者都係省略。"
 }

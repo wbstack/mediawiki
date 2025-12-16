@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"SaldırganSincap"
+		]
+	},
+	"elastica-desc": "[https://elastica.io/ Elastica] kitaplığı sağlayarak diğer uzantılar için temel [https://www.elastic.co/ Elasticsearch] işlevi"
+}

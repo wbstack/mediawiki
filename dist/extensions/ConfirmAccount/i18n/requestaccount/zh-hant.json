@@ -11,7 +11,8 @@
 			"Suchichi02",
 			"Waihorace",
 			"Winston Sung",
-			"Xiplus"
+			"Xiplus",
+			"Kly"
 		]
 	},
 	"requestaccount": "請求帳號",
@@ -29,7 +30,7 @@
 	"requestaccount-ext-text": "以下的資料將會保密，而且只是會用在這次請求中。\n\t您可能需要列示聯絡資料，像電話號碼等去幫助證明您的確認。",
 	"requestaccount-bio-text": "您傳記將會設定成在您使用者頁面中的預設內容，嘗試包含証明。",
 	"requestaccount-bio-text-i": "'''你的簡履將會成為你的使用者頁面的內容。'''\n請確保你可以發佈該等資訊。",
-	"requestaccount-real": "真實名字：",
+	"requestaccount-real": "真實姓名（可選）：",
 	"requestaccount-same": "（同真實名字）",
 	"requestaccount-email": "電子郵件地址：",
 	"requestaccount-reqtype": "位置",

@@ -9,5 +9,6 @@
 	"jsonconfig-edit-action-cancel": "Gaskkalduhte",
 	"jsonconfig-optional-field": "(eaktodáhtolaš)",
 	"jsonconfig-type-name-string": "sreaŋga",
-	"jsonconfig-type-name-boolean": "boolelaš árvu"
+	"jsonconfig-type-name-boolean": "boolelaš árvu",
+	"jsonconfig-license-name-CC-BY-SA-1.0": "Creative Commons Namat-JuogeSeammáláhkái 1.0"
 }
