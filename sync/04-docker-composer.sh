@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+set -e
 
 SCRIPT_COMPOSER_CACHE=${COMPOSER_CACHE_DIR:-$HOME/.cache/composer}
 
