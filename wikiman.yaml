@@ -116,6 +116,11 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-TextExtracts
   - name: EntitySchema
     repoName: wikimedia/mediawiki-extensions-EntitySchema
+
+    # Uses this fork now https://www.mediawiki.org/wiki/Extension:EmbedVideo_(fork)
+  - name: EmbedVideo
+    repoName: StarCitizenWiki/mediawiki-extensions-EmbedVideo
+
   ## These extensions should not currently use the mediawikiVersion
   - name: WikibaseInWikitext
     repoName: wbstack/mediawiki-extensions-WikibaseInWikitext
@@ -158,11 +163,6 @@ extensions:
   # A subsequent patch, only available in REL1_40, appears to removes this dependency again (https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/commit/5e3aab6e8be0e8effa97f9b454020230b6a70e3d)
   - name: StopForumSpam
     url: https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/archive/5e3aab6e8be0e8effa97f9b454020230b6a70e3d.zip
-  # EmbedVideo is currently broken in releases due to deprecated warnings https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/issues/4784
-  # There was a MR up for fixing that https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/merge_requests/148 so lets directly use that commit?
-  # We were using v2.9.0 before this
-  - name: EmbedVideo
-    url: https://gitlab.com/jmnote/EmbedVideo/-/archive/e1e965527e19a00de34e534f87d6b7cdae8b262f/EmbedVideo-e1e965527e19a00de34e534f87d6b7cdae8b262f.zip
   - name: VisualEditor
     url: https://github.com/wbstack/mediawiki-tars/raw/75bedb27afda71878d19f62fc5d96e5c3481cd43/VisualEditor-1761224161-REL1_43.tar.gz
 
