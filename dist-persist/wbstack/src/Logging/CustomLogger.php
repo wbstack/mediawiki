@@ -72,7 +72,9 @@ class CustomLogger extends AbstractLogger {
             'version' => MW_VERSION,
         ];
         $payload[ 'context' ] = [
-            'request_uri' => $_SERVER['REQUEST_URI'] ?? '',
+            'environment'   => $env ?? '',
+
+            'request_uri'   => $_SERVER['REQUEST_URI'] ?? '',
 
             // set in /includes/Defines.php
             'mediawiki'     => MW_VERSION,
