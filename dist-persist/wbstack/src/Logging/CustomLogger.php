@@ -63,7 +63,7 @@ class CustomLogger extends AbstractLogger {
 
         $envString = '';
         if ($env = getenv('MW_ENVIRONMENT')) {
-            $envString = " (${env})";
+            $envString = " ({$env})";
         }
 
         $payload[ 'severity' ] = $level;
