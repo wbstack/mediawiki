@@ -164,6 +164,10 @@ $wgUseImageMagick = true;
 $wgEnableUploads = false;
 $wgAllowCopyUploads = false;
 $wgUseInstantCommons = true;
+
+// Workaround for T413870
+$wgTiffThumbnailType = array( 'jpg', 'image/jpeg' );
+
 $wgFileExtensions = array_merge( $wgFileExtensions,
     array( 'doc', 'xls', 'mpp', 'pdf', 'ppt', 'xlsx', 'jpg',
         'tiff', 'odt', 'odg', 'ods', 'odp', 'svg'
