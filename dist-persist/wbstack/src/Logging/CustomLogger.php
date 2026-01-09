@@ -61,13 +61,20 @@ class CustomLogger extends AbstractLogger {
             $payload[ '@type' ] = 'type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent';
         }
 
+        $envString = '';
+        if ($env = getenv('MW_ENVIRONMENT')) {
+            $envString = " ({$env})";
+        }
+
         $payload[ 'severity' ] = $level;
         $payload[ 'serviceContext' ] = [
-            'service' => 'WBaaS MediaWiki',
+            'service' => 'WBaaS MediaWiki' . $envString,
             'version' => MW_VERSION,
         ];
         $payload[ 'context' ] = [
-            'request_uri' => $_SERVER['REQUEST_URI'] ?? '',
+            'environment'   => $env ?? '',
+
+            'request_uri'   => $_SERVER['REQUEST_URI'] ?? '',
 
             // set in /includes/Defines.php
             'mediawiki'     => MW_VERSION,
