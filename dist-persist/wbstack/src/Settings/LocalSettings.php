@@ -24,7 +24,7 @@ if ( !defined( 'STDERR' ) ) {
 require_once __DIR__ . '/Localization.php';
 
 // Define some conditions to switch behaviour on
-$wwDomainSaysLocal = isset($_SERVER['SERVER_NAME']) && preg_match("/(\w\.localhost)/", $_SERVER['SERVER_NAME']) === 1;
+$wwDomainSaysLocal = isset($_SERVER['SERVER_NAME']) && preg_match("/\w\.(localhost|wbaas\.dev)/", $_SERVER['SERVER_NAME']) === 1;
 $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
 $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
@@ -507,6 +507,16 @@ $wgDnsBlacklistUrls =
         'all.s5h.net.',
         'dnsbl.dronebl.org.',
     ];
+
+if ($wwDomainSaysLocal) {
+    $wgProxyWhitelist = [];
+    
+    for ($a=0; $a<255; $a++) {
+        for ($b=0; $b<255; $b++) {
+            $wgProxyWhitelist[] = "10.244.$a.$b";
+        }
+    }
+}
 
 # ConfirmEdit
 
