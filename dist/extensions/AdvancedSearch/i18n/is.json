@@ -44,6 +44,7 @@
 	"advancedsearch-namespaces-preset-all": "Allt",
 	"advancedsearch-namespaces-preset-default": "Sjálfgefið",
 	"advancedsearch-namespaces-preset-general-help": "Almenn ráð",
-	"advancedsearch-namespaces-preset-discussion": "Spjall",
-	"advancedsearch-namespaces-placeholder": "Bæta við nafnrýmum…"
+	"advancedsearch-namespaces-preset-discussion": "Umræða",
+	"advancedsearch-namespaces-placeholder": "Bæta við nafnrýmum…",
+	"prefs-advancedsearch": "Ítarleg leit"
 }

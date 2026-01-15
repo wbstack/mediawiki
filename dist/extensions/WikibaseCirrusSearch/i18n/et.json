@@ -5,6 +5,12 @@
 			"Pikne"
 		]
 	},
+	"wikibasecirrus-keywordfeature-unknown-language-code": "võtmesõna \"$1\" sisaldab tundmatut keelekoodi \"$2\"",
+	"wikibasecirrus-keywordfeature-too-many-language-codes": "võtmesõnas \"$1\" on ette antud liiga palju keelekoode. Otsitakse $2 keeles $3-st ette antud {{PLURAL:$3|keelest}}",
+	"wikibasecirrus-inlabel-no-query-provided": "võtmesõnas \"inlabel\" anti ette tühi otsisõna",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "võtmesõna \"haswbstatement\" ei sisalda ühtegi kehtivat avaldust",
+	"wikibasecirrus-haslicense-feature-no-valid-arguments": "võtmesõna \"haslicense\" ei sisalda ühtegi kehtivat argumenti",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "võtmesõna \"wbstatementquantity\" ei sisalda ühtegi kehtivat avaldust",
 	"special-entitieswithoutdescription": "Kirjelduseta olemid",
 	"wikibasecirrus-entitieswithoutdescription-legend": "Kirjelduseta olemite loendi hankimine",
 	"special-entitieswithoutlabel": "Sildita olemid",

@@ -21,6 +21,8 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
         '3ef87127dc6892a0a78f223558a0b940' => __DIR__ . '/..' . '/diff/diff/Diff.php',
         '5897ea0ac4cccf14d323035e65887801' => __DIR__ . '/..' . '/symfony/polyfill-php82/bootstrap.php',
         '662a729f963d39afe703c9d9b7ab4a8c' => __DIR__ . '/..' . '/symfony/polyfill-php83/bootstrap.php',
+        '9d2b9fc6db0f153a0a149fefb182415e' => __DIR__ . '/..' . '/symfony/polyfill-php84/bootstrap.php',
+        '606a39d89246991a373564698c2d8383' => __DIR__ . '/..' . '/symfony/polyfill-php85/bootstrap.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -43,6 +45,7 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
             'Wikimedia\\IDLeDOM\\' => 18,
             'Wikimedia\\Composer\\Merge\\V2\\' => 28,
             'Wikimedia\\CommonPasswords\\' => 26,
+            'Wikimedia\\CSS\\' => 14,
             'Wikimedia\\Bcp47Code\\' => 20,
             'Wikimedia\\AtEase\\' => 17,
             'Wikimedia\\Assert\\' => 17,
@@ -60,6 +63,8 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
         ),
         'S' => 
         array (
+            'Symfony\\Polyfill\\Php85\\' => 23,
+            'Symfony\\Polyfill\\Php84\\' => 23,
             'Symfony\\Polyfill\\Php83\\' => 23,
             'Symfony\\Polyfill\\Php82\\' => 23,
             'Symfony\\Polyfill\\Php73\\' => 23,
@@ -68,7 +73,6 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
             'Symfony\\Component\\Translation\\' => 30,
             'Symfony\\Component\\OptionsResolver\\' => 34,
             'Swaggest\\JsonDiff\\' => 18,
-            'StellaMaris\\Clock\\' => 18,
             'Shellbox\\' => 9,
             'Serializers\\' => 12,
         ),
@@ -233,6 +237,10 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
         array (
             0 => __DIR__ . '/..' . '/wikimedia/common-passwords/src',
         ),
+        'Wikimedia\\CSS\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src',
+        ),
         'Wikimedia\\Bcp47Code\\' => 
         array (
             0 => __DIR__ . '/..' . '/wikimedia/bcp-47-code/src',
@@ -285,6 +293,14 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
             0 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueFormatters',
             1 => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters',
         ),
+        'Symfony\\Polyfill\\Php85\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php85',
+        ),
+        'Symfony\\Polyfill\\Php84\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php84',
+        ),
         'Symfony\\Polyfill\\Php83\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php83',
@@ -316,10 +332,6 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
         'Swaggest\\JsonDiff\\' => 
         array (
             0 => __DIR__ . '/..' . '/swaggest/json-diff/src',
-        ),
-        'StellaMaris\\Clock\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/stella-maris/clock/src',
         ),
         'Shellbox\\' => 
         array (
@@ -413,7 +425,7 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
         ),
         'Lcobucci\\Clock\\' => 
         array (
-            0 => __DIR__ . '/..' . '/lcobucci/clock/src',
+            0 => __DIR__ . '/..' . '/okvpn/clock-lts/src',
         ),
         'JsonSchema\\' => 
         array (
@@ -608,7 +620,7 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
     );
 
     public static $fallbackDirsPsr0 = array (
-        0 => __DIR__ . '/..' . '/cssjanus/cssjanus/src',
+        0 => __DIR__ . '/..' . '/wikimedia/cssjanus/src',
     );
 
     public static $classMap = array (
@@ -620,7 +632,7 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
         'CLDRPluralRuleParser\\Error' => __DIR__ . '/..' . '/wikimedia/cldr-plural-rule-parser/src/Error.php',
         'CLDRPluralRuleParser\\Evaluator' => __DIR__ . '/..' . '/wikimedia/cldr-plural-rule-parser/src/Evaluator.php',
         'CLDRPluralRuleParser\\Range' => __DIR__ . '/..' . '/wikimedia/cldr-plural-rule-parser/src/Range.php',
-        'CSSJanus' => __DIR__ . '/..' . '/cssjanus/cssjanus/src/CSSJanus.php',
+        'CSSJanus' => __DIR__ . '/..' . '/wikimedia/cssjanus/src/CSSJanus.php',
         'Carbon\\AbstractTranslator' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/AbstractTranslator.php',
         'Carbon\\Carbon' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Carbon.php',
         'Carbon\\CarbonConverterInterface' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/CarbonConverterInterface.php',
@@ -892,6 +904,7 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
         'Defuse\\Crypto\\KeyOrPassword' => __DIR__ . '/..' . '/defuse/php-encryption/src/KeyOrPassword.php',
         'Defuse\\Crypto\\KeyProtectedByPassword' => __DIR__ . '/..' . '/defuse/php-encryption/src/KeyProtectedByPassword.php',
         'Defuse\\Crypto\\RuntimeTests' => __DIR__ . '/..' . '/defuse/php-encryption/src/RuntimeTests.php',
+        'Deprecated' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/Deprecated.php',
         'Deserializers\\Deserializer' => __DIR__ . '/..' . '/serialization/serialization/src/Deserializers/Deserializer.php',
         'Deserializers\\DispatchableDeserializer' => __DIR__ . '/..' . '/serialization/serialization/src/Deserializers/DispatchableDeserializer.php',
         'Deserializers\\DispatchingDeserializer' => __DIR__ . '/..' . '/serialization/serialization/src/Deserializers/DispatchingDeserializer.php',
@@ -2060,9 +2073,9 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
         'JsonSchema\\Uri\\UriResolver' => __DIR__ . '/..' . '/justinrainbow/json-schema/src/JsonSchema/Uri/UriResolver.php',
         'JsonSchema\\Uri\\UriRetriever' => __DIR__ . '/..' . '/justinrainbow/json-schema/src/JsonSchema/Uri/UriRetriever.php',
         'JsonSchema\\Validator' => __DIR__ . '/..' . '/justinrainbow/json-schema/src/JsonSchema/Validator.php',
-        'Lcobucci\\Clock\\Clock' => __DIR__ . '/..' . '/lcobucci/clock/src/Clock.php',
-        'Lcobucci\\Clock\\FrozenClock' => __DIR__ . '/..' . '/lcobucci/clock/src/FrozenClock.php',
-        'Lcobucci\\Clock\\SystemClock' => __DIR__ . '/..' . '/lcobucci/clock/src/SystemClock.php',
+        'Lcobucci\\Clock\\Clock' => __DIR__ . '/..' . '/okvpn/clock-lts/src/Clock.php',
+        'Lcobucci\\Clock\\FrozenClock' => __DIR__ . '/..' . '/okvpn/clock-lts/src/FrozenClock.php',
+        'Lcobucci\\Clock\\SystemClock' => __DIR__ . '/..' . '/okvpn/clock-lts/src/SystemClock.php',
         'Lcobucci\\JWT\\Builder' => __DIR__ . '/..' . '/lcobucci/jwt/src/Builder.php',
         'Lcobucci\\JWT\\ClaimsFormatter' => __DIR__ . '/..' . '/lcobucci/jwt/src/ClaimsFormatter.php',
         'Lcobucci\\JWT\\Configuration' => __DIR__ . '/..' . '/lcobucci/jwt/src/Configuration.php',
@@ -2653,6 +2666,7 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
         'Net_SMTP' => __DIR__ . '/..' . '/pear/net_smtp/Net/SMTP.php',
         'Net_Socket' => __DIR__ . '/..' . '/pear/net_socket/Net/Socket.php',
         'Net_URL2' => __DIR__ . '/..' . '/pear/net_url2/Net/URL2.php',
+        'NoDiscard' => __DIR__ . '/..' . '/symfony/polyfill-php85/Resources/stubs/NoDiscard.php',
         'Nyholm\\Dsn\\Configuration\\Dsn' => __DIR__ . '/..' . '/nyholm/dsn/src/Configuration/Dsn.php',
         'Nyholm\\Dsn\\Configuration\\DsnFunction' => __DIR__ . '/..' . '/nyholm/dsn/src/Configuration/DsnFunction.php',
         'Nyholm\\Dsn\\Configuration\\Path' => __DIR__ . '/..' . '/nyholm/dsn/src/Configuration/Path.php',
@@ -3019,7 +3033,6 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
         'Shellbox\\Shellbox' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Shellbox.php',
         'Shellbox\\ShellboxError' => __DIR__ . '/..' . '/wikimedia/shellbox/src/ShellboxError.php',
         'Shellbox\\TempDirManager' => __DIR__ . '/..' . '/wikimedia/shellbox/src/TempDirManager.php',
-        'StellaMaris\\Clock\\ClockInterface' => __DIR__ . '/..' . '/stella-maris/clock/src/ClockInterface.php',
         'Swaggest\\JsonDiff\\Exception' => __DIR__ . '/..' . '/swaggest/json-diff/src/Exception.php',
         'Swaggest\\JsonDiff\\InvalidFieldTypeException' => __DIR__ . '/..' . '/swaggest/json-diff/src/InvalidFieldTypeException.php',
         'Swaggest\\JsonDiff\\JsonDiff' => __DIR__ . '/..' . '/swaggest/json-diff/src/JsonDiff.php',
@@ -3174,6 +3187,8 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
         'Symfony\\Polyfill\\Php82\\Random\\Engine\\Secure' => __DIR__ . '/..' . '/symfony/polyfill-php82/Random/Engine/Secure.php',
         'Symfony\\Polyfill\\Php82\\SensitiveParameterValue' => __DIR__ . '/..' . '/symfony/polyfill-php82/SensitiveParameterValue.php',
         'Symfony\\Polyfill\\Php83\\Php83' => __DIR__ . '/..' . '/symfony/polyfill-php83/Php83.php',
+        'Symfony\\Polyfill\\Php84\\Php84' => __DIR__ . '/..' . '/symfony/polyfill-php84/Php84.php',
+        'Symfony\\Polyfill\\Php85\\Php85' => __DIR__ . '/..' . '/symfony/polyfill-php85/Php85.php',
         'System' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/System.php',
         'TextCat' => __DIR__ . '/..' . '/wikimedia/textcat/src/TextCat.php',
         'UtfNormal\\Constants' => __DIR__ . '/..' . '/wikimedia/utfnormal/src/Constants.php',
@@ -3450,6 +3465,67 @@ class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
         'Wikimedia\\AtEase\\AtEase' => __DIR__ . '/..' . '/wikimedia/at-ease/src/AtEase.php',
         'Wikimedia\\Bcp47Code\\Bcp47Code' => __DIR__ . '/..' . '/wikimedia/bcp-47-code/src/Bcp47Code.php',
         'Wikimedia\\Bcp47Code\\Bcp47CodeValue' => __DIR__ . '/..' . '/wikimedia/bcp-47-code/src/Bcp47CodeValue.php',
+        'Wikimedia\\CSS\\Grammar\\Alternative' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/Alternative.php',
+        'Wikimedia\\CSS\\Grammar\\AnythingMatcher' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/AnythingMatcher.php',
+        'Wikimedia\\CSS\\Grammar\\BlockMatcher' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/BlockMatcher.php',
+        'Wikimedia\\CSS\\Grammar\\CheckedMatcher' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/CheckedMatcher.php',
+        'Wikimedia\\CSS\\Grammar\\CustomPropertyMatcher' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/CustomPropertyMatcher.php',
+        'Wikimedia\\CSS\\Grammar\\DelimMatcher' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/DelimMatcher.php',
+        'Wikimedia\\CSS\\Grammar\\FunctionMatcher' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/FunctionMatcher.php',
+        'Wikimedia\\CSS\\Grammar\\GrammarMatch' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/GrammarMatch.php',
+        'Wikimedia\\CSS\\Grammar\\Juxtaposition' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/Juxtaposition.php',
+        'Wikimedia\\CSS\\Grammar\\KeywordMatcher' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/KeywordMatcher.php',
+        'Wikimedia\\CSS\\Grammar\\Matcher' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/Matcher.php',
+        'Wikimedia\\CSS\\Grammar\\MatcherFactory' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/MatcherFactory.php',
+        'Wikimedia\\CSS\\Grammar\\NoWhitespace' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/NoWhitespace.php',
+        'Wikimedia\\CSS\\Grammar\\NonEmpty' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/NonEmpty.php',
+        'Wikimedia\\CSS\\Grammar\\NothingMatcher' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/NothingMatcher.php',
+        'Wikimedia\\CSS\\Grammar\\Quantifier' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/Quantifier.php',
+        'Wikimedia\\CSS\\Grammar\\TokenMatcher' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/TokenMatcher.php',
+        'Wikimedia\\CSS\\Grammar\\UnorderedGroup' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/UnorderedGroup.php',
+        'Wikimedia\\CSS\\Grammar\\UrangeMatcher' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/UrangeMatcher.php',
+        'Wikimedia\\CSS\\Grammar\\UrlMatcher' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/UrlMatcher.php',
+        'Wikimedia\\CSS\\Grammar\\WhitespaceMatcher' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Grammar/WhitespaceMatcher.php',
+        'Wikimedia\\CSS\\Objects\\AtRule' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/AtRule.php',
+        'Wikimedia\\CSS\\Objects\\CSSFunction' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/CSSFunction.php',
+        'Wikimedia\\CSS\\Objects\\CSSObject' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/CSSObject.php',
+        'Wikimedia\\CSS\\Objects\\CSSObjectList' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/CSSObjectList.php',
+        'Wikimedia\\CSS\\Objects\\ComponentValue' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/ComponentValue.php',
+        'Wikimedia\\CSS\\Objects\\ComponentValueList' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/ComponentValueList.php',
+        'Wikimedia\\CSS\\Objects\\Declaration' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/Declaration.php',
+        'Wikimedia\\CSS\\Objects\\DeclarationList' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/DeclarationList.php',
+        'Wikimedia\\CSS\\Objects\\DeclarationOrAtRule' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/DeclarationOrAtRule.php',
+        'Wikimedia\\CSS\\Objects\\DeclarationOrAtRuleList' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/DeclarationOrAtRuleList.php',
+        'Wikimedia\\CSS\\Objects\\QualifiedRule' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/QualifiedRule.php',
+        'Wikimedia\\CSS\\Objects\\Rule' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/Rule.php',
+        'Wikimedia\\CSS\\Objects\\RuleList' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/RuleList.php',
+        'Wikimedia\\CSS\\Objects\\SimpleBlock' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/SimpleBlock.php',
+        'Wikimedia\\CSS\\Objects\\Stylesheet' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/Stylesheet.php',
+        'Wikimedia\\CSS\\Objects\\Token' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/Token.php',
+        'Wikimedia\\CSS\\Objects\\TokenList' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Objects/TokenList.php',
+        'Wikimedia\\CSS\\Parser\\DataSource' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Parser/DataSource.php',
+        'Wikimedia\\CSS\\Parser\\DataSourceTokenizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Parser/DataSourceTokenizer.php',
+        'Wikimedia\\CSS\\Parser\\Encoder' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Parser/Encoder.php',
+        'Wikimedia\\CSS\\Parser\\Parser' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Parser/Parser.php',
+        'Wikimedia\\CSS\\Parser\\StringDataSource' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Parser/StringDataSource.php',
+        'Wikimedia\\CSS\\Parser\\TokenListTokenizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Parser/TokenListTokenizer.php',
+        'Wikimedia\\CSS\\Parser\\Tokenizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Parser/Tokenizer.php',
+        'Wikimedia\\CSS\\Sanitizer\\FontFaceAtRuleSanitizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Sanitizer/FontFaceAtRuleSanitizer.php',
+        'Wikimedia\\CSS\\Sanitizer\\ImportAtRuleSanitizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Sanitizer/ImportAtRuleSanitizer.php',
+        'Wikimedia\\CSS\\Sanitizer\\KeyframesAtRuleSanitizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Sanitizer/KeyframesAtRuleSanitizer.php',
+        'Wikimedia\\CSS\\Sanitizer\\MarginAtRuleSanitizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Sanitizer/MarginAtRuleSanitizer.php',
+        'Wikimedia\\CSS\\Sanitizer\\MediaAtRuleSanitizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Sanitizer/MediaAtRuleSanitizer.php',
+        'Wikimedia\\CSS\\Sanitizer\\NamespaceAtRuleSanitizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Sanitizer/NamespaceAtRuleSanitizer.php',
+        'Wikimedia\\CSS\\Sanitizer\\PageAtRuleSanitizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Sanitizer/PageAtRuleSanitizer.php',
+        'Wikimedia\\CSS\\Sanitizer\\PropertySanitizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Sanitizer/PropertySanitizer.php',
+        'Wikimedia\\CSS\\Sanitizer\\RuleSanitizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Sanitizer/RuleSanitizer.php',
+        'Wikimedia\\CSS\\Sanitizer\\Sanitizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Sanitizer/Sanitizer.php',
+        'Wikimedia\\CSS\\Sanitizer\\StyleAttributeSanitizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Sanitizer/StyleAttributeSanitizer.php',
+        'Wikimedia\\CSS\\Sanitizer\\StylePropertySanitizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Sanitizer/StylePropertySanitizer.php',
+        'Wikimedia\\CSS\\Sanitizer\\StyleRuleSanitizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Sanitizer/StyleRuleSanitizer.php',
+        'Wikimedia\\CSS\\Sanitizer\\StylesheetSanitizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Sanitizer/StylesheetSanitizer.php',
+        'Wikimedia\\CSS\\Sanitizer\\SupportsAtRuleSanitizer' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Sanitizer/SupportsAtRuleSanitizer.php',
+        'Wikimedia\\CSS\\Util' => __DIR__ . '/..' . '/wikimedia/css-sanitizer/src/Util.php',
         'Wikimedia\\CommonPasswords\\CommonPasswords' => __DIR__ . '/..' . '/wikimedia/common-passwords/src/CommonPasswords.php',
         'Wikimedia\\Composer\\Merge\\V2\\ExtraPackage' => __DIR__ . '/..' . '/wikimedia/composer-merge-plugin/src/ExtraPackage.php',
         'Wikimedia\\Composer\\Merge\\V2\\Logger' => __DIR__ . '/..' . '/wikimedia/composer-merge-plugin/src/Logger.php',

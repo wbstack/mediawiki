@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"पर्वत सुबेदी"
+			"पर्वत सुबेदी",
+			"Nirajan pant"
 		]
 	},
 	"requestaccount": "खाता अनुरोध गर्नुहोस्",
@@ -12,7 +13,7 @@
 	"requestaccount-leg-person": "व्यक्तिगत जानकारी",
 	"requestaccount-leg-other": "अन्य जानकारी",
 	"requestaccount-leg-tos": "सेवाका सर्तहरू",
-	"requestaccount-real": "वास्तविक नाम:",
+	"requestaccount-real": "वास्तविक नाम (ऐच्छिक):",
 	"requestaccount-email": "डाँक ठेगाना:",
 	"requestaccount-reqtype": "स्थान:",
 	"requestaccount-level-0": "लेखक",
