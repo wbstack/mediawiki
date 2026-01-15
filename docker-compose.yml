@@ -27,13 +27,9 @@ services:
       - MW_DB_SERVER_MASTER=mysql.svc:3306
       - MW_DB_SERVER_REPLICA=mysql-replica.svc:3306
 
-      - MW_DEFAULT_ELASTICSEARCH_HOST=elasticsearch-6.svc
+      - MW_DEFAULT_ELASTICSEARCH_HOST=elasticsearch.svc
       - MW_DEFAULT_ELASTICSEARCH_PORT=9200
-      - MW_DEFAULT_ELASTICSEARCH_ES6=true
-
-      - MW_WRITE_ONLY_ELASTICSEARCH_HOST=elasticsearch-7.svc
-      - MW_WRITE_ONLY_ELASTICSEARCH_PORT=9200
-      - MW_WRITE_ONLY_ELASTICSEARCH_ES6=false
+      - MW_DEFAULT_ELASTICSEARCH_ES6=false
 
       - MW_REDIS_SERVER_READ=redis.svc
       - MW_REDIS_SERVER_WRITE=redis.svc
@@ -146,28 +142,15 @@ services:
         aliases:
           - redis.svc
 
-  elasticsearch-6:
-    image: wikibase/elasticsearch:6.8.23-wmde.6
+  elasticsearch:
+    image: wikibase/elasticsearch:7.10.2-wmde.11
     restart: unless-stopped
     ports:
       - 9200:9200
     networks:
       default:
         aliases:
-          - elasticsearch-6.svc
-    environment:
-      discovery.type: single-node
-      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
-
-  elasticsearch-7:
-    image: wikibase/elasticsearch:7.10.2-wmde.11
-    restart: unless-stopped
-    ports:
-      - 9201:9200
-    networks:
-      default:
-        aliases:
-          - elasticsearch-7.svc
+          - elasticsearch.svc
     environment:
       discovery.type: single-node
       ES_JAVA_OPTS: "-Xms512m -Xmx512m"
