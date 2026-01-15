@@ -564,7 +564,7 @@ if($wwWikibaseStringLengthMultilang) {
     $wgWBRepoSettings['string-limits']['multilang']['length'] = (int)$wwWikibaseStringLengthMultilang;
 }
 
-$wgWBClientSettings['siteGlobalID'] = $wgDBname-$wgDBprefix;
+$wgWBClientSettings['siteGlobalID'] = "$wgDBname".-."$wgDBprefix";
 $wgWBClientSettings['repoScriptPath'] = '/w';
 $wgWBClientSettings['repoArticlePath'] = '/wiki/$1';
 $wgWBClientSettings['siteGroup'] = null;
