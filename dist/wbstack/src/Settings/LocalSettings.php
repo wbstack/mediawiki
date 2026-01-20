@@ -572,6 +572,10 @@ $wgWBClientSettings['thisWikiIsTheRepo'] = true;
 $wgWBClientSettings['repoUrl'] = $GLOBALS['wgServer'];
 $wgWBClientSettings['repoSiteName'] = $GLOBALS['wgSitename'];
 
+$wgWBRepoSettings['localClientDatabases'] = [
+    $wgDBname => $wgDBname."-".$wgDBprefix
+];
+
 $localConceptBaseUri = 'https://' . $wikiInfo->domain . '/entity/';
 
 $wgWBRepoSettings['entitySources'] = [
