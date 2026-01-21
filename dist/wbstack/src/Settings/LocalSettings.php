@@ -134,7 +134,7 @@ if( !$wwDomainIsMaintenance && !empty(getenv('MW_DB_SERVER_REPLICA'))){
         'type' => "mysql",
         'flags' => DBO_DEFAULT,
         'max lag' => 10,
-        'load' => 100,
+        'load' => 1,
     ];
 }
 
