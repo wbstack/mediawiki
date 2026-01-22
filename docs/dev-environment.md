@@ -38,6 +38,16 @@ Removing the installation:
 ```sh
 docker compose down --volumes
 ```
+### Default admin account (local docker compose)
+
+When running `docker compose up`, a one-shot service seeds a default admin by calling the internal `wbstackInit` API.
+
+Default credentials (configurable via environment variables on the `default-admin` service):
+
+- Username: `Admin`
+- Password: `ChangeMe123!`
+
+You can customize these by editing the `default-admin` service environment in the root [docker-compose file](../docker-compose.yml).
 
 ### Debugging Elastic
 

@@ -177,6 +177,24 @@ services:
     ports:
       - 8003:8080
 
+  default-users:
+    image: curlimages/curl:8.6.0
+    restart: unless-stopped
+    depends_on:
+      - mediawiki
+    networks:
+      default:
+        aliases:
+          - default-users.svc
+    environment:
+      - MW_API_URL=http://mediawiki.svc/w/api.php
+      - MW_DEFAULT_DOMAINS=site1.localhost site2.localhost
+      - MW_DEFAULT_ADMIN_USERNAME=Admin
+      - MW_DEFAULT_ADMIN_PASSWORD=ChangeMe123!
+    volumes:
+      - ./docker-compose/scripts:/scripts:ro
+    command: "/bin/sh /scripts/create-default-users.sh"
+
 volumes:
   mediawiki-mysql-data:
   mysql-replica-data:
