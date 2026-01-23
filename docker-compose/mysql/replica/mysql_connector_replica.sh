@@ -27,7 +27,7 @@ echo "* Create replication user"
 mysql --host mysql-replica -uroot -p$MYSQL_REPLICA_PASSWORD -AN -e 'STOP SLAVE;';
 mysql --host mysql-replica -uroot -p$MYSQL_MAIN_PASSWORD -AN -e 'RESET SLAVE ALL;';
 
-mysql --host mysql -uroot -p$MYSQL_MAIN_PASSWORD -AN -e "CREATE USER '$MYSQL_REPLICATION_USER'@'%';"
+mysql --host mysql -uroot -p$MYSQL_MAIN_PASSWORD -AN -e "CREATE USER '$MYSQL_REPLICATION_USER'@'%' IF NOT EXISTS;"
 mysql --host mysql -uroot -p$MYSQL_MAIN_PASSWORD -AN -e "GRANT REPLICATION SLAVE ON *.* TO '$MYSQL_REPLICATION_USER'@'%' IDENTIFIED BY '$MYSQL_REPLICATION_PASSWORD';"
 mysql --host mysql -uroot -p$MYSQL_MAIN_PASSWORD -AN -e 'flush privileges;'
 
