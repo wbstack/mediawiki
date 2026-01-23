@@ -650,6 +650,10 @@ if ( $wwDockerCompose === true ) {
 
     # Do not force local users to complete a captcha
     $wgGroupPermissions['*']['skipcaptcha'] = true;
+
+    # Disable captchas entirely
+    $wgCaptchaTriggers = [];
+    $wgConfirmAccountCaptchas = false;
 }
 
 # WikibaseManifest
