@@ -39,6 +39,10 @@ Removing the installation:
 docker compose down --volumes
 ```
 
+Understanding special configuration for the `docker compose` environment:
+
+When `$wwDockerCompose` is set some special settings are used. It is set from the environment variable `WBSTACK_DOCKER_COMPOSE` and is always true in the `docker compose` environment. Examples of this include disabling captchas, disabling the normally required email confirmation and automatically granting sysop rights to all users.
+
 ### Debugging Elastic
 
 General overview of the cluster
