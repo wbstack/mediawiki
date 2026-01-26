@@ -95,7 +95,8 @@ if ( getenv('MW_LOG_TO_STDERR') === 'yes' ) {
 }
 
 if ( $wwDockerCompose ) {
-    $wgServer = "http://" . $wikiInfo->domain . ":8001";
+    $wwPort = getenv('MW_LOCAL_HOST_PORT');
+    $wgServer = "http://" . $wikiInfo->domain . ":" . $wwPort;
 } else {
     $wgServer = "https://" . $wikiInfo->domain;
 }
