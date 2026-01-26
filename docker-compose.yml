@@ -39,6 +39,8 @@ services:
       - MW_REDIS_CACHE_SERVER_WRITE=redis.svc
       - MW_REDIS_PASSWORD=
 
+      - MW_LOCAL_HOST_PORT=8001
+
     volumes:
       - "./dist:/var/www/html/w:cached"
       - ./docker-compose/php.ini:/usr/local/etc/php/php.ini
