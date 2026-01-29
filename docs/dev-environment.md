@@ -6,6 +6,10 @@ These are currently not using the real api but rather gets their settings from t
 
 The fake api is served by the [server.php](test/server.php) script and reads the corresponding [subdomain](data/WikiInfo-site1.json) from each request.
 
+ElasticSearch in  docker compose environment uses non-shared index setup and the `mul` works as expected. Howerver the page should be refreshed a few time before ES content indexes got updated.
+
+The ES index names are not based on the site/domain name but rather on the DB name. This is why the indices appeared to be missing in `site1.localhost_content_first`, the right one should be `mwdb_somedb1_general_first`
+
 ### Start the dev environment
 
 ```sh
@@ -29,8 +33,12 @@ Wait until both sites are accessible:
  Once the sites are accessible you can perform secondary setup (_The request takes a while to execute_):
 
  ```sh
-curl -l -X POST "http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
-curl -l -X POST "http://site2.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
+curl -sS -H "Content-Type: application/json" -X POST -d '{}' "http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
+curl -sS -H "Content-Type: application/json" -X POST -d '{}' "http://site2.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
+
+# You can use `jq` to "pretty-print" the JSON response
+curl -sS -H "Content-Type: application/json" -X POST -d '{}' "http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json" | jq .
+curl -sS -H "Content-Type: application/json" -X POST -d '{}' "http://site2.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json" | jq .
 ```
 
 Removing the installation:
@@ -45,14 +53,10 @@ When `$wwDockerCompose` is set some special settings are used. It is set from th
 
 ### Debugging Elastic
 
-General overview of the cluster
+#### General overview of the cluster:
 
-```
-http://localhost:9200/_stats
-```
+- Overall stats: http://localhost:9201/_stats
+- Indices: http://localhost:9201/_indices
+- Aliases: http://localhost:9201/_aliases
 
-Entries in the content index (Items, Lexemes) for `site1.localhost` can be found by going to the following url
-
-```
-http://localhost:9200/site1.localhost_content_first/_search
-```
+- Entries in the content index (Items, Lexemes) for `site1.localhost`: http://localhost:9201/mwdb_somedb1_content_first/_search
