@@ -8,7 +8,7 @@ The fake api is served by the [server.php](test/server.php) script and reads the
 
 ElasticSearch in docker compose environment uses non-shared index setup and the `mul` works as expected. Howerver the page should be refreshed a few time before ES content indexes got updated.
 
-The ES index names are not based on the site/domain name but rather on the DB name. This is why the indices appeared to be missing in `site1.localhost_content_first`, the right one should be `mwdb_somedb1_general_first`
+The Elasticsearch index names are based on the name of the MediaWiki database in the format `{database_name}_{index_name}`, e.g. `mwdb_somedb1_general_first`.
 
 ### Start the dev environment
 
