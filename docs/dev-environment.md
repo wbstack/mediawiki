@@ -58,5 +58,4 @@ When `$wwDockerCompose` is set some special settings are used. It is set from th
 - Overall stats: http://localhost:9200/_stats
 - Indices: http://localhost:9200/_indices
 - Aliases: http://localhost:9200/_aliases
-
 - Entries in the content index (Items, Lexemes) for `site1.localhost`: http://localhost:9200/mwdb_somedb1_content_first/_search
