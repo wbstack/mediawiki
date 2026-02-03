@@ -6,7 +6,7 @@ These are currently not using the real API but instead get their settings from t
 
 The fake API is served by the [server.php](test/server.php) script and reads the corresponding [subdomain](data/WikiInfo-site1.json) from each request.
 
-ElasticSearch in  docker compose environment uses non-shared index setup. Howerver the page should be refreshed a few time before ES content indexes got updated due to the lack of a dedicated job runner.
+ElasticSearch in docker compose environment uses non-shared index setup. Howerver the page should be refreshed a few time before ES content indexes got updated due to the lack of a dedicated job runner.
 
 ElasticSearch index names are based on the wiki database name (not the domain). This is why indices appear in the format `{db_name}_content_first` and `{db_name}_general_first`, for example `mwdb_somedb1_content_first`.
 
