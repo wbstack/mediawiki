@@ -142,7 +142,7 @@ services:
         aliases:
           - redis.svc
 
-  elasticsearch-7:
+  elasticsearch:
     image: wikibase/elasticsearch:7.10.2-wmde.11
     restart: unless-stopped
     ports:
