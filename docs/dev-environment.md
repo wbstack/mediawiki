@@ -2,13 +2,11 @@
 
 There is a [docker-compose file](../docker-compose.yml) in the root directory that allows for serving multiple development sites locally.
 
-These are currently not using the real api but rather gets their settings from the static json files included in the data folder.
+These are currently not using the real API but instead get their settings from the static JSON files included in the data folder.
 
-The fake api is served by the [server.php](test/server.php) script and reads the corresponding [subdomain](data/WikiInfo-site1.json) from each request.
+The fake API is served by the [server.php](test/server.php) script and reads the corresponding [subdomain](data/WikiInfo-site1.json) from each request.
 
-ElasticSearch in docker compose environment uses non-shared index setup and the `mul` works as expected. Howerver the page should be refreshed a few time before ES content indexes got updated.
-
-The Elasticsearch index names are based on the name of the MediaWiki database in the format `{database_name}_{index_name}`, e.g. `mwdb_somedb1_general_first`.
+ElasticSearch index names are based on the wiki database name (not the domain). This is why indices appear in the format `{db_name}_content_first` and `{db_name}_general_first`, for example `mwdb_somedb1_content_first`.
 
 ### Start the dev environment
 
@@ -56,6 +54,6 @@ When `$wwDockerCompose` is set some special settings are used. It is set from th
 #### General overview of the cluster:
 
 - Overall stats: http://localhost:9200/_stats
-- Indices: http://localhost:9200/_indices
+- Indices: http://localhost:9200/_cat/indices
 - Aliases: http://localhost:9200/_aliases
 - Entries in the content index (Items, Lexemes) for `site1.localhost`: http://localhost:9200/mwdb_somedb1_content_first/_search
