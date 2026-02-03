@@ -25,8 +25,9 @@ services:
       - MW_DB_SERVER_MASTER=mysql.svc:3306
       - MW_DB_SERVER_REPLICA=mysql-replica.svc:3306
 
-      - MW_WRITE_ONLY_ELASTICSEARCH_HOST=elasticsearch-7.svc
-      - MW_WRITE_ONLY_ELASTICSEARCH_PORT=9200
+      - MW_DEFAULT_ELASTICSEARCH_HOST=elasticsearch.svc
+      - MW_DEFAULT_ELASTICSEARCH_PORT=9200
+      - MW_DEFAULT_ELASTICSEARCH_ES6=false
 
       - MW_REDIS_SERVER_READ=redis.svc
       - MW_REDIS_SERVER_WRITE=redis.svc
@@ -149,7 +150,7 @@ services:
     networks:
       default:
         aliases:
-          - elasticsearch-7.svc
+          - elasticsearch.svc
     environment:
       discovery.type: single-node
       ES_JAVA_OPTS: "-Xms512m -Xmx512m"
