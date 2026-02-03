@@ -27,7 +27,6 @@ services:
 
       - MW_DEFAULT_ELASTICSEARCH_HOST=elasticsearch.svc
       - MW_DEFAULT_ELASTICSEARCH_PORT=9200
-      - MW_DEFAULT_ELASTICSEARCH_ES6=false
 
       - MW_REDIS_SERVER_READ=redis.svc
       - MW_REDIS_SERVER_WRITE=redis.svc
