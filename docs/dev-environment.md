@@ -6,7 +6,7 @@ These are currently not using the real API but instead get their settings from t
 
 The fake API is served by the [server.php](test/server.php) script and reads the corresponding [subdomain](data/WikiInfo-site1.json) from each request.
 
-In [wmde/wbaas-deploy](https://github.com/wmde/wbaas-deploy/) Elasticsearch is configured so all Wikis share the same indices. In contrast, this docker compose environment is configured so each wiki has its own indices.
+In [wmde/wbaas-deploy](https://github.com/wmde/wbaas-deploy/) Elasticsearch is configured so all Wikis share the same indices. In contrast, this docker compose environment is configured so each wiki has its own indices. From Mediawiki's perspective, Elasticsearch does not distunguish between private and shared indices via an alias; the index configuration is invisible to Mediawiki. This keeps the setup simple and light to run. 
 
 The index names are based on the MediaWiki database name (not the domain). This is why indices appear in the format `{db_name}_content_first` and `{db_name}_general_first`, for example `mwdb_somedb1_content_first`.
 
