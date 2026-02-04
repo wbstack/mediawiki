@@ -735,13 +735,6 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
             'host' => getenv( $prefix . 'HOST' ),
             'port' => getenv( $prefix . 'PORT' )
         ];
-
-        if ( getEnv( $prefix . 'ES6' ) === "true" ) {
-            $config[ 'transport' ] = [
-                'type' => \CirrusSearch\Elastica\ES6CompatTransportWrapper::class,
-                'wrapped_transport' => 'Http'
-            ];
-        }
         return [ $config ];
     }
 
@@ -749,10 +742,6 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
         $wgCirrusSearchClusters = [
             'default' => [
                 [
-                    'transport' => [
-                        'type' => \CirrusSearch\Elastica\ES6CompatTransportWrapper::class,
-                        'wrapped_transport' => 'Http'
-                    ],
                     'host' => getenv('MW_ELASTICSEARCH_HOST'),
                     'port' => getenv('MW_ELASTICSEARCH_PORT')
                 ],
