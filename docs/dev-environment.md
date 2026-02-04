@@ -6,9 +6,12 @@ These are currently not using the real API but instead get their settings from t
 
 The fake API is served by the [server.php](test/server.php) script and reads the corresponding [subdomain](data/WikiInfo-site1.json) from each request.
 
-ElasticSearch in docker compose environment uses non-shared index setup. Howerver the page should be refreshed a few time before ES content indexes got updated due to the lack of a dedicated job runner.
+In [wmde/wbaas-deploy](https://github.com/wmde/wbaas-deploy/) Elasticsearch is configured so all Wikis share the same indices. In contrast, this docker compose environment is configured so each wiki has its own indices.
 
-ElasticSearch index names are based on the wiki database name (not the domain). This is why indices appear in the format `{db_name}_content_first` and `{db_name}_general_first`, for example `mwdb_somedb1_content_first`.
+The index names are based on the MediaWiki database name (not the domain). This is why indices appear in the format `{db_name}_content_first` and `{db_name}_general_first`, for example `mwdb_somedb1_content_first`.
+
+> [!NOTE]
+> You may find you have to refresh the page a few time before changes are reflected in Elasticsearch. Unlike [wmde/wbaas-deploy](https://github.com/wmde/wbaas-deploy/), this setup doesn't have a dedicated job runner. Jobs queued up, such as ones from CirrusSearch and WikibaseCirrusSearch, are completed as part of web requests (see [wbstack/src/Settings/LocalSettings.php#L147-L151](https://github.com/wbstack/mediawiki/blob/ebac07a4a4096d8fd973ebd43ebe342f34b87803/dist-persist/wbstack/src/Settings/LocalSettings.php#L147-L151)), so refreshing the page ensures that all jobs in the queue are run.
 
 ### Start the dev environment
 
