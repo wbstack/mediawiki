@@ -87,7 +87,7 @@ jobs:
           MSG=$(git log -1 --pretty=format:%s)
           echo "msg=$MSG" >> $GITHUB_OUTPUT
       -
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v8
         if: github.event_name != 'pull_request'
         with:
           path: ./repos/wbaas-deploy-staging
@@ -103,7 +103,7 @@ jobs:
 
             **Changes**: [${{ steps.truncate-commit-message.outputs.msg }}](https://github.com/wbstack/mediawiki/commit/${{ github.sha }})
       -
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v8
         if: github.event_name != 'pull_request'
         with:
           path: ./repos/wbaas-deploy-production
