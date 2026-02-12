@@ -20,8 +20,15 @@
  * @file
  */
 
+namespace MediaWiki\Password;
+
+use DomainException;
+use InvalidArgumentException;
+use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Status\Status;
 use MediaWiki\User\UserIdentity;
+use StatusValue;
 
 /**
  * Check if a user's password complies with any password policies that apply to that
@@ -44,7 +51,7 @@ class UserPasswordPolicy {
 	private $policyCheckFunctions;
 
 	/**
-	 * @param array[] $policies List of lists of policies per user group
+	 * @param array[] $policies List of policies per user group
 	 * @param callable[] $checks mapping statement to its checking function. Checking functions are
 	 *   called with the policy value for this user, the user object, and the password to check.
 	 */
@@ -177,18 +184,17 @@ class UserPasswordPolicy {
 	 * @return array the effective policy for $user
 	 */
 	public function getPoliciesForUser( UserIdentity $user ) {
+		$services = MediaWikiServices::getInstance();
 		$effectivePolicy = self::getPoliciesForGroups(
 			$this->policies,
-			MediaWikiServices::getInstance()
-				->getUserGroupManager()
+			$services->getUserGroupManager()
 				->getUserEffectiveGroups( $user ),
 			$this->policies['default']
 		);
 
-		$legacyUser = MediaWikiServices::getInstance()
-			->getUserFactory()
+		$legacyUser = $services->getUserFactory()
 			->newFromUserIdentity( $user );
-		Hooks::runner()->onPasswordPoliciesForUser( $legacyUser, $effectivePolicy );
+		( new HookRunner( $services->getHookContainer() ) )->onPasswordPoliciesForUser( $legacyUser, $effectivePolicy );
 
 		return $effectivePolicy;
 	}
@@ -196,7 +202,7 @@ class UserPasswordPolicy {
 	/**
 	 * Utility function to get the effective policy from a list of policies, based
 	 * on a list of groups.
-	 * @param array[] $policies List of lists of policies per user group
+	 * @param array[] $policies List of policies per user group
 	 * @param string[] $userGroups the groups from which we calculate the effective policy
 	 * @param array $defaultPolicy the default policy to start from
 	 * @return array effective policy
@@ -248,3 +254,6 @@ class UserPasswordPolicy {
 	}
 
 }
+
+/** @deprecated since 1.43 use MediaWiki\\Password\\UserPasswordPolicy */
+class_alias( UserPasswordPolicy::class, 'UserPasswordPolicy' );

@@ -13,6 +13,7 @@ use Wikimedia\Parsoid\DOM\Element;
 use Wikimedia\Parsoid\DOM\Node;
 use Wikimedia\Parsoid\DOM\NodeList;
 use Wikimedia\Parsoid\DOM\Text;
+use Wikimedia\Parsoid\NodeData\DataMw;
 use Wikimedia\Parsoid\NodeData\DataParsoid;
 use Wikimedia\Parsoid\NodeData\TempData;
 use Wikimedia\Parsoid\Tokens\CommentTk;
@@ -41,7 +42,7 @@ class PipelineUtils {
 	 * be a bit fragile and makes dom-fragments a leaky abstraction by leaking subpipeline
 	 * processing into the top-level pipeline.
 	 *
-	 * @param Token[]|string $content The array of tokens to process.
+	 * @param string|Token|array<Token|string> $content The array of tokens to process.
 	 * @param SourceRange $srcOffsets Wikitext source offsets (start/end) of these tokens.
 	 * @param array $opts Parsing options.
 	 *    - Token token The token that generated the content.
@@ -53,7 +54,7 @@ class PipelineUtils {
 	): SelfclosingTagTk {
 		$token = $opts['token'];
 		return new SelfclosingTagTk( 'mw:dom-fragment-token', [
-			new KV( 'contextTok', $token, $token->dataAttribs->tsr->expandTsrV() ),
+			new KV( 'contextTok', $token, $token->dataParsoid->tsr->expandTsrV() ),
 			new KV( 'content', $content, $srcOffsets->expandTsrV() ),
 			new KV( 'inlineContext', ( $opts['inlineContext'] ?? false ) ? "1" : "0" ),
 			new KV( 'inPHPBlock', ( $opts['inPHPBlock'] ?? false ) ? "1" : "0" ),
@@ -68,8 +69,7 @@ class PipelineUtils {
 	 * @param Frame $frame
 	 *    The parent frame within which the expansion is taking place.
 	 *    Used for template expansion and source text tracking.
-	 * @param string|Token|Token[] $content
-	 *    This could be wikitext or single token or an array of tokens.
+	 * @param string|Token|array<Token|string>|Element $content
 	 *    How this content is processed depends on what kind of pipeline
 	 *    is constructed specified by opts.
 	 * @param array $opts
@@ -82,8 +82,9 @@ class PipelineUtils {
 	 *    - string srcText - if set, defines the source text for the expansion
 	 *    - SourceRange  srcOffsets - if set, defines the range within the
 	 *          source text that $content corresponds to
-	 *    - bool   sol
-	 * @return Token[]|DocumentFragment (depending on pipeline type)
+	 *    - bool   sol Whether tokens should be processed in start-of-line context.
+	 *    - bool   toplevel Whether the pipeline is considered atTopLevel
+	 * @return array<Token|string>|DocumentFragment (depending on pipeline type)
 	 */
 	public static function processContentInPipeline(
 		Env $env, Frame $frame, $content, array $opts
@@ -95,7 +96,8 @@ class PipelineUtils {
 		);
 
 		$pipeline->init( [
-			'toplevel' => false,
+			// NOTE: some pipelines force toplevel to true
+			'toplevel' => $opts['toplevel'] ?? false,
 			'frame' => $frame,
 			'tplArgs' => $opts['tplArgs'] ?? null,
 			'srcText' => $opts['srcText'] ?? $frame->getSrcText(),
@@ -126,13 +128,13 @@ class PipelineUtils {
 	 *    Unexpanded templates can occur in the content of extension tags.
 	 * @return array
 	 */
-	public static function expandValueToDOM(
+	public static function expandAttrValueToDOM(
 		Env $env, Frame $frame, array $v, bool $expandTemplates, bool $inTemplate
 	): array {
 		if ( is_array( $v['html'] ?? null ) ) {
 			// Set up pipeline options
 			$opts = [
-				'pipelineType' => 'tokens/x-mediawiki/expanded',
+				'pipelineType' => 'expanded-tokens-to-fragment',
 				'pipelineOpts' => [
 					'attrExpansion' => true,
 					'inlineContext' => true,
@@ -177,12 +179,12 @@ class PipelineUtils {
 	 *    Unexpanded templates can occur in the content of extension tags.
 	 * @return array
 	 */
-	public static function expandValuesToDOM(
+	public static function expandAttrValuesToDOM(
 		Env $env, $frame, array $vals, bool $expandTemplates, bool $inTemplate
 	): array {
 		$ret = [];
 		foreach ( $vals as $v ) {
-			$ret[] = self::expandValueToDOM( $env, $frame, $v, $expandTemplates, $inTemplate );
+			$ret[] = self::expandAttrValueToDOM( $env, $frame, $v, $expandTemplates, $inTemplate );
 		}
 		return $ret;
 	}
@@ -192,8 +194,8 @@ class PipelineUtils {
 	 * are stored outside the DOM.
 	 *
 	 * @param Element $node
-	 * @param string[] $attrs
-	 * @return array
+	 * @param array<string,string> $attrs
+	 * @return array{attrs:KV[],dataParsoid:?DataParsoid,dataMw:?DataMw}
 	 */
 	private static function domAttrsToTagAttrs( Element $node, array $attrs ): array {
 		$out = [];
@@ -202,17 +204,19 @@ class PipelineUtils {
 				$out[] = new KV( $name, $value );
 			}
 		}
-		if ( DOMDataUtils::validDataMw( $node ) ) {
-			$out[] = new KV( 'data-mw', PHPUtils::jsonEncode( DOMDataUtils::getDataMw( $node ) ) );
-		}
-		return [ 'attrs' => $out, 'dataAttrs' => DOMDataUtils::getDataParsoid( $node ) ];
+		return [
+			'attrs' => $out,
+			'dataParsoid' => DOMDataUtils::getDataParsoid( $node ),
+			'dataMw' =>
+				DOMDataUtils::validDataMw( $node ) ? DOMDataUtils::getDataMw( $node ) : null,
+		];
 	}
 
 	/**
 	 * Convert a DOM to tokens. Data attributes for nodes are stored outside the DOM.
 	 *
 	 * @param Node $node The root of the DOM tree to convert to tokens
-	 * @param Token[] $tokBuf This is where the tokens get stored
+	 * @param array<Token|string> $tokBuf This is where the tokens get stored
 	 * @return array
 	 */
 	private static function convertDOMtoTokens( Node $node, array $tokBuf ): array {
@@ -221,16 +225,22 @@ class PipelineUtils {
 			$attrInfo = self::domAttrsToTagAttrs( $node, DOMUtils::attributes( $node ) );
 
 			if ( Utils::isVoidElement( $nodeName ) ) {
-				$tokBuf[] = new SelfclosingTagTk( $nodeName, $attrInfo['attrs'], $attrInfo['dataAttrs'] );
+				$tokBuf[] = new SelfclosingTagTk(
+					$nodeName, $attrInfo['attrs'],
+					$attrInfo['dataParsoid'], $attrInfo['dataMw']
+				);
 			} else {
-				$tokBuf[] = new TagTk( $nodeName, $attrInfo['attrs'], $attrInfo['dataAttrs'] );
+				$tokBuf[] = new TagTk(
+					$nodeName, $attrInfo['attrs'],
+					$attrInfo['dataParsoid'], $attrInfo['dataMw']
+				);
 				for ( $child = $node->firstChild;  $child;  $child = $child->nextSibling ) {
 					$tokBuf = self::convertDOMtoTokens( $child, $tokBuf );
 				}
 				$endTag = new EndTagTk( $nodeName );
 				// Keep stx parity
 				if ( WTUtils::isLiteralHTMLNode( $node ) ) {
-					$endTag->dataAttribs->stx = 'html';
+					$endTag->dataParsoid->stx = 'html';
 				}
 				$tokBuf[] = $endTag;
 			}
@@ -258,7 +268,7 @@ class PipelineUtils {
 	 * @param DocumentFragment $domFragment List of DOM nodes that need to be tunneled through.
 	 * @param array $opts
 	 * @see encapsulateExpansionHTML's doc. for more info about these options.
-	 * @return Token[] List of token representatives.
+	 * @return array<Token|string> List of token representatives.
 	 */
 	private static function getWrapperTokens(
 		DocumentFragment $domFragment, array $opts
@@ -326,7 +336,7 @@ class PipelineUtils {
 			$wrapperName = 'span';
 		} elseif (
 			in_array( DOMCompat::nodeName( $node ), [ 'style', 'script' ], true ) &&
-			count( $domFragment->childNodes ) > 1
+			( $node->nextSibling !== null )
 		) {
 			// <style>/<script> tags are not fostered, so if we're wrapping
 			// more than a single node, they aren't a good representation for
@@ -347,7 +357,7 @@ class PipelineUtils {
 				!$node->hasAttribute( 'data-parsoid' ),
 				"Expected node to have its data attributes loaded" );
 
-			$nodeData = DOMDataUtils::getNodeData( $node )->clone();
+			$nodeData = DOMDataUtils::getNodeData( $node )->cloneNodeData();
 
 			if ( $wrapperName !== DOMCompat::nodeName( $node ) ) {
 				// Create a copy of the node without children
@@ -368,12 +378,28 @@ class PipelineUtils {
 				// Shallow clone since we don't want to convert the whole tree to tokens.
 				$workNode = $node->cloneNode( false );
 
-				// Reset 'tsr' since it isn't applicable.
+				// Reset 'tsr' since it isn't applicable. Neither is
+				// any auxiliary info like 'endTSR'.
 				// FIXME: The above comment is only true if we are reusing
 				// DOM fragments from cache from previous revisions in
 				// incremental parsing scenarios.  See T98992
 				if ( isset( $nodeData->parsoid->tsr ) ) {
 					$nodeData->parsoid->tsr = null;
+				}
+				if ( isset( $nodeData->parsoid->tmp->endTSR ) ) {
+					unset( $nodeData->parsoid->tmp->endTSR );
+				}
+
+				// The "in transclusion" flag was set on the first child for template
+				// wrapping in the nested pipeline, and doesn't apply to the dom
+				// fragment wrapper in this pipeline.  Keeping it around can induce
+				// template wrapping of a foster box if the dom fragment is found in
+				// a fosterable position.
+				if (
+					isset( $nodeData->parsoid ) &&
+					$nodeData->parsoid->getTempFlag( TempData::IN_TRANSCLUSION )
+				) {
+					$nodeData->parsoid->tmp->setFlag( TempData::IN_TRANSCLUSION, false );
 				}
 			}
 
@@ -424,14 +450,12 @@ class PipelineUtils {
 	 *    - array pipelineOpts
 	 *    - bool  unpackOutput
 	 *    - string wrapperName
-	 * @return Token[]
+	 * @return array<Token|string>
 	 */
 	public static function encapsulateExpansionHTML(
 		Env $env, Token $token, array $expansion, array $opts
 	): array {
-		if ( !isset( $opts['unpackOutput'] ) ) {
-			$opts['unpackOutput'] = true; // Default
-		}
+		$opts['unpackOutput'] ??= true; // Default
 		// Get placeholder tokens to get our subdom through the token processing
 		// stages. These will be finally unwrapped on the DOM.
 		$toks = self::getWrapperTokens( $expansion['domFragment'], $opts );
@@ -442,43 +466,39 @@ class PipelineUtils {
 		$firstWrapperToken->setAttribute( 'typeof', $fragmentType );
 
 		// Assign the HTML fragment to the data-parsoid.html on the first wrapper token.
-		$firstWrapperToken->dataAttribs->html = $expansion['html'];
+		$firstWrapperToken->dataParsoid->html = $expansion['html'];
 
 		// Pass through setDSR flag
 		if ( !empty( $opts['setDSR'] ) ) {
-			$firstWrapperToken->dataAttribs->setTempFlag(
+			$firstWrapperToken->dataParsoid->setTempFlag(
 				TempData::SET_DSR, $opts['setDSR'] );
 		}
 
 		// Pass through fromCache flag
 		if ( !empty( $opts['fromCache'] ) ) {
-			$firstWrapperToken->dataAttribs->setTempFlag(
+			$firstWrapperToken->dataParsoid->setTempFlag(
 				TempData::FROM_CACHE, $opts['fromCache'] );
 		}
 
 		// Transfer the tsr.
 		// The first token gets the full width, the following tokens zero width.
-		$tokenTsr = $opts['tsr'] ?? $token->dataAttribs->tsr ?? null;
+		$tokenTsr = $opts['tsr'] ?? $token->dataParsoid->tsr ?? null;
 		if ( $tokenTsr ) {
-			$firstWrapperToken->dataAttribs->tsr = $tokenTsr;
-			$firstWrapperToken->dataAttribs->extTagOffsets = $token->dataAttribs->extTagOffsets ?? null;
+			$firstWrapperToken->dataParsoid->tsr = $tokenTsr;
+			$firstWrapperToken->dataParsoid->extTagOffsets = $token->dataParsoid->extTagOffsets ?? null;
 			// XXX to investigate: if $tokenTsr->end is null, then we're losing
 			// the 'hint' we'd like to provide here that this is a zero-width
 			// source range.
 			// ->end can be set to null by WikiLinkHandler::bailTokens()
 			$endTsr = new SourceRange( $tokenTsr->end, $tokenTsr->end );
 			for ( $i = 1;  $i < count( $toks );  $i++ ) {
-				$toks[$i]->dataAttribs->tsr = clone $endTsr;
+				$toks[$i]->dataParsoid->tsr = clone $endTsr;
 			}
 		}
 
 		return $toks;
 	}
 
-	/**
-	 * @param Document $doc
-	 * @param array &$textCommentAccum
-	 */
 	private static function wrapAccum(
 		Document $doc, array &$textCommentAccum
 	): void {
@@ -560,7 +580,7 @@ class PipelineUtils {
 	 * @param array $opts
 	 *    Options to be passed onto the encapsulation code
 	 *    See encapsulateExpansionHTML's doc. for more info about these options.
-	 * @return Token[]
+	 * @return array<Token|string>
 	 */
 	public static function tunnelDOMThroughTokens(
 		Env $env, Token $token, DocumentFragment $domFragment, array $opts
@@ -571,11 +591,6 @@ class PipelineUtils {
 		return self::encapsulateExpansionHTML( $env, $token, $expansion, $opts );
 	}
 
-	/**
-	 * @param Env $env
-	 * @param DocumentFragment $domFragment
-	 * @return array
-	 */
 	public static function makeExpansion(
 		Env $env, DocumentFragment $domFragment
 	): array {
@@ -584,11 +599,6 @@ class PipelineUtils {
 		return [ 'domFragment' => $domFragment, 'html' => $fragmentId ];
 	}
 
-	/**
-	 * @param Env $env
-	 * @param array &$expansions
-	 * @param Node $node
-	 */
 	private static function doExtractExpansions( Env $env, array &$expansions, Node $node ): void {
 		$nodes = null;
 		$expAccum = null;
@@ -598,7 +608,7 @@ class PipelineUtils {
 						$node->hasAttribute( 'about' )
 					) {
 					$dp = DOMDataUtils::getDataParsoid( $node );
-					$about = $node->hasAttribute( 'about' ) ? $node->getAttribute( 'about' ) : null;
+					$about = DOMCompat::getAttribute( $node, 'about' );
 					$nodes = WTUtils::getAboutSiblings( $node, $about );
 					$key = null;
 					if ( DOMUtils::hasTypeOf( $node, 'mw:Transclusion' ) ) {
@@ -667,5 +677,17 @@ class PipelineUtils {
 		// Kick off the extraction
 		self::doExtractExpansions( $env, $expansions, $body->firstChild );
 		return $expansions;
+	}
+
+	/**
+	 * Fetches output of encapsulations that return HTML from the legacy parser
+	 */
+	public static function fetchHTML( Env $env, string $source ): ?DocumentFragment {
+		$ret = $env->getDataAccess()->parseWikitext(
+			$env->getPageConfig(), $env->getMetadata(), $source
+		);
+		return $ret === '' ? null : DOMUtils::parseHTMLToFragment(
+				$env->topLevelDoc, DOMUtils::stripPWrapper( $ret )
+			);
 	}
 }

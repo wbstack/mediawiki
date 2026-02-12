@@ -2,7 +2,7 @@
 /**
  * XmlDumpWriter
  *
- * Copyright © 2003, 2005, 2006 Brion Vibber <brion@pobox.com>
+ * Copyright © 2003, 2005, 2006 Brooke Vibber <bvibber@wikimedia.org>
  * https://www.mediawiki.org/
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,14 +23,22 @@
  * @file
  */
 
+use MediaWiki\CommentStore\CommentStore;
+use MediaWiki\Content\Content;
+use MediaWiki\Content\TextContent;
+use MediaWiki\Debug\MWDebug;
+use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionAccessException;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\RevisionStore;
 use MediaWiki\Revision\SlotRecord;
 use MediaWiki\Revision\SuppressedDataException;
 use MediaWiki\Storage\SqlBlobStore;
+use MediaWiki\Title\Title;
+use MediaWiki\Xml\Xml;
 use Wikimedia\Assert\Assert;
 use Wikimedia\IPUtils;
 
@@ -82,15 +90,22 @@ class XmlDumpWriter {
 	/** @var HookRunner */
 	private $hookRunner;
 
+	/** @var CommentStore */
+	private $commentStore;
+
 	/**
 	 * @param int $contentMode WRITE_CONTENT or WRITE_STUB.
 	 * @param string $schemaVersion which schema version the generated XML should comply to.
 	 * One of the values from self::$supportedSchemas, using the XML_DUMP_SCHEMA_VERSION_XX
 	 * constants.
+	 * @param HookContainer|null $hookContainer
+	 * @param CommentStore|null $commentStore
 	 */
 	public function __construct(
 		$contentMode = self::WRITE_CONTENT,
-		$schemaVersion = XML_DUMP_SCHEMA_VERSION_11
+		$schemaVersion = XML_DUMP_SCHEMA_VERSION_11,
+		?HookContainer $hookContainer = null,
+		?CommentStore $commentStore = null
 	) {
 		Assert::parameter(
 			in_array( $contentMode, [ self::WRITE_CONTENT, self::WRITE_STUB ], true ),
@@ -107,7 +122,10 @@ class XmlDumpWriter {
 
 		$this->contentMode = $contentMode;
 		$this->schemaVersion = $schemaVersion;
-		$this->hookRunner = new HookRunner( MediaWikiServices::getInstance()->getHookContainer() );
+		$this->hookRunner = new HookRunner(
+			$hookContainer ?? MediaWikiServices::getInstance()->getHookContainer()
+		);
+		$this->commentStore = $commentStore ?? MediaWikiServices::getInstance()->getCommentStore();
 	}
 
 	/**
@@ -258,6 +276,7 @@ class XmlDumpWriter {
 				},
 				'Failed to get redirect target of page ' . $page->getId()
 			);
+			$redirect = Title::castFromLinkTarget( $redirect );
 			if ( $redirect instanceof Title && $redirect->isValidRedirectTarget() ) {
 				$out .= '    ';
 				$out .= Xml::element( 'redirect', [ 'title' => self::canonicalTitle( $redirect ) ] );
@@ -301,14 +320,12 @@ class XmlDumpWriter {
 	}
 
 	/**
-	 * Invokes the given callback, catching and logging any storage related
-	 * exceptions.
+	 * Invokes the given callback, catching and logging any exceptions.
 	 *
 	 * @param callable $callback
 	 * @param string $warning The warning to output in case of a storage related exception.
 	 *
-	 * @return mixed Returns the method's return value,
-	 *         or null in case of a storage related exception.
+	 * @return mixed Returns the method's return value, or null in case of an exception.
 	 * @throws Exception
 	 */
 	private function invokeLenient( $callback, $warning ) {
@@ -316,14 +333,9 @@ class XmlDumpWriter {
 			return $callback();
 		} catch ( SuppressedDataException $ex ) {
 			return null;
-		} catch ( Exception $ex ) {
-			if ( $ex instanceof MWException || $ex instanceof RuntimeException ||
-				$ex instanceof InvalidArgumentException ) {
-				MWDebug::warning( $warning . ': ' . $ex->getMessage() );
-				return null;
-			} else {
-				throw $ex;
-			}
+		} catch ( MWException | RuntimeException | InvalidArgumentException | ErrorException $ex ) {
+			MWDebug::warning( $warning . ': ' . $ex->getMessage() );
+			return null;
 		}
 	}
 
@@ -335,8 +347,7 @@ class XmlDumpWriter {
 	 * @param null|stdClass[] $slotRows
 	 *
 	 * @return string
-	 * @throws FatalError
-	 * @throws MWException
+	 * @throws RevisionAccessException
 	 */
 	public function writeRevision( $row, $slotRows = null ) {
 		$rev = $this->getRevisionStore()->newRevisionFromRowAndSlots(
@@ -407,8 +418,6 @@ class XmlDumpWriter {
 			$out .= "      " . Xml::element( 'sha1', null, strval( $sha1 ) ) . "\n";
 		}
 
-		// Avoid PHP 7.1 warning from passing $this by reference
-		$writer = $this;
 		$text = '';
 		if ( $contentMode === self::WRITE_CONTENT ) {
 			/** @var Content $content */
@@ -421,7 +430,7 @@ class XmlDumpWriter {
 
 			$text = $content ? $content->serialize() : '';
 		}
-		$this->hookRunner->onXmlDumpWriterWriteRevision( $writer, $out, $row, $text, $rev );
+		$this->hookRunner->onXmlDumpWriterWriteRevision( $this, $out, $row, $text, $rev );
 
 		$out .= "    </revision>\n";
 
@@ -511,26 +520,29 @@ class XmlDumpWriter {
 			if ( $isV11 ) {
 				$textAttributes['location'] = $slot->getAddress();
 			}
+			$schema = null;
 
 			if ( $isMain ) {
 				// Output the numerical text ID if possible, for backwards compatibility.
 				// Note that this is currently the ONLY reason we have a BlobStore here at all.
 				// When removing this line, check whether the BlobStore has become unused.
 				try {
-					// NOTE: this will only work for addresses of the form "tt:12345".
+					// NOTE: this will only work for addresses of the form "tt:12345" or "es:DB://cluster1/1234".
 					// If we want to support other kinds of addresses in the future,
 					// we will have to silently ignore failures here.
 					// For now, this fails for "tt:0", which is present in the WMF production
 					// database as of July 2019, due to data corruption.
-					$textId = $this->getBlobStore()->getTextIdFromAddress( $slot->getAddress() );
+					[ $schema, $textId ] = $this->getBlobStore()->splitBlobAddress( $slot->getAddress() );
 				} catch ( InvalidArgumentException $ex ) {
 					MWDebug::warning( 'Bad content address for slot ' . $slot->getRole()
 						. ' of revision ' . $slot->getRevision() . ': ' . $ex->getMessage() );
 					$textId = 0;
 				}
 
-				if ( is_int( $textId ) ) {
+				if ( $schema === 'tt' ) {
 					$textAttributes['id'] = $textId;
+				} elseif ( $schema === 'es' ) {
+					$textAttributes['id'] = bin2hex( $textId );
 				}
 			}
 
@@ -552,8 +564,6 @@ class XmlDumpWriter {
 	 * @return string
 	 */
 	private function writeText( Content $content, $textAttributes, $indent ) {
-		$out = '';
-
 		$contentHandler = $content->getContentHandler();
 		$contentFormat = $contentHandler->getDefaultFormat();
 
@@ -566,11 +576,10 @@ class XmlDumpWriter {
 		}
 
 		$data = $contentHandler->exportTransform( $data, $contentFormat );
-		$textAttributes['bytes'] = $size = strlen( $data ); // make sure to use the actual size
+		// make sure to use the actual size
+		$textAttributes['bytes'] = strlen( $data );
 		$textAttributes['xml:space'] = 'preserve';
-		$out .= $indent . Xml::elementClean( 'text', $textAttributes, strval( $data ) ) . "\n";
-
-		return $out;
+		return $indent . Xml::elementClean( 'text', $textAttributes, strval( $data ) ) . "\n";
 	}
 
 	/**
@@ -595,7 +604,7 @@ class XmlDumpWriter {
 		if ( $row->log_deleted & LogPage::DELETED_COMMENT ) {
 			$out .= "    " . Xml::element( 'comment', [ 'deleted' => 'deleted' ] ) . "\n";
 		} else {
-			$comment = CommentStore::getStore()->getComment( 'log_comment', $row )->text;
+			$comment = $this->commentStore->getComment( 'log_comment', $row )->text;
 			if ( $comment != '' ) {
 				$out .= "    " . Xml::elementClean( 'comment', null, strval( $comment ) ) . "\n";
 			}

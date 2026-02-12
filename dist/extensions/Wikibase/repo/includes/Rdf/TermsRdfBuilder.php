@@ -48,7 +48,7 @@ class TermsRdfBuilder implements EntityRdfBuilder {
 		RdfVocabulary $vocabulary,
 		RdfWriter $writer,
 		array $labelPredicates = [],
-		array $languages = null
+		?array $languages = null
 	) {
 		$this->vocabulary = $vocabulary;
 		$this->writer = $writer;
@@ -78,7 +78,7 @@ class TermsRdfBuilder implements EntityRdfBuilder {
 	 * @param string[][] $labelPredicates array of [ ns, local ] for each label predicate
 	 */
 	private function addLabels( $entityNamespace, $entityLName, TermList $labels, array $labelPredicates ) {
-		if ( empty( $labelPredicates ) ) {
+		if ( !$labelPredicates ) {
 			// If we want no predicates, no need to bother with the rest.
 			return;
 		}

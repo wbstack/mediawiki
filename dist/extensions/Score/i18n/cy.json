@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Afalau"
+			"Afalau",
+			"Ceirios"
 		]
 	},
 	"score-audio-alt-link": "lawrlwytho'r ffeil sain",
@@ -10,5 +11,6 @@
 	"score-page": "Tudalen $1",
 	"score-visualeditor-mwscoredialog-card-advanced": "Uwch",
 	"score-visualeditor-mwscoredialog-card-audio": "Sain",
-	"score-visualeditor-mwscoredialog-lang": "Iaith"
+	"score-visualeditor-mwscoredialog-lang": "Iaith",
+	"score-visualeditor-mwscoredialog-title": "Nodiant cerddoriaeth"
 }

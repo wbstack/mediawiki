@@ -2,6 +2,8 @@
 
 namespace MediaWiki\Widget;
 
+use OOUI\Tag;
+
 /**
  * Search input widget.
  *
@@ -10,10 +12,15 @@ namespace MediaWiki\Widget;
  */
 class SearchInputWidget extends TitleInputWidget {
 
+	/** @var bool */
 	protected $performSearchOnClick = true;
+	/** @var bool */
 	protected $validateTitle = false;
+	/** @var bool */
 	protected $highlightFirst = false;
+	/** @var string */
 	protected $dataLocation = 'header';
+	/** @var bool */
 	protected $showDescriptions = false;
 
 	/**
@@ -29,6 +36,7 @@ class SearchInputWidget extends TitleInputWidget {
 			'maxLength' => null,
 			'icon' => 'search',
 		], $config );
+		'@phan-var array $config';
 
 		parent::__construct( $config );
 
@@ -46,12 +54,17 @@ class SearchInputWidget extends TitleInputWidget {
 			$this->showDescriptions = true;
 		}
 
+		// Perhaps should be upstreamed to TextInputWidget?
+		if ( isset( $config['autocapitalize'] ) ) {
+			$this->input->setAttributes( [ 'autocapitalize' => $config['autocapitalize'] ] );
+		}
+
 		// Initialization
 		$this->addClasses( [ 'mw-widget-searchInputWidget' ] );
 	}
 
 	protected function getInputElement( $config ) {
-		return ( new \OOUI\Tag( 'input' ) )->setAttributes( [ 'type' => 'search' ] );
+		return ( new Tag( 'input' ) )->setAttributes( [ 'type' => 'search' ] );
 	}
 
 	protected function getJavaScriptClassName() {

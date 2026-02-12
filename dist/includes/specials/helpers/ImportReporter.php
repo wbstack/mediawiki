@@ -18,9 +18,16 @@
  * @file
  */
 
+use MediaWiki\CommentStore\CommentStoreComment;
+use MediaWiki\Context\ContextSource;
+use MediaWiki\Context\IContextSource;
 use MediaWiki\HookContainer\ProtectedHookAccessorTrait;
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageIdentity;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\ForeignTitle;
+use MediaWiki\Xml\Xml;
 
 /**
  * Reporting callback
@@ -29,13 +36,21 @@ use MediaWiki\Page\PageIdentity;
 class ImportReporter extends ContextSource {
 	use ProtectedHookAccessorTrait;
 
+	/** @var string */
 	private $reason;
+	/** @var string[] */
 	private $logTags = [];
+	/** @var callable|null */
 	private $mOriginalLogCallback;
+	/** @var callable|null */
 	private $mOriginalPageOutCallback;
+	/** @var int */
 	private $mLogItemCount = 0;
+	/** @var int */
 	private $mPageCount = 0;
+	/** @var bool */
 	private $mIsUpload;
+	/** @var string */
 	private $mInterwiki;
 
 	/**
@@ -43,8 +58,14 @@ class ImportReporter extends ContextSource {
 	 * @param bool $upload
 	 * @param string $interwiki
 	 * @param string|bool $reason
+	 * @param IContextSource|null $context
 	 */
-	public function __construct( $importer, $upload, $interwiki, $reason = "" ) {
+	public function __construct( $importer, $upload, $interwiki, $reason = "", ?IContextSource $context = null ) {
+		if ( $context ) {
+			$this->setContext( $context );
+		} else {
+			wfDeprecated( __METHOD__ . ' without $context', '1.42' );
+		}
 		$this->mOriginalPageOutCallback =
 			$importer->setPageOutCallback( [ $this, 'reportPage' ] );
 		$this->mOriginalLogCallback =
@@ -69,13 +90,13 @@ class ImportReporter extends ContextSource {
 		$this->getOutput()->addHTML( "<ul>\n" );
 	}
 
-	private function reportNotice( $msg, array $params ) {
+	public function reportNotice( $msg, array $params ) {
 		$this->getOutput()->addHTML(
 			Html::element( 'li', [], $this->msg( $msg, $params )->text() )
 		);
 	}
 
-	private function reportLogItem( ...$args ) {
+	public function reportLogItem( ...$args ) {
 		$this->mLogItemCount++;
 		if ( is_callable( $this->mOriginalLogCallback ) ) {
 			call_user_func_array( $this->mOriginalLogCallback, $args );
@@ -107,10 +128,10 @@ class ImportReporter extends ContextSource {
 			// in RTL wikis in case the page title is LTR
 			$this->getOutput()->addHTML(
 				"<li>" . $linkRenderer->makeLink( $pageIdentity ) . " " .
-					"<bdi>" .
-					$this->msg( 'import-revision-count' )->numParams( $successCount )->escaped() .
-					"</bdi>" .
-					"</li>\n"
+				"<bdi>" .
+				$this->msg( 'import-revision-count' )->numParams( $successCount )->escaped() .
+				"</bdi>" .
+				"</li>\n"
 			);
 
 			$logParams = [ '4:number:count' => $successCount ];
@@ -137,7 +158,7 @@ class ImportReporter extends ContextSource {
 			}
 
 			$comment = CommentStoreComment::newUnsavedComment( $detail );
-			$dbw = wfGetDB( DB_PRIMARY );
+			$dbw = $services->getConnectionProvider()->getPrimaryDatabase();
 			$revStore = $services->getRevisionStore();
 			$nullRevRecord = $revStore->newNullRevision(
 				$dbw,

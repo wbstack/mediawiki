@@ -2,14 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Artsiom91",
+			"Maksim L.",
 			"Mechanizatar",
 			"No Sleep till Krupki",
+			"Plaga med",
 			"Tomato Cream",
 			"ZlyiLev",
 			"Дзяніс Тутэйшы",
-			"Чаховіч Уладзіслаў",
-			"Maksim L.",
-			"Plaga med"
+			"Чаховіч Уладзіслаў"
 		]
 	},
 	"specialpages-group-wikibase": "Вікібаза",
@@ -60,8 +60,6 @@
 	"datatypes-type-geo-shape": "Геаграфічная форма",
 	"datatypes-type-tabular-data": "Таблічныя даныя",
 	"datatypes-type-external-id": "Вонкавы ідэнтыфікатар",
-	"datatypes-type-entity-schema": "Схема сутнасці",
-	"version-wikibase": "Wikibase",
 	"wikibase-time-calendar-gregorian": "Грыгарыянскі",
 	"wikibase-time-calendar-julian": "Юліянскі",
 	"wikibase-time-precision-CE": "$1 н. э.",

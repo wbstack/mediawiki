@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"IJzeren Jan"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Prědstavka pěskovišča za šablony, kako pri [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Parsovati stranicu s pomočju <var>$1templatesandboxtext</var> vměsto sodržanja ukazanoj tu stranice.",
+	"templatesandbox-apihelp-text": "Parsovati stranicu s pomočju sodržanja tutoj stranice vměsto stranice ukazanoj od <var>$1templatesandboxtitle</var>.",
+	"templatesandbox-apihelp-contentmodel": "Model sodržanja <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Format sodržanja <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Oba parametry <var>$1templatesandboxtitle</var> i <var>$1templatesandboxtext</var> trěba ili ukazati ili izostaviti."
+}

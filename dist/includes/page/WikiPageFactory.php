@@ -2,15 +2,15 @@
 
 namespace MediaWiki\Page;
 
-use DBAccessObjectUtils;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\Page\Hook\WikiPageFactoryHook;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleFactory;
 use stdClass;
-use Title;
-use TitleFactory;
 use WikiCategoryPage;
 use WikiFilePage;
-use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\Rdbms\DBAccessObjectUtils;
+use Wikimedia\Rdbms\IConnectionProvider;
 use WikiPage;
 
 /**
@@ -19,26 +19,18 @@ use WikiPage;
  * @since 1.36
  */
 class WikiPageFactory {
-	/** @var TitleFactory */
-	private $titleFactory;
-	/** @var WikiPageFactoryHook */
-	private $wikiPageFactoryHookRunner;
-	/** @var ILoadBalancer */
-	private $loadBalancer;
+	private TitleFactory $titleFactory;
+	private WikiPageFactoryHook $wikiPageFactoryHookRunner;
+	private IConnectionProvider $dbProvider;
 
-	/**
-	 * @param TitleFactory $titleFactory
-	 * @param WikiPageFactoryHook $wikiPageFactoryHookRunner
-	 * @param ILoadBalancer $loadBalancer
-	 */
 	public function __construct(
 		TitleFactory $titleFactory,
 		WikiPageFactoryHook $wikiPageFactoryHookRunner,
-		ILoadBalancer $loadBalancer
+		IConnectionProvider $dbProvider
 	) {
 		$this->titleFactory = $titleFactory;
 		$this->wikiPageFactoryHookRunner = $wikiPageFactoryHookRunner;
-		$this->loadBalancer = $loadBalancer;
+		$this->dbProvider = $dbProvider;
 	}
 
 	/**
@@ -64,8 +56,7 @@ class WikiPageFactory {
 
 		// TODO: remove the need for casting to Title. We'll have to create a new hook to
 		//       replace the WikiPageFactory hook.
-		$title = Title::castFromPageIdentity( $pageIdentity );
-		'@phan-var Title $title';
+		$title = Title::newFromPageIdentity( $pageIdentity );
 
 		$page = null;
 		if ( !$this->wikiPageFactoryHookRunner->onWikiPageFactory( $title, $page ) ) {
@@ -101,9 +92,9 @@ class WikiPageFactory {
 	 *
 	 * @param stdClass $row Database row containing at least fields returned by getQueryInfo().
 	 * @param string|int $from Source of $data:
-	 *        - "fromdb" or WikiPage::READ_NORMAL: from a replica DB
-	 *        - "fromdbmaster" or WikiPage::READ_LATEST: from the primary DB
-	 *        - "forupdate" or WikiPage::READ_LOCKING: from the primary DB using SELECT FOR UPDATE
+	 *        - "fromdb" or IDBAccessObject::READ_NORMAL: from a replica DB
+	 *        - "fromdbmaster" or IDBAccessObject::READ_LATEST: from the primary DB
+	 *        - "forupdate" or IDBAccessObject::READ_LOCKING: from the primary DB using SELECT FOR UPDATE
 	 *
 	 * @return WikiPage
 	 */
@@ -118,8 +109,8 @@ class WikiPageFactory {
 	 *
 	 * @param int $id Article ID to load
 	 * @param string|int $from One of the following values:
-	 *        - "fromdb" or WikiPage::READ_NORMAL to select from a replica DB
-	 *        - "fromdbmaster" or WikiPage::READ_LATEST to select from the primary database
+	 *        - "fromdb" or IDBAccessObject::READ_NORMAL to select from a replica DB
+	 *        - "fromdbmaster" or IDBAccessObject::READ_LATEST to select from the primary database
 	 *
 	 * @return WikiPage|null Null when no page exists with that ID
 	 */
@@ -128,15 +119,13 @@ class WikiPageFactory {
 		if ( $id < 1 ) {
 			return null;
 		}
-
-		$from = WikiPage::convertSelectType( $from );
-		[ $index ] = DBAccessObjectUtils::getDBOptions( $from );
-		$db = $this->loadBalancer->getMaintenanceConnectionRef( $index );
+		$db = DBAccessObjectUtils::getDBFromRecency( $this->dbProvider, WikiPage::convertSelectType( $from ) );
 		$pageQuery = WikiPage::getQueryInfo();
-		$row = $db->selectRow(
-			$pageQuery['tables'], $pageQuery['fields'], [ 'page_id' => $id ], __METHOD__,
-			[], $pageQuery['joins']
-		);
+		$row = $db->newSelectQueryBuilder()
+			->queryInfo( $pageQuery )
+			->where( [ 'page_id' => $id ] )
+			->caller( __METHOD__ )
+			->fetchRow();
 		if ( !$row ) {
 			return null;
 		}

@@ -1,8 +1,6 @@
 <?php
 /** Colognian (Ripoarisch)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -162,6 +160,7 @@ $specialPageAliases = [
 	'Randomredirect'            => [ 'Zofällije_Ömleitung' ],
 	'Recentchanges'             => [ 'Neuste_Änderunge', 'Änderunge' ],
 	'Recentchangeslinked'       => [ 'Änderungen_an_verlinkte_Sigge' ],
+	'Renameuser'                => [ 'Metmaacher_ömnänne', 'Medmaacher_ömnänne', 'Metmaacher_ömnenne', 'Medmaacher_ömnenne', 'Metmaacher_ömdäufe', 'Medmaacher_ömdäufe' ],
 	'Revisiondelete'            => [ 'Version_fottschmieße' ],
 	'Search'                    => [ 'Sök', 'Söök', 'Söke', 'Sööke' ],
 	'Shortpages'                => [ 'Koote_Atikelle' ],
@@ -198,7 +197,7 @@ $magicWords = [
 	'hiddencat'                 => [ '1', '__VERSHTOCHE_SAACHJRUPP__', '__VERSTECKTE_KATEGORIE__', '__WARTUNGSKATEGORIE__', '__HIDDENCAT__' ],
 	'img_left'                  => [ '1', 'links', 'lengks', 'lenks', 'left' ],
 	'img_right'                 => [ '1', 'rähß', 'räts', 'rechts', 'right' ],
-	'language'                  => [ '0', '#SHPROOCH:', '#SPROCH:', '#SPRACHE:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#SHPROOCH', '#SPROCH', '#SPRACHE', '#LANGUAGE' ],
 	'nogallery'                 => [ '0', '__KEIN_JALLERIE__', '__KEINE_GALERIE__', '__KEINEGALERIE__', '__NOGALLERY__' ],
 	'redirect'                  => [ '0', '#ÖMLEIDE_OP', '#ÖMLEIDE', '#LEIDT_ÖM_OP', '#ÖMLEIDUNG', '#WEITERLEITUNG', '#REDIRECT' ],
 	'toc'                       => [ '0', '__ENHALLT__', '__INHALTSVERZEICHNIS__', '__TOC__' ],

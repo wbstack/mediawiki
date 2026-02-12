@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Winston Sung"
+		]
+	},
+	"advancedsearch-desc": "拉[[Special:Search]]提供高级搜索功能个轻松访问",
+	"advancedsearch-options-pane-head": "高级搜索：",
+	"advancedsearch-optgroup-text": "拉页面文本中搜索",
+	"advancedsearch-optgroup-structure": "结构",
+	"advancedsearch-optgroup-files": "文件搭图片",
+	"advancedsearch-optgroup-sort": "排序方式",
+	"advancedsearch-field-plain": "箇些词",
+	"advancedsearch-field-phrase": "精确匹配箇些词",
+	"advancedsearch-field-or": "箇些词之一",
+	"advancedsearch-field-not": "弗含箇些词",
+	"advancedsearch-field-subpageof": "此页面个子页面",
+	"advancedsearch-field-intitle": "页面标题包含",
+	"advancedsearch-field-deepcategory": "箇些分类中个页面",
+	"advancedsearch-field-hastemplate": "含箇些模板个页面",
+	"advancedsearch-field-inlanguage": "此语言中个页面",
+	"advancedsearch-field-filetype": "文件格式",
+	"advancedsearch-field-filew": "文件宽度（像素）",
+	"advancedsearch-field-fileh": "文件高度（像素）",
+	"advancedsearch-field-sort": "排序方式",
+	"advancedsearch-field-preview-sort": "按$1排序",
+	"advancedsearch-help-plain": ";描述\n:拉标题或文本中搜索箇些词。\n;请注意以下说明\n:* 此处可以输入多个字词。\n:* 标点符号搭别样非字母数字字符（除了冒号搭逗号）会得忽略。\n:* 箇里可能存在弗包含一个或多个侬搜索关键词个结果。\n:* 字词填充会被应用。例如：如果输入“car”个话，搜索也会得考虑“cars”。字词填充依语言而定。\n;帮助页面\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#全文搜索 全文搜索]\n;拉普通搜索中具有相同功能个语法\n:<code>sesame street car</code>",
+	"advancedsearch-help-phrase": ";描述\n:搜索特定字符个序列。标点符号会被忽略。\n;请注意以下说明\n:（只拉使用引号时有效，参见下方例子）\n:* 使用英文逗号或空格分隔搜索字词，例如<code>\"good morning\"</code>, <code>\"hello friend\"</code>。\n:* 标点符号搭别样非字母数字字符（除了冒号搭逗号）会得忽略。\n:* 搜索并非大小写敏感。\n:* 字词填充弗会应用。\n;帮助页面\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#字词搭修改 字词搭修改]\n;拉普通搜索中具有相同功能个语法\n:引号中个词，例如<code>\"Begin at the beginning\"</code>。",
+	"advancedsearch-help-or": ";描述\n:页面中需包含至少一个搜索关键词。\n;帮助页面\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#字词搭修改 字词搭修改]\n;拉普通搜索中具有相同功能个语法\n:两个词之间包含<code>OR</code>个关键词，例如<code>Laptop OR Notebook</code>。"
+}

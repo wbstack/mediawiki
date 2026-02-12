@@ -1,8 +1,6 @@
 <?php
 /** Kalaallisut (kalaallisut)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -25,7 +23,7 @@ $namespaceNames = [
 	NS_FILE             => 'Fiileq',
 	NS_FILE_TALK        => 'Fiilip_oqalliffia',
 	NS_MEDIAWIKI        => 'MediaWiki',
-	NS_MEDIAWIKI_TALK   => 'Mediawikip_oqalliffia',
+	NS_MEDIAWIKI_TALK   => 'MediaWikip_oqalliffia',
 	NS_TEMPLATE         => 'Ilisserut',
 	NS_TEMPLATE_TALK    => 'Ilisserummi_oqallinneq',
 	NS_HELP             => 'Ikiuutit',

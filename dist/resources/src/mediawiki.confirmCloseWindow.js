@@ -1,17 +1,21 @@
 ( function () {
 	/**
 	 * Prevent the closing of a window with a confirm message (the onbeforeunload event seems to
-	 * work in most browsers.)
+	 * work in most browsers).
+	 *
+	 * Provided by the mediawiki.confirmCloseWindow module.
 	 *
 	 * This supersedes any previous onbeforeunload handler. If there was a handler before, it is
 	 * restored when you execute the returned release() function.
 	 *
+	 * @example
+	 * mw.loader.using( 'mediawiki.confirmCloseWindow' ).then(() => {
 	 *     var allowCloseWindow = mw.confirmCloseWindow();
 	 *     // ... do stuff that can't be interrupted ...
 	 *     allowCloseWindow.release();
 	 *
-	 * The second function returned is a trigger function to trigger the check and an alert
-	 * window manually, e.g.:
+	 *    // The second function returned is a trigger function to trigger the check and an alert
+	 *    // window manually, e.g.:
 	 *
 	 *     var allowCloseWindow = mw.confirmCloseWindow();
 	 *     // ... do stuff that can't be interrupted ...
@@ -20,9 +24,9 @@
 	 *     } else {
 	 *         // do whatever you wanted to do
 	 *     }
-	 *
+	 * })
 	 * @method confirmCloseWindow
-	 * @member mw
+	 * @memberof mw
 	 * @param {Object} [options]
 	 * @param {string} [options.namespace] Optional jQuery event namespace, to allow loosely coupled
 	 *  external code to release your trigger. For example, the VisualEditor extension can use this
@@ -32,8 +36,8 @@
 	 * @return {Object} An object of functions to work with this module
 	 */
 	mw.confirmCloseWindow = function ( options ) {
-		var beforeunloadEvent = 'beforeunload';
-		var test = options && options.test || function () {
+		let beforeunloadEvent = 'beforeunload';
+		const test = options && options.test || function () {
 			return true;
 		};
 
@@ -96,7 +100,7 @@
 			 * @return {boolean}
 			 */
 			trigger: function () {
-				var message = mw.msg( 'confirmleave-warning' );
+				const message = mw.msg( 'confirmleave-warning' );
 				// use confirm to show the message to the user (if options.text() is true)
 				// eslint-disable-next-line no-alert
 				if ( test() && !confirm( message ) ) {

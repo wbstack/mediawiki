@@ -26,13 +26,12 @@
  */
 class TlyConverter extends LanguageConverter {
 	/**
-	 * @var string[]
 	 * The conversion table.
 	 * The Cyrillic sequence is based on Pireyko's 1976 Talysh—Russian dictionary,
 	 * with practical additions.
 	 * The toCyrillic table is built by flipping this one.
 	 */
-	private $toLatin = [
+	private const TO_LATIN = [
 		'а' => 'a', 'А' => 'A',
 		'б' => 'b', 'Б' => 'B',
 		'в' => 'v', 'В' => 'V',
@@ -67,50 +66,24 @@ class TlyConverter extends LanguageConverter {
 		'ш' => 'ş', 'Ш' => 'Ş',
 	];
 
-	/**
-	 * @var string[]
-	 * Filled with data in loadDefaultTables by flipping $toLatin.
-	 */
-	private $toCyrillic = [];
-
-	/**
-	 * Get Main language code.
-	 * @since 1.36
-	 *
-	 * @return string
-	 */
 	public function getMainCode(): string {
 		return 'tly';
 	}
 
-	/**
-	 * Get supported variants of the language.
-	 * @since 1.36
-	 *
-	 * @return array
-	 */
 	public function getLanguageVariants(): array {
 		return [ 'tly', 'tly-cyrl' ];
 	}
 
-	/**
-	 * Get language variants fallbacks.
-	 * @since 1.36
-	 *
-	 * @return array
-	 */
 	public function getVariantsFallbacks(): array {
 		return [
 			'tly-cyrl' => 'tly',
 		];
 	}
 
-	protected function loadDefaultTables() {
-		$this->toCyrillic = array_flip( $this->toLatin );
-
-		$this->mTables = [
-			'tly-cyrl' => new ReplacementArray( $this->toCyrillic ),
-			'tly' => new ReplacementArray( $this->toLatin ),
+	protected function loadDefaultTables(): array {
+		return [
+			'tly-cyrl' => new ReplacementArray( array_flip( self::TO_LATIN ) ),
+			'tly' => new ReplacementArray( self::TO_LATIN ),
 		];
 	}
 }

@@ -41,8 +41,10 @@
 	"advancedsearch-filesize-greater-than": "უმოსი რე ვინდარო",
 	"advancedsearch-filesize-smaller-than": "მერკე რე ვინდარო",
 	"advancedsearch-sort-relevance": "რელევანტური",
+	"advancedsearch-sort-preview-create-timestamp-desc": "გოჭყაფაშ თარიღი",
 	"advancedsearch-namespaces-preset-all": "არძა",
 	"advancedsearch-namespaces-preset-default": "სტანდარტული",
+	"advancedsearch-namespaces-preset-general-help": "ზოგადი მოხვარა",
 	"advancedsearch-namespaces-preset-discussion": "სხუნუა",
 	"prefs-advancedsearch": "გაუჯგუშებული გორუა"
 }

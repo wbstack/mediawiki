@@ -1,15 +1,26 @@
 {
 	"@metadata": {
 		"authors": [
+			"Kimberli Mäkäräinen (WMNO)",
 			"Yupik",
-			"Kimberli Mäkäräinen (WMNO)"
+			"Jon Harald Søby"
 		]
 	},
+	"wikibase-deletedentity-property": "Sihkkojuvvon iešvuohta",
+	"wikibase-deletedentity-query": "Sihkkojuvvon jearran",
 	"wikibase-error-unexpected": "Meattáhus: $1.",
+	"wikibase-error-unknown": "Meattáhus iđii.",
+	"wikibase-error-save-generic": "Vurken ii lihkostuvvan meattáhusa geažil.",
+	"wikibase-error-remove-generic": "Sihkkun ii lihkostuvvan meattáhusa geažil.",
+	"wikibase-timedetails-isotime": "Áigesteampal",
+	"wikibase-globedetails-longitude": "Guhkkodatgráda",
+	"wikibase-globedetails-latitude": "Govdodatgráda",
 	"wikibase-sitelinks-wikipedia": "Wikipedia",
 	"wikibase-snakview-snaktypeselector-somevalue": "dovdameahttun árvu",
-	"datatypes-type-string": "Streaŋga",
+	"datatypes-type-string": "Sreaŋga",
+	"datatypes-type-unknown": "Ii meroštuvvon",
 	"datatypes-type-boolean": "Boolelaš árvu",
 	"datatypes-type-wikibase-property": "Iešvuohta",
+	"wikibase-time-precision-century": "$1. čuohtejahki",
 	"wikibase-reference-formatter-snak-retrieved": "Čujuhuvvon $1"
 }

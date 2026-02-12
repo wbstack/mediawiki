@@ -4,9 +4,12 @@
 			"01miki10",
 			"Beluga",
 			"Crt",
+			"Jack Phoenix",
 			"Nedergard",
 			"Nike",
-			"Olli"
+			"Olli",
+			"Samoasambia",
+			"Silvonen"
 		]
 	},
 	"hieroglyphs": "Kokeile hieroglyfien merkintäkieltä",
@@ -55,5 +58,7 @@
 	"wikihiero-th-meaning": "Merkitys",
 	"wikihiero-th-result": "Tulos",
 	"wikihiero-visualeditor-mwhieroinspector-title": "Hieroglyfit",
-	"wikihiero-void": "Koko leveyden laatikko"
+	"wikihiero-void": "Koko leveyden laatikko",
+	"wikihiero-usage-tracking-category": "WikiHiero-laajennusta käyttävät sivut",
+	"wikihiero-usage-tracking-category-desc": "Tämä luokka lisätään automaattisesti sivuihin, jotka käyttävät WikiHiero-laajennosta."
 }

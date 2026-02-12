@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"JeffreyKim",
+			"Ktchankt"
+		]
+	},
+	"wikibaselexemecirrus-desc": "用緊CirrusSearch功能嘅維基庫詞典嘅擴充程式",
+	"wikibaselexemecirrus-rescore-profile-prefix": "為前綴（完成）搜尋嚟重新再評分個個人檔案"
+}

@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Habila Dachollom",
+			"Kambai Akau",
+			"Rwang PS",
+			"Sarah Niya Danbwarang"
+		]
+	},
+	"uls-plang-title-languages": "Balem",
+	"ext-uls-compact-link-count": "{{PLURAL:$1|Gwining gbak$1 gbak}}"
+}

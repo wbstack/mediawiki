@@ -108,7 +108,10 @@
 
 			var startEditingEvents = [
 				'statementviewafterstartediting.' + this.widgetName,
-				'referenceviewafterstartediting.' + this.widgetName
+				'referenceviewafterstartediting.' + this.widgetName,
+				'senseviewafterstartediting.' + this.widgetName,
+				'lexemeformviewafterstartediting.' + this.widgetName,
+				'lexemeheaderafterstartediting.' + this.widgetName
 			];
 
 			this.element
@@ -123,7 +126,12 @@
 				'statementlistviewafterremove.' + this.widgetName,
 				'statementviewafterstopediting.' + this.widgetName,
 				'statementviewafterremove.' + this.widgetName,
-				'referenceviewafterstopediting.' + this.widgetName
+				'referenceviewafterstopediting.' + this.widgetName,
+				'senselistviewafterremove.' + this.widgetName,
+				'senseviewafterstopediting.' + this.widgetName,
+				'lexemeformviewafterstopediting.' + this.widgetName,
+				'lexemeformlistviewafterremove.' + this.widgetName,
+				'lexemeheaderafterstopediting.' + this.widgetName
 			];
 
 			this.element
@@ -144,6 +152,7 @@
 
 			this.$statements.data( 'statementgrouplistview' )[ state ]();
 		}
+
 	} );
 
 	mw.hook( 'wikibase.lexemeview.ready' ).fire();

@@ -1,11 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
+			"Ebrahim",
+			"Ebraminio",
 			"Jeeputer",
 			"Ladsgroup"
 		]
 	},
-	"apierror-wikibaselexeme-form-must-have-at-least-one-representation": "فرم‌ها حتما باید حداقل یک بیانگر داشته‌باشند",
+	"apierror-wikibaselexeme-form-must-have-at-least-one-representation": "فرم‌ها حتما باید حداقل یک بیانگر داشته باشند",
 	"apierror-wikibaselexeme-json-field-required": "زمینهٔ «$3» در «$2» در پارامتر «$1» الزامی است",
 	"apierror-wikibaselexeme-lexeme-term-language-cannot-be-empty": "زبان نمی‌تواند خالی باشد",
 	"apierror-wikibaselexeme-lexeme-term-text-cannot-be-empty": "متن نمی‌تواند خالی باشد",
@@ -15,7 +17,6 @@
 	"apihelp-wbladdsense-param-lexemeId": "شناسه بن‌مایه مثلا L10",
 	"apihelp-wbladdsense-summary": "یک معنی به یک بن‌مایه اضافه می‌کند",
 	"apihelp-wbleditformelements-param-formId": "شناسه فرم مثلا L10-F2",
-	"apihelp-wblmergelexemes-description": "ادغام دو لکسیم.",
 	"apihelp-wblmergelexemes-param-source": "شناسه برای ادغام از",
 	"apihelp-wblmergelexemes-param-target": "شناسه برای ادغام به",
 	"apihelp-wblmergelexemes-summary": "ادغام دو لکسیم.",

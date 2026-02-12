@@ -9,7 +9,9 @@
 	"thanks": "شکریہ بھیڄو",
 	"thanks-submit": "شکریہ بھیڄو",
 	"echo-category-title-edit-thank": "شکریہ",
-	"notification-thanks-diff-link": "تہاݙی تبدیلی",
+	"log-name-thanks": "شکریہ  لاگ",
+	"logeventslist-thanks-log": "شکریہ  لاگ",
 	"notification-link-text-view-post": "رائے ݙیکھو",
-	"notification-flow-thanks-post-link": "تہاݙی رائے"
+	"notification-link-text-view-logentry": "میݙا لاگ اندراج ݙیکھو",
+	"thanks-error-invalidpostid": "پوسٹ آئی ڈی ٹھیک کائنی۔"
 }

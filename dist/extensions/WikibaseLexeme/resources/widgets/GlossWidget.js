@@ -38,6 +38,7 @@ module.exports = ( function ( require, wb ) {
 	 */
 	function newGlossWidget( messages, template, glosses, beforeUpdate, getDirectionality ) {
 		return {
+			compatConfig: { MODE: 3 },
 			template: template,
 
 			mixins: [
@@ -78,9 +79,7 @@ module.exports = ( function ( require, wb ) {
 					this.glosses = this.glosses.filter( function ( gloss ) {
 						return gloss.value.trim() !== '' && gloss.language.trim() !== '';
 					} );
-				}
-			},
-			filters: {
+				},
 				message: function ( key ) {
 					return messages.get( key );
 				},

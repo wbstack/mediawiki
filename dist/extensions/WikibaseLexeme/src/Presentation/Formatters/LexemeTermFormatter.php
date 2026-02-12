@@ -2,8 +2,8 @@
 
 namespace Wikibase\Lexeme\Presentation\Formatters;
 
-use Html;
-use Language;
+use MediaWiki\Html\Html;
+use MediaWiki\MediaWikiServices;
 use Wikibase\DataModel\Term\Term;
 use Wikibase\DataModel\Term\TermList;
 
@@ -31,16 +31,14 @@ class LexemeTermFormatter {
 		return implode(
 			$this->separator,
 			array_map(
-				function ( Term $term ) {
-					return $this->getTermHtml( $term );
-				},
+				[ $this, 'getTermHtml' ],
 				iterator_to_array( $terms->getIterator() )
 			)
 		);
 	}
 
 	private function getTermHtml( Term $term ) {
-		$language = Language::factory( $term->getLanguageCode() );
+		$language = MediaWikiServices::getInstance()->getLanguageFactory()->getLanguage( $term->getLanguageCode() );
 
 		return Html::element(
 			'span',

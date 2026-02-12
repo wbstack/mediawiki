@@ -5,13 +5,17 @@ const Button = require( '../mobile.startup/Button' ),
 	util = require( '../mobile.startup/util' );
 
 /**
- * @extends View
+ * Renders a block message details.
+ *
+ * @extends module:mobile.startup/View
+ * @private
  */
 class BlockMessageDetails extends View {
 	/** @inheritdoc */
 	get isTemplateMode() {
 		return true;
 	}
+
 	/**
 	 * @inheritdoc
 	 */
@@ -75,6 +79,7 @@ class BlockMessageDetails extends View {
 			expiryHeader: mw.msg( 'mobile-frontend-editor-blocked-drawer-expiry-header' )
 		};
 	}
+
 	/**
 	 * Configure the call to action depending on the type of block.
 	 *
@@ -115,6 +120,7 @@ class BlockMessageDetails extends View {
 
 		return config;
 	}
+
 	/**
 	 * @inheritdoc
 	 */
@@ -125,14 +131,14 @@ class BlockMessageDetails extends View {
 		);
 		this.$el.find( '.block-message-icon' ).prepend(
 			( new Icon( {
-				name: 'block-destructive',
-				additionalClassNames: 'mw-ui-icon-flush-top'
+				icon: 'block-destructive'
 			} ) ).$el
 		);
 		this.options.parsedReason.then( function ( htmlReason ) {
 			drawer.$el.find( '.block-message-reason div' ).html( htmlReason );
 		} );
 	}
+
 	/**
 	 * @inheritdoc
 	 */

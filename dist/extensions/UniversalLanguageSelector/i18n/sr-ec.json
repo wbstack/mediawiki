@@ -5,14 +5,17 @@
 			"BadDog",
 			"Milicevic01",
 			"Prevodim",
+			"Zenfiric",
 			"Милан Јелисавчић",
-			"Сербијана"
+			"Сербијана",
+			"Aca"
 		]
 	},
 	"uls-desc": "Даје кориснику неколико начина да изабере језик и да прилагоди подешавања језика",
 	"uls-plang-title-languages": "Језици",
 	"ext-uls-select-language-settings-icon-tooltip": "Подешавања језика",
-	"ext-uls-undo-language-tooltip-text": "Језик промењен са $1",
+	"ext-uls-undo-language-tooltip-text": "Пређашњи језик $1",
+	"ext-uls-undo-language-tooltip-text-local": "Језик промењен за овај вики. Језик за све викије можете подесити у [[Special:GlobalPreferences|глобалним подешавањима]].",
 	"ext-uls-language-settings-preferences-link": "Још језичких подешавања",
 	"uls-betafeature-label": "Сажете везе ка другим језицима",
 	"uls-betafeature-desc": "Прикажује сажет списак језика, само са Вама битним језицима.",
@@ -64,15 +67,17 @@
 	"prefs-languages": "Језици",
 	"ext-uls-compact-language-links-preference": "Користи [[$1|сажети списак језика]], с језицима који су Вам важни.",
 	"ext-uls-compact-no-results": "Ова страница није доступна на језику који тражите.",
+	"ext-uls-setlang-error": "Дошло је до грешке при ажурирању жељеног језика. Грешка: $1",
 	"ext-uls-setlang-unknown-error": "Непозната грешка",
+	"ext-uls-setlang-message": "Веза коју сте следили приказује интерфејс у <strong>$1 ($2)</strong>",
 	"ext-uls-setlang-heading": "Променити језик интерфејса?",
 	"ext-uls-setlang-accept": "Прихвати промену",
 	"ext-uls-setlang-loading": "Примењивање…",
 	"ext-uls-setlang-cancel": "Не мењај",
-	"ext-uls-actions-menu-header": "Више опција",
 	"ext-uls-actions-menu-language-settings-item-label": "Језичке поставке",
 	"ext-uls-empty-state-header": "Нема других језика",
 	"ext-uls-empty-state-desc": "Тренутно нема других језика",
 	"ext-uls-empty-state-header-actions-available": "Нема других језика. Додајте нови?",
-	"ext-uls-empty-state-desc-actions-available": " Учините садржај доступним у више језика."
+	"ext-uls-empty-state-desc-actions-available": " Учините садржај доступним у више језика.",
+	"ext-uls-add-languages-button-label": "Додај језике"
 }

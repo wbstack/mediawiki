@@ -22,7 +22,7 @@
 
 	var mwImeRulesPath, inputSelector, inputPreferences, ulsIMEPreferences, customHelpLink,
 		getULSPreferences = require( 'ext.uls.preferences' ),
-		languageSettingsModules = [ 'ext.uls.displaysettings' ];
+		languageSettingsModules = [ 'ext.uls.displaysettings', '@wikimedia/codex' ];
 
 	mwImeRulesPath = mw.config.get( 'wgExtensionAssetsPath' ) +
 		'/UniversalLanguageSelector/lib/jquery.ime/';
@@ -215,9 +215,9 @@
 			return;
 		}
 		// Extend the ime preference system
-		$.extend( $.ime.preferences, ulsIMEPreferences );
+		Object.assign( $.ime.preferences, ulsIMEPreferences );
 		// MediaWiki specific overrides for jquery.ime
-		$.extend( $.ime.defaults, {
+		Object.assign( $.ime.defaults, {
 			imePath: mwImeRulesPath
 		} );
 

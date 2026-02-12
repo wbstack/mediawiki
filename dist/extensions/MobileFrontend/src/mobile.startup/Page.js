@@ -1,13 +1,11 @@
-var
+const
 	HTML = mw.html,
-	util = require( './util' ),
-	Section = require( './Section' );
+	util = require( './util' );
 
-/**
- * Mobile page view object
- */
 class Page {
 	/**
+	 * @class module:mobile.startup/Page
+	 * @classdesc Mobile page view object
 	 * @param {Object} options Configuration options
 	 * @param {number} options.id Page ID. The default value of 0 represents a
 	 * new or missing page. Be sure to override it to avoid side effects.
@@ -20,12 +18,10 @@ class Page {
 	 *  namespace the page belongs to
 	 * @param {Object} options.protection List of permissions as returned by API,
 	 * e.g. [{ edit: ['*'] }]
-	 * @param {Array} options.sections Array of {Section} objects.
 	 * @param {string} options.url
 	 * @param {string} options.wikidataDescription
 	 * @param {boolean} options.isMainPage Whether the page is the Main Page.
 	 * @param {boolean} options.isMissing Whether the page exists in the wiki.
-	 * @param {Date} [options.lastModified]
 	 * @param {string} options.anchor
 	 * @param {string} [options.relevantTitle] associated with page.
 	 *  For example Special:WhatLinksHere/Foo would be associated with the page `Foo`.
@@ -50,26 +46,17 @@ class Page {
 			displayTitle: options.displayTitle || HTML.escape( title ),
 			namespaceNumber: options.namespaceNumber || 0,
 			protection: options.protection,
-			sections: [],
 			url: options.url || mw.util.getUrl( title ),
 			wikidataDescription: options.wikidataDescription,
 			_isMainPage: options.isMainPage || false,
 			isMissing: ( options.isMissing !== undefined ) ?
 				options.isMissing : options.id === 0,
-			lastModified: options.lastModified,
 			anchor: options.anchor,
 			revId: options.revId,
 			_isWatched: options.isWatched,
 			thumbnail: ( Object.prototype.hasOwnProperty.call( options, 'thumbnail' ) ) ?
-				options.thumbnail : false,
-			_sectionLookup: {}
+				options.thumbnail : false
 		} );
-
-		( options.sections || [] ).forEach( function ( sectionData ) {
-			var section = new Section( sectionData );
-			this.sections.push( section );
-			this._sectionLookup[section.id] = section;
-		}.bind( this ) );
 
 		if ( this.thumbnail && this.thumbnail.width ) {
 			this.thumbnail.isLandscape = this.thumbnail.width > this.thumbnail.height;
@@ -79,14 +66,17 @@ class Page {
 	/**
 	 * Retrieve the title that should be displayed to the user
 	 *
+	 * @memberof module:mobile.startup/Page
 	 * @return {string} HTML
 	 */
 	getDisplayTitle() {
 		return this.displayTitle;
 	}
+
 	/**
 	 * Determine if current page is in a specified namespace
 	 *
+	 * @memberof module:mobile.startup/Page
 	 * @param {string} namespace Name of namespace
 	 * @return {boolean}
 	 */
@@ -97,6 +87,7 @@ class Page {
 	/**
 	 * Determines if content model is wikitext
 	 *
+	 * @memberof module:mobile.startup/Page
 	 * @return {boolean}
 	 */
 	isWikiText() {
@@ -104,16 +95,58 @@ class Page {
 	}
 
 	/**
+	 * Check if the visual editor is available on this page
+	 *
+	 * @memberof module:mobile.startup/Page
+	 * @return {boolean}
+	 */
+	isVEAvailable() {
+		return !!mw.config.get( 'wgVisualEditorConfig' ) &&
+			!mw.config.get( 'wgVisualEditorDisabledByHook' ) &&
+			this.isWikiText();
+	}
+
+	/**
+	 * Check if the visual editor in visual mode is available on this page
+	 *
+	 * @memberof module:mobile.startup/Page
+	 * @return {boolean}
+	 */
+	isVEVisualAvailable() {
+		if ( !this.isVEAvailable() ) {
+			return false;
+		}
+		const config = mw.config.get( 'wgVisualEditorConfig' );
+		const visualEditorNamespaces = config.namespaces || [];
+
+		return visualEditorNamespaces.indexOf( mw.config.get( 'wgNamespaceNumber' ) ) !== -1;
+	}
+
+	/**
+	 * Check if the visual editor in source mode is available on this page
+	 *
+	 * @memberof module:mobile.startup/Page
+	 * @return {boolean}
+	 */
+	isVESourceAvailable() {
+		return this.isVEAvailable() &&
+			mw.config.get( 'wgMFEnableVEWikitextEditor' );
+	}
+
+	/**
 	 * Checks whether the current page is the main page
 	 *
+	 * @memberof module:mobile.startup/Page
 	 * @return {boolean}
 	 */
 	isMainPage() {
 		return this._isMainPage;
 	}
+
 	/**
 	 * Checks whether the current page is watched
 	 *
+	 * @memberof module:mobile.startup/Page
 	 * @return {boolean}
 	 */
 	isWatched() {
@@ -123,6 +156,7 @@ class Page {
 	/**
 	 * Return the latest revision id for this page
 	 *
+	 * @memberof module:mobile.startup/Page
 	 * @return {number}
 	 */
 	getRevisionId() {
@@ -132,6 +166,7 @@ class Page {
 	/**
 	 * Return prefixed page title
 	 *
+	 * @memberof module:mobile.startup/Page
 	 * @return {string}
 	 */
 	getTitle() {
@@ -141,11 +176,12 @@ class Page {
 	/**
 	 * return namespace id
 	 *
+	 * @memberof module:mobile.startup/Page
 	 * @return {number} namespace Number
 	 */
 	getNamespaceId() {
-		var nsId,
-			args = this.title.split( ':' );
+		let nsId;
+		const args = this.title.split( ':' );
 
 		if ( args[1] ) {
 			nsId = mw.config.get( 'wgNamespaceIds' )[ args[0].toLowerCase().replace( ' ', '_' ) ] || 0;
@@ -153,29 +189,6 @@ class Page {
 			nsId = 0;
 		}
 		return nsId;
-	}
-
-	/**
-	 * FIXME: Change function signature to take the anchor of the heading
-	 *
-	 * @param {string} id of the section as defined by MobileFormatter.
-	 * Note, that currently, this is different from
-	 * the PHP parser in that it relates to top-level sections.
-	 * For example, mf-section-1 would relate to section 1. See FIXME.
-	 * @return {Section}
-	 */
-	getSection( id ) {
-		return this._sectionLookup[ id ];
-	}
-
-	/**
-	 * Obtain the list of high level (and grouped) sections.
-	 * Note that this list will not include subsections.
-	 *
-	 * @return {Array} of Section instances
-	 */
-	getSections() {
-		return this.sections;
 	}
 }
 

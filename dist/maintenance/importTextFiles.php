@@ -21,10 +21,14 @@
  * @ingroup Maintenance
  */
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Content\ContentHandler;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script which reads in text files
@@ -62,6 +66,7 @@ class ImportTextFiles extends Maintenance {
 		// support an arbitrary number of arguments.
 		$files = [];
 		$i = 0;
+		// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 		while ( $arg = $this->getArg( $i++ ) ) {
 			if ( file_exists( $arg ) ) {
 				$files[$arg] = file_get_contents( $arg );
@@ -101,7 +106,7 @@ class ImportTextFiles extends Maintenance {
 		$failCount = 0;
 		$skipCount = 0;
 
-		$revLookup = MediaWikiServices::getInstance()->getRevisionLookup();
+		$revLookup = $this->getServiceContainer()->getRevisionLookup();
 		foreach ( $files as $file => $text ) {
 			$pageName = $prefix . pathinfo( $file, PATHINFO_FILENAME );
 			$timestamp = $useTimestamp ? wfTimestamp( TS_UNIX, filemtime( $file ) ) : wfTimestampNow();
@@ -134,7 +139,7 @@ class ImportTextFiles extends Maintenance {
 			}
 
 			$content = ContentHandler::makeContent( rtrim( $text ), $title );
-			$rev = new WikiRevision( MediaWikiServices::getInstance()->getMainConfig() );
+			$rev = new WikiRevision();
 			$rev->setContent( SlotRecord::MAIN, $content );
 			$rev->setTitle( $title );
 			$rev->setUserObj( $user );
@@ -210,5 +215,7 @@ class ImportTextFiles extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = ImportTextFiles::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

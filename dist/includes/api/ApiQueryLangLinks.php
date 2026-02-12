@@ -20,8 +20,13 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use MediaWiki\Language\Language;
 use MediaWiki\Languages\LanguageNameUtils;
 use MediaWiki\MainConfigNames;
+use MediaWiki\Title\Title;
+use MediaWiki\Utils\UrlUtils;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 
@@ -32,21 +37,21 @@ use Wikimedia\ParamValidator\TypeDef\IntegerDef;
  */
 class ApiQueryLangLinks extends ApiQueryBase {
 
-	/** @var LanguageNameUtils */
-	private $languageNameUtils;
-
-	/** @var Language */
-	private $contentLanguage;
+	private LanguageNameUtils $languageNameUtils;
+	private Language $contentLanguage;
+	private UrlUtils $urlUtils;
 
 	public function __construct(
 		ApiQuery $query,
-		$moduleName,
+		string $moduleName,
 		LanguageNameUtils $languageNameUtils,
-		Language $contentLanguage
+		Language $contentLanguage,
+		UrlUtils $urlUtils
 	) {
 		parent::__construct( $query, $moduleName, 'll' );
 		$this->languageNameUtils = $languageNameUtils;
 		$this->contentLanguage = $contentLanguage;
+		$this->urlUtils = $urlUtils;
 	}
 
 	public function execute() {
@@ -84,16 +89,13 @@ class ApiQueryLangLinks extends ApiQueryBase {
 		$this->addTables( 'langlinks' );
 		$this->addWhereFld( 'll_from', array_keys( $pages ) );
 		if ( $params['continue'] !== null ) {
-			$cont = explode( '|', $params['continue'] );
-			$this->dieContinueUsageIf( count( $cont ) != 2 );
-			$op = $params['dir'] == 'descending' ? '<' : '>';
-			$llfrom = (int)$cont[0];
-			$lllang = $this->getDB()->addQuotes( $cont[1] );
-			$this->addWhere(
-				"ll_from $op $llfrom OR " .
-				"(ll_from = $llfrom AND " .
-				"ll_lang $op= $lllang)"
-			);
+			$db = $this->getDB();
+			$cont = $this->parseContinueParamOrDie( $params['continue'], [ 'int', 'string' ] );
+			$op = $params['dir'] == 'descending' ? '<=' : '>=';
+			$this->addWhere( $db->buildComparison( $op, [
+				'll_from' => $cont[0],
+				'll_lang' => $cont[1],
+			] ) );
 		}
 
 		// FIXME: (follow-up) To allow extensions to add to the language links, we need
@@ -141,7 +143,7 @@ class ApiQueryLangLinks extends ApiQueryBase {
 			if ( isset( $prop['url'] ) ) {
 				$title = Title::newFromText( "{$row->ll_lang}:{$row->ll_title}" );
 				if ( $title ) {
-					$entry['url'] = wfExpandUrl( $title->getFullURL(), PROTO_CURRENT );
+					$entry['url'] = (string)$this->urlUtils->expand( $title->getFullURL(), PROTO_CURRENT );
 				}
 			}
 
@@ -204,8 +206,11 @@ class ApiQueryLangLinks extends ApiQueryBase {
 	}
 
 	protected function getExamplesMessages() {
+		$title = Title::newMainPage()->getPrefixedText();
+		$mp = rawurlencode( $title );
+
 		return [
-			'action=query&prop=langlinks&titles=Main%20Page&redirects='
+			"action=query&prop=langlinks&titles={$mp}&redirects="
 				=> 'apihelp-query+langlinks-example-simple',
 		];
 	}
@@ -214,3 +219,6 @@ class ApiQueryLangLinks extends ApiQueryBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Langlinks';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryLangLinks::class, 'ApiQueryLangLinks' );

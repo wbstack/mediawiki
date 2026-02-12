@@ -4,16 +4,15 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiUsageException;
-use ArrayAccess;
-use IContextSource;
 use InvalidArgumentException;
 use LogicException;
+use MediaWiki\Api\ApiUsageException;
+use MediaWiki\Context\IContextSource;
 use MediaWiki\Permissions\PermissionManager;
 use MediaWiki\Revision\RevisionLookup;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\TitleFactory;
 use OutOfBoundsException;
-use Status;
-use TitleFactory;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -24,7 +23,8 @@ use Wikibase\Lib\Store\EntityStore;
 use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Store\StorageException;
 use Wikibase\Repo\EditEntity\EditEntity;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\EditEntityStatus;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\Store\EntityTitleStoreLookup;
 use Wikibase\Repo\SummaryFormatter;
 
@@ -46,7 +46,7 @@ class EntitySavingHelper extends EntityLoadingHelper {
 	private $summaryFormatter;
 
 	/**
-	 * @var MediawikiEditEntityFactory
+	 * @var MediaWikiEditEntityFactory
 	 */
 	private $editEntityFactory;
 
@@ -111,7 +111,7 @@ class EntitySavingHelper extends EntityLoadingHelper {
 		EntityTitleStoreLookup $entityTitleStoreLookup,
 		ApiErrorReporter $errorReporter,
 		SummaryFormatter $summaryFormatter,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		PermissionManager $permissionManager
 	) {
 		parent::__construct(
@@ -157,6 +157,7 @@ class EntitySavingHelper extends EntityLoadingHelper {
 	}
 
 	/**
+	 * @param array $requestParams
 	 * @param EntityId|null $entityId ID of the entity to load. If not given, the ID is taken
 	 *        from the request parameters. If $entityId is given, the 'baserevid' parameter must
 	 *        belong to it.
@@ -259,7 +260,7 @@ class EntitySavingHelper extends EntityLoadingHelper {
 	 * @throws LogicException
 	 * @return EntityDocument
 	 */
-	private function createEntity( $entityType, EntityId $customId = null, $assignFreshId = self::ASSIGN_FRESH_ID ): EntityDocument {
+	private function createEntity( ?string $entityType, ?EntityId $customId, string $assignFreshId ): EntityDocument {
 		if ( $customId ) {
 			$entityType = $customId->getEntityType();
 		} elseif ( !$entityType ) {
@@ -268,6 +269,7 @@ class EntitySavingHelper extends EntityLoadingHelper {
 				'no-entity-type'
 			);
 
+			// @phan-suppress-next-line PhanPluginUnreachableCode Wanted
 			throw new LogicException( 'ApiErrorReporter::dieError did not throw an exception' );
 		}
 
@@ -279,6 +281,7 @@ class EntitySavingHelper extends EntityLoadingHelper {
 				'no-such-entity-type'
 			);
 
+			// @phan-suppress-next-line PhanPluginUnreachableCode Wanted
 			throw new LogicException( 'ApiErrorReporter::dieError did not throw an exception' );
 		}
 
@@ -289,6 +292,7 @@ class EntitySavingHelper extends EntityLoadingHelper {
 					'bad-entity-id'
 				);
 
+				// @phan-suppress-next-line PhanPluginUnreachableCode Wanted
 				throw new LogicException( 'ApiErrorReporter::dieError did not throw an exception' );
 			}
 
@@ -302,6 +306,7 @@ class EntitySavingHelper extends EntityLoadingHelper {
 					'no-automatic-entity-id'
 				);
 
+				// @phan-suppress-next-line PhanPluginUnreachableCode Wanted
 				throw new LogicException( 'ApiErrorReporter::dieError did not throw an exception' );
 			}
 
@@ -328,6 +333,8 @@ class EntitySavingHelper extends EntityLoadingHelper {
 	 *
 	 * @param EntityDocument $entity The entity to save
 	 * @param string|FormatableSummary $summary The edit summary
+	 * @param array $requestParams
+	 * @param IContextSource $context
 	 * @param int $flags The edit flags (see WikiPage::doEditContent)
 	 *
 	 * @throws LogicException if not in write mode
@@ -414,28 +421,21 @@ class EntitySavingHelper extends EntityLoadingHelper {
 	/**
 	 * Signal errors and warnings from a save operation to the API call's output.
 	 * This is much like handleStatus(), but specialized for Status objects returned by
-	 * EditEntityHandler::attemptSave(). In particular, the 'errorFlags' and 'errorCode' fields
-	 * from the status value are used to determine the error code to return to the caller.
+	 * EditEntityHandler::attemptSave(). In particular, the 'errorFlags' field
+	 * from the status value is used to determine the error code to return to the caller.
 	 *
 	 * @note this function may or may not return normally, depending on whether
 	 *        the status is fatal or not.
 	 *
 	 * @see handleStatus().
 	 *
-	 * @param Status $status The status to report
+	 * @param EditEntityStatus $status The status to report
 	 */
-	private function handleSaveStatus( Status $status ): void {
-		$value = $status->getValue();
+	private function handleSaveStatus( EditEntityStatus $status ): void {
 		$errorCode = null;
 
-		if ( $this->isArrayLike( $value ) && isset( $value['errorCode'] ) ) {
-			$errorCode = $value['errorCode'];
-		} else {
-			$editError = 0;
-
-			if ( $this->isArrayLike( $value ) && isset( $value['errorFlags'] ) ) {
-				$editError = $value['errorFlags'];
-			}
+		if ( !$status->isOK() ) {
+			$editError = $status->getErrorFlags() ?? 0;
 
 			if ( $editError & EditEntity::TOKEN_ERROR ) {
 				$errorCode = 'badtoken';
@@ -451,20 +451,13 @@ class EntitySavingHelper extends EntityLoadingHelper {
 	}
 
 	/**
-	 * Checks whether accessing array keys is safe, with e.g. @see DeprecatablePropertyArray
-	 */
-	private function isArrayLike( $value ): bool {
-		return is_array( $value ) || $value instanceof ArrayAccess;
-	}
-
-	/**
 	 * Include messages from a Status object in the API call's output.
 	 *
 	 * An ApiErrorHandler is used to report the status, if necessary.
 	 * If $status->isOK() is false, this method will terminate with an ApiUsageException.
 	 *
 	 * @param Status $status The status to report
-	 * @param string  $errorCode The API error code to use in case $status->isOK() returns false
+	 * @param string|null $errorCode The API error code to use in case $status->isOK() returns false
 	 *
 	 * @throws ApiUsageException If $status->isOK() returns false.
 	 */

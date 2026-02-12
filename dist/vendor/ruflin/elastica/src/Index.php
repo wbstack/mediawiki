@@ -3,6 +3,9 @@
 namespace Elastica;
 
 use Elastica\Bulk\ResponseSet;
+use Elastica\Exception\Bulk\ResponseException as BulkResponseException;
+use Elastica\Exception\ClientException;
+use Elastica\Exception\ConnectionException;
 use Elastica\Exception\InvalidException;
 use Elastica\Exception\NotFoundException;
 use Elastica\Exception\ResponseException;
@@ -45,6 +48,7 @@ use Elasticsearch\Endpoints\UpdateByQuery;
  * Handles reads, deletes and configurations of an index
  *
  * @author   Nicolas Ruflin <spam@ruflin.com>
+ * @phpstan-import-type TCreateQueryArgsMatching from Query
  */
 class Index implements SearchableInterface
 {
@@ -109,6 +113,10 @@ class Index implements SearchableInterface
 
     /**
      * Gets all mappings for the current index.
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function getMapping(): array
     {
@@ -150,6 +158,12 @@ class Index implements SearchableInterface
      * @param Document[] $docs    Array of Elastica\Document
      * @param array      $options Array of query params to use for query. For possible options check es api
      *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
+     * @throws BulkResponseException
+     * @throws InvalidException
+     *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
      */
     public function updateDocuments(array $docs, array $options = []): ResponseSet
@@ -164,11 +178,17 @@ class Index implements SearchableInterface
     /**
      * Update entries in the db based on a query.
      *
-     * @param AbstractQuery|array|Collapse|Query|string|Suggest $query   Query object or array
-     * @param AbstractScript                                    $script  Script
-     * @param array                                             $options Optional params
+     * @param AbstractQuery|array|Query|string|null $query Query object or array
+     * @phpstan-param TCreateQueryArgsMatching $query
+     *
+     * @param AbstractScript $script  Script
+     * @param array          $options Optional params
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function updateByQuery($query, AbstractScript $script, array $options = []): Response
     {
@@ -187,13 +207,17 @@ class Index implements SearchableInterface
 
     /**
      * Adds the given document to the search index.
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function addDocument(Document $doc): Response
     {
         $endpoint = new IndexEndpoint();
 
         if (null !== $doc->getId() && '' !== $doc->getId()) {
-            $endpoint->setID($doc->getId());
+            $endpoint->setId($doc->getId());
         }
 
         $options = $doc->getOptions(
@@ -236,6 +260,12 @@ class Index implements SearchableInterface
      * @param array|Document[] $docs    Array of Elastica\Document
      * @param array            $options Array of query params to use for query. For possible options check es api
      *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
+     * @throws BulkResponseException
+     * @throws InvalidException
+     *
      * @return ResponseSet
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
@@ -255,13 +285,15 @@ class Index implements SearchableInterface
      * @param int|string $id      Document id
      * @param array      $options options for the get request
      *
-     * @throws ResponseException
      * @throws NotFoundException
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function getDocument($id, array $options = []): Document
     {
         $endpoint = new DocumentGet();
-        $endpoint->setID($id);
+        $endpoint->setId($id);
         $endpoint->setParams($options);
 
         $response = $this->requestEndpoint($endpoint);
@@ -289,6 +321,10 @@ class Index implements SearchableInterface
      * Deletes a document by its unique identifier.
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function deleteById(string $id, array $options = []): Response
     {
@@ -297,7 +333,7 @@ class Index implements SearchableInterface
         }
 
         $endpoint = new \Elasticsearch\Endpoints\Delete();
-        $endpoint->setID(\trim($id));
+        $endpoint->setId(\trim($id));
         $endpoint->setParams($options);
 
         return $this->requestEndpoint($endpoint);
@@ -306,10 +342,16 @@ class Index implements SearchableInterface
     /**
      * Deletes documents matching the given query.
      *
-     * @param AbstractQuery|array|Collapse|Query|string|Suggest $query   Query object or array
-     * @param array                                             $options Optional params
+     * @param AbstractQuery|array|Query|string|null $query Query object or array
+     * @phpstan-param TCreateQueryArgsMatching $query
+     *
+     * @param array $options Optional params
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete-by-query.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function deleteByQuery($query, array $options = []): Response
     {
@@ -326,6 +368,10 @@ class Index implements SearchableInterface
      * Opens a Point-in-Time on the index.
      *
      * @see: https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function openPointInTime(string $keepAlive): Response
     {
@@ -337,6 +383,10 @@ class Index implements SearchableInterface
 
     /**
      * Deletes the index.
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function delete(): Response
     {
@@ -347,6 +397,12 @@ class Index implements SearchableInterface
      * Uses the "_bulk" endpoint to delete documents from the server.
      *
      * @param Document[] $docs Array of documents
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
+     * @throws BulkResponseException
+     * @throws InvalidException
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
      */
@@ -367,6 +423,10 @@ class Index implements SearchableInterface
      * @param array $args Additional arguments
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-forcemerge.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function forcemerge($args = []): Response
     {
@@ -380,6 +440,10 @@ class Index implements SearchableInterface
      * Refreshes the index.
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-refresh.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function refresh(): Response
     {
@@ -397,6 +461,8 @@ class Index implements SearchableInterface
      *                            array => Associative array of options (option=>value)
      *
      * @throws InvalidException
+     * @throws ClientException
+     * @throws ConnectionException
      * @throws ResponseException
      *
      * @return Response Server response
@@ -446,6 +512,10 @@ class Index implements SearchableInterface
 
     /**
      * Checks if the given index exists ans is created.
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function exists(): bool
     {
@@ -455,9 +525,7 @@ class Index implements SearchableInterface
     }
 
     /**
-     * @param AbstractQuery|array|Collapse|Query|string|Suggest $query
-     * @param array|int                                         $options
-     * @param BuilderInterface                                  $builder
+     * {@inheritdoc}
      */
     public function createSearch($query = '', $options = null, ?BuilderInterface $builder = null): Search
     {
@@ -492,6 +560,10 @@ class Index implements SearchableInterface
      * Opens an index.
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-open-close.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function open(): Response
     {
@@ -502,6 +574,10 @@ class Index implements SearchableInterface
      * Closes the index.
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-open-close.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function close(): Response
     {
@@ -530,6 +606,10 @@ class Index implements SearchableInterface
      * @param bool $replace If set, an existing alias will be replaced
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-aliases.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function addAlias(string $name, bool $replace = false): Response
     {
@@ -555,6 +635,10 @@ class Index implements SearchableInterface
      * Removes an alias pointing to the current index.
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-aliases.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function removeAlias(string $name): Response
     {
@@ -567,6 +651,10 @@ class Index implements SearchableInterface
 
     /**
      * Returns all index aliases.
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      *
      * @return string[]
      */
@@ -602,6 +690,10 @@ class Index implements SearchableInterface
      * Clears the cache of an index.
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-clearcache.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function clearCache(): Response
     {
@@ -616,6 +708,10 @@ class Index implements SearchableInterface
      * Flushes the index to storage.
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-flush.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function flush(array $options = []): Response
     {
@@ -631,6 +727,10 @@ class Index implements SearchableInterface
      * @param array $data Data array
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-update-settings.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function setSettings(array $data): Response
     {
@@ -647,6 +747,10 @@ class Index implements SearchableInterface
      * @param string       $path   Path to call
      * @param string       $method Rest method to use (GET, POST, DELETE, PUT)
      * @param array|string $data   Arguments as array or encoded string
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function request(string $path, string $method, $data = [], array $queryParameters = []): Response
     {
@@ -657,6 +761,10 @@ class Index implements SearchableInterface
 
     /**
      * Makes calls to the elasticsearch server with usage official client Endpoint based on this index.
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function requestEndpoint(AbstractEndpoint $endpoint): Response
     {
@@ -673,6 +781,10 @@ class Index implements SearchableInterface
      * @param array $args Additional arguments
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-analyze.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function analyze(array $body, $args = []): array
     {

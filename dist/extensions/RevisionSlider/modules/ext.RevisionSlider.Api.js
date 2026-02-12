@@ -7,7 +7,7 @@ function Api( apiUrl ) {
 	this.url = apiUrl;
 }
 
-$.extend( Api.prototype, {
+Object.assign( Api.prototype, {
 	url: '',
 
 	/**
@@ -41,16 +41,16 @@ $.extend( Api.prototype, {
 	 * @return {jQuery.promise}
 	 */
 	fetchRevisionData: function ( pageName, options ) {
-		var userXhr,
-			deferred = $.Deferred(),
+		const deferred = $.Deferred(),
 			self = this;
+		let userXhr;
 
 		options = options || {};
 
-		var xhr = this.fetchRevisions( pageName, options )
-			.done( function ( data ) {
-				var revs = data.query.pages[ 0 ].revisions,
-					revContinue = data.continue,
+		const xhr = this.fetchRevisions( pageName, options )
+			.done( ( data ) => {
+				let revs = data.query.pages[ 0 ].revisions;
+				const revContinue = data.continue,
 					genderData = options.knownUserGenders || {},
 					changeTags = options.changeTags;
 
@@ -64,26 +64,26 @@ $.extend( Api.prototype, {
 
 				// No need to query any gender data if masculine, feminine, and neutral are all
 				// the same anyway
-				var unknown = mw.msg( 'revisionslider-label-username', 'unknown' );
+				const unknown = mw.msg( 'revisionslider-label-username', 'unknown' );
 				if ( mw.msg( 'revisionslider-label-username', 'male' ) === unknown &&
 					mw.msg( 'revisionslider-label-username', 'female' ) === unknown
 				) {
 					return deferred.resolve( { revisions: revs, continue: revContinue } );
 				}
 
-				var userNames = self.getUniqueUserNamesWithUnknownGender( revs, genderData );
+				const userNames = self.getUniqueUserNamesWithUnknownGender( revs, genderData );
 
 				userXhr = self.fetchUserGenderData( userNames )
-					.done( function ( data2 ) {
+					.done( ( data2 ) => {
 						if ( typeof data2 === 'object' &&
 							data2.query &&
 							data2.query.users &&
 							data2.query.users.length > 0
 						) {
-							$.extend( genderData, self.getUserGenderData( data2.query.users, genderData ) );
+							Object.assign( genderData, self.getUserGenderData( data2.query.users, genderData ) );
 						}
 
-						revs.forEach( function ( rev ) {
+						revs.forEach( ( rev ) => {
 							if ( rev.user in genderData ) {
 								rev.userGender = genderData[ rev.user ];
 							}
@@ -118,11 +118,11 @@ $.extend( Api.prototype, {
 	 */
 	fetchRevisions: function ( pageName, options ) {
 		options = options || {};
-		var data = {
+		const data = {
 			action: 'query',
 			prop: 'revisions',
 			format: 'json',
-			rvprop: 'ids|timestamp|user|comment|parsedcomment|size|flags|tags',
+			rvprop: 'ids|timestamp|user|parsedcomment|size|flags|tags',
 			titles: pageName,
 			formatversion: 2,
 			continue: '',
@@ -175,15 +175,13 @@ $.extend( Api.prototype, {
 	 * @return {string[]}
 	 */
 	getUniqueUserNamesWithUnknownGender: function ( revs, knownUserGenders ) {
-		var allUsers = revs.map( function ( rev ) {
-			return !( 'anon' in rev ) && rev.user;
-		} );
-		return allUsers.filter( function ( name, index ) {
+		const allUsers = revs.map( ( rev ) => !( 'anon' in rev ) && rev.user );
+		return allUsers.filter( ( name, index ) =>
 			// Anonymous users don't have a name
-			return name && !( name in knownUserGenders ) &&
+			 name && !( name in knownUserGenders ) &&
 				// This filters duplicates by rejecting all but the first one
-				allUsers.indexOf( name ) === index;
-		} );
+				allUsers.indexOf( name ) === index
+		 );
 	},
 
 	/**
@@ -191,8 +189,8 @@ $.extend( Api.prototype, {
 	 * @return {Object.<string,string>}
 	 */
 	getUserGenderData: function ( users ) {
-		var genderData = {};
-		users.forEach( function ( user ) {
+		const genderData = {};
+		users.forEach( ( user ) => {
 			if ( user.gender && user.gender !== 'unknown' ) {
 				genderData[ user.name ] = user.gender;
 			}
@@ -206,9 +204,9 @@ $.extend( Api.prototype, {
 	 * @return {Object[]}
 	 */
 	getRevisionsWithNewTags: function ( revs, changeTags ) {
-		revs.forEach( function ( rev ) {
-			rev.tags = rev.tags.map( function ( tag ) {
-				changeTags.some( function ( changeTag ) {
+		revs.forEach( ( rev ) => {
+			rev.tags = rev.tags.map( ( tag ) => {
+				changeTags.some( ( changeTag ) => {
 					if ( tag === changeTag.name ) {
 						tag = changeTag.displayname;
 						return true;
@@ -216,10 +214,10 @@ $.extend( Api.prototype, {
 					return false;
 				} );
 				return tag;
-			} ).filter( function ( tag ) {
+			} ).filter( ( tag ) =>
 				// Remove hidden tags (tags with no displayname)
-				return tag;
-			} );
+				 tag
+			 );
 		} );
 		return revs;
 	}

@@ -13,27 +13,71 @@ function showPreview() {
 		api = new mw.Api();
 	}
 
-	api.post( {
+	var apiParams = {
 		action: 'parse',
 		page: titleInput.getQueryValue(),
+		pst: true,
+		preview: true,
 		templatesandboxtitle: mw.config.get( 'wgPageName' ),
 		templatesandboxtext: $( '#wpTextbox1' ).textSelection( 'getContents' ),
 		templatesandboxcontentmodel: mw.config.get( 'wgPageContentModel' ),
+		disableeditsection: true,
+		prop: [ 'text', 'categorieshtml', 'displaytitle' ],
 		errorformat: 'html',
 		errorlang: mw.config.get( 'wgUserLanguage' ),
 		errorsuselocal: true,
+		uselang: mw.config.get( 'wgUserLanguage' ),
+		useskin: mw.config.get( 'skin' ),
 		formatversion: 2
-	} ).always( function () {
+	};
+
+	if ( mw.config.get( 'wgUserVariant' ) ) {
+		apiParams.variant = mw.config.get( 'wgUserVariant' );
+	}
+
+	api.post( apiParams ).always( function () {
 		saveDialog.popPending();
 		submitButton.setDisabled( false );
 	} ).then( function ( res ) {
+		var veConfig = mw.config.get( 'wgVisualEditor' ),
+			$heading = $( '<h1>' )
+				.addClass( [ 'firstHeading', 'mw-first-heading' ] )
+				.html( res.parse.displaytitle ),
+			$text = $( '<div>' )
+				// The following classes are used here:
+				// * mw-content-ltr
+				// * mw-content-rtl
+				.addClass( [
+					'mw-body-content',
+					'mw-content-' + veConfig.pageLanguageDir,
+					// HACK: T287733
+					mw.config.get( 'skin' ) === 'vector' || mw.config.get( 'skin' ) === 'vector-2022' ? 'vector-body' : null
+				] )
+				.attr( {
+					lang: veConfig.pageLanguageCode,
+					dir: veConfig.pageLanguageDir
+				} )
+				.html( res.parse.text );
+
 		saveDialog.setSize( 'full' );
 		saveDialog.actions.setMode( 'preview' );
 		saveDialog.title.setLabel(
 			OO.ui.msg( 'templatesandbox-preview', '', titleInput.getValue() )
 		);
-		panelLayout.$element.html( res.parse.text );
+
+		panelLayout.$element.empty().append(
+			$( '<div>' ).addClass( 'mw-content-container' ).append(
+				$( '<div>' ).addClass( 'mw-body' ).append(
+					$heading,
+					$text,
+					res.parse.categorieshtml
+				)
+			)
+		);
 		saveDialog.panels.setItem( panelLayout );
+
+		// Fire hook to allow scripts to process the new content
+		mw.hook( 'wikipage.content' ).fire( panelLayout.$element );
 	}, function ( code, data ) {
 		var msg;
 		switch ( code ) {
@@ -52,7 +96,7 @@ function showPreview() {
 }
 
 if (
-	( new mw.Uri() ).query.wpTemplateSandboxShow !== undefined ||
+	new URL( location.href ).searchParams.has( 'wpTemplateSandboxShow' ) ||
 	require( './namespaces.json' ).indexOf( mw.config.get( 'wgNamespaceNumber' ) ) !== -1
 ) {
 	mw.hook( 've.saveDialog.stateChanged' ).add( function () {
@@ -82,7 +126,7 @@ if (
 		}
 	} );
 
-	mw.hook( 've.deactivate' ).add( function () {
+	mw.hook( 've.deactivationComplete' ).add( function () {
 		// Set to undefined so value cannot be restored
 		titleInput = undefined;
 	} );

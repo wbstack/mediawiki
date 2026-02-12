@@ -34,11 +34,23 @@
  * @author Gergő Tisza <tgr.huwiki@gmail.com>
  */
 
+// NO_AUTOLOAD -- file-scope code
+
+use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\Logger\ConsoleSpi;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use Psr\Log\LogLevel;
 
+// Horrible hack to support the --no-session parameter, which needs to be handled
+// way before parameters are parsed.
+if ( in_array( '--no-session', $_SERVER['argv'], true ) ) {
+	define( 'MW_NO_SESSION', 1 );
+}
+
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Interactive shell with completion and global scope.
@@ -49,11 +61,22 @@ class MediaWikiShell extends Maintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->addOption( 'd',
-			'For back compatibility with eval.php. ' .
+			'Deprecated, for back compatibility with eval.php. ' .
 			'1 send debug to stderr. ' .
 			'With 2 additionally initialize database with debugging ',
 			false, true
 		);
+		$this->addOption( 'log-channels', 'Send the given log channels to STDERR. '
+			. 'Format: channel[:level],...', false, true );
+		$this->addOption( 'log-all', 'Send all log channels to STDERR.' );
+		$this->addOption( 'dbo-debug', 'Set DBO_DEBUG flags (equivalent of $wgDebugDumpSql).' );
+		$this->addOption( 'no-session',
+			'Disable session support (like MW_NO_SESSION)'
+		);
+	}
+
+	public function canExecuteWithoutLocalSettings(): bool {
+		return true;
 	}
 
 	public function execute() {
@@ -74,13 +97,48 @@ class MediaWikiShell extends Maintenance {
 		$config->setRuntimeDir( wfTempDir() );
 
 		$shell = new \Psy\Shell( $config );
-		if ( $this->hasOption( 'd' ) ) {
-			$this->setupLegacy();
-		}
 
-		Hooks::runner()->onMaintenanceShellStart();
+		$this->setupLogging();
+
+		( new HookRunner( $this->getServiceContainer()->getHookContainer() ) )->onMaintenanceShellStart();
 
 		$shell->run();
+	}
+
+	protected function setupLogging() {
+		if ( $this->hasOption( 'd' ) ) {
+			wfDeprecated( 'shell.php -d', '1.40' );
+			$this->setupLegacy();
+			return;
+		}
+
+		if ( $this->hasOption( 'log-all' ) ) {
+			LoggerFactory::registerProvider( new ConsoleSpi( [
+				'forwardTo' => LoggerFactory::getProvider(),
+			] ) );
+			// Some services hold Logger instances in object properties
+			MediaWikiServices::resetGlobalInstance();
+			MediaWikiServices::getInstance()->getObjectCacheFactory()->clear();
+		} elseif ( $this->hasOption( 'log-channels' ) ) {
+			$channelsArg = $this->getOption( 'log-channels' );
+			$channels = [];
+			foreach ( explode( ',', $channelsArg ) as $channelArg ) {
+				$parts = explode( ':', $channelArg );
+				$channel = $parts[0];
+				$level = $parts[1] ?? LogLevel::DEBUG;
+				$channels[$channel] = $level;
+			}
+			LoggerFactory::registerProvider( new ConsoleSpi( [
+				'channels' => $channels,
+				'forwardTo' => LoggerFactory::getProvider(),
+			] ) );
+			MediaWikiServices::resetGlobalInstance();
+			MediaWikiServices::getInstance()->getObjectCacheFactory()->clear();
+		}
+		if ( $this->hasOption( 'dbo-debug' ) ) {
+			$this->getPrimaryDB()->setFlag( DBO_DEBUG );
+			$this->getReplicaDB()->setFlag( DBO_DEBUG );
+		}
 	}
 
 	/**
@@ -92,15 +150,18 @@ class MediaWikiShell extends Maintenance {
 			LoggerFactory::registerProvider( new ConsoleSpi );
 			// Some services hold Logger instances in object properties
 			MediaWikiServices::resetGlobalInstance();
+			MediaWikiServices::getInstance()->getObjectCacheFactory()->clear();
 		}
 		if ( $d > 1 ) {
 			# Set DBO_DEBUG (equivalent of $wgDebugDumpSql)
-			$this->getDB( DB_PRIMARY )->setFlag( DBO_DEBUG );
-			$this->getDB( DB_REPLICA )->setFlag( DBO_DEBUG );
+			$this->getPrimaryDB()->setFlag( DBO_DEBUG );
+			$this->getReplicaDB()->setFlag( DBO_DEBUG );
 		}
 	}
 
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = MediaWikiShell::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

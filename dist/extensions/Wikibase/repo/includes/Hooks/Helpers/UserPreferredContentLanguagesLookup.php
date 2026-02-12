@@ -2,7 +2,7 @@
 
 namespace Wikibase\Repo\Hooks\Helpers;
 
-use User;
+use MediaWiki\User\User;
 use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\UserLanguageLookup;
 
@@ -37,7 +37,7 @@ class UserPreferredContentLanguagesLookup {
 	}
 
 	/**
-	 * @param $uiLanguage - user interface language; will be returned as the first language in the list if valid
+	 * @param string $uiLanguage User interface language; will be returned as the first language in the list if valid
 	 * @param User $user
 	 *
 	 * @return array language codes
@@ -50,7 +50,9 @@ class UserPreferredContentLanguagesLookup {
 			) ),
 			[ $this->contentLanguages, 'hasLanguage' ]
 		);
-		return count( $validLanguages ) === 0 ? [ $this->wikiDefaultContentLanguage ] : $validLanguages;
+		return count( $validLanguages ) === 0 ?
+			[ $this->wikiDefaultContentLanguage ] :
+			array_values( $validLanguages );
 	}
 
 }

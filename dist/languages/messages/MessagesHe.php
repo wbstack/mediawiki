@@ -1,8 +1,6 @@
 <?php
 /** Hebrew (עברית)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -131,6 +129,7 @@ $specialPageAliases = [
 	'Recentchangeslinked'       => [ 'שינויים_בדפים_המקושרים' ],
 	'Redirect'                  => [ 'הפניה' ],
 	'RemoveCredentials'         => [ 'הסרת_נתוני_ההזדהות' ],
+	'Renameuser'                => [ 'שינוי_שם_משתמש' ],
 	'ResetTokens'               => [ 'איפוס_אסימונים' ],
 	'Revisiondelete'            => [ 'מחיקת_ושחזור_גרסאות' ],
 	'RunJobs'                   => [ 'הרצת_משימות' ],
@@ -231,7 +230,7 @@ $magicWords = [
 	'img_width'                 => [ '1', '$1 פיקסלים', '$1px' ],
 	'index'                     => [ '1', '__לחיפוש__', '__INDEX__' ],
 	'int'                       => [ '0', 'הודעה:', 'INT:' ],
-	'language'                  => [ '0', '#שפה:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#שפה', '#LANGUAGE' ],
 	'lc'                        => [ '0', 'אותיות קטנות:', 'LC:' ],
 	'lcfirst'                   => [ '0', 'אות ראשונה קטנה:', 'LCFIRST:' ],
 	'localday'                  => [ '1', 'יום מקומי', 'LOCALDAY' ],

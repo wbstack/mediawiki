@@ -19,40 +19,28 @@
  * @ingroup Installer
  */
 
+namespace MediaWiki\Installer;
+
 class WebInstallerComplete extends WebInstallerPage {
 
 	public function execute() {
 		// Pop up a dialog box, to make it difficult for the user to forget
 		// to download the file
 		$lsUrl = $this->getVar( 'wgServer' ) . $this->parent->getUrl( [ 'localsettings' => 1 ] );
-		if ( isset( $_SERVER['HTTP_USER_AGENT'] ) &&
-			strpos( $_SERVER['HTTP_USER_AGENT'], 'MSIE' ) !== false
-		) {
-			// JS appears to be the only method that works consistently with IE7+
-			$this->addHTML( "\n<script>jQuery( function () { location.href = " .
-				Xml::encodeJsVar( $lsUrl ) . "; } );</script>\n" );
-		} else {
-			$this->parent->request->response()->header( "Refresh: 0;url=$lsUrl" );
-		}
-
+		$this->parent->request->response()->header( "Refresh: 0;url=$lsUrl" );
 		$this->startForm();
 		$this->parent->disableLinkPopups();
 		$location = $this->parent->getLocalSettingsLocation();
 		$msg = 'config-install-done';
 		if ( $location !== false ) {
-			// config-install-done-path
-			$msg .= '-path';
+			$msg = 'config-install-done-path';
 		}
-		$this->addHTML(
-			$this->parent->getInfoBox(
-				new HtmlArmor( wfMessage( $msg,
-					$lsUrl,
-					$this->getVar( 'wgServer' ) .
-						$this->getVar( 'wgScriptPath' ) . '/index.php',
-					Message::rawParam( $this->parent->makeDownloadLinkHtml() ),
-					$location ?: ''
-				)->parse() ), 'tick-32.png'
-			)
+		$this->parent->showSuccess( $msg,
+			$lsUrl,
+			$this->getVar( 'wgServer' ) .
+				$this->getVar( 'wgScriptPath' ) . '/index.php',
+			"[$lsUrl " . wfMessage( 'config-download-localsettings' )->plain() . ']',
+			$location ?: ''
 		);
 		$this->addHTML( $this->parent->getInfoBox(
 			wfMessage( 'config-extension-link' )->plain() ) );

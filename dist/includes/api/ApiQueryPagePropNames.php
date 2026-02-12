@@ -21,6 +21,8 @@
  * @since 1.21
  */
 
+namespace MediaWiki\Api;
+
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 
@@ -32,7 +34,7 @@ use Wikimedia\ParamValidator\TypeDef\IntegerDef;
  */
 class ApiQueryPagePropNames extends ApiQueryBase {
 
-	public function __construct( ApiQuery $query, $moduleName ) {
+	public function __construct( ApiQuery $query, string $moduleName ) {
 		parent::__construct( $query, $moduleName, 'ppn' );
 	}
 
@@ -49,9 +51,7 @@ class ApiQueryPagePropNames extends ApiQueryBase {
 		$this->addOption( 'ORDER BY', 'pp_propname' );
 
 		if ( $params['continue'] ) {
-			$cont = explode( '|', $params['continue'] );
-			$this->dieContinueUsageIf( count( $cont ) != 1 );
-
+			$cont = $this->parseContinueParamOrDie( $params['continue'], [ 'string' ] );
 			// Add a WHERE clause
 			$this->addWhereRange( 'pp_propname', 'newer', $cont[0], null );
 		}
@@ -111,3 +111,6 @@ class ApiQueryPagePropNames extends ApiQueryBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Pagepropnames';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryPagePropNames::class, 'ApiQueryPagePropNames' );

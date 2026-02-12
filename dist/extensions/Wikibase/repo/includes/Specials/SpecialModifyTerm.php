@@ -2,20 +2,21 @@
 
 namespace Wikibase\Repo\Specials;
 
-use Html;
-use HTMLForm;
-use Language;
-use Status;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Languages\LanguageNameUtils;
+use MediaWiki\Status\Status;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Summary;
 use Wikibase\Lib\UserInputException;
+use Wikibase\Repo\AnonymousEditWarningBuilder;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
 use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\FingerprintChangeOpFactory;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\Store\EntityPermissionChecker;
 use Wikibase\Repo\SummaryFormatter;
 
@@ -33,14 +34,14 @@ abstract class SpecialModifyTerm extends SpecialModifyEntity {
 	/**
 	 * The language the value is set in.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	private $languageCode;
 
 	/**
 	 * The value to set.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	private $value;
 
@@ -59,6 +60,11 @@ abstract class SpecialModifyTerm extends SpecialModifyEntity {
 	 */
 	private $permissionChecker;
 
+	/**
+	 * @var LanguageNameUtils
+	 */
+	private $languageNameUtils;
+
 	public function __construct(
 		string $title,
 		array $tags,
@@ -66,9 +72,11 @@ abstract class SpecialModifyTerm extends SpecialModifyEntity {
 		SpecialPageCopyrightView $copyrightView,
 		SummaryFormatter $summaryFormatter,
 		EntityTitleLookup $entityTitleLookup,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
+		AnonymousEditWarningBuilder $anonymousEditWarningBuilder,
 		EntityPermissionChecker $permissionChecker,
-		ContentLanguages $termsLanguages
+		ContentLanguages $termsLanguages,
+		LanguageNameUtils $languageNameUtils
 	) {
 		parent::__construct(
 			$title,
@@ -76,12 +84,14 @@ abstract class SpecialModifyTerm extends SpecialModifyEntity {
 			$copyrightView,
 			$summaryFormatter,
 			$entityTitleLookup,
-			$editEntityFactory
+			$editEntityFactory,
+			$anonymousEditWarningBuilder
 		);
 
 		$this->termChangeOpFactory = $changeOpFactoryProvider->getFingerprintChangeOpFactory();
 		$this->termsLanguages = $termsLanguages;
 		$this->permissionChecker = $permissionChecker;
+		$this->languageNameUtils = $languageNameUtils;
 	}
 
 	public function doesWrites() {
@@ -97,9 +107,9 @@ abstract class SpecialModifyTerm extends SpecialModifyEntity {
 		parent::processArguments( $subPage );
 
 		$request = $this->getRequest();
-		$parts = ( $subPage === '' ) ? [] : explode( '/', $subPage, 2 );
+		$parts = $subPage ? explode( '/', $subPage, 2 ) : [];
 
-		$this->languageCode = $request->getRawVal( 'language', $parts[1] ?? '' );
+		$this->languageCode = $request->getRawVal( 'language' ) ?? $parts[1] ?? '';
 
 		if ( $this->languageCode === '' ) {
 			$this->languageCode = null;
@@ -199,7 +209,7 @@ abstract class SpecialModifyTerm extends SpecialModifyEntity {
 	 *
 	 * @return HTMLForm
 	 */
-	protected function getForm( EntityDocument $entity = null ) {
+	protected function getForm( ?EntityDocument $entity ) {
 		if ( $this->languageCode === null ) {
 			$this->languageCode = $this->getLanguage()->getCode();
 		}
@@ -212,10 +222,11 @@ abstract class SpecialModifyTerm extends SpecialModifyEntity {
 			'id' => 'wb-modifyterm-value',
 			'type' => 'text',
 			'default' => $this->getRequest()->getVal( 'value' ) ?: $this->value,
-			'nodata' => true
+			'nodata' => true,
 		];
 
-		$languageName = Language::fetchLanguageName( $this->languageCode, $this->getLanguage()->getCode() );
+		$languageName = $this->languageNameUtils
+			->getLanguageName( $this->languageCode, $this->getLanguage()->getCode() );
 
 		if ( $entity !== null && $this->languageCode !== null && $languageName !== '' ) {
 			// Messages:
@@ -231,17 +242,17 @@ abstract class SpecialModifyTerm extends SpecialModifyEntity {
 				'language' => [
 					'name' => 'language',
 					'type' => 'hidden',
-					'default' => $this->languageCode
+					'default' => $this->languageCode,
 				],
 				'id' => [
 					'name' => 'id',
 					'type' => 'hidden',
-					'default' => $entity->getId()->getSerialization()
+					'default' => $entity->getId()->getSerialization(),
 				],
 				'remove' => [
 					'name' => 'remove',
 					'type' => 'hidden',
-					'default' => 'remove'
+					'default' => 'remove',
 				],
 				'value' => $valueinput,
 				'revid' => [
@@ -262,7 +273,7 @@ abstract class SpecialModifyTerm extends SpecialModifyEntity {
 				'label-message' => 'wikibase-modifyterm-language',
 				'type' => 'text',
 				'default' => $this->languageCode,
-				'id' => 'wb-modifyterm-language'
+				'id' => 'wb-modifyterm-language',
 			];
 			// Messages:
 			// wikibase-setlabel-label
@@ -273,10 +284,10 @@ abstract class SpecialModifyTerm extends SpecialModifyEntity {
 		}
 
 		return HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )
-			->setHeaderText( Html::rawElement( 'p', [], $intro ) );
+			->setHeaderHtml( Html::rawElement( 'p', [], $intro ) );
 	}
 
-	private function setValueIfNull( EntityDocument $entity = null ) {
+	private function setValueIfNull( ?EntityDocument $entity ) {
 		if ( $this->value === null ) {
 			if ( $entity === null ) {
 				$this->value = '';

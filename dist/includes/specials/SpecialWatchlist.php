@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:Watchlist
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,62 +16,96 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
 
+namespace MediaWiki\Specials;
+
+use ChangesList;
+use ChangesListBooleanFilterGroup;
+use ChangesListStringOptionsFilterGroup;
+use EnhancedChangesList;
+use LogPage;
+use MediaWiki\ChangeTags\ChangeTagsStore;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Html\FormOptions;
+use MediaWiki\Html\Html;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Request\DerivativeRequest;
+use MediaWiki\SpecialPage\ChangesListSpecialPage;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\TitleValue;
+use MediaWiki\User\Options\UserOptionsLookup;
+use MediaWiki\User\TempUser\TempUserConfig;
 use MediaWiki\User\UserIdentity;
-use MediaWiki\User\UserOptionsLookup;
+use MediaWiki\User\UserIdentityUtils;
+use MediaWiki\Watchlist\WatchedItem;
+use MediaWiki\Watchlist\WatchedItemStoreInterface;
 use MediaWiki\Watchlist\WatchlistManager;
-use Wikimedia\Rdbms\IDatabase;
-use Wikimedia\Rdbms\ILoadBalancer;
+use MediaWiki\Xml\Xml;
+use MediaWiki\Xml\XmlSelect;
+use RecentChange;
+use UserNotLoggedIn;
+use Wikimedia\Rdbms\IReadableDatabase;
 use Wikimedia\Rdbms\IResultWrapper;
+use Wikimedia\Rdbms\RawSQLExpression;
+use Wikimedia\Rdbms\RawSQLValue;
+
+/**
+ * @defgroup Watchlist Users watchlist handling
+ */
 
 /**
  * A special page that lists last changes made to the wiki,
  * limited to user-defined list of titles.
  *
  * @ingroup SpecialPage
+ * @ingroup Watchlist
  */
 class SpecialWatchlist extends ChangesListSpecialPage {
 
-	/** @var WatchedItemStoreInterface */
-	private $watchedItemStore;
+	public const WATCHLIST_TAB_PATHS = [
+		'Special:Watchlist',
+		'Special:EditWatchlist',
+		'Special:EditWatchlist/raw',
+		'Special:EditWatchlist/clear'
+	];
 
-	/** @var WatchlistManager */
-	private $watchlistManager;
-
-	/** @var ILoadBalancer */
-	private $loadBalancer;
-
-	/** @var UserOptionsLookup */
-	private $userOptionsLookup;
+	private WatchedItemStoreInterface $watchedItemStore;
+	private WatchlistManager $watchlistManager;
+	private UserOptionsLookup $userOptionsLookup;
 
 	/**
 	 * @var int|false where the value is one of the SpecialEditWatchlist:EDIT_ prefixed
 	 * constants (e.g. EDIT_NORMAL)
 	 */
 	private $currentMode;
+	private ChangeTagsStore $changeTagsStore;
 
 	/**
 	 * @param WatchedItemStoreInterface $watchedItemStore
 	 * @param WatchlistManager $watchlistManager
-	 * @param ILoadBalancer $loadBalancer
 	 * @param UserOptionsLookup $userOptionsLookup
 	 */
 	public function __construct(
 		WatchedItemStoreInterface $watchedItemStore,
 		WatchlistManager $watchlistManager,
-		ILoadBalancer $loadBalancer,
-		UserOptionsLookup $userOptionsLookup
+		UserOptionsLookup $userOptionsLookup,
+		ChangeTagsStore $changeTagsStore,
+		UserIdentityUtils $userIdentityUtils,
+		TempUserConfig $tempUserConfig
 	) {
-		parent::__construct( 'Watchlist', 'viewmywatchlist' );
+		parent::__construct(
+			'Watchlist',
+			'viewmywatchlist',
+			$userIdentityUtils,
+			$tempUserConfig
+		);
 
 		$this->watchedItemStore = $watchedItemStore;
 		$this->watchlistManager = $watchlistManager;
-		$this->loadBalancer = $loadBalancer;
 		$this->userOptionsLookup = $userOptionsLookup;
+		$this->changeTagsStore = $changeTagsStore;
 	}
 
 	public function doesWrites() {
@@ -86,8 +118,15 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 	 * @param string|null $subpage
 	 */
 	public function execute( $subpage ) {
-		// Anons don't get a watchlist
-		$this->requireNamedUser( 'watchlistanontext' );
+		$user = $this->getUser();
+		if (
+			// Anons don't get a watchlist
+			!$user->isRegistered()
+			// Redirect temp users to login if they're not allowed
+			|| ( $user->isTemp() && !$user->isAllowed( 'viewmywatchlist' ) )
+		) {
+			throw new UserNotLoggedIn( 'watchlistanontext' );
+		}
 
 		$output = $this->getOutput();
 		$request = $this->getRequest();
@@ -114,7 +153,6 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 
 		$this->checkPermissions();
 
-		$user = $this->getUser();
 		$opts = $this->getOptions();
 
 		$config = $this->getConfig();
@@ -154,9 +192,9 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 	 */
 	public function getSubpagesForPrefixSearch() {
 		return [
-			'clear',
 			'edit',
 			'raw',
+			'clear',
 		];
 	}
 
@@ -188,18 +226,13 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 					'activeValue' => false,
 					'default' => $this->userOptionsLookup->getBoolOption( $this->getUser(), 'extendwatchlist' ),
 					'queryCallable' => function ( string $specialClassName, IContextSource $ctx,
-						IDatabase $dbr, &$tables, &$fields, &$conds, &$query_options, &$join_conds
+						IReadableDatabase $dbr, &$tables, &$fields, &$conds, &$query_options, &$join_conds
 					) {
 						$nonRevisionTypes = [ RC_LOG ];
 						$this->getHookRunner()->onSpecialWatchlistGetNonRevisionTypes( $nonRevisionTypes );
 						if ( $nonRevisionTypes ) {
-							$conds[] = $dbr->makeList(
-								[
-									'rc_this_oldid=page_latest',
-									'rc_type' => $nonRevisionTypes,
-								],
-								LIST_OR
-							);
+							$conds[] = $dbr->expr( 'rc_this_oldid', '=', new RawSQLValue( 'page_latest' ) )
+								->or( 'rc_type', '=', $nonRevisionTypes );
 						}
 					},
 				]
@@ -243,7 +276,7 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 			'queryCallable' => static function (
 				string $specialPageClassName,
 				IContextSource $context,
-				IDatabase $dbr,
+				IReadableDatabase $dbr,
 				&$tables,
 				&$fields,
 				&$conds,
@@ -252,15 +285,11 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 				$selectedValues
 			) {
 				if ( $selectedValues === [ 'seen' ] ) {
-					$conds[] = $dbr->makeList( [
-						'wl_notificationtimestamp IS NULL',
-						'rc_timestamp < wl_notificationtimestamp'
-					], LIST_OR );
+					$conds[] = $dbr->expr( 'wl_notificationtimestamp', '=', null )
+						->orExpr( new RawSQLExpression( 'rc_timestamp < wl_notificationtimestamp' ) );
 				} elseif ( $selectedValues === [ 'unseen' ] ) {
-					$conds[] = $dbr->makeList( [
-						'wl_notificationtimestamp IS NOT NULL',
-						'rc_timestamp >= wl_notificationtimestamp'
-					], LIST_AND );
+					$conds[] = $dbr->expr( 'wl_notificationtimestamp', '!=', null )
+						->andExpr( new RawSQLExpression( 'rc_timestamp >= wl_notificationtimestamp' ) );
 				}
 			}
 		] ) );
@@ -405,7 +434,7 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 			$tables[] = 'watchlist_expiry';
 			$fields[] = 'we_expiry';
 			$join_conds['watchlist_expiry'] = [ 'LEFT JOIN', 'wl_id = we_item' ];
-			$conds[] = 'we_expiry IS NULL OR we_expiry > ' . $dbr->addQuotes( $dbr->timestamp() );
+			$conds[] = $dbr->expr( 'we_expiry', '=', null )->or( 'we_expiry', '>', $dbr->timestamp() );
 		}
 
 		$tables[] = 'page';
@@ -425,20 +454,19 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 			$bitmask = 0;
 		}
 		if ( $bitmask ) {
-			$conds[] = $dbr->makeList( [
-				'rc_type != ' . RC_LOG,
-				$dbr->bitAnd( 'rc_deleted', $bitmask ) . " != $bitmask",
-			], LIST_OR );
+			$conds[] = $dbr->expr( 'rc_type', '!=', RC_LOG )
+				->orExpr( new RawSQLExpression( $dbr->bitAnd( 'rc_deleted', $bitmask ) . " != $bitmask" ) );
 		}
 
 		$tagFilter = $opts['tagfilter'] !== '' ? explode( '|', $opts['tagfilter'] ) : [];
-		ChangeTags::modifyDisplayQuery(
+		$this->changeTagsStore->modifyDisplayQuery(
 			$tables,
 			$fields,
 			$conds,
 			$join_conds,
 			$query_options,
-			$tagFilter
+			$tagFilter,
+			$opts['inverttags']
 		);
 
 		$this->runMainQueryHook( $tables, $fields, $conds, $query_options, $join_conds, $opts );
@@ -452,7 +480,7 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 			'LIMIT' => $opts['limit']
 		];
 		if ( in_array( 'DISTINCT', $query_options ) ) {
-			// ChangeTags::modifyDisplayQuery() adds DISTINCT when filtering on multiple tags.
+			// ChangeTagsStore::modifyDisplayQuery() adds DISTINCT when filtering on multiple tags.
 			// In order to prevent DISTINCT from causing query performance problems,
 			// we have to GROUP BY the primary key. This in turn requires us to add
 			// the primary key to the end of the ORDER BY, and the old ORDER BY to the
@@ -474,15 +502,6 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 			->caller( __METHOD__ );
 
 		return $queryBuilder->fetchResultSet();
-	}
-
-	/**
-	 * Return a IDatabase object for reading
-	 *
-	 * @return IDatabase
-	 */
-	protected function getDB() {
-		return $this->loadBalancer->getConnectionRef( ILoadBalancer::DB_REPLICA );
 	}
 
 	public function outputFeedLinks() {
@@ -617,6 +636,40 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 	}
 
 	/**
+	 * @inheritDoc
+	 */
+	public function getAssociatedNavigationLinks() {
+		return self::WATCHLIST_TAB_PATHS;
+	}
+
+	/**
+	 * @param SpecialPage $specialPage
+	 * @param string $path
+	 * @return string
+	 */
+	public static function getShortDescriptionHelper( SpecialPage $specialPage, string $path = '' ): string {
+		switch ( $path ) {
+			case 'Watchlist':
+				return $specialPage->msg( 'watchlisttools-view' )->text();
+			case 'EditWatchlist':
+				return $specialPage->msg( 'watchlisttools-edit' )->text();
+			case 'EditWatchlist/raw':
+				return $specialPage->msg( 'watchlisttools-raw' )->text();
+			case 'EditWatchlist/clear':
+				return $specialPage->msg( 'watchlisttools-clear' )->text();
+			default:
+				return $path;
+		}
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getShortDescription( string $path = '' ): string {
+		return self::getShortDescriptionHelper( $this, $path );
+	}
+
+	/**
 	 * Set the text to be displayed above the changes
 	 *
 	 * @param FormOptions $opts
@@ -625,6 +678,15 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 	public function doHeader( $opts, $numRows ) {
 		$user = $this->getUser();
 		$out = $this->getOutput();
+		$skin = $this->getSkin();
+		// For legacy skins render the tabs in the subtitle
+		$subpageSubtitle = $skin->supportsMenu( 'associated-pages' ) ? '' :
+			' ' .
+			SpecialEditWatchlist::buildTools(
+					null,
+					$this->getLinkRenderer(),
+					$this->currentMode
+				);
 
 		$out->addSubtitle(
 			Html::element(
@@ -637,12 +699,7 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 				// Empty string parameter can be removed when all messages
 				// are updated to not use $2
 				$this->msg( 'watchlistfor2', $this->getUser()->getName(), '' )->text()
-			) . ' ' .
-			SpecialEditWatchlist::buildTools(
-				$this->getLanguage(),
-				$this->getLinkRenderer(),
-				$this->currentMode
-			)
+			) . $subpageSubtitle
 		);
 
 		$this->setTopText( $opts );
@@ -736,20 +793,16 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 				'class' => 'namespaceselector',
 			]
 		) . "\n";
-		$namespaceForm .= '<span class="mw-input-with-label">' . Xml::checkLabel(
-			$this->msg( 'invert' )->text(),
-			'invert',
-			'nsinvert',
-			$opts['invert'],
-			[ 'title' => $this->msg( 'tooltip-invert' )->text() ]
-		) . "</span>\n";
-		$namespaceForm .= '<span class="mw-input-with-label">' . Xml::checkLabel(
-			$this->msg( 'namespace_association' )->text(),
-			'associated',
-			'nsassociated',
-			$opts['associated'],
-			[ 'title' => $this->msg( 'tooltip-namespace_association' )->text() ]
-		) . "</span>\n";
+		$namespaceForm .= Html::rawElement( 'label', [
+			'class' => 'mw-input-with-label', 'title' => $this->msg( 'tooltip-invert' )->text(),
+		], Html::element( 'input', [
+			'type' => 'checkbox', 'name' => 'invert', 'value' => '1', 'checked' => $opts['invert'],
+		] ) . '&nbsp;' . $this->msg( 'invert' )->escaped() ) . "\n";
+		$namespaceForm .= Html::rawElement( 'label', [
+			'class' => 'mw-input-with-label', 'title' => $this->msg( 'tooltip-namespace_association' )->text(),
+		], Html::element( 'input', [
+			'type' => 'checkbox', 'name' => 'associated', 'value' => '1', 'checked' => $opts['associated'],
+		] ) . '&nbsp;' . $this->msg( 'namespace_association' )->escaped() ) . "\n";
 		$form .= Html::rawElement(
 			'span',
 			[ 'class' => 'namespaceForm cloption' ],
@@ -900,7 +953,7 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 		return Html::rawElement(
 			'span',
 			$attribs,
-			// not using Html::checkLabel because that would escape the contents
+			// not using Html::label because that would escape the contents
 			Html::check( $name, (bool)$value, [ 'id' => $name ] ) . "\n" . Html::rawElement(
 				'label',
 				$attribs + [ 'for' => $name ],
@@ -973,3 +1026,9 @@ class SpecialWatchlist extends ChangesListSpecialPage {
 	}
 
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialWatchlist::class, 'SpecialWatchlist' );

@@ -6,14 +6,15 @@
 			"NMaia"
 		]
 	},
+	"datatypes-type-entity-schema": "Esquema de Entidade",
 	"entityschema-desc": "Armazenar e discutir esquemas para entidades do Wikibase",
 	"special-newschema": "Criar um novo EntitySchema",
+	"nstab-entityschema": "Esquema de entidade",
 	"entityschema-newschema-label": "Etiqueta:",
 	"entityschema-newschema-description": "Descrição:",
 	"entityschema-newschema-aliases": "Nomes alternativos, separados por barras:",
 	"entityschema-newschema-schema-shexc": "Código de expressões de forma:",
 	"entityschema-newschema-submit": "Criar",
-	"entityschema-newschema-copyright": "Ao clicar em \"$1\", você concorda com os [[$2|termos de uso]] e irrevogavelmente aceita disponibilizar sua contribuição sob $3.",
 	"entityschema-anonymouseditwarning": "Aviso: Você não está logado. Seu endereço IP será registrado no histórico de edição deste Esquema.",
 	"entityschema-label-edit-placeholder": "insira um rótulo em $1",
 	"entityschema-description-edit-placeholder": "insira uma descrição em $1",
@@ -24,7 +25,6 @@
 	"entityschema-error-schemaupdate-failed": "O esquema não pôde ser atualizado",
 	"entityschema-error-schematext-conflict": "Este esquema foi alterado nesse meio tempo. Por favor retorne à página Esquema e tente editá-lo novamente.",
 	"entityschema-error-namebadge-conflict": "Este esquema foi alterado nesse meio tempo. Por favor, retorne à página Esquema e tente editar os rótulos, descrições e aliases neste idioma novamente.",
-	"entityschema-error-saving-failed": "Salvando o esquema falhou com a seguinte mensagem: $1",
 	"entityschema-error-not-post": "Esta ação deve ser feita com uma solicitação de postagem.",
 	"entityschema-error-inconsistent-id": "As revisões fornecidas não pertencem todas ao título dado.",
 	"entityschema-error-wrong-page-revisions": "A revisão fornecida não pertence à página atual.",
@@ -80,5 +80,8 @@
 	"entityschema-special-setlabeldescriptionaliases-info": "Você está definindo rótulo, descrição e aliases em '''$1''' para Esquema [[$3|$2]].",
 	"entityschema-special-label": "Etiqueta:",
 	"entityschema-special-description": "Descrição:",
-	"entityschema-special-aliases": "Aliases (separados por barras):"
+	"entityschema-special-aliases": "Aliases (separados por barras):",
+	"wikibase-listdatatypes-entity-schema-head": "Esquema de entidade",
+	"wikibase-listdatatypes-entity-schema-body": "Link para esquemas de entidade armazenados no espaço nominal configurado na mesma wiki. O valor não pode ter o prefixo de espaço nominal \"EntitySchema:\".",
+	"wikibase-validator-illegal-entity-schema-title": "O valor deve começar por <code>E</code> e o resto devem ser só algarismos."
 }

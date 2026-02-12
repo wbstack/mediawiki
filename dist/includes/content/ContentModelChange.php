@@ -1,14 +1,26 @@
 <?php
 
-use MediaWiki\Content\IContentHandlerFactory;
+namespace MediaWiki\Content;
+
+use ChangeTags;
+use LogFormatterFactory;
+use ManualLogEntry;
+use MediaWiki\Context\DerivativeContext;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
+use MediaWiki\Message\Message;
 use MediaWiki\Page\PageIdentity;
+use MediaWiki\Page\WikiPageFactory;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Permissions\PermissionStatus;
 use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\Status\Status;
 use MediaWiki\User\UserFactory;
+use MWException;
+use WikiPage;
 
 /**
  * Backend logic for changing the content model of a page.
@@ -28,10 +40,13 @@ class ContentModelChange {
 	private $revLookup;
 	/** @var UserFactory */
 	private $userFactory;
+	private LogFormatterFactory $logFormatterFactory;
 	/** @var Authority making the change */
 	private $performer;
 	/** @var WikiPage */
 	private $page;
+	/** @var PageIdentity */
+	private $pageIdentity;
 	/** @var string */
 	private $newModel;
 	/** @var string[] tags to add */
@@ -47,12 +62,15 @@ class ContentModelChange {
 
 	/**
 	 * @internal Create via the ContentModelChangeFactory service.
+	 *
 	 * @param IContentHandlerFactory $contentHandlerFactory
 	 * @param HookContainer $hookContainer
 	 * @param RevisionLookup $revLookup
 	 * @param UserFactory $userFactory
+	 * @param WikiPageFactory $wikiPageFactory
+	 * @param LogFormatterFactory $logFormatterFactory
 	 * @param Authority $performer
-	 * @param WikiPage $page
+	 * @param PageIdentity $page
 	 * @param string $newModel
 	 */
 	public function __construct(
@@ -60,17 +78,21 @@ class ContentModelChange {
 		HookContainer $hookContainer,
 		RevisionLookup $revLookup,
 		UserFactory $userFactory,
+		WikiPageFactory $wikiPageFactory,
+		LogFormatterFactory $logFormatterFactory,
 		Authority $performer,
-		WikiPage $page,
+		PageIdentity $page,
 		string $newModel
 	) {
 		$this->contentHandlerFactory = $contentHandlerFactory;
 		$this->hookRunner = new HookRunner( $hookContainer );
 		$this->revLookup = $revLookup;
 		$this->userFactory = $userFactory;
+		$this->logFormatterFactory = $logFormatterFactory;
 
 		$this->performer = $performer;
-		$this->page = $page;
+		$this->page = $wikiPageFactory->newFromTitle( $page );
+		$this->pageIdentity = $page;
 		$this->newModel = $newModel;
 
 		// SpecialChangeContentModel doesn't support tags
@@ -94,6 +116,7 @@ class ContentModelChange {
 
 	/**
 	 * @param callable $authorizer ( string $action, PageIdentity $target, PermissionStatus $status )
+	 *
 	 * @return PermissionStatus
 	 */
 	private function authorizeInternal( callable $authorizer ): PermissionStatus {
@@ -102,19 +125,20 @@ class ContentModelChange {
 		$titleWithNewContentModel->setContentModel( $this->newModel );
 
 		$status = PermissionStatus::newEmpty();
-		$authorizer( 'editcontentmodel', $current, $status );
-		$authorizer( 'edit', $current, $status );
+		$authorizer( 'editcontentmodel', $this->pageIdentity, $status );
+		$authorizer( 'edit', $this->pageIdentity, $status );
 		$authorizer( 'editcontentmodel', $titleWithNewContentModel, $status );
 		$authorizer( 'edit', $titleWithNewContentModel, $status );
+
 		return $status;
 	}
 
 	/**
-	 * Check whether $performer can execute the move.
+	 * Check whether $performer can execute the content model change.
 	 *
 	 * @note this method does not guarantee full permissions check, so it should
-	 * only be used to to decide whether to show a move form. To authorize the move
-	 * action use {@link self::authorizeChange} instead.
+	 * only be used to to decide whether to show a content model change form.
+	 * To authorize the content model change action use {@link self::authorizeChange} instead.
 	 *
 	 * @return PermissionStatus
 	 */
@@ -127,10 +151,10 @@ class ContentModelChange {
 	}
 
 	/**
-	 * Authorize the move by $performer.
+	 * Authorize the content model change by $performer.
 	 *
-	 * @note this method should be used right before the actual move is performed.
-	 * To check whether a current performer has the potential to move the page,
+	 * @note this method should be used right before the actual content model change is performed.
+	 * To check whether a current performer has the potential to change the content model of the page,
 	 * use {@link self::probablyCanChange} instead.
 	 *
 	 * @return PermissionStatus
@@ -147,7 +171,7 @@ class ContentModelChange {
 	 * Check user can edit and editcontentmodel before and after
 	 *
 	 * @deprecated since 1.36. Use ::probablyCanChange or ::authorizeChange instead.
-	 * @return array from wfMergeErrorArrays
+	 * @return array Errors in legacy error array format
 	 */
 	public function checkPermissions() {
 		wfDeprecated( __METHOD__, '1.36' );
@@ -162,12 +186,14 @@ class ContentModelChange {
 	 * Specify the tags the user wants to add, and check permissions
 	 *
 	 * @param string[] $tags
+	 *
 	 * @return Status
 	 */
 	public function setTags( $tags ) {
 		$tagStatus = ChangeTags::canAddTagsAccompanyingChange( $tags, $this->performer );
 		if ( $tagStatus->isOK() ) {
 			$this->tags = $tags;
+
 			return Status::newGood();
 		} else {
 			return $tagStatus;
@@ -181,7 +207,7 @@ class ContentModelChange {
 		$contentHandlerFactory = $this->contentHandlerFactory;
 
 		$title = $this->page->getTitle();
-		$latestRevRecord = $this->revLookup->getRevisionByTitle( $title );
+		$latestRevRecord = $this->revLookup->getRevisionByTitle( $this->pageIdentity );
 
 		if ( $latestRevRecord ) {
 			$latestContent = $latestRevRecord->getContent( SlotRecord::MAIN );
@@ -234,6 +260,7 @@ class ContentModelChange {
 			$this->logAction = 'new';
 		}
 		$this->newContent = $newContent;
+
 		return Status::newGood();
 	}
 
@@ -245,8 +272,8 @@ class ContentModelChange {
 	 * @param IContextSource $context
 	 * @param string $comment
 	 * @param bool $bot Mark as a bot edit if the user can
+	 *
 	 * @return Status
-	 * @throws ThrottledError
 	 */
 	public function doContentModelChange(
 		IContextSource $context,
@@ -262,11 +289,6 @@ class ContentModelChange {
 		$title = $page->getTitle();
 		$user = $this->userFactory->newFromAuthority( $this->performer );
 
-		// TODO: fold into authorizeChange
-		if ( $user->pingLimiter( 'editcontentmodel' ) ) {
-			throw new ThrottledError();
-		}
-
 		// Create log entry
 		$log = new ManualLogEntry( 'contentmodel', $this->logAction );
 		$log->setPerformer( $this->performer->getUser() );
@@ -278,7 +300,7 @@ class ContentModelChange {
 		] );
 		$log->addTags( $this->tags );
 
-		$formatter = LogFormatter::newFromEntry( $log );
+		$formatter = $this->logFormatterFactory->newFromEntry( $log );
 		$formatter->setContext( RequestContext::newExtraneousContext( $title ) );
 		$reason = $formatter->getPlainActionText();
 
@@ -301,12 +323,14 @@ class ContentModelChange {
 				// TODO: extensions should really specify an error message
 				$status->fatal( 'hookaborted' );
 			}
+
 			return $status;
 		}
 		if ( !$status->isOK() ) {
-			if ( !$status->getErrors() ) {
+			if ( !$status->getMessages() ) {
 				$status->fatal( 'hookaborted' );
 			}
+
 			return $status;
 		}
 
@@ -341,3 +365,6 @@ class ContentModelChange {
 	}
 
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ContentModelChange::class, 'ContentModelChange' );

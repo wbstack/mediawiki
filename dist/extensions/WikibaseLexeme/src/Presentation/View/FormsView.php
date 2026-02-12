@@ -66,10 +66,8 @@ class FormsView {
 	 */
 	public function getHtml( FormSet $forms ) {
 		$html = '<div class="wikibase-lexeme-forms-section">';
-		$html .= '<h2 class="wb-section-heading section-heading">'
-			. '<span class="mw-headline" id="forms">'
+		$html .= '<h2 class="wb-section-heading section-heading" id="forms">'
 			. htmlspecialchars( $this->textProvider->get( 'wikibaselexeme-header-forms' ) )
-			. '</span>'
 			. '</h2>';
 
 		$html .= '<div class="wikibase-lexeme-forms ">';
@@ -106,7 +104,7 @@ class FormsView {
 						},
 						$this->getSortedGrammaticalFeatures( $form )
 					)
-				)
+				),
 			]
 		);
 
@@ -116,7 +114,7 @@ class FormsView {
 			$grammaticalFeaturesHtml,
 			$this->getStatementSectionHtml( $form ),
 			// Anchor separated from ID to avoid issue with front-end rendering
-			htmlspecialchars( $form->getId()->getIdSuffix() )
+			htmlspecialchars( $form->getId()->getIdSuffix() ),
 		] );
 	}
 
@@ -176,12 +174,12 @@ class FormsView {
 			$representationsVueTemplate,
 			[
 				'inEditMode' => false,
-				'representations' => $representations
+				'representations' => $representations,
 			],
 			[
 				'message' => function ( $key ) {
 					return $this->textProvider->get( $key );
-				}
+				},
 			]
 		);
 
@@ -214,7 +212,7 @@ class FormsView {
 
 		$statementHeader = <<<HTML
 <h2 class="wb-section-heading section-heading wikibase-statements" dir="auto">
-	<span class="mw-headline">{$headerText}</span>
+	$headerText
 </h2>
 HTML;
 

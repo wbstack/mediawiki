@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:Activeusers
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,13 +16,21 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
 
+namespace MediaWiki\Specials;
+
+use MediaWiki\Block\HideUserUtils;
 use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\Html\FormOptions;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
 use MediaWiki\MainConfigNames;
+use MediaWiki\Pager\ActiveUsersPager;
+use MediaWiki\SpecialPage\SpecialPage;
 use MediaWiki\User\UserGroupManager;
-use Wikimedia\Rdbms\ILoadBalancer;
+use MediaWiki\User\UserIdentityLookup;
+use Wikimedia\Rdbms\IConnectionProvider;
 
 /**
  * Implements Special:Activeusers
@@ -33,29 +39,32 @@ use Wikimedia\Rdbms\ILoadBalancer;
  */
 class SpecialActiveUsers extends SpecialPage {
 
-	/** @var LinkBatchFactory */
-	private $linkBatchFactory;
-
-	/** @var ILoadBalancer */
-	private $loadBalancer;
-
-	/** @var UserGroupManager */
-	private $userGroupManager;
+	private LinkBatchFactory $linkBatchFactory;
+	private IConnectionProvider $dbProvider;
+	private UserGroupManager $userGroupManager;
+	private UserIdentityLookup $userIdentityLookup;
+	private HideUserUtils $hideUserUtils;
 
 	/**
 	 * @param LinkBatchFactory $linkBatchFactory
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 * @param UserGroupManager $userGroupManager
+	 * @param UserIdentityLookup $userIdentityLookup
+	 * @param HideUserUtils $hideUserUtils
 	 */
 	public function __construct(
 		LinkBatchFactory $linkBatchFactory,
-		ILoadBalancer $loadBalancer,
-		UserGroupManager $userGroupManager
+		IConnectionProvider $dbProvider,
+		UserGroupManager $userGroupManager,
+		UserIdentityLookup $userIdentityLookup,
+		HideUserUtils $hideUserUtils
 	) {
 		parent::__construct( 'Activeusers' );
 		$this->linkBatchFactory = $linkBatchFactory;
-		$this->loadBalancer = $loadBalancer;
+		$this->dbProvider = $dbProvider;
 		$this->userGroupManager = $userGroupManager;
+		$this->userIdentityLookup = $userIdentityLookup;
+		$this->hideUserUtils = $hideUserUtils;
 	}
 
 	/**
@@ -86,8 +95,10 @@ class SpecialActiveUsers extends SpecialPage {
 			$this->getContext(),
 			$this->getHookContainer(),
 			$this->linkBatchFactory,
-			$this->loadBalancer,
+			$this->dbProvider,
 			$this->userGroupManager,
+			$this->userIdentityLookup,
+			$this->hideUserUtils,
 			$opts
 		);
 		$usersBody = $pager->getBody();
@@ -158,7 +169,7 @@ class SpecialActiveUsers extends SpecialPage {
 		HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )
 			// For the 'multiselect' field values to be preserved on submit
 			->setFormIdentifier( 'specialactiveusers' )
-			->setIntro( $this->getIntroText() )
+			->setPreHtml( $this->getIntroText() )
 			->setWrapperLegendMsg( 'activeusers' )
 			->setSubmitTextMsg( 'activeusers-submit' )
 			// prevent setting subpage and 'username' parameter at the same time
@@ -178,18 +189,25 @@ class SpecialActiveUsers extends SpecialPage {
 		$intro = $this->msg( 'activeusers-intro' )->numParams( $days )->parse();
 
 		// Mention the level of cache staleness...
-		$dbr = $this->loadBalancer->getConnectionRef( ILoadBalancer::DB_REPLICA, 'recentchanges' );
-		$rcMax = $dbr->selectField( 'recentchanges', 'MAX(rc_timestamp)', '', __METHOD__ );
+		$dbr = $this->dbProvider->getReplicaDatabase();
+
+		$rcMax = $dbr->newSelectQueryBuilder()
+			->select( 'MAX(rc_timestamp)' )
+			->from( 'recentchanges' )
+			->caller( __METHOD__ )->fetchField();
 		if ( $rcMax ) {
-			$cTime = $dbr->selectField( 'querycache_info',
-				'qci_timestamp',
-				[ 'qci_type' => 'activeusers' ],
-				__METHOD__
-			);
+			$cTime = $dbr->newSelectQueryBuilder()
+				->select( 'qci_timestamp' )
+				->from( 'querycache_info' )
+				->where( [ 'qci_type' => 'activeusers' ] )
+				->caller( __METHOD__ )->fetchField();
 			if ( $cTime ) {
 				$secondsOld = (int)wfTimestamp( TS_UNIX, $rcMax ) - (int)wfTimestamp( TS_UNIX, $cTime );
 			} else {
-				$rcMin = $dbr->selectField( 'recentchanges', 'MIN(rc_timestamp)', '', __METHOD__ );
+				$rcMin = $dbr->newSelectQueryBuilder()
+					->select( 'MIN(rc_timestamp)' )
+					->from( 'recentchanges' )
+					->caller( __METHOD__ )->fetchField();
 				$secondsOld = time() - (int)wfTimestamp( TS_UNIX, $rcMin );
 			}
 			if ( $secondsOld > 0 ) {
@@ -205,3 +223,6 @@ class SpecialActiveUsers extends SpecialPage {
 		return 'users';
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( SpecialActiveUsers::class, 'SpecialActiveUsers' );

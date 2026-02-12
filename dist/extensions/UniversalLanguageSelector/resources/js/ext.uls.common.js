@@ -63,7 +63,7 @@
 		// Track if event logging is enabled
 		mw.hook( 'mw.uls.interface.language.change' ).fire( language );
 
-		if ( mw.user.isAnon() ) {
+		if ( !mw.user.isNamed() ) {
 			return changeLanguageAnon();
 		}
 
@@ -192,7 +192,7 @@
 	};
 
 	mw.uls.getAcceptLanguageList = function () {
-		// eslint-disable-next-line compat/compat
+
 		return mw.config.get( 'wgULSAcceptLanguageList' ) || window.navigator.languages || [];
 	};
 
@@ -238,5 +238,4 @@
 
 		return ret;
 	};
-
 }() );

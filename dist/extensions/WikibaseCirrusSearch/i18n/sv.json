@@ -31,6 +31,7 @@
 	"wikibasecirrus-search-bad-profile-name": "Trasig sökning av profilnamn: $1",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "Nyckelordet haswbstatement innehåller inte några giltiga uttalanden",
 	"wikibasecirrus-haslicense-feature-no-valid-arguments": "nyckelordet \"haslicense\" innehåller inga giltiga argument",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "wbstatementquantity nyckelord innehållet inga giltiga uttalanden",
 	"special-entitieswithoutdescription": "Entiteter utan beskrivning",
 	"wikibasecirrus-entitieswithoutdescription-legend": "Få en lista av entiteter utan beskrivning",
 	"special-entitieswithoutlabel": "Enheter utan etikett",

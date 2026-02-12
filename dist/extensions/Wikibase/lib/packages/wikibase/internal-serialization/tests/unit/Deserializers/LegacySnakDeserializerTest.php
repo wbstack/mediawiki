@@ -32,12 +32,12 @@ class LegacySnakDeserializerTest extends \PHPUnit\Framework\TestCase {
 		$dataValueDeserializer->expects( $this->any() )
 			->method( 'deserialize' )
 			->with( $this->equalTo( [ 'type' => 'string', 'value' => 'foo' ] ) )
-			->will( $this->returnValue( new StringValue( 'foo' ) ) );
+			->willReturn( new StringValue( 'foo' ) );
 
 		$this->deserializer = new LegacySnakDeserializer( $dataValueDeserializer );
 	}
 
-	public function invalidSerializationProvider() {
+	public static function invalidSerializationProvider() {
 		return [
 			[ null ],
 			[ [] ],
@@ -89,14 +89,14 @@ class LegacySnakDeserializerTest extends \PHPUnit\Framework\TestCase {
 				'value',
 				42,
 				'string',
-				'foo'
+				'foo',
 			] )
 		);
 	}
 
 	public function testGivenInvalidDataValue_unDerializableValueIsConstructed() {
 		$dataValueDeserializer = new DataValueDeserializer( [
-			'string' => StringValue::class
+			'string' => StringValue::class,
 		] );
 
 		$deserializer = new LegacySnakDeserializer( $dataValueDeserializer );
@@ -105,7 +105,7 @@ class LegacySnakDeserializerTest extends \PHPUnit\Framework\TestCase {
 			'value',
 			42,
 			'string',
-			1337
+			1337,
 		] );
 
 		$this->assertInstanceOf( PropertyValueSnak::class, $snak );

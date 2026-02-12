@@ -7,10 +7,12 @@ use DOMElement;
 use DOMNode;
 use DOMXPath;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
+use Wikimedia\Parsoid\Utils\DOMCompat;
 
 class MoveLeadParagraphTransform implements IMobileTransform {
 	/**
-	 * @var string
+	 * @var Title|string
 	 */
 	private $title;
 
@@ -20,7 +22,7 @@ class MoveLeadParagraphTransform implements IMobileTransform {
 	private $revId;
 
 	/**
-	 * @param string $title for logging purposes
+	 * @param Title|string $title for logging purposes
 	 * @param int $revId for logging purposes
 	 */
 	public function __construct( $title, $revId ) {
@@ -35,9 +37,8 @@ class MoveLeadParagraphTransform implements IMobileTransform {
 	 * @param DOMElement $node to be transformed
 	 */
 	public function apply( DOMElement $node ) {
-		$section = $node->getElementsByTagName( 'section' )->item( 0 );
+		$section = DOMCompat::querySelector( $node, 'section' );
 		if ( $section ) {
-			/** @phan-suppress-next-line PhanTypeMismatchArgumentSuperType DOMNode vs. DOMElement */
 			$this->moveFirstParagraphBeforeInfobox( $section, $section->ownerDocument );
 		}
 	}
@@ -53,7 +54,7 @@ class MoveLeadParagraphTransform implements IMobileTransform {
 	private static function matchElement( DOMElement $node, $requiredTagName, $requiredClass ) {
 		$classes = explode( ' ', $node->getAttribute( 'class' ) );
 		return ( $requiredTagName === false || strtolower( $node->tagName ) === $requiredTagName )
-			&& !empty( preg_grep( $requiredClass, $classes ) );
+			&& preg_grep( $requiredClass, $classes );
 	}
 
 	/**
@@ -163,9 +164,12 @@ class MoveLeadParagraphTransform implements IMobileTransform {
 	 * elements that are not infoboxes.
 	 *
 	 * @param DOMElement $leadSection
-	 * @param DOMDocument $doc Document to which the section belongs
+	 * @param ?DOMDocument $doc Document to which the section belongs
 	 */
-	private function moveFirstParagraphBeforeInfobox( DOMElement $leadSection, DOMDocument $doc ) {
+	private function moveFirstParagraphBeforeInfobox( DOMElement $leadSection, ?DOMDocument $doc ) {
+		if ( $doc === null ) {
+			return;
+		}
 		$xPath = new DOMXPath( $doc );
 		$infobox = $this->identifyInfoboxElement( $xPath, $leadSection );
 

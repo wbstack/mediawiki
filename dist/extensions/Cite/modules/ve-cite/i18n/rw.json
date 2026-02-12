@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Musindi250",
 			"Rodrigue"
 		]
 	},
@@ -24,7 +25,6 @@
 	"cite-ve-dialog-reference-editing-reused-long": "Iyi ntanganturo ikoreshwa inshuro {{PLURAL:$1|imwe|2=ebyiri|$1 times}} kuri uru rupapuro. Impinduka zakozwe hano zizakoreshwa ahantu hose iyi ntanganturo izongera gukoreshwa.",
 	"cite-ve-dialog-reference-options-group-label": "koresha iri tsinda",
 	"cite-ve-dialog-reference-options-group-placeholder": "Intanganturo rusange",
-	"cite-ve-dialog-reference-options-name-label": "Ongera ukoreshe iri zina",
 	"cite-ve-dialog-reference-options-responsive-label": "Koresha imiterere y'inkingi zisubije",
 	"cite-ve-dialog-reference-options-section": "Amahitamo",
 	"cite-ve-dialog-reference-placeholder": "Andika cyangwa ukoporore indanganturo yawe hano, cyangwa shyiramo inyandikorugero.",
@@ -44,9 +44,7 @@
 	"cite-ve-referenceslist-isempty-default": "Nta ndanganturo kuri uru rupapuro yo kongera kuri uru rutonde.",
 	"cite-ve-referenceslist-missingref": "Iyi ndanganturo isobanurwa mu nyandikorugero cyangwa izindi nyandiko, kandi kuri ubu zishobora guhindurwa gusa mu buryo bw'inkomoko.",
 	"cite-ve-referenceslist-missingref-in-list": "Iyi ndanganturo isobanurwa mu nyandikorugero cyangwa izindi nyandiko, kandi kuri ubu bishobora gusa kuboneka muburyo bw'inkomoko.",
-	"cite-ve-referenceslist-missingreflist": "Uru rutonde rw'indanganturo ruva mu nyandikorugero, kandi kuri ubu rushobora guhindurwa gusa muburyo bw'inkomoko.",
+	"cite-ve-referenceslist-missingreflist": "Uru rutonde rw'indanganturo ruva mu nyandikorugero",
 	"cite-ve-toolbar-group-label": "vuga",
-	"cite-ve-othergroup-item": "$1 Indanganturo",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "Indanganturo",
-	"visualeditor-internal-list-diff-group-name-mwreference": "Izina ry'itsinda ry'indanganturo : \"$1\""
+	"cite-ve-othergroup-item": "$1 Indanganturo"
 }

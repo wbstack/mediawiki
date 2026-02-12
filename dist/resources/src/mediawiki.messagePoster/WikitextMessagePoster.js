@@ -1,11 +1,13 @@
 ( function () {
 	/**
-	 * This is an implementation of MessagePoster for wikitext talk pages.
+	 * @classdesc Posts messages to wikitext talk pages.
 	 *
 	 * @class mw.messagePoster.WikitextMessagePoster
 	 * @extends mw.messagePoster.MessagePoster
+	 * @type {mw.messagePoster.WikitextMessagePoster}
 	 *
 	 * @constructor
+	 * @description Create an instance of `mw.messagePoster.WikitextMessagePoster`.
 	 * @param {mw.Title} title Wikitext page in a talk namespace, to post to
 	 * @param {mw.Api} api mw.Api object to use
 	 */
@@ -27,16 +29,15 @@
 	 * @param {string} [options.tags] [Change tags](https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Tags) to add to the message's revision, pipe-separated.
 	 */
 	WikitextMessagePoster.prototype.post = function ( subject, body, options ) {
-		var additionalParams;
 		options = options || {};
-		mw.messagePoster.WikitextMessagePoster.parent.prototype.post.call( this, subject, body, options );
+		mw.messagePoster.WikitextMessagePoster.super.prototype.post.call( this, subject, body, options );
 
 		// Add signature if needed
 		if ( body.indexOf( '~~~' ) === -1 ) {
 			body += '\n\n~~~~';
 		}
 
-		additionalParams = { redirect: true };
+		const additionalParams = { redirect: true };
 		if ( options.tags !== undefined ) {
 			additionalParams.tags = options.tags;
 		}
@@ -45,7 +46,7 @@
 			subject,
 			body,
 			additionalParams
-		).then( function ( resp, jqXHR ) {
+		).then( ( resp, jqXHR ) => {
 			if ( resp.edit.result === 'Success' ) {
 				return $.Deferred().resolve( resp, jqXHR );
 			} else {
@@ -53,9 +54,7 @@
 				// request fails, but it's not caught there?
 				return $.Deferred().reject( 'api-unexpected' );
 			}
-		}, function ( code, details ) {
-			return $.Deferred().reject( 'api-fail', code, details );
-		} ).promise();
+		}, ( code, details ) => $.Deferred().reject( 'api-fail', code, details ) ).promise();
 	};
 
 	mw.messagePoster.factory.register( 'wikitext', WikitextMessagePoster );

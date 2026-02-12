@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lib\Store\Sql;
 
 use InvalidArgumentException;
@@ -13,6 +15,7 @@ use Wikibase\Lib\Store\PropertyInfoStore;
 use Wikimedia\Assert\Assert;
 use Wikimedia\Rdbms\DBError;
 use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IReadableDatabase;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
@@ -26,16 +29,11 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 
 	private const TABLE_NAME = 'wb_property_info';
 
-	/** @var EntityIdComposer */
-	private $entityIdComposer;
+	private EntityIdComposer $entityIdComposer;
 
-	/**
-	 * @var RepoDomainDb
-	 */
-	private $db;
+	private RepoDomainDb $db;
 
-	/** @var bool */
-	private $allowWrites;
+	private bool $allowWrites;
 
 	/**
 	 * @param EntityIdComposer $entityIdComposer
@@ -62,7 +60,7 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 	 * @return array|null The decoded blob as an associative array, or null if the blob
 	 *         could not be decoded.
 	 */
-	private function decodeBlob( $blob ) {
+	private function decodeBlob( $blob ): ?array {
 		if ( $blob === false || $blob === null ) {
 			return null;
 		}
@@ -83,7 +81,7 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 	 *
 	 * @return array[] The array of decoded blobs
 	 */
-	private function decodeResult( IResultWrapper $res ) {
+	private function decodeResult( IResultWrapper $res ): array {
 		$infos = [];
 
 		foreach ( $res as $row ) {
@@ -96,7 +94,6 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 			}
 
 			$id = $this->entityIdComposer->composeEntityId(
-				'',
 				Property::ENTITY_TYPE,
 				$row->pi_property_id
 			);
@@ -115,7 +112,7 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 	 * @throws InvalidArgumentException
 	 * @throws DBError
 	 */
-	public function getPropertyInfo( PropertyId $propertyId ) {
+	public function getPropertyInfo( PropertyId $propertyId ): ?array {
 		Assert::parameterType( NumericPropertyId::class, $propertyId, '$propertyId' );
 		/** @var NumericPropertyId $propertyId */
 		'@phan-var NumericPropertyId $propertyId';
@@ -206,16 +203,16 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 
 		$dbw = $this->getWriteConnection();
 
-		$dbw->replace(
-			self::TABLE_NAME,
-			'pi_property_id',
-			[
+		$dbw->newReplaceQueryBuilder()
+			->replaceInto( self::TABLE_NAME )
+			->uniqueIndexFields( 'pi_property_id' )
+			->row( [
 				'pi_property_id' => $propertyId->getNumericId(),
 				'pi_info' => $json,
 				'pi_type' => $type,
-			],
-			__METHOD__
-		);
+			] )
+			->caller( __METHOD__ )
+			->execute();
 	}
 
 	/**
@@ -232,11 +229,11 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 
 		$dbw = $this->getWriteConnection();
 
-		$dbw->delete(
-			self::TABLE_NAME,
-			[ 'pi_property_id' => $propertyId->getNumericId() ],
-			__METHOD__
-		);
+		$dbw->newDeleteQueryBuilder()
+			->deleteFrom( self::TABLE_NAME )
+			->where( [ 'pi_property_id' => $propertyId->getNumericId() ] )
+			->caller( __METHOD__ )
+			->execute();
 
 		$c = $dbw->affectedRows();
 
@@ -252,11 +249,11 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 	}
 
 	private function getWriteConnection(): IDatabase {
-		return $this->db->connections()->getWriteConnectionRef();
+		return $this->db->connections()->getWriteConnection();
 	}
 
-	private function getReadConnection(): IDatabase {
-		return $this->db->connections()->getReadConnectionRef();
+	private function getReadConnection(): IReadableDatabase {
+		return $this->db->connections()->getReadConnection();
 	}
 
 	/**
@@ -275,10 +272,8 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 	 *
 	 * This is for use for closely related classes that want to operate directly
 	 * on the database table.
-	 *
-	 * @return string
 	 */
-	public function getTableName() {
+	public function getTableName(): string {
 		return self::TABLE_NAME;
 	}
 

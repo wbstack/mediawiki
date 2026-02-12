@@ -1,7 +1,5 @@
 <?php
 /**
- * Interface for generic jobs only uses the parameters field.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -21,12 +19,13 @@
  */
 
 /**
- * Interface for generic jobs only uses the parameters field and are JSON serializable
+ * Interface for generic jobs only uses the parameters field and are JSON serializable.
+ * Jobs using this interface require `needsPage: false` to be set
+ * in the JobClasses configuration of their extension.json declaration.
  *
  * @stable to implement
- *
- * @ingroup JobQueue
  * @since 1.33
+ * @ingroup JobQueue
  */
 interface GenericParameterJob extends IJobSpecification {
 	/**

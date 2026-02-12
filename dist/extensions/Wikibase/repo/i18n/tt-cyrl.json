@@ -1,12 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
+			"Blackisnewyellow",
 			"Derslek",
+			"Don Alessandro",
 			"Ladsgroup",
+			"З. ӘЙЛЕ",
+			"Ильгиз",
 			"Ильнар"
 		]
 	},
-	"wikibase-edit": "үзгәртү",
+	"wikibase-edit": "үзгәрт",
 	"wikibase-add": "өстәү",
 	"wikibase-entitytermsview-entitytermsforlanguagelistview-toggler": "Башка телләрдә",
 	"wikibase-label-empty": "Тамга (исем) күрсәтелмәгән",
@@ -15,5 +19,8 @@
 	"wikibase-statementsection-identifiers": "Идентификаторлар",
 	"wikibase-sitelinks-special": "Башка сайтлар",
 	"wikibase-statementview-rank-normal": "Нормаль ранг",
-	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|чыганак}}"
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|чыганак}}",
+	"special-newitem": "Яңа элемент ясау",
+	"wikibase-newitem-fieldset": "Яңа элемент ясау",
+	"wikibase-api-inconsistent-language": "Туры килмәгән \"$1\" тел табылды (\"$2\" көтелгән иде)."
 }

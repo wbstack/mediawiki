@@ -34,7 +34,7 @@ class TimeRdfBuilder implements ValueSnakRdfBuilder {
 	 */
 	public function __construct(
 		DateTimeValueCleaner $dateCleaner,
-		ComplexValueRdfHelper $complexValueHelper = null
+		?ComplexValueRdfHelper $complexValueHelper
 	) {
 		$this->dateCleaner = $dateCleaner;
 		$this->complexValueHelper = $complexValueHelper;
@@ -47,6 +47,7 @@ class TimeRdfBuilder implements ValueSnakRdfBuilder {
 	 * @param string $propertyValueNamespace Property value relation namespace
 	 * @param string $propertyValueLName Property value relation name
 	 * @param string $dataType Property data type
+	 * @param string $snakNamespace
 	 * @param PropertyValueSnak $snak
 	 */
 	public function addValue(
@@ -117,9 +118,11 @@ class TimeRdfBuilder implements ValueSnakRdfBuilder {
 		$this->sayDateLiteral( $valueWriter, $value );
 
 		$valueWriter->say( RdfVocabulary::NS_ONTOLOGY, 'timePrecision' )
+			// @phan-suppress-next-line PhanTypeMismatchArgument T302667
 			->value( $value->getPrecision(), 'xsd', 'integer' ); //TODO: use identifiers
 
 		$valueWriter->say( RdfVocabulary::NS_ONTOLOGY, 'timeTimezone' )
+			// @phan-suppress-next-line PhanTypeMismatchArgument T302667
 			->value( $value->getTimezone(), 'xsd', 'integer' ); //XXX: underspecified
 
 		$valueWriter->say( RdfVocabulary::NS_ONTOLOGY, 'timeCalendarModel' )

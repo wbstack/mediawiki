@@ -73,10 +73,10 @@ class TokenUtilsTest extends \PHPUnit\Framework\TestCase {
 				'type' => 'TagTk',
 				'name' => 'div',
 				'attribs' => [
-					[ 'k' => 'role','v' => 'note' ],
+					[ 'k' => 'role', 'v' => 'note' ],
 					[ 'k' => 'class', 'v' => 'hatnote navigation-not-searchable' ],
 				],
-				'dataAttribs' => [
+				'dataParsoid' => [
 					'stx' => 'html',
 				],
 			],
@@ -93,7 +93,7 @@ class TokenUtilsTest extends \PHPUnit\Framework\TestCase {
 					[ 'k' => 'data-parsoid', 'v' => '{}' ],
 					[ 'k' => 'typeof', 'v' => 'mw:DOMFragment' ],
 				],
-				'dataAttribs' => [
+				'dataParsoid' => [
 					'tmp' => [ 'setDSR' => true ],
 					'html' => 'mwf13',
 					'tagWidths' => [ 8, 9 ]
@@ -111,7 +111,7 @@ class TokenUtilsTest extends \PHPUnit\Framework\TestCase {
 					[ 'k' => 'rel', 'v' => 'mw:PageProp/Category' ],
 					[ 'k' => 'href', 'v' => './Category:Articles_with_short_description' ],
 				],
-				'dataAttribs' => [
+				'dataParsoid' => [
 					'stx' => 'simple',
 					'a' => [
 						'href' => './Category:Articles_with_short_description',
@@ -129,8 +129,8 @@ class TokenUtilsTest extends \PHPUnit\Framework\TestCase {
 			'token' => [
 				'type' => 'CommentTk',
 				'value' => ' THIS IS A COMMENT ',
-				'dataAttribs' => [
-					'tsr' => [ 2104,2147 ],
+				'dataParsoid' => [
+					'tsr' => [ 2104, 2147 ],
 				],
 			],
 			'getTokenType' => 'CommentTk',
@@ -143,7 +143,7 @@ class TokenUtilsTest extends \PHPUnit\Framework\TestCase {
 				'attribs' => [
 					[ 'k' => 'typeof', 'v' => 'mw:EmptyLine' ],
 				],
-				'dataAttribs' => [
+				'dataParsoid' => [
 					'tokens' => [
 						[ 'type' => 'NlTk' ],
 					],
@@ -344,7 +344,7 @@ class TokenUtilsTest extends \PHPUnit\Framework\TestCase {
 		$offsets = [
 			# 0th offset must be zero, 1st should be length of string
 			'byte' => [ 0, 32, 4, 13, 9, 18, 21, 22, 23, 25, 28 ],
-			'char' => [ 0, 19, 4,  9, 8, 11, 14, 15, 16, 17, 18 ],
+			'char' => [ 0, 19, 4, 9, 8, 11, 14, 15, 16, 17, 18 ],
 			'ucs2' => [ 0, 22, 4, 10, 8, 13, 16, 17, 18, 19, 20 ],
 		];
 		foreach ( $offsets as $from => $input ) {

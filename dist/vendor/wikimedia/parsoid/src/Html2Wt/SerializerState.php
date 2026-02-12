@@ -7,13 +7,16 @@ use Composer\Semver\Semver;
 use stdClass;
 use Wikimedia\Assert\Assert;
 use Wikimedia\Parsoid\Config\Env;
-use Wikimedia\Parsoid\Core\SelserData;
+use Wikimedia\Parsoid\Core\DomSourceRange;
+use Wikimedia\Parsoid\Core\SelectiveUpdateData;
 use Wikimedia\Parsoid\DOM\DocumentFragment;
 use Wikimedia\Parsoid\DOM\Element;
 use Wikimedia\Parsoid\DOM\Node;
 use Wikimedia\Parsoid\DOM\Text;
 use Wikimedia\Parsoid\Ext\ParsoidExtensionAPI;
 use Wikimedia\Parsoid\Html2Wt\ConstrainedText\ConstrainedText;
+use Wikimedia\Parsoid\Tokens\SourceRange;
+use Wikimedia\Parsoid\Utils\DiffDOMUtils;
 use Wikimedia\Parsoid\Utils\DOMCompat;
 use Wikimedia\Parsoid\Utils\DOMDataUtils;
 use Wikimedia\Parsoid\Utils\DOMUtils;
@@ -137,11 +140,11 @@ class SerializerState {
 
 	/**
 	 * Is the serializer currently processing a subtree that has been
-	 * modified compared to original content (ex: via VE / CX)?
+	 * marked inserted compared to original content (ex: via VE / CX)?
 	 *
 	 * @var bool
 	 */
-	public $inModifiedContent;
+	public $inInsertedContent;
 
 	/**
 	 * Did we introduce nowikis for indent-pre protection?
@@ -235,8 +238,7 @@ class SerializerState {
 	 */
 	public $selserMode;
 
-	/** @var SelserData */
-	private $selserData;
+	private ?SelectiveUpdateData $selserData;
 
 	/**
 	 * If in selser mode, while processing a node, do we know if
@@ -291,18 +293,22 @@ class SerializerState {
 
 	/**
 	 * @param WikitextSerializer $serializer
-	 * @param array $options
+	 * @param array $options List of options for serialization:
+	 *   - onSOL: (bool)
+	 *   - inPHPBlock: (bool)
+	 *   - inAttribute: (bool)
+	 *   - protect: (string)
+	 *   - selserData: (SelectiveUpdateData)
 	 */
 	public function __construct( WikitextSerializer $serializer, array $options = [] ) {
 		$this->env = $serializer->env;
 		$this->serializer = $serializer;
 		$this->extApi = new ParsoidExtensionAPI( $this->env, [ 'html2wt' => [ 'state' => $this ] ] );
-		foreach ( $options as $name => $option ) {
-			// PORT-FIXME validate
-			if ( !( $option instanceof Env ) ) {
-				$this->$name = Utils::clone( $option );
-			}
-		}
+		$this->onSOL = $options['onSOL'] ?? $this->onSOL;
+		$this->inPHPBlock = $options['inPHPBlock'] ?? $this->inPHPBlock;
+		$this->inAttribute = $options['inAttribute'] ?? $this->inAttribute;
+		$this->protect = $options['protect'] ?? null;
+		$this->selserData = $options['selserData'] ?? null;
 		$this->resetCurrLine( null );
 		$this->singleLineContext = new SingleLineContext();
 		$this->resetSep();
@@ -342,7 +348,7 @@ class SerializerState {
 	 * @param string $src
 	 */
 	public function appendSep( string $src ): void {
-		$this->sep->src = ( $this->sep->src ?: '' ) . $src;
+		$this->sep->src = ( $this->sep->src ?? '' ) . $src;
 	}
 
 	/**
@@ -354,11 +360,11 @@ class SerializerState {
 	}
 
 	private function resetSep() {
-		$this->sep = PHPUtils::arrayToObject( [
+		$this->sep = (object)[
 			'constraints' => null,
 			'src' => null,
 			'lastSourceNode' => null,
-		] );
+		];
 	}
 
 	/**
@@ -384,26 +390,104 @@ class SerializerState {
 	}
 
 	/**
-	 * Extracts a subset of the page source bound by the supplied indices.
-	 * @param int $start Start offset, in bytes
-	 * @param int $end End offset, in bytes
+	 * Extracts a subset of the page source bound by the supplied source range.
+	 * @param SourceRange $sr
 	 * @return string|null
 	 */
-	public function getOrigSrc( int $start, int $end ): ?string {
+	public function getOrigSrc( SourceRange $sr ): ?string {
 		Assert::invariant( $this->selserMode, 'SerializerState::$selserMode must be set' );
 		if (
-			$start <= $end &&
+			$sr->start <= $sr->end &&
 			// FIXME: Having a $start greater than the source length is
 			// probably a canary for corruption.  Maybe we should be throwing
 			// here instead.  See T240053.
 			// But, see comment in UnpackDOMFragments where we very very rarely
 			// can deliberately set DSR to point outside page source.
-			$start <= strlen( $this->selserData->oldText )
+			$sr->start <= strlen( $this->selserData->revText )
 		) {
-			return substr( $this->selserData->oldText, $start, $end - $start );
+			// XXX should use $frame->getSrcText() like WTUtils::getWTSource
+			return $sr->substr( $this->selserData->revText );
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * Check the validity of a DSR in the context of the page source.
+	 *
+	 * Returns false if Utils::isValidDSR() would return false, but also
+	 * returns false if the DSR offsets would create a bad UTF-8 string
+	 * (ie, the start offsets don't point to a valid UTF-8 start character).
+	 * @param ?DomSourceRange $dsr DSR source range values
+	 * @param bool $all Also check the widths of the container tag
+	 * @return bool
+	 */
+	public function isValidDSR( ?DomSourceRange $dsr, bool $all = false ) {
+		if ( !Utils::isValidDSR( $dsr, $all ) ) {
+			return false;
+		}
+		if ( !( $dsr->start <= $dsr->end &&
+			  $dsr->end <= strlen( $this->selserData->revText ) ) ) {
+			return false;
+		}
+		// check the UTF-8 ranges.
+		$src = $this->selserData->revText;
+		$check = static function ( $start, $end ) use ( $src ) {
+			if ( $start === $end ) {
+				// zero-length string is always ok
+				return true;
+			}
+			$firstChar = ord( $src[$start] );
+			if ( ( $firstChar & 0xC0 ) === 0x80 ) {
+				return false; // bad UTF-8 at start of string
+			}
+			$i = 0;
+			// This next loop won't pass $start because we've already
+			// asserted that the first character isn't 10xx xxxx
+			do {
+				$i--;
+				if ( $i <= -5 ) {
+					return false; // bad UTF-8 at end of string (>4 byte sequence)
+				}
+				$lastChar = ord( $src[$end + $i] );
+			} while ( ( $lastChar & 0xC0 ) === 0x80 );
+			if ( ( $lastChar & 0x80 ) === 0 ) {
+				return $i === -1;
+			} elseif ( ( $lastChar & 0xE0 ) === 0xC0 ) {
+				return $i === -2;
+			} elseif ( ( $lastChar & 0xF0 ) === 0xE0 ) {
+				return $i === -3;
+			} elseif ( ( $lastChar & 0xF8 ) === 0xF0 ) {
+				return $i === -4;
+			} else {
+				return false;
+			}
+		};
+		if ( !$all ) {
+			return $check( $dsr->start, $dsr->end );
+		}
+		// Check each inner ranges.
+		$openEnd = $dsr->start + $dsr->openWidth;
+		if ( $openEnd > $dsr->end ) {
+			return false;
+		}
+		if ( !$check( $dsr->start, $openEnd ) ) {
+			return false;
+		}
+		$closeStart = $dsr->end - $dsr->closeWidth;
+		if ( $dsr->start > $closeStart ) {
+			return false;
+		}
+		if ( !$check( $closeStart, $dsr->end ) ) {
+			return false;
+		}
+		if ( $openEnd > $closeStart ) {
+			return false;
+		}
+		if ( !$check( $openEnd, $closeStart ) ) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -544,12 +628,14 @@ class SerializerState {
 		if ( $origSepUsable ) {
 			if ( $this->prevNode instanceof Element && $node instanceof Element ) {
 				'@phan-var Element $node';/** @var Element $node */
-				$origSep = $this->getOrigSrc(
+				if ( DOMUtils::isBody( $this->prevNode ) ) {
 					// <body> won't have DSR in body_only scenarios
-					( DOMUtils::isBody( $this->prevNode ) ?
-						0 : DOMDataUtils::getDataParsoid( $this->prevNode )->dsr->end ),
-					DOMDataUtils::getDataParsoid( $node )->dsr->start
-				);
+					$sr = new SourceRange( 0, 0 );
+				} else {
+					$sr = DOMDataUtils::getDataParsoid( $this->prevNode )->dsr;
+				}
+				$sr = $sr->to( DOMDataUtils::getDataParsoid( $node )->dsr );
+				$origSep = $this->getOrigSrc( $sr );
 			} elseif ( $this->sep->src && WTSUtils::isValidSep( $this->sep->src ) ) {
 				// We don't know where '$this->sep->src' comes from. So, reuse it
 				// only if it is a valid separator string.
@@ -561,7 +647,7 @@ class SerializerState {
 			$this->emitSep( $origSep, $node, 'ORIG-SEP:' );
 		} else {
 			$sep = $this->separators->buildSep( $node );
-			$this->emitSep( $sep ?: '', $node, 'SEP:' );
+			$this->emitSep( $sep ?? '', $node, 'SEP:' );
 		}
 	}
 
@@ -616,7 +702,7 @@ class SerializerState {
 			$res = new ConstrainedText( [
 				'text' => $this->serializer->escapeWikitext( $this, $res->text, [
 					'node' => $node,
-					'isLastChild' => DOMUtils::nextNonDeletedSibling( $node ) === null,
+					'isLastChild' => DiffDOMUtils::nextNonDeletedSibling( $node ) === null,
 				] ),
 				'prefix' => $res->prefix,
 				'suffix' => $res->suffix,
@@ -654,7 +740,7 @@ class SerializerState {
 				 && !$this->prevNodeUnmodified
 				&& DOMCompat::nodeName( $node ) === 'p' && !WTUtils::isLiteralHTMLNode( $node )
 			) {
-				$pChild = DOMUtils::firstNonSepChild( $node );
+				$pChild = DiffDOMUtils::firstNonSepChild( $node );
 				// If a text node, we have to make sure that the text doesn't
 				// get reparsed as non-text in the wt2html pipeline.
 				if ( $pChild instanceof Text ) {
@@ -664,7 +750,7 @@ class SerializerState {
 							// ! and | chars are harmless outside tables
 							|| ( strspn( $match[2], '|!' ) && $this->wikiTableNesting > 0 )
 							// indent-pres are suppressed inside <blockquote>
-							|| ( preg_match( '/^ [^\s]/', $match[2] )
+							|| ( preg_match( '/^ \S/', $match[2] )
 								&& !DOMUtils::hasNameOrHasAncestorOfName( $node, 'blockquote' ) )
 						) {
 							$res = ConstrainedText::cast( ( $match[1] ?: '' )

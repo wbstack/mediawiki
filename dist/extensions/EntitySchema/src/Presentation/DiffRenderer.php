@@ -1,9 +1,12 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\Presentation;
 
 use DifferenceEngine;
-use Message;
+use EntitySchema\MediaWiki\Content\EntitySchemaSlotDiffRenderer;
+use MediaWiki\Message\Message;
 use MessageLocalizer;
 
 /**
@@ -11,17 +14,21 @@ use MessageLocalizer;
  */
 class DiffRenderer {
 
-	/** @var MessageLocalizer */
-	private $msgLocalizer;
+	private MessageLocalizer $msgLocalizer;
+	private EntitySchemaSlotDiffRenderer $slotDiffRenderer;
 
-	public function __construct( MessageLocalizer $msgLocalizer ) {
+	public function __construct(
+		MessageLocalizer $msgLocalizer,
+		EntitySchemaSlotDiffRenderer $slotDiffRenderer
+	) {
 		$this->msgLocalizer = $msgLocalizer;
+		$this->slotDiffRenderer = $slotDiffRenderer;
 	}
 
-	public function renderSchemaDiffTable( $diffRowsHTML, Message $leftSideHeading ) {
+	public function renderSchemaDiffTable( string $diffRowsHTML, Message $leftSideHeading ): string {
 		$diffEngine = new DifferenceEngine();
 		return $diffEngine->addHeader(
-			$diffEngine->localiseLineNumbers( $diffRowsHTML ),
+			$this->slotDiffRenderer->localizeDiff( $diffRowsHTML ),
 			$leftSideHeading->parse(),
 			$this->msgLocalizer->msg( 'yourtext' )->parse()
 		);

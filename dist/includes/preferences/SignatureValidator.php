@@ -20,20 +20,19 @@
 
 namespace MediaWiki\Preferences;
 
-use Html;
 use MediaWiki\Config\ServiceOptions;
+use MediaWiki\Html\Html;
 use MediaWiki\MainConfigNames;
+use MediaWiki\Parser\ParserFactory;
+use MediaWiki\Parser\ParserOptions;
 use MediaWiki\Parser\ParserOutputFlags;
+use MediaWiki\Parser\Parsoid\LintErrorChecker;
+use MediaWiki\SpecialPage\SpecialPage;
 use MediaWiki\SpecialPage\SpecialPageFactory;
+use MediaWiki\Title\TitleFactory;
 use MediaWiki\User\UserIdentity;
 use MessageLocalizer;
-use MultiHttpClient;
-use ParserFactory;
-use ParserOptions;
-use ParsoidVirtualRESTService;
-use SpecialPage;
-use TitleFactory;
-use VirtualRESTServiceClient;
+use OOUI\ButtonWidget;
 
 /**
  * @since 1.35
@@ -54,6 +53,7 @@ class SignatureValidator {
 	private $popts;
 	/** @var ParserFactory */
 	private $parserFactory;
+	private LintErrorChecker $lintErrorChecker;
 	/** @var ServiceOptions */
 	private $serviceOptions;
 	/** @var SpecialPageFactory */
@@ -67,6 +67,7 @@ class SignatureValidator {
 	 * @param ?MessageLocalizer $localizer
 	 * @param ParserOptions $popts
 	 * @param ParserFactory $parserFactory
+	 * @param LintErrorChecker $lintErrorChecker
 	 * @param SpecialPageFactory $specialPageFactory
 	 * @param TitleFactory $titleFactory
 	 */
@@ -76,6 +77,7 @@ class SignatureValidator {
 		?MessageLocalizer $localizer,
 		ParserOptions $popts,
 		ParserFactory $parserFactory,
+		LintErrorChecker $lintErrorChecker,
 		SpecialPageFactory $specialPageFactory,
 		TitleFactory $titleFactory
 	) {
@@ -83,6 +85,7 @@ class SignatureValidator {
 		$this->localizer = $localizer;
 		$this->popts = $popts;
 		$this->parserFactory = $parserFactory;
+		$this->lintErrorChecker = $lintErrorChecker;
 		// Configuration
 		$this->serviceOptions = $options;
 		$this->serviceOptions->assertRequiredOptions( self::CONSTRUCTOR_OPTIONS );
@@ -118,18 +121,9 @@ class SignatureValidator {
 
 		$lintErrors = $this->checkLintErrors( $signature );
 		if ( $lintErrors ) {
-			$allowedLintErrors = $this->serviceOptions->get(
-				MainConfigNames::SignatureAllowedLintErrors );
 			$messages = '';
 
 			foreach ( $lintErrors as $error ) {
-				if ( $error['type'] === 'multiple-unclosed-formatting-tags' ) {
-					// Always appears with 'missing-end-tag', we can ignore it to simplify the error message
-					continue;
-				}
-				if ( in_array( $error['type'], $allowedLintErrors, true ) ) {
-					continue;
-				}
 				if ( !$this->localizer ) {
 					$errors = true;
 					break;
@@ -137,16 +131,28 @@ class SignatureValidator {
 
 				$details = $this->getLintErrorDetails( $error );
 				$location = $this->getLintErrorLocation( $error );
+				// THESE MESSAGE IDS SHOULD BE KEPT IN SYNC WITH
+				// those declared in Extension:Linter -- in particular
+				// there should be a linterror-<cat> declared here for every
+				// linter-pager-<cat>-details declared in Linter's qqq.json.
+				// T360809: this redundancy should be eventually eliminated
+
 				// Messages used here:
 				// * linterror-bogus-image-options
 				// * linterror-deletable-table-tag
+				// * linterror-fostered
 				// * linterror-html5-misnesting
+				// * linterror-inline-media-caption
+				// * linterror-large-tables
 				// * linterror-misc-tidy-replacement-issues
 				// * linterror-misnested-tag
 				// * linterror-missing-end-tag
+				// * linterror-missing-end-tag-in-heading
+				// * linterror-missing-image-alt-text
 				// * linterror-multi-colon-escape
 				// * linterror-multiline-html-table-in-list
 				// * linterror-multiple-unclosed-formatting-tags
+				// * linterror-night-mode-unaware-background-color
 				// * linterror-obsolete-tag
 				// * linterror-pwrap-bug-workaround
 				// * linterror-self-closed-tag
@@ -154,8 +160,9 @@ class SignatureValidator {
 				// * linterror-tidy-font-bug
 				// * linterror-tidy-whitespace-bug
 				// * linterror-unclosed-quotes-in-heading
+				// * linterror-wikilink-in-extlink
 				$label = $this->localizer->msg( "linterror-{$error['type']}" )->parse();
-				$docsLink = new \OOUI\ButtonWidget( [
+				$docsLink = new ButtonWidget( [
 					'href' =>
 						"https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Lint_errors/{$error['type']}",
 					'target' => '_blank',
@@ -204,7 +211,7 @@ class SignatureValidator {
 
 	/**
 	 * @param string $signature Signature before PST
-	 * @return string|bool Signature with PST applied, or false if applying PST yields wikitext that
+	 * @return string|false Signature with PST applied, or false if applying PST yields wikitext that
 	 *     would change if PST was applied again
 	 */
 	protected function applyPreSaveTransform( string $signature ) {
@@ -246,44 +253,17 @@ class SignatureValidator {
 		// This has to use Parsoid because PHP Parser doesn't produce this information,
 		// it just fixes up the result quietly.
 
-		// This request is not cached, but that's okay, because $signature is short (other code checks
-		// the length against $wgMaxSigChars).
-
-		$vrsConfig = $this->serviceOptions->get( MainConfigNames::VirtualRestConfig );
-		if ( isset( $vrsConfig['modules']['parsoid'] ) ) {
-			$params = $vrsConfig['modules']['parsoid'];
-			if ( isset( $vrsConfig['global'] ) ) {
-				$params = array_merge( $vrsConfig['global'], $params );
-			}
-			$parsoidVrs = new ParsoidVirtualRESTService( $params );
-
-			$vrsClient = new VirtualRESTServiceClient( new MultiHttpClient( [] ) );
-			$vrsClient->mount( '/parsoid/', $parsoidVrs );
-
-			$request = [
-				'method' => 'POST',
-				'url' => '/parsoid/local/v3/transform/wikitext/to/lint',
-				'body' => [
-					'wikitext' => $signature,
-				],
-				'headers' => [
-					// Are both of these are really needed?
-					'User-Agent' => 'MediaWiki/' . MW_VERSION,
-					'Api-User-Agent' => 'MediaWiki/' . MW_VERSION,
-				],
-			];
-
-			$response = $vrsClient->run( $request );
-			if ( $response['code'] === 200 ) {
-				$json = json_decode( $response['body'], true );
-				// $json is an array of error objects
-				if ( $json ) {
-					return $json;
-				}
-			}
-		}
-
-		return [];
+		$disabled = array_merge(
+			[
+				// Always appears with 'missing-end-tag', we can ignore it to
+				// simplify the error message
+				'multiple-unclosed-formatting-tags',
+			],
+			$this->serviceOptions->get(
+				MainConfigNames::SignatureAllowedLintErrors
+			)
+		);
+		return $this->lintErrorChecker->checkSome( $signature, $disabled );
 	}
 
 	/**
@@ -315,7 +295,7 @@ class SignatureValidator {
 		// the "subpage parameter" are not normalized for us.
 		$splinks = $pout->getLinksSpecial();
 		foreach ( $splinks as $dbkey => $unused ) {
-			list( $name, $subpage ) = $this->specialPageFactory->resolveAlias( $dbkey );
+			[ $name, $subpage ] = $this->specialPageFactory->resolveAlias( $dbkey );
 			if ( $name === 'Contributions' && $subpage ) {
 				$userTitle = $this->titleFactory->makeTitleSafe( NS_USER, $subpage );
 				if ( $userTitle && $userTitle->getText() === $username ) {

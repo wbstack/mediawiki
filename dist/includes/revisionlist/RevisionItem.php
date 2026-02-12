@@ -20,6 +20,10 @@
  * @file
  */
 
+namespace MediaWiki\RevisionList;
+
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Linker\Linker;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
 
@@ -157,7 +161,8 @@ class RevisionItem extends RevisionItemBase {
 			->rawParams( $this->getDiffLink() )->escaped();
 		$revlink = $this->getRevisionLink();
 		$userlink = Linker::revUserLink( $this->getRevisionRecord() );
-		$comment = Linker::revComment( $this->getRevisionRecord() );
+		$comment = MediaWikiServices::getInstance()->getCommentFormatter()
+			->formatRevision( $this->getRevisionRecord(), $this->context->getAuthority() );
 		if ( $this->isDeleted() ) {
 			$class = Linker::getRevisionDeletedClass( $this->getRevisionRecord() );
 			$revlink = "<span class=\"$class\">$revlink</span>";
@@ -165,3 +170,5 @@ class RevisionItem extends RevisionItemBase {
 		return "<li>$difflink $revlink $userlink $comment</li>";
 	}
 }
+/** @deprecated class alias since 1.43 */
+class_alias( RevisionItem::class, 'RevisionItem' );

@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"P. S. F. Freitas"
+		]
+	},
+	"advancedsearch-field-inlanguage": "Kuatiakuéra ko ñe'ẽme",
+	"advancedsearch-help-phrase": ";Descripción\n:Busca una secuencia específica de caracteres. Los signos de puntuación se ignoran.\n;Ten en cuenta lo siguiente\n:(solo es válido cuando se usan comillas, ver el ejemplo siguiente)\n:* Separa las frases de búsqueda por coma o espacio, por ejemplo <code>\"buenos días\"</code>, <code>\"¡hola amigo!\"</code>.\n:* Se ignorarán los signos de puntuación y otros caracteres no alfanuméricos (con excepción de los dos puntos y la coma).\n:* La búsqueda no distingue entre mayúsculas y minúsculas.\n:* No se aplica la derivación de palabras.\n;Página de ayuda\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Palabras, frases y modificadores]\n;Sintaxis equivalente a la búsqueda normal\n:Palabras entre comillas, por ejemplo, <code>\"Empezar por el principio\"</code>.",
+	"advancedsearch-placeholder-exact-text": "\"mbarakaja ohayhu kavara\"",
+	"advancedsearch-inlanguage-default": "Eiporavo ñe'ẽ"
+}

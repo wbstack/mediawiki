@@ -18,8 +18,10 @@
  * @file
  */
 
+use MediaWiki\FileRepo\File\FileSelectQueryBuilder;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Status\Status;
 use MediaWiki\User\UserIdentity;
 use Wikimedia\ScopedCallback;
 
@@ -89,11 +91,11 @@ class LocalFileDeleteBatch {
 		$archiveNames = [];
 
 		$dbw = $this->file->repo->getPrimaryDB();
-		$result = $dbw->select( 'oldimage',
-			[ 'oi_archive_name' ],
-			[ 'oi_name' => $this->file->getName() ],
-			__METHOD__
-		);
+		$result = $dbw->newSelectQueryBuilder()
+			->select( [ 'oi_archive_name' ] )
+			->from( 'oldimage' )
+			->where( [ 'oi_name' => $this->file->getName() ] )
+			->caller( __METHOD__ )->fetchResultSet();
 
 		foreach ( $result as $row ) {
 			$this->addOld( $row->oi_archive_name );
@@ -125,7 +127,7 @@ class LocalFileDeleteBatch {
 	 */
 	protected function getHashes( StatusValue $status ): array {
 		$hashes = [];
-		list( $oldRels, $deleteCurrent ) = $this->getOldRels();
+		[ $oldRels, $deleteCurrent ] = $this->getOldRels();
 
 		if ( $deleteCurrent ) {
 			$hashes['.'] = $this->file->getSha1();
@@ -133,15 +135,21 @@ class LocalFileDeleteBatch {
 
 		if ( count( $oldRels ) ) {
 			$dbw = $this->file->repo->getPrimaryDB();
-			$res = $dbw->select(
-				'oldimage',
-				[ 'oi_archive_name', 'oi_sha1' ],
-				[ 'oi_archive_name' => array_map( 'strval', array_keys( $oldRels ) ),
-					'oi_name' => $this->file->getName() ], // performance
-				__METHOD__
-			);
+			$res = $dbw->newSelectQueryBuilder()
+				->select( [ 'oi_archive_name', 'oi_sha1' ] )
+				->from( 'oldimage' )
+				->where( [
+					'oi_archive_name' => array_map( 'strval', array_keys( $oldRels ) ),
+					'oi_name' => $this->file->getName() // performance
+				] )
+				->caller( __METHOD__ )->fetchResultSet();
 
 			foreach ( $res as $row ) {
+				if ( $row->oi_archive_name === '' ) {
+					// File lost, the check simulates OldLocalFile::exists
+					$hashes[$row->oi_archive_name] = false;
+					continue;
+				}
 				if ( rtrim( $row->oi_sha1, "\0" ) === '' ) {
 					// Get the hash from the file
 					$oldUrl = $this->file->getArchiveVirtualUrl( $row->oi_archive_name );
@@ -149,10 +157,14 @@ class LocalFileDeleteBatch {
 
 					if ( $props['fileExists'] ) {
 						// Upgrade the oldimage row
-						$dbw->update( 'oldimage',
-							[ 'oi_sha1' => $props['sha1'] ],
-							[ 'oi_name' => $this->file->getName(), 'oi_archive_name' => $row->oi_archive_name ],
-							__METHOD__ );
+						$dbw->newUpdateQueryBuilder()
+							->update( 'oldimage' )
+							->set( [ 'oi_sha1' => $props['sha1'] ] )
+							->where( [
+								'oi_name' => $this->file->getName(),
+								'oi_archive_name' => $row->oi_archive_name,
+							] )
+							->caller( __METHOD__ )->execute();
 						$hashes[$row->oi_archive_name] = $props['sha1'];
 					} else {
 						$hashes[$row->oi_archive_name] = false;
@@ -191,7 +203,7 @@ class LocalFileDeleteBatch {
 		$ext = $this->file->getExtension();
 		$dotExt = $ext === '' ? '' : ".$ext";
 		$encExt = $dbw->addQuotes( $dotExt );
-		list( $oldRels, $deleteCurrent ) = $this->getOldRels();
+		[ $oldRels, $deleteCurrent ] = $this->getOldRels();
 
 		// Bitfields to further suppress the content
 		if ( $this->suppress ) {
@@ -235,22 +247,16 @@ class LocalFileDeleteBatch {
 			);
 
 			$dbw->insertSelect( 'filearchive', $tables, $fields,
-				[ 'img_name' => $this->file->getName() ], __METHOD__, [], [], $joins );
+				[ 'img_name' => $this->file->getName() ], __METHOD__, [ 'IGNORE' ], [], $joins );
 		}
 
 		if ( count( $oldRels ) ) {
-			$fileQuery = OldLocalFile::getQueryInfo();
-			$res = $dbw->select(
-				$fileQuery['tables'],
-				$fileQuery['fields'],
-				[
-					'oi_name' => $this->file->getName(),
-					'oi_archive_name' => array_map( 'strval', array_keys( $oldRels ) )
-				],
-				__METHOD__,
-				[ 'FOR UPDATE' ],
-				$fileQuery['joins']
-			);
+			$queryBuilder = FileSelectQueryBuilder::newForOldFile( $dbw );
+			$queryBuilder
+				->forUpdate()
+				->where( [ 'oi_name' => $this->file->getName() ] )
+				->andWhere( [ 'oi_archive_name' => array_map( 'strval', array_keys( $oldRels ) ) ] );
+			$res = $queryBuilder->caller( __METHOD__ )->fetchResultSet();
 			$rowsInsert = [];
 			if ( $res->numRows() ) {
 				$reason = $commentStore->createComment( $dbw, $this->reason );
@@ -284,24 +290,33 @@ class LocalFileDeleteBatch {
 				}
 			}
 
-			$dbw->insert( 'filearchive', $rowsInsert, __METHOD__ );
+			$dbw->newInsertQueryBuilder()
+				->insertInto( 'filearchive' )
+				->ignore()
+				->rows( $rowsInsert )
+				->caller( __METHOD__ )->execute();
 		}
 	}
 
 	private function doDBDeletes() {
 		$dbw = $this->file->repo->getPrimaryDB();
-		list( $oldRels, $deleteCurrent ) = $this->getOldRels();
+		[ $oldRels, $deleteCurrent ] = $this->getOldRels();
 
 		if ( count( $oldRels ) ) {
-			$dbw->delete( 'oldimage',
-				[
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( 'oldimage' )
+				->where( [
 					'oi_name' => $this->file->getName(),
 					'oi_archive_name' => array_map( 'strval', array_keys( $oldRels ) )
-				], __METHOD__ );
+				] )
+				->caller( __METHOD__ )->execute();
 		}
 
 		if ( $deleteCurrent ) {
-			$dbw->delete( 'image', [ 'img_name' => $this->file->getName() ], __METHOD__ );
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( 'image' )
+				->where( [ 'img_name' => $this->file->getName() ] )
+				->caller( __METHOD__ )->execute();
 		}
 	}
 

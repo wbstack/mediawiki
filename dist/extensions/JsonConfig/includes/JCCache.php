@@ -2,7 +2,7 @@
 namespace JsonConfig;
 
 use MediaWiki\MediaWikiServices;
-use ObjectCache;
+use Wikimedia\ObjectCache\BagOStuff;
 
 /**
  * Represents a json blob on a remote wiki.
@@ -13,9 +13,8 @@ class JCCache {
 	private $titleValue;
 	/** @var string */
 	private $key;
-	/** @var \BagOStuff */
+	/** @var BagOStuff */
 	private $cache;
-
 	/** @var bool|string|JCContent */
 	private $content = null;
 
@@ -29,23 +28,23 @@ class JCCache {
 	 * @param JCContent|null $content
 	 */
 	public function __construct( JCTitle $titleValue, $content = null ) {
-		global $wgJsonConfigCacheKeyPrefix;
 		$this->titleValue = $titleValue;
 		$conf = $this->titleValue->getConfig();
 		$flRev = $conf->flaggedRevs;
-		$this->cache = ObjectCache::getInstance( CACHE_ANYTHING );
+		$this->cache = MediaWikiServices::getInstance()
+			->getObjectCacheFactory()->getInstance( CACHE_ANYTHING );
 		$keyArgs = [
 			'JsonConfig',
-			$wgJsonConfigCacheKeyPrefix,
+			MediaWikiServices::getInstance()->getMainConfig()->get( 'JsonConfigCacheKeyPrefix' ),
 			$conf->cacheKey,
 			$flRev === null ? '' : ( $flRev ? 'T' : 'F' ),
 			$titleValue->getNamespace(),
 			$titleValue->getDBkey(),
 		];
 		if ( $conf->isLocal ) {
-			$this->key = call_user_func_array( [ $this->cache, 'makeKey' ], $keyArgs );
+			$this->key = $this->cache->makeKey( ...$keyArgs );
 		} else {
-			$this->key = call_user_func_array( [ $this->cache, 'makeGlobalKey' ], $keyArgs );
+			$this->key = $this->cache->makeGlobalKey( ...$keyArgs );
 		}
 		$this->cacheExpiration = $conf->cacheExp;
 		$this->content = $content ?: null; // ensure that if we don't have content, we use 'null'
@@ -80,9 +79,9 @@ class JCCache {
 	 * @return string|bool Carrier config or false if not in cache.
 	 */
 	private function memcGet() {
-		global $wgJsonConfigDisableCache;
-
-		return $wgJsonConfigDisableCache ? false : $this->cache->get( $this->key );
+		return MediaWikiServices::getInstance()->getMainConfig()->get( 'JsonConfigDisableCache' ) ?
+			false :
+			$this->cache->get( $this->key );
 	}
 
 	/**
@@ -90,14 +89,11 @@ class JCCache {
 	 * If the content is invalid, store an empty string to prevent repeated attempts
 	 */
 	private function memcSet() {
-		global $wgJsonConfigDisableCache;
-		if ( !$wgJsonConfigDisableCache ) {
-			$value = $this->content;
-			$exp = $this->cacheExpiration;
-			if ( !$value ) {
-				$value = '';
-				$exp = 10; // caching an error condition for short time
-			} elseif ( !is_string( $value ) ) {
+		if ( !MediaWikiServices::getInstance()->getMainConfig()->get( 'JsonConfigDisableCache' ) ) {
+			// caching an error condition for short time
+			$exp = $this->content ? $this->cacheExpiration : 10;
+			$value = $this->content ?: '';
+			if ( !is_string( $value ) ) {
 				$value = $value->getNativeData();
 			}
 
@@ -115,8 +111,7 @@ class JCCache {
 	 *   (either get() was called before, or it was set via ctor)
 	 */
 	public function resetCache( $updateCacheContent = null ) {
-		global $wgJsonConfigDisableCache;
-		if ( !$wgJsonConfigDisableCache ) {
+		if ( !MediaWikiServices::getInstance()->getMainConfig()->get( 'JsonConfigDisableCache' ) ) {
 			$conf = $this->titleValue->getConfig();
 			if ( $this->content && ( $updateCacheContent === true ||
 				( $updateCacheContent === null && isset( $conf->store ) &&
@@ -215,7 +210,6 @@ class JCCache {
 			if ( $result === false ) {
 				break;
 			}
-
 		} while ( false );
 
 		$this->content = $result;
@@ -242,8 +236,7 @@ class JCCache {
 			return false;
 		}
 		$pageInfo = reset( $pages ); // get the only element of the array
-		if ( isset( $revInfo['missing'] ) ) {
-			JCUtils::warn( 'Config page does not exist', [ 'title' => $articleName ], $query );
+		if ( isset( $pageInfo['missing'] ) ) {
 			return false;
 		}
 		return $pageInfo;

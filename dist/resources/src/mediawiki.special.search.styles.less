@@ -1,18 +1,35 @@
 /* Special:Search */
+@import 'mediawiki.skin.variables.less';
 @import 'mediawiki.mixins.less';
 
 /* stylelint-disable selector-class-pattern */
-.searchresults {
-	margin: 1em 0 1em 0;
-}
+#mw-content-text {
+	.searchresults {
+		margin-bottom: 1em;
+	}
 
-.searchresults .mw-search-exists {
-	margin-bottom: 32px;
+	.mw-search-nonefound,
+	.mw-search-exists,
+	.mw-search-createlink,
+	.searchdidyoumean {
+		margin-bottom: 0;
+		float: none;
+	}
+
+	// If more than one message is present at the same time, add a bit of margin in between
+	.searchdidyoumean + .searchresults .mw-search-createlink,
+	.mw-search-nonefound + .mw-search-createlink {
+		margin-top: 12px;
+	}
+
+	// Default top margin for the search result
+	.mw-search-results {
+		margin-top: 32px;
+	}
 }
 
 /* needs extra specificity to override `.mw-body p` selector */
 .mw-body .mw-search-nonefound {
-	margin: 1.5em 0 0.5em 0;
 	font-size: 1.2em;
 }
 
@@ -20,14 +37,16 @@
 	font-weight: bold;
 }
 
+.mw-search-form-wrapper {
+	margin-bottom: 24px;
+}
+
 .mw-search-results {
 	margin: 0;
-	max-width: 38em;
 
 	li {
 		list-style: none;
-		/* Rely on `padding-bottom` here to add on top of `.content li` provided `margin`. */
-		padding-bottom: 24px;
+		margin-bottom: 24px;
 
 		a {
 			font-size: 114%;
@@ -35,20 +54,82 @@
 	}
 }
 
+.mw-search-results-container,
+.mw-search-results-info {
+	float: left;
+}
+
+@media only screen and ( min-width: @min-width-breakpoint-tablet ) {
+	.mw-search-results-container,
+	.mw-search-results-info {
+		width: ~'calc( 100% / 12 * 7 )';
+	}
+}
+
+.searchResultImage {
+	display: flex;
+
+	.searchResultImage-thumbnail {
+		flex-shrink: 0;
+		width: 90px;
+		height: 90px;
+		text-align: center;
+		vertical-align: top;
+		padding-right: 1em;
+
+		> div {
+			padding: 0.5em;
+		}
+
+		.searchResultImage-thumbnail-placeholder {
+			background-color: @background-color-neutral-subtle;
+			box-sizing: border-box;
+			width: inherit;
+			height: inherit;
+			border: @border-subtle;
+			fill: @color-placeholder;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		img {
+			width: 100%;
+			/* Note: below !important required to override an unrelated !important in minerva skin */
+			/* stylelint-disable-next-line declaration-no-important */
+			height: 100% !important;
+			object-fit: cover;
+			object-position: top;
+			border: @border-subtle;
+		}
+	}
+
+	.searchResultImage-text {
+		vertical-align: top;
+	}
+}
+
+/* Don't show thumbnails for interwiki results */
+.mw-search-interwiki-results .searchResultImage-thumbnail {
+	display: none;
+}
+
 .mw-search-visualclear {
 	clear: both;
 }
 
 .mw-search-result-data {
-	color: #54595d;
+	color: @color-subtle;
 	font-size: 93%;
 }
 
 .mw-search-profile-tabs {
-	background-color: #f8f9fa;
+	background-color: @background-color-neutral-subtle;
 	margin-top: 1em;
-	border: 1px solid #c8ccd1;
-	border-radius: 2px;
+	border: @border-subtle;
+	border-radius: @border-radius-base;
+	// ooui's @max-width-base
+	max-width: 50em;
 }
 
 .search-types {
@@ -73,7 +154,7 @@
 	}
 
 	.current a {
-		color: #202122;
+		color: @color-base;
 		cursor: default;
 
 		&:hover {
@@ -86,7 +167,7 @@
 	float: right;
 	padding: 0.5em;
 	padding-right: 0.75em;
-	color: #54595d;
+	color: @color-subtle;
 	font-size: 95%;
 }
 
@@ -99,13 +180,13 @@
 /* ===================== */
 
 #mw-searchoptions {
+	background-color: @background-color-neutral-subtle;
 	/* Support: Firefox, needs `clear: both` on `fieldset` when zoom level > 100%, see T176499 */
 	clear: both;
 	padding: 0.5em 0.75em 0.75em 0.75em;
-	background-color: #f8f9fa;
 	margin: -1px 0 0;
-	border: 1px solid #c8ccd1;
-	border-radius: 0 0 2px 2px;
+	border: @border-subtle;
+	border-radius: 0 0 @border-radius-base @border-radius-base;
 
 	legend {
 		display: none;
@@ -119,7 +200,7 @@
 
 	.divider {
 		clear: both;
-		border-bottom: 1px solid #eaecf0;
+		border-bottom: @border-subtle;
 		padding-top: 0.5em;
 		margin-bottom: 0.5em;
 	}
@@ -142,7 +223,7 @@
 #mw-search-interwiki {
 	float: right;
 	width: 18em;
-	border: 1px solid #a2a9b1;
+	border: @border-base;
 	margin-top: 2ex;
 }
 
@@ -163,16 +244,22 @@
 }
 
 .mw-search-interwiki-project {
+	background-color: @background-color-neutral;
 	font-size: 97%;
 	text-align: left;
 	padding: 0.15em 0.15em 0.2em 0.2em;
-	background-color: #eaecf0;
-	border-top: 1px solid #c8ccd1;
+	border-top: @border-subtle;
+}
+
+.mw-search-interwiki-header {
+	font-size: 1.3125em;
+	border-bottom: @border-base;
 }
 
 .searchdidyoumean {
 	font-size: 114%;
 	margin-top: 0.8em;
+	margin-bottom: 0.8em;
 
 	em {
 		font-style: normal;

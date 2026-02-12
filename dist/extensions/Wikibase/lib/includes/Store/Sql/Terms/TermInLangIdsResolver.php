@@ -6,7 +6,7 @@ namespace Wikibase\Lib\Store\Sql\Terms;
  * A service to turn term in lang IDs into terms,
  * the inverse of {@link TermInLangIdsAcquirer}.
  *
- * @see @ref md_docs_storage_terms
+ * @see @ref docs_storage_terms
  * @license GPL-2.0-or-later
  */
 interface TermInLangIdsResolver {
@@ -39,8 +39,8 @@ interface TermInLangIdsResolver {
 	 */
 	public function resolveTermInLangIds(
 		array $termInLangIds,
-		array $types = null,
-		array $languages = null
+		?array $types = null,
+		?array $languages = null
 	): array;
 
 	/**
@@ -51,7 +51,7 @@ interface TermInLangIdsResolver {
 	 * where the values belong to the term in lang IDs corresponding to that key.
 	 * One call to this method is effectively equivalent to multiple calls to
 	 * {@link resolveTermInLangIds} with the individual term in lang ID arrays, but may be
-	 * more efficient than that, e. g. resolving all the term in lang IDs in one batch
+	 * more efficient than that, e.g. resolving all the term in lang IDs in one batch
 	 * and then grouping them correctly afterwards.
 	 *
 	 * @param int[][] $groupedTermInLangIds
@@ -61,8 +61,8 @@ interface TermInLangIdsResolver {
 	 */
 	public function resolveGroupedTermInLangIds(
 		array $groupedTermInLangIds,
-		array $types = null,
-		array $languages = null
+		?array $types = null,
+		?array $languages = null
 	): array;
 
 }

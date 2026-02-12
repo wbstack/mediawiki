@@ -24,10 +24,11 @@
  */
 
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\Logging\LoggingSelectQueryBuilder;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserIdentity;
 use Wikimedia\AtEase\AtEase;
-use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IReadableDatabase;
 
 /**
  * A value class to process existing log entries. In other words, this class caches a log
@@ -48,10 +49,12 @@ class DatabaseLogEntry extends LogEntryBase {
 	 * database, but they continue to be available in query results as
 	 * aliases.
 	 *
+	 * @deprecated since 1.41 use ::newSelectQueryBuilder() instead
+	 *
 	 * @return array
 	 */
 	public static function getSelectQueryData() {
-		$commentQuery = CommentStore::getStore()->getJoin( 'log_comment' );
+		$commentQuery = MediaWikiServices::getInstance()->getCommentStore()->getJoin( 'log_comment' );
 
 		$tables = array_merge(
 			[
@@ -87,6 +90,10 @@ class DatabaseLogEntry extends LogEntryBase {
 		];
 	}
 
+	public static function newSelectQueryBuilder( IReadableDatabase $db ) {
+		return new LoggingSelectQueryBuilder( $db );
+	}
+
 	/**
 	 * Constructs new LogEntry from database result row.
 	 * Supports rows from both logging and recentchanges table.
@@ -104,23 +111,16 @@ class DatabaseLogEntry extends LogEntryBase {
 	}
 
 	/**
-	 * Loads a LogEntry with the given id from database
+	 * Loads a LogEntry with the given id from database.
 	 *
 	 * @param int $id
-	 * @param IDatabase $db
+	 * @param IReadableDatabase $db
 	 * @return DatabaseLogEntry|null
 	 */
-	public static function newFromId( $id, IDatabase $db ) {
-		$queryInfo = self::getSelectQueryData();
-		$queryInfo['conds'] += [ 'log_id' => $id ];
-		$row = $db->selectRow(
-			$queryInfo['tables'],
-			$queryInfo['fields'],
-			$queryInfo['conds'],
-			__METHOD__,
-			$queryInfo['options'],
-			$queryInfo['join_conds']
-		);
+	public static function newFromId( $id, IReadableDatabase $db ) {
+		$row = self::newSelectQueryBuilder( $db )
+			->where( [ 'log_id' => $id ] )
+			->caller( __METHOD__ )->fetchRow();
 		if ( !$row ) {
 			return null;
 		}
@@ -156,7 +156,8 @@ class DatabaseLogEntry extends LogEntryBase {
 	}
 
 	/**
-	 * Returns whatever is stored in the database field.
+	 * Returns whatever is stored in the database field (typically a serialized
+	 * associative array but very old entries might have different formats).
 	 *
 	 * @return string
 	 */
@@ -232,7 +233,7 @@ class DatabaseLogEntry extends LogEntryBase {
 	public function getTarget() {
 		$namespace = $this->row->log_namespace;
 		$page = $this->row->log_title;
-		return Title::makeTitle( $namespace, $page );
+		return MediaWikiServices::getInstance()->getTitleFactory()->makeTitle( $namespace, $page );
 	}
 
 	public function getTimestamp() {
@@ -240,7 +241,8 @@ class DatabaseLogEntry extends LogEntryBase {
 	}
 
 	public function getComment() {
-		return CommentStore::getStore()->getComment( 'log_comment', $this->row )->text;
+		return MediaWikiServices::getInstance()->getCommentStore()
+			->getComment( 'log_comment', $this->row )->text;
 	}
 
 	public function getDeleted() {

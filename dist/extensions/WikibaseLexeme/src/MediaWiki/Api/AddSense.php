@@ -1,11 +1,16 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lexeme\MediaWiki\Api;
 
-use ApiBase;
-use ApiMain;
 use Deserializers\Deserializer;
 use LogicException;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiCreateTempUserTrait;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiUsageException;
+use MediaWiki\Message\Message;
 use RuntimeException;
 use Wikibase\DataModel\Deserializers\TermDeserializer;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -14,13 +19,13 @@ use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LexemeTermLanguageValidator;
 use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LexemeTermSerializationValidator;
 use Wikibase\Lexeme\Domain\Model\Exceptions\ConflictException;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
+use Wikibase\Lexeme\Domain\Model\Sense;
 use Wikibase\Lexeme\Domain\Model\SenseId;
 use Wikibase\Lexeme\MediaWiki\Api\Error\LexemeNotFound;
 use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\EditSenseChangeOpDeserializer;
 use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\GlossesChangeOpDeserializer;
 use Wikibase\Lexeme\Serialization\SenseSerializer;
 use Wikibase\Lexeme\WikibaseLexemeServices;
-use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Store\StorageException;
@@ -28,11 +33,12 @@ use Wikibase\Lib\StringNormalizer;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Api\ApiErrorReporter;
 use Wikibase\Repo\Api\ApiHelperFactory;
+use Wikibase\Repo\Api\ResultBuilder;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
 use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
 use Wikibase\Repo\ChangeOp\Deserialization\ClaimsChangeOpDeserializer;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -42,37 +48,18 @@ use Wikimedia\ParamValidator\ParamValidator;
  */
 class AddSense extends ApiBase {
 
+	use ApiCreateTempUserTrait;
+
 	private const LATEST_REVISION = 0;
 
-	/**
-	 * @var AddSenseRequestParser
-	 */
-	private $requestParser;
+	private AddSenseRequestParser $requestParser;
 
-	/**
-	 * @var ApiErrorReporter
-	 */
-	private $errorReporter;
-
-	/**
-	 * @var SenseSerializer
-	 */
-	private $senseSerializer;
-
-	/**
-	 * @var MediawikiEditEntityFactory
-	 */
-	private $editEntityFactory;
-
-	/**
-	 * @var SummaryFormatter
-	 */
-	private $summaryFormatter;
-
-	/**
-	 * @var EntityRevisionLookup
-	 */
-	private $entityRevisionLookup;
+	private ResultBuilder $resultBuilder;
+	private ApiErrorReporter $errorReporter;
+	private SenseSerializer $senseSerializer;
+	private MediaWikiEditEntityFactory $editEntityFactory;
+	private SummaryFormatter $summaryFormatter;
+	private EntityRevisionLookup $entityRevisionLookup;
 
 	/**
 	 * @return self
@@ -83,7 +70,7 @@ class AddSense extends ApiBase {
 		ApiHelperFactory $apiHelperFactory,
 		SerializerFactory $baseDataModelSerializerFactory,
 		ChangeOpFactoryProvider $changeOpFactoryProvider,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		EntityIdParser $entityIdParser,
 		Deserializer $externalFormatStatementDeserializer,
 		Store $store,
@@ -118,25 +105,24 @@ class AddSense extends ApiBase {
 			$store->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
 			$editEntityFactory,
 			$summaryFormatter,
-			static function ( $module ) use ( $apiHelperFactory ) {
-				return $apiHelperFactory->getErrorReporter( $module );
-			}
+			$apiHelperFactory
 		);
 	}
 
 	public function __construct(
 		ApiMain $mainModule,
-		$moduleName,
+		string $moduleName,
 		AddSenseRequestParser $requestParser,
 		SenseSerializer $senseSerializer,
 		EntityRevisionLookup $entityRevisionLookup,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		SummaryFormatter $summaryFormatter,
-		callable $errorReporterInstantiator
+		ApiHelperFactory $apiHelperFactory
 	) {
 		parent::__construct( $mainModule, $moduleName );
 
-		$this->errorReporter = $errorReporterInstantiator( $this );
+		$this->resultBuilder = $apiHelperFactory->getResultBuilder( $this );
+		$this->errorReporter = $apiHelperFactory->getErrorReporter( $this );
 		$this->requestParser = $requestParser;
 		$this->senseSerializer = $senseSerializer;
 		$this->editEntityFactory = $editEntityFactory;
@@ -147,28 +133,25 @@ class AddSense extends ApiBase {
 	/**
 	 * @see ApiBase::execute()
 	 *
-	 * @throws \ApiUsageException
+	 * @throws ApiUsageException
 	 */
-	public function execute() {
+	public function execute(): void { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.TooHigh
 		/*
 		 * {
 			  "glosses": [
 				"en-GB": {
 				  "value": "colour",
-				  "language": "en-GB"
+				  "language": "en-gb"
 				},
 				"en-US": {
 				  "value": "color",
-				  "language": "en-US"
+				  "language": "en-us"
 				}
 			  ]
 			}
 		 *
 		 */
 
-		//FIXME: Response structure? - Added sense
-
-		//TODO: Corresponding HTTP codes on failure (e.g. 400, 404, 422) (?)
 		//TODO: Documenting response structure. Is it possible?
 
 		$params = $this->extractRequestParams();
@@ -215,14 +198,10 @@ class AddSense extends ApiBase {
 		try {
 			$changeOp->apply( $lexeme, $summary );
 		} catch ( ChangeOpException $exception ) {
-			$this->errorReporter->dieException( $exception,  'unprocessable-request' );
+			$this->errorReporter->dieException( $exception, 'unprocessable-request' );
 		}
 
-		if ( $request->getBaseRevId() ) {
-			$baseRevId = $request->getBaseRevId();
-		} else {
-			$baseRevId = $lexemeRevision->getRevisionId();
-		}
+		$baseRevId = $request->getBaseRevId() ?: $lexemeRevision->getRevisionId();
 
 		$editEntity = $this->editEntityFactory->newEditEntity(
 			$this->getContext(),
@@ -240,7 +219,6 @@ class AddSense extends ApiBase {
 		}
 
 		$tokenThatDoesNotNeedChecking = false;
-		// FIXME: Handle failure
 		try {
 			$status = $editEntity->attemptSave(
 				$lexeme,
@@ -255,54 +233,49 @@ class AddSense extends ApiBase {
 		}
 
 		if ( !$status->isGood() ) {
-			$this->dieStatus( $status ); // Seems like it is good enough
+			$this->dieStatus( $status );
 		}
 
-		/** @var EntityRevision $entityRevision */
-		$entityRevision = $status->getValue()['revision'];
-		$revisionId = $entityRevision->getRevisionId();
+		$entityRevision = $status->getRevision();
 
 		/** @var Lexeme $editedLexeme */
 		$editedLexeme = $entityRevision->getEntity();
+		'@phan-var Lexeme $editedLexeme';
 		$newSense = $this->getSenseWithMaxId( $editedLexeme );
 		$serializedSense = $this->senseSerializer->serialize( $newSense );
 
-		$apiResult = $this->getResult();
-		$apiResult->addValue( null, 'lastrevid', $revisionId );
-		// TODO: Do we really need `success` property in response?
-		$apiResult->addValue( null, 'success', 1 );
-		$apiResult->addValue( null, 'sense', $serializedSense );
+		$this->resultBuilder->addRevisionIdFromStatusToResult( $status, null );
+		$this->resultBuilder->markSuccess();
+		$this->resultBuilder->addTempUser( $status, fn ( $user ) => $this->getTempUserRedirectUrl( $params, $user ) );
+		$this->getResult()->addValue( null, 'sense', $serializedSense );
 	}
 
 	/** @inheritDoc */
-	protected function getAllowedParams() {
-		return array_merge(
-			[
-				AddSenseRequestParser::PARAM_LEXEME_ID => [
-					ParamValidator::PARAM_TYPE => 'string',
-					ParamValidator::PARAM_REQUIRED => true,
-				],
-				AddSenseRequestParser::PARAM_DATA => [
-					ParamValidator::PARAM_TYPE => 'text',
-					ParamValidator::PARAM_REQUIRED => true,
-				],
-				AddSenseRequestParser::PARAM_BASEREVID => [
-					ParamValidator::PARAM_TYPE => 'integer',
-				],
-				'tags' => [
-					ParamValidator::PARAM_TYPE => 'tags',
-					ParamValidator::PARAM_ISMULTI => true,
-				],
-				'bot' => [
-					ParamValidator::PARAM_TYPE => 'boolean',
-					ParamValidator::PARAM_DEFAULT => false,
-				]
-			]
-		);
+	protected function getAllowedParams(): array {
+		return array_merge( [
+			AddSenseRequestParser::PARAM_LEXEME_ID => [
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_REQUIRED => true,
+			],
+			AddSenseRequestParser::PARAM_DATA => [
+				ParamValidator::PARAM_TYPE => 'text',
+				ParamValidator::PARAM_REQUIRED => true,
+			],
+			AddSenseRequestParser::PARAM_BASEREVID => [
+				ParamValidator::PARAM_TYPE => 'integer',
+			],
+			'tags' => [
+				ParamValidator::PARAM_TYPE => 'tags',
+				ParamValidator::PARAM_ISMULTI => true,
+			],
+			'bot' => [
+				ParamValidator::PARAM_TYPE => 'boolean',
+				ParamValidator::PARAM_DEFAULT => false,
+			],
+		], $this->getCreateTempUserParams() );
 	}
 
-	/** @inheritDoc */
-	public function isWriteMode() {
+	public function isWriteMode(): bool {
 		return true;
 	}
 
@@ -310,60 +283,54 @@ class AddSense extends ApiBase {
 	 * As long as this codebase is in development and APIs might change any time without notice, we
 	 * mark all as internal. This adds an "unstable" notice, but does not hide them in any way.
 	 */
-	public function isInternal() {
+	public function isInternal(): bool {
 		return true;
 	}
 
-	/** @inheritDoc */
-	public function needsToken() {
+	public function needsToken(): string {
 		return 'csrf';
 	}
 
-	/** @inheritDoc */
-	public function mustBePosted() {
+	public function mustBePosted(): bool {
 		return true;
 	}
 
-	protected function getExamplesMessages() {
+	protected function getExamplesMessages(): array {
 		$lexemeId = 'L12';
 		$exampleData = [
 			'glosses' => [
-				'en-US' => [ 'value' => 'Some text value', 'language' => 'en-US' ],
-				'en-GB' => [ 'value' => 'Another text value', 'language' => 'en-GB' ],
-			]
+				'en-us' => [ 'value' => 'Some text value', 'language' => 'en-us' ],
+				'en-gb' => [ 'value' => 'Another text value', 'language' => 'en-gb' ],
+			],
 		];
 
 		$query = http_build_query( [
 			'action' => $this->getModuleName(),
 			AddSenseRequestParser::PARAM_LEXEME_ID => $lexemeId,
-			AddSenseRequestParser::PARAM_DATA => json_encode( $exampleData )
+			AddSenseRequestParser::PARAM_DATA => json_encode( $exampleData ),
 		] );
 
-		$languages = array_map( static function ( $r ) {
-			return $r['language'];
-		}, $exampleData['glosses'] );
-		$glosses = array_map( static function ( $r ) {
-			return $r['value'];
-		}, $exampleData['glosses'] );
+		$languages = array_column( $exampleData['glosses'], 'language' );
+		$glosses = array_column( $exampleData['glosses'], 'value' );
 
 		$glossesText = $this->getLanguage()->commaList( $glosses );
 		$languagesText = $this->getLanguage()->commaList( $languages );
 
-		$exampleMessage = new \Message(
+		$exampleMessage = new Message(
 			'apihelp-wbladdsense-example-1',
 			[
 				$lexemeId,
 				$glossesText,
-				$languagesText
+				$languagesText,
 			]
 		);
 
 		return [
-			urldecode( $query ) => $exampleMessage
+			urldecode( $query ) => $exampleMessage,
 		];
 	}
 
-	private function getSenseWithMaxId( Lexeme $lexeme ) {
+	private function getSenseWithMaxId( Lexeme $lexeme ): Sense {
 		// TODO: This is all rather nasty
 		$maxIdNumber = $lexeme->getSenses()->maxSenseIdNumber();
 		// TODO: Use some service to get the ID object!

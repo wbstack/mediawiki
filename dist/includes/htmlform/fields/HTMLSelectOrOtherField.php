@@ -1,5 +1,12 @@
 <?php
 
+namespace MediaWiki\HTMLForm\Field;
+
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLFormField;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Xml\XmlSelect;
+
 /**
  * Select dropdown field, with an additional "other" textbox.
  *
@@ -59,14 +66,18 @@ class HTMLSelectOrOtherField extends HTMLTextField {
 			$tbAttribs['maxlength'] = $this->mParams['maxlength'];
 		}
 
+		if ( isset( $this->mParams['minlength'] ) ) {
+			$tbAttribs['minlength'] = $this->mParams['minlength'];
+		}
+
 		$textbox = Html::input( $this->mName . '-other', $valInSelect ? '' : $value, 'text', $tbAttribs );
 
 		$wrapperAttribs = [
 			'id' => $this->mID,
-			'class' => self::FIELD_CLASS
+			'class' => $this->getFieldClasses()
 		];
 		if ( $this->mClass !== '' ) {
-			$wrapperAttribs['class'] .= ' ' . $this->mClass;
+			$wrapperAttribs['class'][] = $this->mClass;
 		}
 		return Html::rawElement(
 			'div',
@@ -106,7 +117,7 @@ class HTMLSelectOrOtherField extends HTMLTextField {
 			'tabindex',
 		];
 
-		$dropdownAttribs += OOUI\Element::configFromHtmlAttributes(
+		$dropdownAttribs += \OOUI\Element::configFromHtmlAttributes(
 			$this->getAttributes( $allowedParams )
 		);
 
@@ -124,9 +135,10 @@ class HTMLSelectOrOtherField extends HTMLTextField {
 			'disabled',
 			'tabindex',
 			'maxlength',
+			'minlength',
 		];
 
-		$textAttribs += OOUI\Element::configFromHtmlAttributes(
+		$textAttribs += \OOUI\Element::configFromHtmlAttributes(
 			$this->getAttributes( $allowedParams )
 		);
 
@@ -139,7 +151,7 @@ class HTMLSelectOrOtherField extends HTMLTextField {
 			$disabled = true;
 		}
 
-		$inputClasses = [ self::FIELD_CLASS ];
+		$inputClasses = $this->getFieldClasses();
 		if ( $this->mClass !== '' ) {
 			$inputClasses = array_merge( $inputClasses, explode( ' ', $this->mClass ) );
 		}
@@ -155,7 +167,71 @@ class HTMLSelectOrOtherField extends HTMLTextField {
 	}
 
 	public function getInputWidget( $params ) {
-		return new MediaWiki\Widget\SelectWithInputWidget( $params );
+		return new \MediaWiki\Widget\SelectWithInputWidget( $params );
+	}
+
+	public function getInputCodex( $value, $hasErrors ) {
+		// Figure out the value of the select.
+		$valInSelect = false;
+		if ( $value !== false ) {
+			$value = strval( $value );
+			$valInSelect = in_array(
+				$value, HTMLFormField::flattenOptions( $this->getOptions() ), true
+			);
+		}
+		$selected = $valInSelect ? $value : 'other';
+
+		// Create the <select> element.
+		$select = new XmlSelect( $this->mName, false, $selected );
+		// TODO: Add support for error class once it's implemented in the Codex CSS-only Select.
+		$select->setAttribute( 'class', 'cdx-select' );
+		$select->addOptions( $this->getOptions() );
+
+		// Set up attributes for the select and the text input.
+		$textInputAttribs = [ 'size' => $this->getSize() ];
+		$textInputAttribs['name'] = $this->mName . '-other';
+
+		if ( !empty( $this->mParams['disabled'] ) ) {
+			$select->setAttribute( 'disabled', 'disabled' );
+			$textInputAttribs['disabled'] = 'disabled';
+		}
+
+		if ( isset( $this->mParams['tabindex'] ) ) {
+			$select->setAttribute( 'tabindex', $this->mParams['tabindex'] );
+			$textInputAttribs['tabindex'] = $this->mParams['tabindex'];
+		}
+
+		if ( isset( $this->mParams['maxlength'] ) ) {
+			$textInputAttribs['maxlength'] = $this->mParams['maxlength'];
+		}
+
+		if ( isset( $this->mParams['minlength'] ) ) {
+			$textInputAttribs['minlength'] = $this->mParams['minlength'];
+		}
+
+		// Get HTML of the select and text input.
+		$select = $select->getHTML();
+		$textInput = parent::buildCodexComponent(
+			$valInSelect ? '' : $value,
+			$hasErrors,
+			'text',
+			$this->mName . '-other',
+			$textInputAttribs
+		);
+
+		// Set up the wrapper element and return the entire component.
+		$wrapperAttribs = [
+			'id' => $this->mID,
+			'class' => $this->getFieldClasses()
+		];
+		if ( $this->mClass !== '' ) {
+			$wrapperAttribs['class'][] = $this->mClass;
+		}
+		return Html::rawElement(
+			'div',
+			$wrapperAttribs,
+			"$select\n$textInput"
+		);
 	}
 
 	/**
@@ -176,4 +252,19 @@ class HTMLSelectOrOtherField extends HTMLTextField {
 			return $this->getDefault();
 		}
 	}
+
+	/**
+	 * Returns a list of classes that should be applied to the widget itself. Unfortunately, we can't use
+	 * $this->mClass or the 'cssclass' config option, because they're also added to the outer field wrapper
+	 * (which includes the label). This method exists a temporary workaround until HTMLFormField will have
+	 * a stable way for subclasses to specify additional classes for the widget itself.
+	 * @internal Should only be used in HTMLTimezoneField
+	 * @return string[]
+	 */
+	protected function getFieldClasses(): array {
+		return [ self::FIELD_CLASS ];
+	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( HTMLSelectOrOtherField::class, 'HTMLSelectOrOtherField' );

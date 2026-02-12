@@ -21,6 +21,9 @@
  * @ingroup FileBackend
  */
 
+namespace Wikimedia\FileBackend\FileOps;
+
+use StatusValue;
 use Wikimedia\AtEase\AtEase;
 
 /**
@@ -36,31 +39,38 @@ class StoreFileOp extends FileOp {
 		];
 	}
 
-	protected function doPrecheck( array &$predicates ) {
+	protected function doPrecheck(
+		FileStatePredicates $opPredicates,
+		FileStatePredicates $batchPredicates
+	) {
 		$status = StatusValue::newGood();
 
-		// Check if the source file exists in the file system and is not too big
+		// Check if the source file exists in the file system
 		if ( !is_file( $this->params['src'] ) ) {
 			$status->fatal( 'backend-fail-notexists', $this->params['src'] );
 
 			return $status;
 		}
 		// Check if the source file is too big
-		$maxBytes = $this->backend->maxFileSizeInternal();
-		if ( filesize( $this->params['src'] ) > $maxBytes ) {
-			$status->fatal( 'backend-fail-maxsize', $this->params['dst'], $maxBytes );
+		$sourceSize = $this->getSourceSize();
+		$maxFileSize = $this->backend->maxFileSizeInternal();
+		if ( $sourceSize > $maxFileSize ) {
+			$status->fatal( 'backend-fail-maxsize', $this->params['dst'], $maxFileSize );
 
 			return $status;
 		}
 		// Check if an incompatible destination file exists
-		$status->merge( $this->precheckDestExistence( $predicates ) );
+		$sourceSha1 = function () {
+			static $sha1 = null;
+			$sha1 ??= $this->getSourceSha1Base36();
+			return $sha1;
+		};
+		$status->merge( $this->precheckDestExistence( $opPredicates, $sourceSize, $sourceSha1 ) );
 		$this->params['dstExists'] = $this->destExists; // see FileBackendStore::setFileCache()
 
 		// Update file existence predicates if the operation is expected to be allowed to run
 		if ( $status->isOK() ) {
-			$predicates[self::ASSUMED_EXISTS][$this->params['dst']] = true;
-			$predicates[self::ASSUMED_SIZE][$this->params['dst']] = $this->sourceSize;
-			$predicates[self::ASSUMED_SHA1][$this->params['dst']] = $this->sourceSha1;
+			$batchPredicates->assumeFileExists( $this->params['dst'], $sourceSize, $sourceSha1 );
 		}
 
 		return $status; // safe to call attempt()
@@ -90,7 +100,7 @@ class StoreFileOp extends FileOp {
 		$hash = sha1_file( $this->params['src'] );
 		AtEase::restoreWarnings();
 		if ( $hash !== false ) {
-			$hash = Wikimedia\base_convert( $hash, 16, 36, 31 );
+			$hash = \Wikimedia\base_convert( $hash, 16, 36, 31 );
 		}
 
 		return $hash;
@@ -100,3 +110,6 @@ class StoreFileOp extends FileOp {
 		return [ $this->params['dst'] ];
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( StoreFileOp::class, 'StoreFileOp' );

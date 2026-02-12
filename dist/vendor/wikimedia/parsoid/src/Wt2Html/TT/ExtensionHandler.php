@@ -5,11 +5,13 @@ namespace Wikimedia\Parsoid\Wt2Html\TT;
 
 use Wikimedia\Assert\Assert;
 use Wikimedia\Assert\UnreachableException;
+use Wikimedia\Parsoid\Config\SiteConfig;
 use Wikimedia\Parsoid\DOM\DocumentFragment;
 use Wikimedia\Parsoid\Ext\ExtensionError;
 use Wikimedia\Parsoid\Ext\ExtensionTag;
-use Wikimedia\Parsoid\Ext\ExtensionTagHandler;
 use Wikimedia\Parsoid\Ext\ParsoidExtensionAPI;
+use Wikimedia\Parsoid\NodeData\DataMw;
+use Wikimedia\Parsoid\NodeData\DataMwError;
 use Wikimedia\Parsoid\Tokens\Token;
 use Wikimedia\Parsoid\Utils\DOMDataUtils;
 use Wikimedia\Parsoid\Utils\DOMUtils;
@@ -20,18 +22,11 @@ use Wikimedia\Parsoid\Utils\WTUtils;
 use Wikimedia\Parsoid\Wt2Html\TokenTransformManager;
 
 class ExtensionHandler extends TokenHandler {
-	/**
-	 * @param TokenTransformManager $manager
-	 * @param array $options
-	 */
+
 	public function __construct( TokenTransformManager $manager, array $options ) {
 		parent::__construct( $manager, $options );
 	}
 
-	/**
-	 * @param array $options
-	 * @return array
-	 */
 	private static function normalizeExtOptions( array $options ): array {
 		// Mimics Sanitizer::decodeTagAttributes from the PHP parser
 		//
@@ -55,33 +50,47 @@ class ExtensionHandler extends TokenHandler {
 		return $options;
 	}
 
-	/**
-	 * @param Token $token
-	 * @return TokenHandlerResult
-	 */
 	private function onExtension( Token $token ): TokenHandlerResult {
 		$env = $this->env;
 		$siteConfig = $env->getSiteConfig();
 		$pageConfig = $env->getPageConfig();
-		$extensionName = $token->getAttribute( 'name' );
+		$extensionName = $token->getAttributeV( 'name' );
+		$extConfig = $env->getSiteConfig()->getExtTagConfig( $extensionName );
 
-		// Track uses of extensions in the talk namespace
-		if ( $siteConfig->namespaceIsTalk( $pageConfig->getNS() ) ) {
-			$metrics = $siteConfig->metrics();
-			if ( $metrics ) {
-				$metrics->increment( "extension.talk.{$extensionName}" );
+		$metrics = $siteConfig->metrics();
+		if ( $metrics ) {
+			// Track uses of extensions
+			$wiki = $siteConfig->iwp();
+			$ns = $env->getContextTitle()->getNamespace();
+			if ( $ns === 0 ) {
+				// Article space
+				$nsName = 'main';
+			} elseif ( $siteConfig->namespaceIsTalk( $ns ) ) {
+				// Any talk namespace
+				$nsName = 'talk';
+			} else {
+				// Everything else
+				$nsName = "ns-$ns";
 			}
+			$metrics->increment( "extension.{$wiki}.{$nsName}.{$extensionName}" );
+			$siteConfig->incrementCounter( "extension_total", [
+				"wiki" => $wiki,
+				"namespace" => $nsName,
+				"name" => $extensionName,
+			] );
 		}
 
 		$nativeExt = $siteConfig->getExtTagImpl( $extensionName );
-		$cachedExpansion = $env->extensionCache[$token->dataAttribs->src] ?? null;
+		$cachedExpansion = $env->extensionCache[$token->dataParsoid->src] ?? null;
 
-		$options = $token->getAttribute( 'options' );
+		$options = $token->getAttributeV( 'options' );
 		$token->setAttribute( 'options', self::normalizeExtOptions( $options ) );
 
+		// Call after normalizing extension options, since that can affect the result
+		$dataMw = Utils::getExtArgInfo( $token );
+
 		if ( $nativeExt !== null ) {
-			$extContent = Utils::extractExtBody( $token );
-			$extArgs = $token->getAttribute( 'options' );
+			$extArgs = $token->getAttributeV( 'options' );
 			$extApi = new ParsoidExtensionAPI( $env, [
 				'wt2html' => [
 					'frame' => $this->manager->getFrame(),
@@ -90,23 +99,33 @@ class ExtensionHandler extends TokenHandler {
 				],
 			] );
 			try {
+				$extSrc = $dataMw->body->extsrc ?? '';
+				if ( !( $extConfig['options']['hasWikitextInput'] ?? true ) ) {
+					$extSrc = $this->stripAnnotations( $extSrc, $env->getSiteConfig() );
+				}
 				$domFragment = $nativeExt->sourceToDom(
-					$extApi, $extContent, $extArgs
+					$extApi, $extSrc ?? '', $extArgs
 				);
 				$errors = $extApi->getErrors();
+				if ( $extConfig['options']['wt2html']['customizesDataMw'] ?? false ) {
+					$firstNode = $domFragment->firstChild;
+					DOMUtils::assertElt( $firstNode );
+					$dataMw = DOMDataUtils::getDataMw( $firstNode );
+				}
 			} catch ( ExtensionError $e ) {
 				$domFragment = WTUtils::createInterfaceI18nFragment(
-					$env->topLevelDoc, $e->err['key'], $e->err['params'] ?? null
+					$env->topLevelDoc, $e->err->key, $e->err->params ?: null
 				);
 				$errors = [ $e->err ];
 				// FIXME: Should we include any errors collected
-				// from $extApi->getErrors() here?
+				// from $extApi->getErrors() here?  Also, what's the correct $dataMw
+				// to apply in this case?
 			}
 			if ( $domFragment !== false ) {
 				if ( $domFragment !== null ) {
 					// Turn this document fragment into a token
 					$toks = $this->onDocumentFragment(
-						$nativeExt, $token, $domFragment, $errors
+						$token, $domFragment, $dataMw, $errors
 					);
 					return new TokenHandlerResult( $toks );
 				} else {
@@ -134,24 +153,16 @@ class ExtensionHandler extends TokenHandler {
 			*/
 		} else {
 			$start = microtime( true );
-			$ret = $env->getDataAccess()->parseWikitext(
-				$pageConfig, $env->getMetadata(), $token->getAttribute( 'source' )
-			);
+			$domFragment = PipelineUtils::fetchHTML( $env, $token->getAttributeV( 'source' ) );
 			if ( $env->profiling() ) {
 				$profile = $env->getCurrentProfile();
 				$profile->bumpMWTime( "Extension", 1000 * ( microtime( true ) - $start ), "api" );
 				$profile->bumpCount( "Extension" );
 			}
-
-			$domFragment = DOMUtils::parseHTMLToFragment(
-				$env->topLevelDoc,
-				// Strip a paragraph wrapper, if any, before parsing HTML to DOM
-				preg_replace( '#(^<p>)|(\n</p>(' . Utils::COMMENT_REGEXP_FRAGMENT . '|\s)*$)#D', '', $ret )
-			);
-
-			$toks = $this->onDocumentFragment(
-				$nativeExt, $token, $domFragment, []
-			);
+			if ( !$domFragment ) {
+				$domFragment = DOMUtils::parseHTMLToFragment( $env->topLevelDoc, '' );
+			}
+			$toks = $this->onDocumentFragment( $token, $domFragment, $dataMw, [] );
 		}
 		return new TokenHandlerResult( $toks );
 	}
@@ -159,24 +170,24 @@ class ExtensionHandler extends TokenHandler {
 	/**
 	 * DOMFragment-based encapsulation
 	 *
-	 * @param ?ExtensionTagHandler $nativeExt
 	 * @param Token $extToken
 	 * @param DocumentFragment $domFragment
-	 * @param array $errors
+	 * @param DataMw $dataMw
+	 * @param list<DataMwError> $errors
 	 * @return array
 	 */
 	private function onDocumentFragment(
-		?ExtensionTagHandler $nativeExt, Token $extToken,
-		DocumentFragment $domFragment, array $errors
+		Token $extToken, DocumentFragment $domFragment, DataMw $dataMw,
+		array $errors
 	): array {
 		$env = $this->env;
-		$extensionName = $extToken->getAttribute( 'name' );
+		$extensionName = $extToken->getAttributeV( 'name' );
 
 		if ( $env->hasDumpFlag( 'extoutput' ) ) {
 			$logger = $env->getSiteConfig()->getLogger();
 			$logger->warning( str_repeat( '=', 80 ) );
 			$logger->warning(
-				'EXTENSION INPUT: ' . $extToken->getAttribute( 'source' )
+				'EXTENSION INPUT: ' . $extToken->getAttributeV( 'source' )
 			);
 			$logger->warning( str_repeat( '=', 80 ) );
 			$logger->warning( "EXTENSION OUTPUT:\n" );
@@ -186,20 +197,8 @@ class ExtensionHandler extends TokenHandler {
 			$logger->warning( str_repeat( '-', 80 ) );
 		}
 
-		$argDict = Utils::getExtArgInfo( $extToken )->dict;
-		$extTagOffsets = $extToken->dataAttribs->extTagOffsets;
-		if ( $extTagOffsets->closeWidth === 0 ) {
-			unset( $argDict->body ); // Serialize to self-closing.
-		}
-
-		// Give native extensions a chance to manipulate the argDict
-		if ( $nativeExt ) {
-			$extApi = new ParsoidExtensionAPI( $env );
-			$nativeExt->modifyArgDict( $extApi, $argDict );
-		}
-
 		$opts = [
-			'setDSR' => true, // FIXME: This is the only place that sets this ...
+			'setDSR' => true,
 			'wrapperName' => $extensionName,
 		];
 
@@ -245,8 +244,13 @@ class ExtensionHandler extends TokenHandler {
 
 			if ( count( $errors ) > 0 ) {
 				DOMUtils::addTypeOf( $firstNode, 'mw:Error' );
-				$argDict->errors = $errors;
+				$dataMw->errors = is_array( $dataMw->errors ?? null ) ?
+					array_merge( $dataMw->errors, $errors ) : $errors;
 			}
+
+			// Set data-mw
+			// FIXME: Similar to T214241, we're clobbering $firstNode
+			DOMDataUtils::setDataMw( $firstNode, $dataMw );
 
 			// Add about to all wrapper tokens.
 			$about = $env->newAboutId();
@@ -256,14 +260,10 @@ class ExtensionHandler extends TokenHandler {
 				$n = $n->nextSibling;
 			}
 
-			// Set data-mw
-			// FIXME: Similar to T214241, we're clobbering $firstNode
-			DOMDataUtils::setDataMw( $firstNode, $argDict );
-
 			// Update data-parsoid
 			$dp = DOMDataUtils::getDataParsoid( $firstNode );
-			$dp->tsr = clone $extToken->dataAttribs->tsr;
-			$dp->src = $extToken->dataAttribs->src;
+			$dp->tsr = clone $extToken->dataParsoid->tsr;
+			$dp->src = $extToken->dataParsoid->src;
 			DOMDataUtils::setDataParsoid( $firstNode, $dp );
 		}
 
@@ -277,5 +277,15 @@ class ExtensionHandler extends TokenHandler {
 	 */
 	public function onTag( Token $token ): ?TokenHandlerResult {
 		return $token->getName() === 'extension' ? $this->onExtension( $token ) : null;
+	}
+
+	private function stripAnnotations( string $s, SiteConfig $siteConfig ): string {
+		$annotationStrippers = $siteConfig->getAnnotationStrippers();
+
+		$res = $s;
+		foreach ( $annotationStrippers as $annotationStripper ) {
+			$res = $annotationStripper->stripAnnotations( $s );
+		}
+		return $res;
 	}
 }

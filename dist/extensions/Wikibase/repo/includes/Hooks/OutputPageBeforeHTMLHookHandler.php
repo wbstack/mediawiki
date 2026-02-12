@@ -1,33 +1,34 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Hooks;
 
-use IBufferingStatsdDataFactory;
-use Language;
-use MediaWiki\Hook\OutputPageBeforeHTMLHook;
 use MediaWiki\Http\HttpRequestFactory;
-use MediaWiki\User\UserOptionsLookup;
-use OutputPage;
+use MediaWiki\Language\Language;
+use MediaWiki\Output\Hook\OutputPageBeforeHTMLHook;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\User\Options\UserOptionsLookup;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use RuntimeException;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\DataModel\Term\AliasesProvider;
+use Wikibase\DataModel\Term\LabelsProvider;
 use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\EntityFactory;
 use Wikibase\Lib\LanguageFallbackChainFactory;
-use Wikibase\Lib\LanguageNameLookup;
+use Wikibase\Lib\LanguageNameLookupFactory;
 use Wikibase\Lib\SettingsArray;
-use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\EntityRevisionLookup;
-use Wikibase\Lib\UserLanguageLookup;
 use Wikibase\Repo\BabelUserLanguageLookup;
 use Wikibase\Repo\Content\EntityContentFactory;
 use Wikibase\Repo\Hooks\Helpers\OutputPageEditability;
 use Wikibase\Repo\Hooks\Helpers\OutputPageEntityViewChecker;
 use Wikibase\Repo\Hooks\Helpers\OutputPageRevisionIdReader;
 use Wikibase\Repo\Hooks\Helpers\UserPreferredContentLanguagesLookup;
-use Wikibase\Repo\MediaWikiLanguageDirectionalityLookup;
 use Wikibase\Repo\MediaWikiLocalizedTextProvider;
 use Wikibase\Repo\ParserOutput\PlaceholderExpander\EntityViewPlaceholderExpander;
 use Wikibase\Repo\ParserOutput\PlaceholderExpander\ExternallyRenderedEntityViewPlaceholderExpander;
@@ -36,9 +37,11 @@ use Wikibase\Repo\ParserOutput\PlaceholderExpander\TermboxRequestInspector;
 use Wikibase\Repo\ParserOutput\TermboxFlag;
 use Wikibase\Repo\ParserOutput\TextInjector;
 use Wikibase\Repo\View\RepoSpecialPageLinker;
+use Wikibase\View\LanguageDirectionalityLookup;
 use Wikibase\View\Template\TemplateFactory;
 use Wikibase\View\Termbox\Renderer\TermboxRemoteRenderer;
 use Wikibase\View\ToolbarEditSectionGenerator;
+use Wikimedia\Stats\IBufferingStatsdDataFactory;
 
 /**
  * Handler for the "OutputPageBeforeHTML" hook.
@@ -48,127 +51,59 @@ use Wikibase\View\ToolbarEditSectionGenerator;
  */
 class OutputPageBeforeHTMLHookHandler implements OutputPageBeforeHTMLHook {
 
-	/** @var HttpRequestFactory */
-	private $httpRequestFactory;
-
-	/** @var IBufferingStatsdDataFactory */
-	private $statsDataFactory;
-
-	/** @var SettingsArray */
-	private $repoSettings;
-
-	/**
-	 * @var TemplateFactory
-	 */
-	private $templateFactory;
-
-	/**
-	 * @var UserLanguageLookup
-	 */
-	private $userLanguageLookup;
-
-	/**
-	 * @var ContentLanguages
-	 */
-	private $termsLanguages;
-
-	/**
-	 * @var EntityRevisionLookup
-	 */
-	private $entityRevisionLookup;
-
-	/**
-	 * @var LanguageNameLookup
-	 */
-	private $languageNameLookup;
-
-	/**
-	 * @var OutputPageEntityIdReader
-	 */
-	private $outputPageEntityIdReader;
-
-	/**
-	 * @var EntityFactory
-	 */
-	private $entityFactory;
-
-	/**
-	 * @var string
-	 */
-	private $cookiePrefix;
-
-	/**
-	 * @var OutputPageEditability
-	 */
-	private $editability;
-
-	/**
-	 * @var bool
-	 */
-	private $isExternallyRendered;
-
-	/**
-	 * @var UserPreferredContentLanguagesLookup
-	 */
-	private $userPreferredTermsLanguages;
-
-	/**
-	 * @var OutputPageEntityViewChecker
-	 */
-	private $entityViewChecker;
-
-	/** @var LanguageFallbackChainFactory */
-	private $languageFallbackChainFactory;
-
-	/** @var UserOptionsLookup */
-	private $userOptionsLookup;
-
-	/** @var LoggerInterface */
-	private $logger;
+	private HttpRequestFactory $httpRequestFactory;
+	private IBufferingStatsdDataFactory $statsDataFactory;
+	private SettingsArray $repoSettings;
+	private TemplateFactory $templateFactory;
+	private EntityRevisionLookup $entityRevisionLookup;
+	private LanguageNameLookupFactory $languageNameLookupFactory;
+	private OutputPageEntityIdReader $outputPageEntityIdReader;
+	private EntityFactory $entityFactory;
+	private OutputPageEditability $editability;
+	private bool $isExternallyRendered;
+	private UserPreferredContentLanguagesLookup $userPreferredTermsLanguages;
+	private OutputPageEntityViewChecker $entityViewChecker;
+	private LanguageFallbackChainFactory $languageFallbackChainFactory;
+	private LanguageDirectionalityLookup $languageDirectionalityLookup;
+	private UserOptionsLookup $userOptionsLookup;
+	private LoggerInterface $logger;
 
 	public function __construct(
 		HttpRequestFactory $httpRequestFactory,
 		IBufferingStatsdDataFactory $statsdDataFactory,
 		SettingsArray $repoSettings,
 		TemplateFactory $templateFactory,
-		UserLanguageLookup $userLanguageLookup,
-		ContentLanguages $termsLanguages,
 		EntityRevisionLookup $entityRevisionLookup,
-		LanguageNameLookup $languageNameLookup,
+		LanguageNameLookupFactory $languageNameLookupFactory,
 		OutputPageEntityIdReader $outputPageEntityIdReader,
 		EntityFactory $entityFactory,
-		$cookiePrefix,
 		OutputPageEditability $editability,
 		$isExternallyRendered,
 		UserPreferredContentLanguagesLookup $userPreferredTermsLanguages,
 		OutputPageEntityViewChecker $entityViewChecker,
 		LanguageFallbackChainFactory $languageFallbackChainFactory,
 		UserOptionsLookup $userOptionsLookup,
-		LoggerInterface $logger = null
+		LanguageDirectionalityLookup $languageDirectionalityLookup,
+		?LoggerInterface $logger = null
 	) {
 		$this->httpRequestFactory = $httpRequestFactory;
 		$this->statsDataFactory = $statsdDataFactory;
 		$this->repoSettings = $repoSettings;
 		$this->templateFactory = $templateFactory;
-		$this->userLanguageLookup = $userLanguageLookup;
-		$this->termsLanguages = $termsLanguages;
 		$this->entityRevisionLookup = $entityRevisionLookup;
-		$this->languageNameLookup = $languageNameLookup;
+		$this->languageNameLookupFactory = $languageNameLookupFactory;
 		$this->outputPageEntityIdReader = $outputPageEntityIdReader;
 		$this->entityFactory = $entityFactory;
-		$this->cookiePrefix = $cookiePrefix;
 		$this->isExternallyRendered = $isExternallyRendered;
 		$this->editability = $editability;
 		$this->userPreferredTermsLanguages = $userPreferredTermsLanguages;
 		$this->entityViewChecker = $entityViewChecker;
 		$this->languageFallbackChainFactory = $languageFallbackChainFactory;
 		$this->userOptionsLookup = $userOptionsLookup;
+		$this->languageDirectionalityLookup = $languageDirectionalityLookup;
 		$this->logger = $logger ?: new NullLogger();
 	}
 
-	/**
-	 * @return self
-	 */
 	public static function factory(
 		Language $contentLanguage,
 		HttpRequestFactory $httpRequestFactory,
@@ -178,14 +113,13 @@ class OutputPageBeforeHTMLHookHandler implements OutputPageBeforeHTMLHook {
 		EntityFactory $entityFactory,
 		EntityIdParser $entityIdParser,
 		EntityRevisionLookup $entityRevisionLookup,
+		LanguageDirectionalityLookup $languageDirectionalityLookup,
 		LanguageFallbackChainFactory $languageFallbackChainFactory,
+		LanguageNameLookupFactory $languageNameLookupFactory,
 		LoggerInterface $logger,
 		SettingsArray $settings,
 		ContentLanguages $termsLanguages
 	): self {
-		global $wgLang, $wgCookiePrefix;
-
-		$babelUserLanguageLookup = new BabelUserLanguageLookup();
 		$entityViewChecker = new OutputPageEntityViewChecker( $entityContentFactory );
 
 		return new self(
@@ -193,27 +127,24 @@ class OutputPageBeforeHTMLHookHandler implements OutputPageBeforeHTMLHook {
 			$statsdDataFactory,
 			$settings,
 			TemplateFactory::getDefaultInstance(),
-			$babelUserLanguageLookup,
-			$termsLanguages,
 			$entityRevisionLookup,
-			new LanguageNameLookup( $wgLang->getCode() ),
+			$languageNameLookupFactory,
 			new OutputPageEntityIdReader(
 				$entityViewChecker,
 				$entityIdParser
 			),
 			$entityFactory,
-			// @phan-suppress-next-line PhanPossiblyUndeclaredVariable
-			$wgCookiePrefix,
 			new OutputPageEditability(),
 			TermboxFlag::getInstance()->shouldRenderTermbox(),
 			new UserPreferredContentLanguagesLookup(
 				$termsLanguages,
-				$babelUserLanguageLookup,
+				new BabelUserLanguageLookup(),
 				$contentLanguage->getCode()
 			),
 			$entityViewChecker,
 			$languageFallbackChainFactory,
 			$userOptionsLookup,
+			$languageDirectionalityLookup,
 			$logger
 		);
 	}
@@ -232,17 +163,10 @@ class OutputPageBeforeHTMLHookHandler implements OutputPageBeforeHTMLHook {
 		}
 
 		$html = $this->replacePlaceholders( $out, $html );
-		$this->addJsUserLanguages( $out );
 		$html = $this->showOrHideEditLinks( $out, $html );
 	}
 
-	/**
-	 * @param OutputPage $out
-	 * @param string $html
-	 *
-	 * @return string
-	 */
-	private function replacePlaceholders( OutputPage $out, $html ) {
+	private function replacePlaceholders( OutputPage $out, string $html ): string {
 		$placeholders = $out->getProperty( 'wikibase-view-chunks' );
 		if ( !$placeholders ) {
 			return $html;
@@ -261,47 +185,31 @@ class OutputPageBeforeHTMLHookHandler implements OutputPageBeforeHTMLHook {
 		return $injector->inject( $html, $getHtmlCallback );
 	}
 
-	private function addJsUserLanguages( OutputPage $out ) {
-		$out->addJsConfigVars(
-			'wbUserSpecifiedLanguages',
-			// All user-specified languages, that are valid term languages
-			// Reindex the keys so that JavaScript still works if an unknown
-			// language code in the babel box causes an index to miss
-			array_values( array_intersect(
-				$this->userLanguageLookup->getUserSpecifiedLanguages( $out->getUser() ),
-				$this->termsLanguages->getLanguages()
-			) )
-		);
-	}
-
-	/**
-	 * @param OutputPage $out
-	 *
-	 * @return EntityDocument|null
-	 */
-	private function getEntity( OutputPage $out ) {
+	private function getEntity( OutputPage $out ): ?EntityDocument {
 		$entityId = $this->getEntityId( $out );
 
 		if ( !$entityId ) {
 			return null;
 		}
 
-		if ( $this->needsRealEntity( $out ) ) {
-			// The parser cache content is too old to contain the terms list items
-			// Pass the correct entity to generate terms list items on the fly
-			$entityRev = $this->entityRevisionLookup->getEntityRevision( $entityId, $out->getRevisionId() );
-			if ( !( $entityRev instanceof EntityRevision ) ) {
-				return null;
-			}
+		// Previously, this would sometimes load the entity from the EntityRevisionLookup.
+		// However, this is currently not needed: the parser cache content has all the term list items,
+		// so we can just use a blank entity to render the remaining "no terms" rows,
+		// optionally hydrated with labels, also from the parser cache, in order to render label placeholder fallbacks.
 
-			return $entityRev->getEntity();
+		$entity = $this->entityFactory->newEmpty( $entityId->getEntityType() );
+
+		if ( $entity instanceof LabelsProvider ) {
+			$labelsTermList = $entity->getLabels();
+			$entityLabels = $out->getProperty( 'wikibase-entity-labels' ) ?: [];
+			if ( $labelsTermList->isEmpty() && count( $entityLabels ) > 0 ) {
+				foreach ( $entityLabels as $languageCode => $label ) {
+					$labelsTermList->setTextForLanguage( $languageCode, $label );
+				}
+			}
 		}
 
-		return $this->entityFactory->newEmpty( $entityId->getEntityType() );
-	}
-
-	private function needsRealEntity( OutputPage $out ) {
-		return !$this->isExternallyRendered && !$this->getEntityTermsListHtml( $out );
+		return $entity;
 	}
 
 	private function getPlaceholderExpander(
@@ -316,34 +224,72 @@ class OutputPageBeforeHTMLHookHandler implements OutputPageBeforeHTMLHook {
 			);
 	}
 
-	/**
-	 * @param EntityDocument $entity
-	 * @param OutputPage $out
-	 *
-	 * @return EntityViewPlaceholderExpander
-	 */
 	private function getLocallyRenderedEntityViewPlaceholderExpander(
 		EntityDocument $entity,
 		OutputPage $out
-	) {
+	): EntityViewPlaceholderExpander {
 		$language = $out->getLanguage();
 		$user = $out->getUser();
+		$entityTermsListHtml = $this->getEntityTermsListHtml( $out );
 
 		return new EntityViewPlaceholderExpander(
 			$this->templateFactory,
 			$user,
 			$entity,
-			$this->userPreferredTermsLanguages->getLanguages( $language->getCode(), $user ),
-			new MediaWikiLanguageDirectionalityLookup(),
-			$this->languageNameLookup,
+			$this->getTermsLanguages(
+				$this->userPreferredTermsLanguages->getLanguages( $language->getCode(), $user ),
+				$entity,
+				$entityTermsListHtml
+			),
+			$this->languageDirectionalityLookup,
+			$this->languageNameLookupFactory->getForLanguage( $language ),
 			new MediaWikiLocalizedTextProvider( $language ),
 			$this->userOptionsLookup,
-			$this->cookiePrefix,
-			$this->getEntityTermsListHtml( $out ) ?: []
+			$this->languageFallbackChainFactory,
+			$this->repoSettings->getSetting( 'tmpEnableMulLanguageCode' ),
+			$entityTermsListHtml
 		);
 	}
 
-	private function getExternallyRenderedEntityViewPlaceholderExpander( OutputPage $out ) {
+	/**
+	 * Get the term languages to use for the current user and entity.
+	 */
+	private function getTermsLanguages(
+		array $userPreferredTermsLanguages,
+		EntityDocument $entity,
+		array $entityTermsListHtml
+	): array {
+		// The user already has "mul" in their preferred languages, nothing to do
+		if ( in_array( 'mul', $userPreferredTermsLanguages ) ) {
+			return $userPreferredTermsLanguages;
+		}
+
+		if (
+			$this->repoSettings->getSetting( 'tmpEnableMulLanguageCode' )
+			&& $this->repoSettings->getSetting( 'tmpAlwaysShowMulLanguageCode' )
+		) {
+			return array_merge( $userPreferredTermsLanguages, [ 'mul' ] );
+		}
+
+		// Check both the html snippets and the (possibly empty) entity for a "mul" term.
+		$hasMulTerm = isset( $entityTermsListHtml['mul'] );
+		if ( $entity instanceof LabelsProvider ) {
+			$hasMulTerm = $hasMulTerm || $entity->getLabels()->hasTermForLanguage( 'mul' );
+		}
+		if ( $entity instanceof AliasesProvider ) {
+			$hasMulTerm = $hasMulTerm || $entity->getAliasGroups()->hasGroupForLanguage( 'mul' );
+		}
+
+		if ( $hasMulTerm ) {
+			// There is a "mul" term present, show as last entry in the term box.
+			return array_merge( $userPreferredTermsLanguages, [ 'mul' ] );
+		}
+		return $userPreferredTermsLanguages;
+	}
+
+	private function getExternallyRenderedEntityViewPlaceholderExpander(
+		OutputPage $out
+	): ExternallyRenderedEntityViewPlaceholderExpander {
 		return new ExternallyRenderedEntityViewPlaceholderExpander(
 			$out,
 			new TermboxRequestInspector( $this->languageFallbackChainFactory ),
@@ -362,23 +308,29 @@ class OutputPageBeforeHTMLHookHandler implements OutputPageBeforeHTMLHook {
 		);
 	}
 
-	private function getEntityTermsListHtml( OutputPage $out ) {
-		return $out->getProperty( 'wikibase-terms-list-items' );
+	private function getEntityTermsListHtml( OutputPage $out ): array {
+		$items = $out->getProperty( 'wikibase-terms-list-items' );
+		if ( is_array( $items ) ) {
+			return $items;
+		} elseif ( $items === null ) {
+			throw new RuntimeException(
+				'OutputPage missing wikibase-terms-list-items: ' . $out->getTitle()->getPrefixedText()
+			);
+		} else {
+			throw new RuntimeException(
+				'Unexpected type ' . get_debug_type( $items ) . ' for wikibase-terms-list-items: ' . $out->getTitle()->getPrefixedText()
+			);
+		}
 	}
 
-	private function showOrHideEditLinks( OutputPage $out, $html ) {
+	private function showOrHideEditLinks( OutputPage $out, string $html ): string {
 		return ToolbarEditSectionGenerator::enableSectionEditLinks(
 			$html,
 			$this->editability->validate( $out )
 		);
 	}
 
-	/**
-	 * @param OutputPage $out
-	 *
-	 * @return EntityId|null
-	 */
-	private function getEntityId( OutputPage $out ) {
+	private function getEntityId( OutputPage $out ): ?EntityId {
 		return $this->outputPageEntityIdReader->getEntityIdFromOutputPage( $out );
 	}
 

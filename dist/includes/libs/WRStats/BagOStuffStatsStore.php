@@ -2,7 +2,7 @@
 
 namespace Wikimedia\WRStats;
 
-use BagOStuff;
+use Wikimedia\ObjectCache\BagOStuff;
 
 /**
  * An adaptor allowing WRStats to store data in MediaWiki's BagOStuff
@@ -21,6 +21,10 @@ class BagOStuffStatsStore implements StatsStore {
 		$this->cache = $cache;
 	}
 
+	/**
+	 * @inheritDoc
+	 * @suppress PhanParamTooFewUnpack
+	 */
 	public function makeKey( $prefix, $internals, $entity ) {
 		if ( $entity->isGlobal() ) {
 			return $this->cache->makeGlobalKey(

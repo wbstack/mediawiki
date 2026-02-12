@@ -7,14 +7,15 @@ use CirrusSearch\Parser\AST\KeywordFeatureNode;
 use CirrusSearch\Query\Builder\QueryBuildingContext;
 use CirrusSearch\Search\SearchContext;
 use CirrusSearch\SearchConfig;
+use CirrusSearch\Util;
 use CirrusSearch\WarningCollector;
-use Config;
 use Elastica\Query\AbstractQuery;
+use MediaWiki\Config\Config;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Sparql\SparqlClient;
 use MediaWiki\Sparql\SparqlException;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * Filters by category or its subcategories. E.g. if category Vehicles includes Cars
@@ -53,24 +54,16 @@ class DeepcatFeature extends SimpleKeywordFeature implements FilterQueryFeature 
 	 * TODO: make configurable?
 	 */
 	public const TIMEOUT = 3;
-	/**
-	 * Stats key for SPARQL requests
-	 */
-	private const STATSD_SPARQL_KEY = 'CirrusSearch.deepcat.sparql';
-	/**
-	 * Stats key for reporting too many categories
-	 */
-	private const STATSD_TOOMANY_KEY = 'CirrusSearch.deepcat.toomany';
 
 	/**
 	 * @param Config $config
 	 * @param SparqlClient|null $client
 	 */
-	public function __construct( Config $config, SparqlClient $client = null ) {
+	public function __construct( Config $config, ?SparqlClient $client = null ) {
 		$this->depth = (int)$config->get( 'CirrusSearchCategoryDepth' );
 		$this->limit = (int)$config->get( 'CirrusSearchCategoryMax' );
 		$endpoint = $config->get( 'CirrusSearchCategoryEndpoint' );
-		if ( !empty( $endpoint ) ) {
+		if ( $endpoint !== null && $endpoint !== '' ) {
 			$this->client = $client ?: MediaWikiServices::getInstance()->getService( 'CirrusCategoriesClient' );
 		}
 	}
@@ -140,7 +133,7 @@ class DeepcatFeature extends SimpleKeywordFeature implements FilterQueryFeature 
 	 * @return array
 	 */
 	private function doExpand( $value, WarningCollector $warningCollector ) {
-		if ( empty( $this->client ) ) {
+		if ( !$this->client ) {
 			$warningCollector->addWarning( 'cirrussearch-feature-deepcat-endpoint' );
 			return [];
 		}
@@ -150,13 +143,25 @@ class DeepcatFeature extends SimpleKeywordFeature implements FilterQueryFeature 
 			$categories = $this->fetchCategories( $value, $warningCollector );
 		} catch ( SparqlException $e ) {
 			// Not publishing exception here because it can contain too many details including IPs, etc.
-			$warningCollector->addWarning( 'cirrussearch-feature-deepcat-exception' );
+			$warningCollector->addWarning( $this->decideUiWarning( $e ) );
 			LoggerFactory::getInstance( 'CirrusSearch' )
 				->warning( 'Deepcat SPARQL Exception: ' . $e->getMessage() );
 			$categories = [ $value ];
 		}
 		$this->logRequest( $startQueryTime );
 		return $categories;
+	}
+
+	private function decideUiWarning( SparqlException $e ): string {
+		$message = $e->getMessage();
+		// This could alternatively be a 500 error if blazegraph timed out
+		// prior to the http client timing out, but that doesn't happen due
+		// to http and blazegraph timeouts being set to the same value.
+		if ( strpos( $message, 'HTTP request timed out.' ) !== false ) {
+			return 'cirrussearch-feature-deepcat-timeout';
+		} else {
+			return 'cirrussearch-feature-deepcat-exception';
+		}
 	}
 
 	/**
@@ -178,9 +183,10 @@ class DeepcatFeature extends SimpleKeywordFeature implements FilterQueryFeature 
 	 */
 	private function logRequest( $startQueryTime ) {
 		$timeTaken = intval( 1000 * ( microtime( true ) - $startQueryTime ) );
-		MediaWikiServices::getInstance()->getStatsdDataFactory()->timing(
-			self::STATSD_SPARQL_KEY, $timeTaken
-		);
+		Util::getStatsFactory()
+			->getTiming( 'deepcat_sparql_query_seconds' )
+			->copyToStatsdAt( 'CirrusSearch.deepcat.sparql' )
+			->observe( $timeTaken );
 	}
 
 	/**
@@ -192,7 +198,6 @@ class DeepcatFeature extends SimpleKeywordFeature implements FilterQueryFeature 
 	 * @throws SparqlException
 	 */
 	private function fetchCategories( $rootCategory, WarningCollector $warningCollector ) {
-		/** @var SparqlClient $client */
 		$title = Title::makeTitleSafe( NS_CATEGORY, $rootCategory );
 		if ( $title === null ) {
 			$warningCollector->addWarning( 'cirrussearch-feature-deepcat-invalid-title' );
@@ -216,9 +221,10 @@ SPARQL;
 			// We went over the limit.
 			// According to T181549 this means we fail the filter application
 			$warningCollector->addWarning( 'cirrussearch-feature-deepcat-toomany' );
-			MediaWikiServices::getInstance()
-				->getStatsdDataFactory()
-				->increment( self::STATSD_TOOMANY_KEY );
+			Util::getStatsFactory()
+				->getCounter( 'deepcat_too_many_total' )
+				->copyToStatsdAt( 'CirrusSearch.deepcat.toomany' )
+				->increment();
 			return [];
 		}
 

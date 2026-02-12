@@ -14,7 +14,7 @@ class MiddlewareHandler {
 	/**
 	 * @var Middleware[]
 	 */
-	private $middlewares;
+	private array $middlewares;
 
 	public function __construct( array $middlewares ) {
 		Assert::parameter(
@@ -29,9 +29,7 @@ class MiddlewareHandler {
 		return $this->callMiddlewaresRecursively(
 			$this->middlewares,
 			$routeHandler,
-			function() use ( $runRoute, $args ) {
-				return $runRoute( ...$args );
-			}
+			fn() => $runRoute( ...$args )
 		);
 	}
 
@@ -43,11 +41,9 @@ class MiddlewareHandler {
 		$currentMiddleware = array_shift( $remainingMiddlewares );
 
 		// Each middleware runs the next one. The last one runs $runRouteWithArgs.
-		$runNext = empty( $remainingMiddlewares ) ?
+		$runNext = !$remainingMiddlewares ?
 			$runRouteWithArgs :
-			function() use ( $remainingMiddlewares, $routeHandler, $runRouteWithArgs ) {
-				return $this->callMiddlewaresRecursively( $remainingMiddlewares, $routeHandler, $runRouteWithArgs );
-			};
+			fn() => $this->callMiddlewaresRecursively( $remainingMiddlewares, $routeHandler, $runRouteWithArgs );
 
 		return $currentMiddleware->run( $routeHandler, $runNext );
 	}

@@ -1,7 +1,5 @@
 <?php
 /**
- * Debug toolbar related code.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -20,18 +18,32 @@
  * @file
  */
 
+namespace MediaWiki\Debug;
+
+use LogicException;
+use MediaWiki\Api\ApiResult;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Html\Html;
 use MediaWiki\Logger\LegacyLogger;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Parser\Sanitizer;
 use MediaWiki\ResourceLoader\ResourceLoader;
+use MediaWiki\Utils\GitInfo;
+use ReflectionMethod;
+use UtfNormal;
 use Wikimedia\WrappedString;
 use Wikimedia\WrappedStringList;
 
 /**
- * New debugger system that outputs a toolbar on page view.
+ * Debug toolbar.
  *
- * By default, most methods do nothing ( self::$enabled = false ). You have
- * to explicitly call MWDebug::init() to enabled them.
+ * By default most of these methods do nothing, as enforced by self::$enabled = false.
+ *
+ * To enable the debug toolbar, use $wgDebugToolbar = true in LocalSettings.php.
+ * That ensures MWDebug::init() is called from Setup.php.
  *
  * @since 1.19
+ * @ingroup Debug
  */
 class MWDebug {
 	/**
@@ -80,7 +92,7 @@ class MWDebug {
 	 */
 	public static function setup() {
 		global $wgDebugToolbar,
-			$wgUseCdn, $wgUseFileCache, $wgCommandLineMode;
+			$wgUseCdn, $wgUseFileCache;
 
 		if (
 			// Easy to forget to falsify $wgDebugToolbar for static caches.
@@ -89,7 +101,7 @@ class MWDebug {
 			$wgUseFileCache ||
 			// Keep MWDebug off on CLI. This prevents MWDebug from eating up
 			// all the memory for logging SQL queries in maintenance scripts.
-			$wgCommandLineMode
+			MW_ENTRY_POINT === 'cli'
 		) {
 			return;
 		}
@@ -197,14 +209,6 @@ class MWDebug {
 			self::formatCallerDescription( $msg, $callerDescription ),
 			'warning',
 			$level );
-
-		if ( self::$enabled ) {
-			self::$log[] = [
-				'msg' => htmlspecialchars( $msg ),
-				'type' => 'warn',
-				'caller' => $callerDescription['func'],
-			];
-		}
 	}
 
 	/**
@@ -288,7 +292,7 @@ class MWDebug {
 	 * - Debug toolbar, with one item per function and caller, if $wgDebugToolbar
 	 *   is set to true.
 	 * - PHP's error log, with level E_USER_DEPRECATED, if $wgDevelopmentWarnings
-	 *   is set to true. This is the case in phpunit tests per default, and will
+	 *   is set to true. This is the case in phpunit tests by default, and will
 	 *   cause tests to fail.
 	 * - MediaWiki's debug log, if $wgDevelopmentWarnings is set to false.
 	 *
@@ -380,19 +384,6 @@ class MWDebug {
 		if ( $sendToLog ) {
 			trigger_error( $msg, E_USER_DEPRECATED );
 		}
-
-		if ( self::$enabled ) {
-			$logMsg = htmlspecialchars( $msg ) .
-				Html::rawElement( 'div', [ 'class' => 'mw-debug-backtrace' ],
-					Html::element( 'span', [], 'Backtrace:' ) . wfBacktrace()
-				);
-
-			self::$log[] = [
-				'msg' => $logMsg,
-				'type' => 'deprecated',
-				'caller' => $callerFunc,
-			];
-		}
 	}
 
 	/**
@@ -406,7 +397,7 @@ class MWDebug {
 		string $regex, ?callable $callback = null
 	): void {
 		if ( !defined( 'MW_PHPUNIT_TEST' ) && !defined( 'MW_PARSER_TEST' ) ) {
-			throw new RuntimeException( __METHOD__ . ' can only be used in tests' );
+			throw new LogicException( __METHOD__ . ' can only be used in tests' );
 		}
 		self::$deprecationFilters[$regex] = $callback;
 	}
@@ -511,9 +502,11 @@ class MWDebug {
 	}
 
 	/**
-	 * This is a method to pass messages from wfDebug to the pretty debugger.
-	 * Do NOT use this method, use MWDebug::log or wfDebug()
+	 * This method receives messages from LoggerFactory, wfDebugLog, and MWExceptionHandler.
 	 *
+	 * Do NOT call this method directly.
+	 *
+	 * @internal For use by MWExceptionHandler and LegacyLogger only
 	 * @since 1.19
 	 * @param string $str
 	 * @param array $context
@@ -535,7 +528,40 @@ class MWDebug {
 				$str = LegacyLogger::interpolate( $str, $context );
 				$str = $prefix . $str;
 			}
-			self::$debug[] = rtrim( UtfNormal\Validator::cleanUp( $str ) );
+			$str = rtrim( UtfNormal\Validator::cleanUp( $str ) );
+			self::$debug[] = $str;
+			if ( isset( $context['channel'] ) && $context['channel'] === 'error' ) {
+				$message = isset( $context['exception'] )
+					? $context['exception']->getMessage()
+					: $str;
+				$real = self::parseCallerDescription( $message );
+				if ( $real ) {
+					// from wfLogWarning()
+					$message = $real['message'];
+					$caller = $real['func'];
+				} else {
+					$trace = isset( $context['exception'] ) ? $context['exception']->getTrace() : [];
+					if ( ( $trace[5]['function'] ?? null ) === 'wfDeprecated' ) {
+						// from MWExceptionHandler/trigger_error/MWDebug/MWDebug/MWDebug/wfDeprecated()
+						$offset = 6;
+					} elseif ( ( $trace[1]['function'] ?? null ) === 'trigger_error' ) {
+						// from trigger_error
+						$offset = 2;
+					} else {
+						// built-in PHP error
+						$offset = 1;
+					}
+					$frame = $trace[$offset] ?? $trace[0];
+					$caller = ( isset( $frame['class'] ) ? $frame['class'] . '::' : '' )
+						. $frame['function'];
+				}
+
+				self::$log[] = [
+					'msg' => htmlspecialchars( $message ),
+					'type' => 'warn',
+					'caller' => $caller,
+				];
+			}
 		}
 	}
 
@@ -598,7 +624,14 @@ class MWDebug {
 		$files = get_included_files();
 		$fileList = [];
 		foreach ( $files as $file ) {
-			$size = filesize( $file );
+			// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+			$size = @filesize( $file );
+			if ( $size === false ) {
+				// Certain files that have been included might then be deleted. This is especially likely to happen
+				// in tests, see T351986.
+				// Just use a size of 0, but include these files here to try and be as useful as possible.
+				$size = 0;
+			}
 			$fileList[] = [
 				'name' => $file,
 				'size' => $context->getLanguage()->formatSize( $size ),
@@ -627,8 +660,7 @@ class MWDebug {
 			// Cannot use OutputPage::addJsConfigVars because those are already outputted
 			// by the time this method is called.
 			$html[] = ResourceLoader::makeInlineScript(
-				ResourceLoader::makeConfigSetScript( [ 'debugInfo' => $debugInfo ] ),
-				$context->getOutput()->getCSP()->getNonce()
+				ResourceLoader::makeConfigSetScript( [ 'debugInfo' => $debugInfo ] )
 			);
 		}
 
@@ -748,3 +780,6 @@ class MWDebug {
 		];
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( MWDebug::class, 'MWDebug' );

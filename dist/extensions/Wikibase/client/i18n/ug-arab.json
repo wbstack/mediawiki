@@ -4,7 +4,8 @@
 			"AlimOmar",
 			"Sahran",
 			"TayfunEt.",
-			"Uzdil"
+			"Uzdil",
+			"Zolgoyo"
 		]
 	},
 	"tooltip-t-wikibase": "ئۇلىنىشنىڭ سانلىق ئۇچۇر ساقلاش ئامبىرى تۈرىنى كۆرۈش",
@@ -12,11 +13,15 @@
 	"wikibase-dataitem": "{{WBREPONAME}} تۈرى",
 	"wikibase-editlinks": "ئۇلىنىش تەھرىرلەش",
 	"wikibase-editlinkstitle": "تىل ھالقىغان ئۇلىنىشنى تەھرىرلەش",
+	"wikibase-addlinkstitle": "تىل ھالقىغان ئۇلانما قوش",
 	"wikibase-linkitem-addlinks": "ئۇلانما قوش",
+	"wikibase-linkitem-title": "بەتكە باغلاش",
+	"wikibase-linkitem-linkpage": "بەتكە باغلاش",
+	"wikibase-linkitem-selectlink": "بۇ بەتكە باغلىنىدىغان تور بېكەت ۋە بەتنى تاللاڭ.",
 	"wikibase-linkitem-input-site": "تىل:",
 	"wikibase-linkitem-input-page": "بەت:",
 	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
-	"wikibase-rc-hide-wikidata-hide": "يوشۇرۇش",
+	"wikibase-rc-hide-wikidata-hide": "يوشۇر",
 	"wikibase-rc-hide-wikidata-show": "كۆرسەت",
 	"wikibase-rc-wikibase-edit-letter": "سان",
 	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} تەھرىرلەش",

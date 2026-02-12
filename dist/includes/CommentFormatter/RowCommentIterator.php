@@ -3,9 +3,9 @@
 namespace MediaWiki\CommentFormatter;
 
 use ArrayIterator;
-use CommentStore;
 use IteratorIterator;
-use TitleValue;
+use MediaWiki\CommentStore\CommentStore;
+use MediaWiki\Title\TitleValue;
 use Traversable;
 
 /**

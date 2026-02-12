@@ -2,9 +2,15 @@
 // phpcs:disable Generic.Files.LineLength -- Long html test examples
 // @phan-file-suppress PhanUndeclaredClassMethod, PhanUndeclaredClassConstant Other extensions used for testing purposes
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Content\WikitextContent;
+use MediaWiki\Extension\Notifications\Model\Event;
+use MediaWiki\Maintenance\Maintenance;
+use MediaWiki\Registration\ExtensionRegistry;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
+use Wikimedia\Rdbms\IDBAccessObject;
 
 $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
@@ -213,9 +219,9 @@ class GenerateSampleNotifications extends Maintenance {
 	}
 
 	private function addToPageContent( Title $title, User $agent, $contentText ) {
-		$page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
+		$page = $this->getServiceContainer()->getWikiPageFactory()->newFromTitle( $title );
 		$previousContent = "";
-		$page->loadPageData( WikiPage::READ_LATEST );
+		$page->loadPageData( IDBAccessObject::READ_LATEST );
 		$revision = $page->getRevisionRecord();
 		if ( $revision ) {
 			$content = $revision->getContent( SlotRecord::MAIN, RevisionRecord::FOR_PUBLIC );
@@ -266,7 +272,7 @@ class GenerateSampleNotifications extends Maintenance {
 	}
 
 	private function generateReverted( User $user, User $agent ) {
-		$services = MediaWikiServices::getInstance();
+		$services = $this->getServiceContainer();
 		$services->getUserGroupManager()->addUserToGroup( $agent, 'sysop' );
 
 		// revert (undo)
@@ -302,16 +308,20 @@ class GenerateSampleNotifications extends Maintenance {
 			$undoContent,
 			$undoContent,
 			$previousContent,
-			true // undoIsLatest
+			// undoIsLatest
+			true
 		);
 
 		$status = $page->doUserEditContent(
 			$content,
 			$agent,
 			'undo',
-			0, // $flags
-			false, // $originalRevId
-			[], // $tags
+			// $flags
+			0,
+			// $originalRevId
+			false,
+			// $tags
+			[],
 			$undoRev->getId()
 		);
 
@@ -322,7 +332,7 @@ class GenerateSampleNotifications extends Maintenance {
 
 	private function generateWelcome( User $user ) {
 		$this->output( "Welcoming {$user->getName()}\n" );
-		EchoEvent::create( [
+		Event::create( [
 			'type' => 'welcome',
 			'agent' => $user,
 			'timestamp' => $this->getTimestamp(),
@@ -332,7 +342,7 @@ class GenerateSampleNotifications extends Maintenance {
 	private function generateEmail( User $user, User $agent ) {
 		$output = $this->addTimestampToOutput( "{$agent->getName()} is emailing {$user->getName()}" );
 		$this->output( "$output\n" );
-		EchoEvent::create( [
+		Event::create( [
 			'type' => 'emailuser',
 			'extra' => [
 				'to-user-id' => $user->getId(),
@@ -352,7 +362,7 @@ class GenerateSampleNotifications extends Maintenance {
 	}
 
 	private function createUserRightsNotification( User $user, User $agent, $add, $remove ) {
-		EchoEvent::create(
+		Event::create(
 			[
 				'type' => 'user-rights',
 				'extra' => [
@@ -374,7 +384,7 @@ class GenerateSampleNotifications extends Maintenance {
 
 		$this->output( "Generating CX notifications\n" );
 		foreach ( [ 'cx-first-translation', 'cx-tenth-translation', 'cx-hundredth-translation' ] as $eventType ) {
-			EchoEvent::create(
+			Event::create(
 				[
 					'type' => $eventType,
 					'extra' => [
@@ -385,7 +395,7 @@ class GenerateSampleNotifications extends Maintenance {
 			);
 		}
 
-		EchoEvent::create(
+		Event::create(
 			[
 				'type' => 'cx-suggestions-available',
 				'extra' => [
@@ -428,7 +438,7 @@ class GenerateSampleNotifications extends Maintenance {
 		$this->output( "Generating OpenStackManager notifications\n" );
 
 		foreach ( [ 'build-completed', 'reboot-completed', 'deleted' ] as $action ) {
-			EchoEvent::create( [
+			Event::create( [
 				'type' => "osm-instance-$action",
 				'title' => Title::newFromText( "Moai" ),
 				'agent' => $user,
@@ -441,7 +451,7 @@ class GenerateSampleNotifications extends Maintenance {
 			] );
 		}
 
-		EchoEvent::create( [
+		Event::create( [
 			'type' => 'osm-projectmembers-add',
 			'title' => Title::newFromText( "Moai" ),
 			'agent' => $agent,
@@ -466,7 +476,7 @@ class GenerateSampleNotifications extends Maintenance {
 		// make an edit, thank it once
 		$title = $this->generateNewPageTitle();
 		$revisionRecord = $this->addToPageContent( $title, $user, "an awesome edit! ~~~~" );
-		EchoEvent::create( [
+		Event::create( [
 			'type' => 'edit-thank',
 			'title' => $title,
 			'extra' => [
@@ -488,7 +498,7 @@ class GenerateSampleNotifications extends Maintenance {
 		// make an edit, thank it twice
 		$title = $this->generateNewPageTitle();
 		$revisionRecord = $this->addToPageContent( $title, $user, "an even better edit! ~~~~" );
-		EchoEvent::create( [
+		Event::create( [
 			'type' => 'edit-thank',
 			'title' => $title,
 			'extra' => [
@@ -499,7 +509,7 @@ class GenerateSampleNotifications extends Maintenance {
 			'agent' => $agent,
 			'timestamp' => $this->getTimestamp(),
 		] );
-		EchoEvent::create( [
+		Event::create( [
 			'type' => 'edit-thank',
 			'title' => $title,
 			'extra' => [
@@ -564,7 +574,7 @@ class GenerateSampleNotifications extends Maintenance {
 
 		$output = $this->addTimestampToOutput( "{$agent->getName()} is connecting {$user->getName()}'s page {$title->getPrefixedText()} to an item" );
 		$this->output( "$output\n" );
-		EchoEvent::create( [
+		Event::create( [
 			'type' => EchoNotificationsHandlers::NOTIFICATION_TYPE,
 			'title' => $title,
 			'extra' => [

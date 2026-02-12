@@ -18,7 +18,15 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use Exception;
+use InvalidArgumentException;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Message\Message;
+use RuntimeException;
+use stdClass;
+use UnexpectedValueException;
 
 /**
  * This class represents the result of the API operations.
@@ -142,8 +150,12 @@ class ApiResult implements ApiSerializable {
 	 */
 	public const META_BC_SUBELEMENTS = '_BC_subelements';
 
-	private $data, $size, $maxSize;
-	private $errorFormatter;
+	/** @var mixed */
+	private $data;
+	private int $size;
+	/** @var int|false */
+	private $maxSize;
+	private ApiErrorFormatter $errorFormatter;
 
 	/**
 	 * @param int|false $maxSize Maximum result "size", or false for no limit
@@ -283,7 +295,7 @@ class ApiResult implements ApiSerializable {
 			if ( $flags & self::ADD_ON_TOP ) {
 				array_unshift( $arr, $value );
 			} else {
-				array_push( $arr, $value );
+				$arr[] = $value;
 			}
 			return;
 		}
@@ -343,6 +355,10 @@ class ApiResult implements ApiSerializable {
 						$ex
 					);
 				}
+			} elseif ( $value instanceof \Wikimedia\Message\MessageParam ) {
+				// HACK Support code that puts $msg->getParams() directly into API responses
+				// (e.g. ApiErrorFormatter::formatRawMessage()).
+				$value = $value->getType() === 'text' ? $value->getValue() : $value->jsonSerialize();
 			} elseif ( is_callable( [ $value, '__toString' ] ) ) {
 				$value = (string)$value;
 			} else {
@@ -362,11 +378,7 @@ class ApiResult implements ApiSerializable {
 				$value[$k] = self::validateValue( $v );
 			}
 		} elseif ( $value !== null && !is_scalar( $value ) ) {
-			$type = gettype( $value );
-			// phpcs:ignore MediaWiki.Usage.ForbiddenFunctions.is_resource
-			if ( is_resource( $value ) ) {
-				$type .= '(' . get_resource_type( $value ) . ')';
-			}
+			$type = get_debug_type( $value );
 			throw new InvalidArgumentException( "Cannot add $type to ApiResult" );
 		} elseif ( is_float( $value ) && !is_finite( $value ) ) {
 			throw new InvalidArgumentException( 'Cannot add non-finite floats to ApiResult' );
@@ -941,7 +953,28 @@ class ApiResult implements ApiSerializable {
 				return empty( $transformTypes['AssocAsObject'] ) ? $data : (object)$data;
 
 			case 'array':
-				ksort( $data );
+				// Sort items in ascending order by key. Note that $data may contain a mix of number and string keys,
+				// for which the sorting behavior of krsort() with SORT_REGULAR is inconsistent between PHP versions.
+				// Given a comparison of a string key and a number key, PHP < 8.2 coerces the string key into a number
+				// (which yields zero if the string was non-numeric), and then performs the comparison,
+				// while PHP >= 8.2 makes the behavior consistent with stricter numeric comparisons introduced by
+				// PHP 8.0 in that if the string key is non-numeric, it converts the number key into a string
+				// and compares those two strings instead. We therefore use a custom comparison function
+				// implementing PHP >= 8.2 ordering semantics to ensure consistent ordering of items
+				// irrespective of the PHP version (T326480).
+				uksort( $data, static function ( $a, $b ): int {
+					// In a comparison of a number or numeric string with a non-numeric string,
+					// coerce both values into a string prior to comparing and compare the resulting strings.
+					// Note that PHP prior to 8.0 did not consider numeric strings with trailing whitespace
+					// to be numeric, so trim the inputs prior to the numeric checks to make the behavior
+					// consistent across PHP versions.
+					if ( is_numeric( trim( $a ) ) xor is_numeric( trim( $b ) ) ) {
+						return (string)$a <=> (string)$b;
+					}
+
+					return $a <=> $b;
+				} );
+
 				$data = array_values( $data );
 				$metadata[self::META_TYPE] = 'array';
 				// @phan-suppress-next-line PhanTypeMismatchReturnNullable Type mismatch on pass-by-ref args
@@ -1198,9 +1231,9 @@ class ApiResult implements ApiSerializable {
 	 */
 	public static function formatExpiry( $expiry, $infinity = 'infinity' ) {
 		static $dbInfinity;
-		if ( $dbInfinity === null ) {
-			$dbInfinity = wfGetDB( DB_REPLICA )->getInfinity();
-		}
+		$dbInfinity ??= MediaWikiServices::getInstance()->getConnectionProvider()
+			->getReplicaDatabase()
+			->getInfinity();
 
 		if ( $expiry === '' || $expiry === null || $expiry === false ||
 			wfIsInfinity( $expiry ) || $expiry === $dbInfinity
@@ -1223,3 +1256,6 @@ class ApiResult implements ApiSerializable {
  *
  * vim: foldmarker=//\ region,//\ endregion foldmethod=marker
  */
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiResult::class, 'ApiResult' );

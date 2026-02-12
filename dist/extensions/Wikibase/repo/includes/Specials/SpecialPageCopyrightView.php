@@ -2,9 +2,9 @@
 
 namespace Wikibase\Repo\Specials;
 
-use Html;
-use Language;
-use Message;
+use MediaWiki\Html\Html;
+use MediaWiki\Language\Language;
+use MediaWiki\Message\Message;
 use Wikibase\Repo\CopyrightMessageBuilder;
 
 /**

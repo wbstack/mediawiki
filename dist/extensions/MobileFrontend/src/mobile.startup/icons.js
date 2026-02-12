@@ -1,7 +1,7 @@
-var
+const
 	CANCEL_GLYPH = 'close',
 	Icon = require( './Icon' ),
-	util = require( './util' );
+	IconButton = require( './IconButton' );
 
 /**
  * A set of shared icons.
@@ -14,10 +14,11 @@ var
  * @singleton
  * @uses Icon
  */
-module.exports = {
-	CANCEL_GLYPH: CANCEL_GLYPH,
+const icons = {
+	CANCEL_GLYPH,
 	// Exported to support testing and stubbing
-	Icon: Icon,
+	Icon,
+	IconButton,
 	/**
 	 * Gets a back icon
 	 *
@@ -26,12 +27,12 @@ module.exports = {
 	 *
 	 * @memberof icons
 	 * @instance
-	 * @return {Icon}
+	 * @return {IconButton}
 	 */
-	back: function () {
-		return new Icon( {
+	back() {
+		return new icons.IconButton( {
 			tagName: 'button',
-			name: 'previous-base20',
+			icon: 'previous',
 			additionalClassNames: 'back',
 			label: mw.msg( 'mobile-frontend-overlay-close' )
 		} );
@@ -44,23 +45,24 @@ module.exports = {
 	 *
 	 * @memberof icons
 	 * @instance
-	 * @param {string} [variant] defaults to `base20`.
+	 * @param {string} [variant]
 	 * @param {Object} [props] to extend
-	 * @return {Icon}
+	 * @return {IconButton}
 	 */
-	cancel: function ( variant, props = {} ) {
-		var glyph = variant ? `${CANCEL_GLYPH}-${variant}` : `${CANCEL_GLYPH}-base20`;
+	cancel( variant, props = {} ) {
+		const glyph = variant ? `${ CANCEL_GLYPH }-${ variant }` : `${ CANCEL_GLYPH }`;
 		props.additionalClassNames = props.additionalClassNames || '';
 		props.additionalClassNames += ' cancel';
 
-		return new this.Icon( util.extend( {
+		return new icons.IconButton( Object.assign( {
 			tagName: 'button',
-			name: glyph,
+			icon: glyph,
 			label: mw.msg( 'mobile-frontend-overlay-close' )
 		}, props ) );
 	},
 	/**
-	 * Gets a spinner icon.
+	 * Gets a spinner icon. This uses IconButton but should never actually
+	 * be a button or have full button styles, as its purely presentational
 	 *
 	 * The icon should be used to inform the user that the front-end is
 	 * communicating with the back-end.
@@ -68,28 +70,39 @@ module.exports = {
 	 * @memberof icons
 	 * @instance
 	 * @param {Object} [props] See `Icon` for more details
-	 * @return {Icon}
+	 * @return {IconButton}
 	 */
-	spinner: function ( props = {} ) {
+	spinner( props = {} ) {
 		if ( props.additionalClassNames === undefined ) {
 			props.additionalClassNames = 'spinner loading';
 		}
 
-		return new this.Icon( util.extend( {
-			name: 'spinner',
+		const spinner = new icons.IconButton( Object.assign( {
+			tagName: 'span',
+			icon: 'spinner',
 			label: mw.msg( 'mobile-frontend-loading-message' )
 		}, props ) );
+
+		// Update the element to not use button classes or attributes
+		spinner.$el.removeClass();
+		// eslint-disable-next-line mediawiki/class-doc
+		spinner.$el.addClass( props.additionalClassNames );
+		spinner.$el.attr( 'type', '' );
+		if ( spinner.options.isIconOnly ) {
+			spinner.$el.addClass( 'mf-spinner-icon-element' );
+		}
+		return spinner;
 	},
 	/**
 	 * Gets a failure (error) icon
 	 *
 	 * @memberof icons
 	 * @instance
-	 * @return {Icon}
+	 * @return {IconButton}
 	 */
-	error: function () {
-		return new Icon( {
-			name: 'alert-invert',
+	error() {
+		return new icons.IconButton( {
+			icon: 'alert-invert',
 			additionalClassNames: 'load-fail-msg-icon'
 		} );
 	},
@@ -99,15 +112,14 @@ module.exports = {
 	 * @memberof icons
 	 * @instance
 	 * @param {Object} props
-	 * @return {Icon}
+	 * @return {IconButton}
 	 */
-	watchIcon: function ( props = {} ) {
+	watch( props = {} ) {
 		props.additionalClassNames = props.additionalClassNames || '';
 		props.additionalClassNames += ' watch-this-article';
 
-		return new this.Icon( util.extend( {
-			name: 'star-base20',
-			glyphPrefix: 'wikimedia'
+		return new icons.IconButton( Object.assign( {
+			icon: 'star-subtle'
 		}, props ) );
 	},
 	/**
@@ -116,15 +128,16 @@ module.exports = {
 	 * @memberof icons
 	 * @instance
 	 * @param {Object} props
-	 * @return {Icon}
+	 * @return {IconButton}
 	 */
-	watchedIcon: function ( props = {} ) {
+	watched( props = {} ) {
 		props.additionalClassNames = props.additionalClassNames || '';
 		props.additionalClassNames += ' watch-this-article watched';
 
-		return new this.Icon( util.extend( {
-			name: 'unStar-progressive',
-			glyphPrefix: 'wikimedia'
+		return new icons.IconButton( Object.assign( {
+			icon: 'unStar-progressive'
 		}, props ) );
 	}
 };
+
+module.exports = icons;

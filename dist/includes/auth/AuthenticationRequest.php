@@ -23,13 +23,19 @@
 
 namespace MediaWiki\Auth;
 
-use Message;
+use MediaWiki\Language\RawMessage;
+use MediaWiki\Message\Message;
+use UnexpectedValueException;
 
 /**
  * This is a value object for authentication requests.
  *
  * An AuthenticationRequest represents a set of form fields that are needed on
  * and provided from a login, account creation, password change or similar form.
+ *
+ * Authentication providers that expect user input need to implement one or more subclasses
+ * of this class and return them from AuthenticationProvider::getAuthenticationRequests().
+ * A typical subclass would override getFieldInfo() and set $required.
  *
  * @stable to extend
  * @ingroup Auth
@@ -92,7 +98,8 @@ abstract class AuthenticationRequest {
 	}
 
 	/**
-	 * Fetch input field info
+	 * Fetch input field info. This will be used in the AuthManager APIs and web UIs to define
+	 * API input parameters / form fields and to process the submitted data.
 	 *
 	 * The field info is an associative array mapping field names to info
 	 * arrays. The info arrays have the following keys:
@@ -109,7 +116,8 @@ abstract class AuthenticationRequest {
 	 *      'select' and 'multiselect' types.
 	 *  - value: (string) Value (for 'null' and 'hidden') or default value (for other types).
 	 *  - label: (Message) Text suitable for a label in an HTML form
-	 *  - help: (Message) Text suitable as a description of what the field is
+	 *  - help: (Message) Text suitable as a description of what the field is. Used in API
+	 *      documentation. To add a help text to the web UI, use the AuthChangeFormFields hook.
 	 *  - optional: (bool) If set and truthy, the field may be left empty
 	 *  - sensitive: (bool) If set and truthy, the field is considered sensitive. Code using the
 	 *      request should avoid exposing the value of the field.
@@ -121,7 +129,8 @@ abstract class AuthenticationRequest {
 	 * All AuthenticationRequests are populated from the same data, so most of the time you'll
 	 * want to prefix fields names with something unique to the extension/provider (although
 	 * in some cases sharing the field with other requests is the right thing to do, e.g. for
-	 * a 'password' field).
+	 * a 'password' field). When multiple fields have the same name, they will be merged (see
+	 * AuthenticationRequests::mergeFieldInfo).
 	 *
 	 * @return array As above
 	 * @phan-return array<string,array{type:string,options?:array,value?:string,label:Message,help:Message,optional?:bool,sensitive?:bool,skippable?:bool}>
@@ -170,8 +179,8 @@ abstract class AuthenticationRequest {
 			// might be boolean. Further, image buttons might submit the
 			// coordinates of the click rather than the expected value.
 			if ( $info['type'] === 'checkbox' || $info['type'] === 'button' ) {
-				$this->$field = isset( $data[$field] ) && $data[$field] !== false
-					|| isset( $data["{$field}_x"] ) && $data["{$field}_x"] !== false;
+				$this->$field = ( isset( $data[$field] ) && $data[$field] !== false )
+					|| ( isset( $data["{$field}_x"] ) && $data["{$field}_x"] !== false );
 				if ( !$this->$field && empty( $info['optional'] ) ) {
 					return false;
 				}
@@ -235,8 +244,8 @@ abstract class AuthenticationRequest {
 	 */
 	public function describeCredentials() {
 		return [
-			'provider' => new \RawMessage( '$1', [ get_called_class() ] ),
-			'account' => new \RawMessage( '$1', [ $this->getUniqueId() ] ),
+			'provider' => new RawMessage( '$1', [ get_called_class() ] ),
+			'account' => new RawMessage( '$1', [ $this->getUniqueId() ] ),
 		];
 	}
 
@@ -289,7 +298,7 @@ abstract class AuthenticationRequest {
 	 *
 	 * @param AuthenticationRequest[] $reqs
 	 * @return string|null
-	 * @throws \UnexpectedValueException If multiple different usernames are present.
+	 * @throws UnexpectedValueException If multiple different usernames are present.
 	 */
 	public static function getUsernameFromRequests( array $reqs ) {
 		$username = null;
@@ -302,7 +311,7 @@ abstract class AuthenticationRequest {
 					$otherClass = get_class( $req );
 				} elseif ( $username !== $req->username ) {
 					$requestClass = get_class( $req );
-					throw new \UnexpectedValueException( "Conflicting username fields: \"{$req->username}\" from "
+					throw new UnexpectedValueException( "Conflicting username fields: \"{$req->username}\" from "
 						// @phan-suppress-next-line PhanTypeSuspiciousStringExpression $otherClass always set
 						. "$requestClass::\$username vs. \"$username\" from $otherClass::\$username" );
 				}
@@ -315,7 +324,7 @@ abstract class AuthenticationRequest {
 	 * Merge the output of multiple AuthenticationRequest::getFieldInfo() calls.
 	 * @param AuthenticationRequest[] $reqs
 	 * @return array
-	 * @throws \UnexpectedValueException If fields cannot be merged
+	 * @throws UnexpectedValueException If fields cannot be merged
 	 */
 	public static function mergeFieldInfo( array $reqs ) {
 		$merged = [];
@@ -351,9 +360,9 @@ abstract class AuthenticationRequest {
 					$req->required === self::OPTIONAL
 					// If there is a primary not requiring this field, no matter how many others do,
 					// authentication can proceed without it.
-					|| $req->required === self::PRIMARY_REQUIRED
+					|| ( $req->required === self::PRIMARY_REQUIRED
 						// @phan-suppress-next-line PhanTypeMismatchArgumentNullableInternal False positive
-						&& !in_array( $name, $sharedRequiredPrimaryFields, true )
+						&& !in_array( $name, $sharedRequiredPrimaryFields, true ) )
 				) {
 					$options['optional'] = true;
 				} else {
@@ -366,7 +375,7 @@ abstract class AuthenticationRequest {
 				if ( !array_key_exists( $name, $merged ) ) {
 					$merged[$name] = $options;
 				} elseif ( $merged[$name]['type'] !== $type ) {
-					throw new \UnexpectedValueException( "Field type conflict for \"$name\", " .
+					throw new UnexpectedValueException( "Field type conflict for \"$name\", " .
 						"\"{$merged[$name]['type']}\" vs \"$type\""
 					);
 				} else {

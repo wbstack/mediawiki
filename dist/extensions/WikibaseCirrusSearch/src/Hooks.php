@@ -7,9 +7,10 @@ use CirrusSearch\Parser\BasicQueryClassifier;
 use CirrusSearch\Profile\ArrayProfileRepository;
 use CirrusSearch\Profile\SearchProfileRepositoryTransformer;
 use CirrusSearch\Profile\SearchProfileService;
-use Language;
+use MediaWiki\Config\ConfigException;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
-use RequestContext;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\Repo\WikibaseRepo;
 use Wikibase\Search\Elastic\Fields\StatementsField;
@@ -134,7 +135,14 @@ class Hooks {
 
 		$namespacesForContexts = [];
 		$entityNsLookup = WikibaseRepo::getEntityNamespaceLookup();
+		$localEntityTypes = WikibaseRepo::getLocalEntityTypes();
 		foreach ( WikibaseRepo::getFulltextSearchTypes() as $type => $profileContext ) {
+			if ( !in_array( $type, $localEntityTypes ) ) {
+				// Do not enable profiles for entity types that are not local
+				// e.g. when using MediaInfo items and properties are not managed by this wiki
+				// and thus should not enable specific profiles for them.
+				continue;
+			}
 			$namespace = $entityNsLookup->getEntityNamespace( $type );
 			if ( $namespace === null ) {
 				continue;
@@ -172,7 +180,7 @@ class Hooks {
 	 * @param int[][] $namespacesForContexts list of namespaces indexed by profile context name
 	 * @see SearchProfileService
 	 * @see WikibaseRepo::getFulltextSearchTypes()
-	 * @throws \ConfigException
+	 * @throws ConfigException
 	 */
 	public static function registerSearchProfiles(
 		SearchProfileService $service,
@@ -222,6 +230,10 @@ class Hooks {
 			EntitySearchElastic::DEFAULT_RESCORE_PROFILE );
 		$service->registerDefaultProfile( SearchProfileService::RESCORE,
 			EntitySearchElastic::CONTEXT_WIKIBASE_PREFIX, $defaultRescore );
+		// Check for a variation of the default profile with the requested language code appended. If available
+		// use the language specific profile instead of the default profile.
+		$service->registerContextualOverride( SearchProfileService::RESCORE,
+			EntitySearchElastic::CONTEXT_WIKIBASE_PREFIX, "{$defaultRescore}-{lang}", [ '{lang}' => 'language' ] );
 		// add the possibility to override the profile by setting the URI param cirrusRescoreProfile
 		$service->registerUriParamOverride( SearchProfileService::RESCORE,
 			EntitySearchElastic::CONTEXT_WIKIBASE_PREFIX, 'cirrusRescoreProfile' );
@@ -232,6 +244,8 @@ class Hooks {
 
 		$service->registerDefaultProfile( EntitySearchElastic::WIKIBASE_PREFIX_QUERY_BUILDER,
 			EntitySearchElastic::CONTEXT_WIKIBASE_PREFIX, $defaultQB );
+		$service->registerContextualOverride( EntitySearchElastic::WIKIBASE_PREFIX_QUERY_BUILDER,
+			EntitySearchElastic::CONTEXT_WIKIBASE_PREFIX, "{$defaultQB}-{lang}", [ '{lang}' => 'language' ] );
 		$service->registerUriParamOverride( EntitySearchElastic::WIKIBASE_PREFIX_QUERY_BUILDER,
 			EntitySearchElastic::CONTEXT_WIKIBASE_PREFIX, 'cirrusWBProfile' );
 
@@ -350,7 +364,7 @@ class Hooks {
 				continue;
 			}
 		}
-		if ( empty( $entityIds ) ) {
+		if ( !$entityIds ) {
 			return;
 		}
 		$lookup = WikibaseRepo::getFallbackLabelDescriptionLookupFactory()
@@ -379,7 +393,12 @@ class Hooks {
 	 * @param array &$results
 	 */
 	public static function onApiOpenSearchSuggest( &$results ) {
-		if ( empty( $results ) ) {
+		$wbcsConfig = self::getWBCSConfig();
+		if ( !$wbcsConfig->enabled() ) {
+			return;
+		}
+
+		if ( !$results ) {
 			return;
 		}
 

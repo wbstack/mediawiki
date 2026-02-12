@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Strainu",
-			"NGC 54"
+			"NGC 54",
+			"Paloi Sciurala",
+			"Strainu"
 		]
 	},
 	"codemirror-desc": "Oferă evidențierea sintaxei în editorul wikitext",

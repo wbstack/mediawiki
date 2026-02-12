@@ -25,10 +25,10 @@
 		// Tab switcher buttons
 		'<div class="row">' +
 		'<div class="twelve columns uls-display-settings-tab-switcher">' +
-		'<div class="uls-button-group mw-ui-button-group">' +
-		'<button id="uls-display-settings-language-tab" class="mw-ui-button mw-ui-pressed" ' +
+		'<div class="uls-button-group cdx-button-group">' +
+		'<button id="uls-display-settings-language-tab" class="cdx-button uls-cdx-button-pressed" ' +
 		'data-i18n="ext-uls-display-settings-language-tab"></button>' +
-		'<button id="uls-display-settings-fonts-tab" class="mw-ui-button" data-i18n="ext-uls-display-settings-fonts-tab"></button>' +
+		'<button id="uls-display-settings-fonts-tab" class="cdx-button" data-i18n="ext-uls-display-settings-fonts-tab"></button>' +
 		'</div>' +
 		'</div>' +
 		'</div>' +
@@ -87,9 +87,10 @@
 		// Webfonts enabling checkbox with label
 		'<div class="row">' +
 		'<div class="twelve columns">' +
-		'<div class="mw-ui-checkbox">' +
-		'<input type="checkbox" id="webfonts-enable-checkbox" />' +
-		'<label class="checkbox" for="webfonts-enable-checkbox" >' +
+		'<div class="cdx-checkbox">' +
+		'<input type="checkbox" id="webfonts-enable-checkbox" class="cdx-checkbox__input" />' +
+		'<span class="cdx-checkbox__icon"></span>' +
+		'<label class="checkbox cdx-checkbox__label" for="webfonts-enable-checkbox" >' +
 		'<strong data-i18n="ext-uls-webfonts-settings-title"></strong> ' +
 		'<span data-i18n="ext-uls-webfonts-settings-info"></span> ' +
 		'<a target="_blank" href="https://www.mediawiki.org/wiki/Universal_Language_Selector/WebFonts" data-i18n="ext-uls-webfonts-settings-info-link"></a>' +
@@ -124,7 +125,7 @@
 		 */
 		setupWebFonts: function () {
 			var d = $.Deferred();
-			mw.loader.using( [ 'ext.uls.webfonts.repository' ] ).then( function () {
+			mw.loader.using( [ 'ext.uls.webfonts.repository', '@wikimedia/codex' ] ).then( function () {
 				if ( this.isWebFontsEnabled ) {
 					mw.webfonts.setup();
 				}
@@ -188,7 +189,7 @@
 				lang, i, language, $button, autonym;
 
 			// Don't let anonymous users change interface language
-			if ( !anonsAllowed && mw.user.isAnon() ) {
+			if ( !anonsAllowed && !mw.user.isNamed() ) {
 				$loginCta = $( '<p>' )
 					.attr( 'id', 'uls-display-settings-anon-log-in-cta' );
 				autonym = $.uls.data.getAutonym( this.contentLanguage );
@@ -199,8 +200,7 @@
 						$( '<p>' ).append(
 							$( '<span>' )
 								.addClass( 'uls-display-settings-anon-label' )
-								// .html() is needed for correct parsing of the nbsp
-								.html( $.i18n( 'ext-uls-display-settings-anon-label' ) + '&#160;' ),
+								.text( $.i18n( 'ext-uls-display-settings-anon-label' ) + '\u00A0' ),
 							$( '<span>' )
 								.text( $.i18n( 'ext-uls-display-settings-anon-same-as-content', autonym ) )
 						),
@@ -227,7 +227,7 @@
 			suggestedLanguages = this.frequentLanguageList()
 				// Common world languages, for the case that there are
 				// too few suggested languages
-				.concat( [ 'en', 'zh', 'fr' ] );
+				.concat( [ 'en', 'zh-hans', 'zh-hant', 'fr' ] );
 
 			// Content language is always on the first button
 			languagesForButtons = [ this.contentLanguage ];
@@ -259,8 +259,8 @@
 				return function () {
 					displaySettings.markDirty();
 					displaySettings.uiLanguage = button.data( 'language' ) || displaySettings.uiLanguage;
-					$( 'div.uls-ui-languages button.mw-ui-button' ).removeClass( 'mw-ui-pressed' );
-					button.addClass( 'mw-ui-pressed' );
+					$( 'div.uls-ui-languages button.cdx-button' ).removeClass( 'uls-cdx-button-pressed' );
+					button.addClass( 'uls-cdx-button-pressed' );
 					displaySettings.prepareUIFonts();
 					displaySettings.preview( displaySettings.uiLanguage );
 				};
@@ -270,7 +270,7 @@
 			for ( i = 0; i < SUGGESTED_LANGUAGES_NUMBER; i++ ) {
 				language = languagesForButtons[ i ];
 				$button = $( '<button>' )
-					.addClass( 'mw-ui-button uls-language-button autonym' )
+					.addClass( 'cdx-button uls-language-button autonym' )
 					.text( $.uls.data.getAutonym( language ) )
 					.prop( {
 						lang: language,
@@ -278,7 +278,7 @@
 					} );
 
 				if ( language === this.uiLanguage ) {
-					$button.addClass( 'mw-ui-pressed' );
+					$button.addClass( 'uls-cdx-button-pressed' );
 				}
 
 				$button.data( 'language', language );
@@ -299,7 +299,7 @@
 			$languages = this.$template.find( 'div.uls-ui-languages' );
 			$moreLanguagesButton = $( '<button>' )
 				.prop( 'class', 'uls-more-languages' )
-				.addClass( 'mw-ui-button' ).text( '...' );
+				.addClass( 'cdx-button' ).text( '...' );
 
 			$languages.append( $moreLanguagesButton );
 			// Show the long language list to select a language for display settings
@@ -481,8 +481,7 @@
 			// uls-ui-font-selector-label
 			// uls-content-font-selector-label
 			$fontLabel = this.$template.find( '#' + target + '-font-selector-label' );
-			$fontLabel.empty();
-			$fontLabel.append( $( '<strong>' ) );
+			$fontLabel.empty().append( $( '<strong>' ) );
 
 			// Possible messages:
 			// ext-uls-webfonts-select-for-ui-info
@@ -589,7 +588,7 @@
 				var $button = $( this );
 
 				// eslint-disable-next-line no-jquery/no-class-state
-				if ( $button.hasClass( 'mw-ui-pressed' ) ) {
+				if ( $button.hasClass( 'uls-cdx-button-pressed' ) ) {
 					return;
 				}
 
@@ -605,8 +604,8 @@
 				} );
 
 				displaySettings.$parent.position();
-				$tabButtons.removeClass( 'mw-ui-pressed' );
-				$button.addClass( 'mw-ui-pressed' );
+				$tabButtons.removeClass( 'uls-cdx-button-pressed' );
+				$button.addClass( 'uls-cdx-button-pressed' );
 			} ).on( 'mousedown', function ( event ) {
 				// Avoid taking focus, to avoid bad looking focus styles
 				event.preventDefault();
@@ -725,7 +724,7 @@
 	};
 
 	// Register this module to language settings modules
-	$.fn.languagesettings.modules = $.extend( $.fn.languagesettings.modules, {
+	$.fn.languagesettings.modules = Object.assign( $.fn.languagesettings.modules, {
 		display: DisplaySettings
 	} );
 }() );

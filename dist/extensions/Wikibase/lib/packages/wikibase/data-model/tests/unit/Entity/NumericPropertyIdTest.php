@@ -7,7 +7,6 @@ use Wikibase\DataModel\Entity\NumericPropertyId;
 
 /**
  * @covers \Wikibase\DataModel\Entity\NumericPropertyId
- * @covers \Wikibase\DataModel\Entity\EntityId
  *
  * @group Wikibase
  * @group WikibaseDataModel
@@ -28,7 +27,7 @@ class NumericPropertyIdTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function idSerializationProvider() {
+	public static function idSerializationProvider() {
 		return [
 			[ 'p1', 'P1' ],
 			[ 'p100', 'P100' ],
@@ -36,9 +35,6 @@ class NumericPropertyIdTest extends \PHPUnit\Framework\TestCase {
 			[ 'p31337', 'P31337' ],
 			[ 'P31337', 'P31337' ],
 			[ 'P42', 'P42' ],
-			[ ':P42', 'P42' ],
-			[ 'foo:P42', 'foo:P42' ],
-			[ 'foo:bar:p42', 'foo:bar:P42' ],
 			[ 'P2147483647', 'P2147483647' ],
 		];
 	}
@@ -51,7 +47,7 @@ class NumericPropertyIdTest extends \PHPUnit\Framework\TestCase {
 		new NumericPropertyId( $invalidSerialization );
 	}
 
-	public function invalidIdSerializationProvider() {
+	public static function invalidIdSerializationProvider() {
 		return [
 			[ "P1\n" ],
 			[ 'p' ],
@@ -70,16 +66,15 @@ class NumericPropertyIdTest extends \PHPUnit\Framework\TestCase {
 			[ 1 ],
 			[ 'P2147483648' ],
 			[ 'P99999999999' ],
+			// no longer supported (T291823, T338223)
+			[ 'foo:P42', 'foo:P42' ],
+			[ 'foo:bar:p42', 'foo:bar:P42' ],
+			[ ':P42', 'P42' ],
 		];
 	}
 
 	public function testGetNumericId() {
 		$id = new NumericPropertyId( 'P1' );
-		$this->assertSame( 1, $id->getNumericId() );
-	}
-
-	public function testGetNumericId_foreignId() {
-		$id = new NumericPropertyId( 'foo:P1' );
 		$this->assertSame( 1, $id->getNumericId() );
 	}
 
@@ -90,31 +85,26 @@ class NumericPropertyIdTest extends \PHPUnit\Framework\TestCase {
 
 	public function testSerialize() {
 		$id = new NumericPropertyId( 'P1' );
-		$this->assertSame( 'P1', $id->serialize() );
+		$this->assertSame( [ 'serialization' => 'P1' ], $id->__serialize() );
 	}
 
-	/**
-	 * @dataProvider serializationProvider
-	 */
-	public function testUnserialize( $json, $expected ) {
+	public function testUnserialize() {
 		$id = new NumericPropertyId( 'P1' );
-		$id->unserialize( $json );
-		$this->assertSame( $expected, $id->getSerialization() );
+		$id->__unserialize( [ 'serialization' => 'P2' ] );
+		$this->assertSame( 'P2', $id->getSerialization() );
 	}
 
-	public function serializationProvider() {
-		return [
-			[ 'P2', 'P2' ],
-			[ '["property","P2"]', 'P2' ],
+	public function testUnserializeInvalid(): void {
+		$id = new NumericPropertyId( 'P1' );
+		$this->expectException( InvalidArgumentException::class );
+		$id->__unserialize( [ 'serialization' => 'p' ] );
+	}
 
-			// All these cases are kind of an injection vector and allow constructing invalid ids.
-			[ '["string","P2"]', 'P2' ],
-			[ '["","string"]', 'string' ],
-			[ '["",""]', '' ],
-			[ '["",2]', 2 ],
-			[ '["",null]', null ],
-			[ '', '' ],
-		];
+	public function testUnserializeNotNormalized(): void {
+		$id = new NumericPropertyId( 'P1' );
+		$this->expectException( InvalidArgumentException::class );
+		$id->__unserialize( [ 'serialization' => 'p2' ] );
+		// 'p2' is allowed in the constructor (silently uppercased) but not in unserialize()
 	}
 
 	/**
@@ -125,7 +115,7 @@ class NumericPropertyIdTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( 'P' . $number, $id->getSerialization() );
 	}
 
-	public function numericIdProvider() {
+	public static function numericIdProvider() {
 		return [
 			[ 42 ],
 			[ '42' ],
@@ -144,7 +134,7 @@ class NumericPropertyIdTest extends \PHPUnit\Framework\TestCase {
 		NumericPropertyId::newFromNumber( $number );
 	}
 
-	public function invalidNumericIdProvider() {
+	public static function invalidNumericIdProvider() {
 		return [
 			[ 'P1' ],
 			[ '42.1' ],
@@ -152,16 +142,6 @@ class NumericPropertyIdTest extends \PHPUnit\Framework\TestCase {
 			[ 2147483648 ],
 			[ '2147483648' ],
 		];
-	}
-
-	public function testNewFromRepositoryAndNumber() {
-		$id = NumericPropertyId::newFromRepositoryAndNumber( 'foo', 1 );
-		$this->assertSame( 'foo:P1', $id->getSerialization() );
-	}
-
-	public function testNewFromRepositoryAndNumberWithInvalidNumericId() {
-		$this->expectException( InvalidArgumentException::class );
-		NumericPropertyId::newFromRepositoryAndNumber( '', 'P1' );
 	}
 
 }

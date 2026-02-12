@@ -5,8 +5,8 @@ declare( strict_types = 1 );
 namespace Wikibase\Client\Store;
 
 use InvalidArgumentException;
-use PageProps;
-use Title;
+use MediaWiki\Page\PageProps;
+use MediaWiki\Title\Title;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\Term\TermBuffer;
 use Wikibase\Lib\Store\EntityIdLookup;
@@ -64,7 +64,7 @@ class DescriptionLookup {
 	 * @param Title[] $titles Titles to look up (will be loaded).
 	 * @param array|string $sources One or both of the DescriptionLookup::SOURCE_* constants.
 	 *   When an array is provided, the second element will be used as fallback.
-	 * @param null $actualSources Will be set to an associative array of page ID => SOURCE_*,
+	 * @param array|null &$actualSources Will be set to an associative array of page ID => SOURCE_*,
 	 *   indicating where each description came from, or null if no description was found.
 	 * @return string[] Associative array of page ID => description. Pages with no description
 	 *   will be omitted.
@@ -102,7 +102,7 @@ class DescriptionLookup {
 	 * @param Title $title Title to look up (will be loaded).
 	 * @param array|string $sources One or both of the DescriptionLookup::SOURCE_* constants.
 	 *   When an array is provided, the second element will be used as fallback.
-	 * @param null $actualSource Will be set to one of the DescriptionLookup::SOURCE_* constants,
+	 * @param string|null &$actualSource Will be set to one of the DescriptionLookup::SOURCE_* constants,
 	 *   indicating where the description came from, or null if no description was found.
 	 * @return string|null The description, or null if none was found.
 	 */
@@ -112,6 +112,7 @@ class DescriptionLookup {
 
 		$pageId = $title->getArticleID();
 		if ( array_key_exists( $pageId, $descriptions ) ) {
+			// @phan-suppress-next-line PhanTypeArraySuspiciousNullable has the same keys as $descriptions after getDescriptions() call
 			$actualSource = $actualSources[$pageId];
 			return $descriptions[$pageId];
 		} else {

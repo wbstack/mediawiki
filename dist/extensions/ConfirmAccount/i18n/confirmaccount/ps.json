@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ahmed-Najib-Biabani-Ibrahimkhel"
+			"Ahmed-Najib-Biabani-Ibrahimkhel",
+			"شاه زمان پټان"
 		]
 	},
 	"confirmaccount-real-q": "نوم",
@@ -13,7 +14,7 @@
 	"confirmaccount-leg-user": "گڼون",
 	"confirmaccount-leg-person": "ځاني مالومات",
 	"confirmaccount-leg-other": "نور مالومات",
-	"confirmaccount-name": "کارن-نوم",
+	"confirmaccount-name": "کارن‌نوم",
 	"confirmaccount-real": "نوم:",
 	"confirmaccount-email": "برېښليک:",
 	"confirmaccount-pos-0": "ليکوال",

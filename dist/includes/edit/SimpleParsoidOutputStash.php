@@ -2,47 +2,45 @@
 
 namespace MediaWiki\Edit;
 
-use BagOStuff;
-use FormatJson;
+use MediaWiki\Json\JsonCodec;
 use MediaWiki\Parser\Parsoid\PageBundleJsonTrait;
-use MediaWiki\Parser\Parsoid\ParsoidRenderID;
-use Wikimedia\Parsoid\Core\PageBundle;
+use Wikimedia\ObjectCache\BagOStuff;
 
 /**
+ * @internal
  * @since 1.39
- * @unstable since 1.39, should be stable before release.
  */
 class SimpleParsoidOutputStash implements ParsoidOutputStash {
 	use PageBundleJsonTrait;
 
-	/** @var BagOStuff */
-	private $bagOfStuff;
+	public function __construct(
+		private JsonCodec $jsonCodec,
+		/** Storage backend */
+		private BagOStuff $bagOfStuff,
+		/** Cache duration in seconds */
+		private int $duration,
+	) {
+	}
 
-	/** @var int */
-	private $duration;
-
-	/**
-	 * @param BagOStuff $bagOfStuff storage backend
-	 * @param int $duration cache duration in seconds
-	 */
-	public function __construct( BagOStuff $bagOfStuff, int $duration ) {
-		$this->bagOfStuff = $bagOfStuff;
-		$this->duration = $duration;
+	private function makeCacheKey( ParsoidRenderID $renderId ): string {
+		return $this->bagOfStuff->makeKey( 'ParsoidOutputStash', $renderId->getKey() );
 	}
 
 	/**
 	 * Before we stash, we serialize & encode into JSON the relevant
 	 * parts of the data we need to construct a page bundle in the future.
 	 *
-	 * @param ParsoidRenderId $renderId
-	 * @param PageBundle $bundle
+	 * @param ParsoidRenderID $renderId Combination of revision ID and revision's time ID
+	 * @param SelserContext $selserContext
 	 *
 	 * @return bool
 	 */
-	public function set( ParsoidRenderId $renderId, PageBundle $bundle ): bool {
-		$pageBundleJson = FormatJson::encode( $this->jsonSerializePageBundle( $bundle ) );
-
-		return $this->bagOfStuff->set( $renderId->getKey(), $pageBundleJson, $this->duration );
+	public function set( ParsoidRenderID $renderId, SelserContext $selserContext ): bool {
+		$jsonic = $this->jsonCodec->toJsonArray(
+			$selserContext, SelserContext::class
+		);
+		$key = $this->makeCacheKey( $renderId );
+		return $this->bagOfStuff->set( $key, $jsonic, $this->duration );
 	}
 
 	/**
@@ -50,18 +48,25 @@ class SimpleParsoidOutputStash implements ParsoidOutputStash {
 	 * if we have something in the stash that matches a given rendering or
 	 * will just return an empty array if no entry in the stash.
 	 *
-	 * @param ParsoidRenderId $renderId
+	 * @param ParsoidRenderID $renderId
 	 *
-	 * @return PageBundle|null
+	 * @return SelserContext|null
 	 */
-	public function get( ParsoidRenderId $renderId ): ?PageBundle {
-		$pageBundleArray = FormatJson::decode(
-				$this->bagOfStuff->get( $renderId->getKey() ),
-				true
-			) ?? [];
-		$pageBundle = $this->newPageBundleFromJson( $pageBundleArray );
+	public function get( ParsoidRenderID $renderId ): ?SelserContext {
+		$key = $this->makeCacheKey( $renderId );
+		$jsonic = $this->bagOfStuff->get( $key ) ?? [];
 
-		return $pageBundle ?: null;
+		if ( !is_array( $jsonic ) ) {
+			// Defend against old stashed data.
+			// Only needed for a couple of days after this code has been deployed.
+			return null;
+		}
+		if ( !isset( $jsonic['pb'] ) ) {
+			return null;
+		}
+		return $this->jsonCodec->newFromJsonArray(
+			$jsonic, SelserContext::class
+		);
 	}
 
 }

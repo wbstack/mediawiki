@@ -1,15 +1,18 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\MediaWiki\Specials;
 
-use EntitySchema\Domain\Model\SchemaId;
+use EntitySchema\Domain\Model\EntitySchemaId;
 use EntitySchema\MediaWiki\Content\EntitySchemaContent;
-use EntitySchema\Services\SchemaConverter\SchemaConverter;
+use EntitySchema\Services\Converter\EntitySchemaConverter;
 use HttpError;
 use InvalidArgumentException;
 use MediaWiki\MediaWikiServices;
-use SpecialPage;
-use Title;
+use MediaWiki\Message\Message;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\Title;
 
 /**
  * @license GPL-2.0-or-later
@@ -23,15 +26,15 @@ class EntitySchemaText extends SpecialPage {
 		);
 	}
 
-	public function execute( $subPage ) {
+	public function execute( $subPage ): void {
 		parent::execute( $subPage );
-		$schemaId = $this->getIdFromSubpage( $subPage );
-		if ( !$schemaId ) {
+		$entitySchemaId = $this->getIdFromSubpage( $subPage );
+		if ( !$entitySchemaId ) {
 			$this->getOutput()->addWikiMsg( 'entityschema-schematext-text' );
 			$this->getOutput()->returnToMain();
 			return;
 		}
-		$title = Title::makeTitle( NS_ENTITYSCHEMA_JSON, $schemaId->getId() );
+		$title = Title::makeTitle( NS_ENTITYSCHEMA_JSON, $entitySchemaId->getId() );
 
 		if ( !$title->exists() ) {
 			throw new HttpError( 404, $this->getOutput()->msg(
@@ -42,20 +45,20 @@ class EntitySchemaText extends SpecialPage {
 		$this->sendContentSchemaText(
 			// @phan-suppress-next-line PhanTypeMismatchArgumentSuperType
 			MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title )->getContent(),
-			$schemaId
+			$entitySchemaId
 		);
 	}
 
-	public function getDescription() {
-		return $this->msg( 'special-schematext' )->text();
+	public function getDescription(): Message {
+		return $this->msg( 'special-schematext' );
 	}
 
-	protected function getGroupName() {
+	protected function getGroupName(): string {
 		return 'wikibase';
 	}
 
-	private function sendContentSchemaText( EntitySchemaContent $schemaContent, SchemaId $id ) {
-		$converter = new SchemaConverter();
+	private function sendContentSchemaText( EntitySchemaContent $schemaContent, EntitySchemaId $id ): void {
+		$converter = new EntitySchemaConverter();
 		$schemaText = $converter->getSchemaText( $schemaContent->getText() );
 		$out = $this->getOutput();
 		$out->disable();
@@ -69,21 +72,16 @@ class EntitySchemaText extends SpecialPage {
 		echo $schemaText;
 	}
 
-	/**
-	 * @param string $subPage
-	 *
-	 * @return false|SchemaId
-	 */
-	private function getIdFromSubpage( $subPage ) {
+	private function getIdFromSubpage( ?string $subPage ): ?EntitySchemaId {
 		if ( !$subPage ) {
-			return false;
+			return null;
 		}
 		try {
-			$schemaId = new SchemaId( $subPage );
+			$entitySchemaId = new EntitySchemaId( $subPage );
 		} catch ( InvalidArgumentException $e ) {
-			return false;
+			return null;
 		}
-		return $schemaId;
+		return $entitySchemaId;
 	}
 
 }

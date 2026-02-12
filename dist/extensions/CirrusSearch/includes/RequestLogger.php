@@ -2,13 +2,15 @@
 
 namespace CirrusSearch;
 
-use DeferredUpdates;
 use ISearchResultSet;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Deferred\DeferredUpdates;
+use MediaWiki\Json\FormatJson;
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\User\User;
 use MediaWiki\User\UserIdentity;
-use UIDGenerator;
-use User;
-use WikiMap;
+use MediaWiki\WikiMap\WikiMap;
 
 /**
  * Handles logging information about requests made to various destinations,
@@ -108,7 +110,7 @@ class RequestLogger {
 	 * @return array A map of information about the performed request, suitible
 	 *  for use as a psr-3 log context.
 	 */
-	public function addRequest( RequestLog $log, UserIdentity $user = null, $slowMillis = null ) {
+	public function addRequest( RequestLog $log, ?UserIdentity $user = null, $slowMillis = null ) {
 		global $wgCirrusSearchLogElasticRequests;
 
 		// @todo Is this necessary here? Check on what uses the response value
@@ -230,7 +232,7 @@ class RequestLogger {
 					$requestContext, 'namespaces', $requestEntry, 'namespaces',
 					// Make sure namespace values are all integers.
 					static function ( $v ) {
-						if ( empty( $v ) ) {
+						if ( !$v ) {
 							return $v;
 						} else {
 							return array_values( array_map( 'intval', $v ) );
@@ -306,13 +308,14 @@ class RequestLogger {
 			$resultHits[] = $hit;
 		}
 
+		$gen = MediaWikiServices::getInstance()->getGlobalIdGenerator();
 		$requestEvent = [
 			// This schema can be found in the mediawiki/event-schemas repository.
 			// The $schema URI here should be updated if we increment schema versions.
 			'$schema' => '/mediawiki/cirrussearch/request/0.0.1',
 			'meta' => [
 				'request_id' => $webrequest->getRequestId(),
-				'id' => UIDGenerator::newUUIDv4(),
+				'id' => $gen->newUUIDv4(),
 				'dt' => wfTimestamp( TS_ISO_8601 ),
 				'domain' => $wgServerName,
 				'stream' => 'mediawiki.cirrussearch-request',
@@ -332,7 +335,7 @@ class RequestLogger {
 		];
 
 		$webRequestValues = $webrequest->getValues();
-		if ( !empty( $webRequestValues ) ) {
+		if ( $webRequestValues ) {
 			$requestEvent['params'] = [];
 			// Make sure all params are string keys and values
 			foreach ( $webRequestValues as $k => $v ) {
@@ -342,7 +345,7 @@ class RequestLogger {
 					// guarantee about always returning a string, and
 					// faithfully represents the variety of shapes request
 					// parameters can be parsed into.
-					$v = \FormatJson::encode( $v );
+					$v = FormatJson::encode( $v );
 				}
 				$k = $webrequest->normalizeUnicode( $k );
 				$requestEvent['params'][(string)$k] = (string)$v;
@@ -350,10 +353,10 @@ class RequestLogger {
 		}
 
 		// Don't set these fields if there is no data.
-		if ( !empty( $resultHits ) ) {
+		if ( $resultHits ) {
 			$requestEvent['hits'] = $resultHits;
 		}
-		if ( !empty( $elasticSearchRequests ) ) {
+		if ( $elasticSearchRequests ) {
 			$requestEvent['elasticsearch_requests'] = $elasticSearchRequests;
 		}
 		// Should always be true, but don't accidently instantiate user testing if somehow
@@ -452,7 +455,7 @@ class RequestLogger {
 	 * @return int The number of ms the php request took
 	 */
 	private function getPhpRequestTookMs() {
-		$timing = \RequestContext::getMain()->getTiming();
+		$timing = RequestContext::getMain()->getTiming();
 		$startMark = $timing->getEntryByName( 'requestStart' );
 		$endMark  = $timing->getEntryByName( 'requestShutdown' );
 		if ( $startMark && $endMark ) {

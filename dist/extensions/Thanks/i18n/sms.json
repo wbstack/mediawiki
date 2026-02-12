@@ -5,11 +5,15 @@
 		]
 	},
 	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|späʹssbõõžž}}}}",
+	"thanks-thanked": "{{GENDER:$1|{{GENDER:$2|Späʹssbõʹššiǩ}}}} õõʹnni.",
 	"thanks-button-thank": "{{GENDER:$1|{{GENDER:$2|Späʹssbõõžž}}}}",
-	"thanks-button-action-cancel": "Jõõsk",
+	"thanks-button-thanked": "{{GENDER:$1|{{GENDER:$2|Späʹssbõʹššiǩ}}}} õõʹnni.",
 	"thanks-thank-tooltip": "{{GENDER:$1|Späʹssbõõžž}} tän {{GENDER:$2|õõʹnni}}",
+	"thanks-thanked-notice": "{{GENDER:$3|Späʹssbõʹššiǩ}} õõʹnni {{GENDER:$2|$1}}.",
 	"thanks": "Späʹssbõõžž",
 	"thanks-submit": "Vuõlttâd",
 	"echo-category-title-edit-thank": "Späʹsseb",
-	"notification-link-text-view-post": "Čuäʹjet kommeeʹnt"
+	"notification-compact-header-edit-thank": "Õõʹnni $1 {{GENDER:$2|späʹssbõõžži}} {{GENDER:$3|tuu}}.",
+	"notification-link-text-view-post": "Čuäʹjet kommeeʹnt",
+	"notification-compact-header-flow-thank": "Õõʹnni $1 {{GENDER:$2|späʹssbõõžži}} {{GENDER:$3|tuu}}."
 }

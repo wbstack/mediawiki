@@ -20,6 +20,9 @@ class SiteConfig extends ApiSiteConfig {
 	/** @var bool overrides parent-class info */
 	private $interwikiMagic;
 
+	/** @var array<string,bool> overrides parent-class info */
+	private $enabledMagicLinks = [];
+
 	/** @var array overrides parent-class server info */
 	private $serverData;
 
@@ -32,7 +35,7 @@ class SiteConfig extends ApiSiteConfig {
 	 */
 	public $responsiveReferences;
 
-	/** @var int */
+	/** @var ?int */
 	public $thumbsize;
 
 	/** @var LoggerInterface */
@@ -40,6 +43,9 @@ class SiteConfig extends ApiSiteConfig {
 
 	/** @var string|false */
 	private $externalLinkTarget = false;
+
+	/** @var ?array */
+	private $noFollowConfig;
 
 	/** @inheritDoc */
 	public function __construct( ApiHelper $api, array $opts ) {
@@ -108,11 +114,9 @@ class SiteConfig extends ApiSiteConfig {
 		$this->unregisterParserTestExtension( new I18nTag() );
 		$this->thumbsize = null;
 		$this->externalLinkTarget = false;
+		$this->noFollowConfig = null;
 	}
 
-	/**
-	 * @param string $name
-	 */
 	private function deleteNamespace( string $name ): void {
 		$normName = Utils::normalizeNamespaceName( $name );
 		$id = $this->namespaceId( $normName );
@@ -131,16 +135,10 @@ class SiteConfig extends ApiSiteConfig {
 		}
 	}
 
-	/**
-	 * @param int $ns
-	 */
 	public function disableSubpagesForNS( int $ns ): void {
 		$this->nsWithSubpages[$ns] = false;
 	}
 
-	/**
-	 * @param int $ns
-	 */
 	public function enableSubpagesForNS( int $ns ): void {
 		$this->nsWithSubpages[$ns] = true;
 	}
@@ -176,6 +174,8 @@ class SiteConfig extends ApiSiteConfig {
 	 */
 	public function setupInterwikiMap( array $iwData ): void {
 		$this->interwikiMap = ConfigUtils::computeInterwikiMap( $iwData );
+		$this->interwikiMapNoNamespaces = null;
+		$this->iwMatcher = null;
 	}
 
 	public function interwikiMap(): array {
@@ -202,19 +202,39 @@ class SiteConfig extends ApiSiteConfig {
 		return $this->allowedExternalImagePrefixes;
 	}
 
-	public function responsiveReferences(): array {
-		return $this->responsiveReferences;
+	/** @inheritDoc */
+	public function getMWConfigValue( string $key ) {
+		switch ( $key ) {
+			case 'CiteResponsiveReferences':
+				return $this->responsiveReferences['enabled'];
+
+			case 'CiteResponsiveReferencesThreshold':
+				return $this->responsiveReferences['threshold'];
+
+			default:
+				return null;
+		}
 	}
 
-	/**
-	 * @param bool $val
-	 */
 	public function setInterwikiMagic( bool $val ): void {
 		$this->interwikiMagic = $val;
 	}
 
 	public function interwikiMagic(): bool {
 		return $this->interwikiMagic;
+	}
+
+	/**
+	 * @param string $which One of "RFC", "PMID", or "ISBN".
+	 * @param bool $val
+	 */
+	public function setMagicLinkEnabled( string $which, bool $val ): void {
+		$this->enabledMagicLinks[$which] = $val;
+	}
+
+	public function magicLinkEnabled( string $which ): bool {
+		// defaults to enabled
+		return $this->enabledMagicLinks[$which] ?? true;
 	}
 
 	public function fakeTimestamp(): ?int {
@@ -278,7 +298,6 @@ class SiteConfig extends ApiSiteConfig {
 
 	/**
 	 * @param string|false $value
-	 * @return void
 	 */
 	public function setExternalLinkTarget( $value ): void {
 		$this->externalLinkTarget = $value;
@@ -289,5 +308,25 @@ class SiteConfig extends ApiSiteConfig {
 	 */
 	public function getExternalLinkTarget() {
 		return $this->externalLinkTarget;
+	}
+
+	/**
+	 * @param string $key
+	 * @param mixed $value
+	 */
+	public function setNoFollowConfig( string $key, $value ): void {
+		$noFollowConfig = $this->getNoFollowConfig();
+		$noFollowConfig[$key] = $value;
+		$this->noFollowConfig = $noFollowConfig;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getNoFollowConfig(): array {
+		if ( $this->noFollowConfig === null ) {
+			$this->noFollowConfig = parent::getNoFollowConfig();
+		}
+		return $this->noFollowConfig;
 	}
 }

@@ -41,18 +41,24 @@ class SearchPostgres extends SearchDatabase {
 	 * @return SqlSearchResultSet
 	 */
 	protected function doSearchTitleInDB( $term ) {
-		$q = $this->searchQuery( $term, 'titlevector', 'page_title' );
+		$q = $this->searchQuery( $term, 'titlevector' );
 		$olderror = error_reporting( E_ERROR );
-		$dbr = $this->lb->getConnectionRef( DB_REPLICA );
+		$dbr = $this->dbProvider->getReplicaDatabase();
+		// The real type is still IDatabase, but IReplicaDatabase is used for safety.
+		'@phan-var IDatabase $dbr';
+		// phpcs:ignore MediaWiki.Usage.DbrQueryUsage.DbrQueryFound
 		$resultSet = $dbr->query( $q, 'SearchPostgres', IDatabase::QUERY_SILENCE_ERRORS );
 		error_reporting( $olderror );
 		return new SqlSearchResultSet( $resultSet, $this->searchTerms );
 	}
 
 	protected function doSearchTextInDB( $term ) {
-		$q = $this->searchQuery( $term, 'textvector', 'old_text' );
+		$q = $this->searchQuery( $term, 'textvector' );
 		$olderror = error_reporting( E_ERROR );
-		$dbr = $this->lb->getConnectionRef( DB_REPLICA );
+		$dbr = $this->dbProvider->getReplicaDatabase();
+		// The real type is still IDatabase, but IReplicaDatabase is used for safety.
+		'@phan-var IDatabase $dbr';
+		// phpcs:ignore MediaWiki.Usage.DbrQueryUsage.DbrQueryFound
 		$resultSet = $dbr->query( $q, 'SearchPostgres', IDatabase::QUERY_SILENCE_ERRORS );
 		error_reporting( $olderror );
 		return new SqlSearchResultSet( $resultSet, $this->searchTerms );
@@ -70,7 +76,7 @@ class SearchPostgres extends SearchDatabase {
 		wfDebug( "parseQuery received: $term" );
 
 		// No backslashes allowed
-		$term = preg_replace( '/\\\/', '', $term );
+		$term = preg_replace( '/\\\\/', '', $term );
 
 		// Collapse parens into nearby words:
 		$term = preg_replace( '/\s*\(\s*/', ' (', $term );
@@ -114,7 +120,7 @@ class SearchPostgres extends SearchDatabase {
 		$searchstring = preg_replace( '/^[\'"](.*)[\'"]$/', "$1", $searchstring );
 
 		// Quote the whole thing
-		$dbr = $this->lb->getConnectionRef( DB_REPLICA );
+		$dbr = $this->dbProvider->getReplicaDatabase();
 		$searchstring = $dbr->addQuotes( $searchstring );
 
 		wfDebug( "parseQuery returned: $searchstring" );
@@ -126,16 +132,18 @@ class SearchPostgres extends SearchDatabase {
 	 * Construct the full SQL query to do the search.
 	 * @param string $term
 	 * @param string $fulltext
-	 * @param string $colname
 	 * @return string
 	 */
-	private function searchQuery( $term, $fulltext, $colname ) {
+	private function searchQuery( $term, $fulltext ) {
 		# Get the SQL fragment for the given term
 		$searchstring = $this->parseQuery( $term );
 
 		// We need a separate query here so gin does not complain about empty searches
 		$sql = "SELECT to_tsquery($searchstring)";
-		$dbr = $this->lb->getConnectionRef( DB_REPLICA );
+		$dbr = $this->dbProvider->getReplicaDatabase();
+		// The real type is still IDatabase, but IReplicaDatabase is used for safety.
+		'@phan-var IDatabase $dbr';
+		// phpcs:ignore MediaWiki.Usage.DbrQueryUsage.DbrQueryFound
 		$res = $dbr->query( $sql, __METHOD__ );
 		if ( !$res ) {
 			// TODO: Better output (example to catch: one 'two)
@@ -150,7 +158,8 @@ class SearchPostgres extends SearchDatabase {
 				"FROM page p, revision r, slots s, content c, \"text\" pc " .
 				"WHERE p.page_latest = r.rev_id " .
 				"AND s.slot_revision_id = r.rev_id " .
-				"AND s.slot_role_id = " . $slotRoleStore->getId( SlotRecord::MAIN ) . " " .
+				"AND s.slot_role_id = " .
+					$dbr->addQuotes( $slotRoleStore->acquireId( SlotRecord::MAIN ) ) . " " .
 				"AND c.content_id = s.slot_content_id " .
 				"AND pc.old_id = substring( c.content_address from '^tt:([0-9]+)$' )::int " .
 				"AND 1=0";
@@ -167,7 +176,8 @@ class SearchPostgres extends SearchDatabase {
 				"FROM page p, revision r, slots s, content c, \"text\" pc " .
 				"WHERE p.page_latest = r.rev_id " .
 				"AND s.slot_revision_id = r.rev_id " .
-				"AND s.slot_role_id = " . $slotRoleStore->getId( SlotRecord::MAIN ) . " " .
+				"AND s.slot_role_id = " . $dbr->addQuotes(
+					$slotRoleStore->acquireId( SlotRecord::MAIN ) ) . " " .
 				"AND c.content_id = s.slot_content_id " .
 				"AND pc.old_id = substring( c.content_address from '^tt:([0-9]+)$' )::int " .
 				"AND $fulltext @@ to_tsquery($searchstring)";
@@ -196,6 +206,7 @@ class SearchPostgres extends SearchDatabase {
 	public function update( $pageid, $title, $text ) {
 		// We don't want to index older revisions
 		$slotRoleStore = MediaWikiServices::getInstance()->getSlotRoleStore();
+		$dbw = $this->dbProvider->getPrimaryDatabase();
 		$sql = "UPDATE \"text\" SET textvector = NULL " .
 			"WHERE textvector IS NOT NULL " .
 			"AND old_id IN " .
@@ -203,11 +214,11 @@ class SearchPostgres extends SearchDatabase {
 			" FROM content c, slots s, revision r " .
 			" WHERE r.rev_page = $pageid " .
 			" AND s.slot_revision_id = r.rev_id " .
-			" AND s.slot_role_id = " . $slotRoleStore->getId( SlotRecord::MAIN ) . " " .
+			" AND s.slot_role_id = " .
+				$dbw->addQuotes( $slotRoleStore->acquireId( SlotRecord::MAIN ) ) . " " .
 			" AND c.content_id = s.slot_content_id " .
 			" ORDER BY old_rev_text_id DESC OFFSET 1)";
 
-		$dbw = $this->lb->getConnectionRef( DB_PRIMARY );
 		$dbw->query( $sql, __METHOD__ );
 
 		return true;

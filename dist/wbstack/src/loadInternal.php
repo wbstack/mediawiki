@@ -11,6 +11,7 @@ if ( getenv('WBSTACK_LOAD_MW_INTERNAL') !== 'yes' ) {
 
 // Load the files
 require_once __DIR__ . '/Internal/WbStackPlatformReservedUser.php';
+require_once __DIR__ . '/Internal/ApiWbStackInitMainPage.php';
 require_once __DIR__ . '/Internal/ApiWbStackInit.php';
 require_once __DIR__ . '/Internal/ApiWbStackOauthGet.php';
 require_once __DIR__ . '/Internal/ApiWbStackElasticSearchInit.php';
@@ -26,6 +27,3 @@ $wgAPIModules['wbstackElasticSearchInit'] = \WBStack\Internal\ApiWbStackElasticS
 $wgAPIModules['wbstackForceSearchIndex'] = \WBStack\Internal\ApiWbStackForceSearchIndex::class;
 $wgAPIModules['wbstackQueueSearchIndexBatches'] = \WBStack\Internal\ApiWbStackQueueSearchIndexBatches::class;
 $wgAPIModules['wbstackSiteStatsUpdate'] = \WBStack\Internal\ApiWbStackSiteStatsUpdate::class;
-
-// This is needed for Sandbox sites to have their Example data loaded via API
-wfLoadExtension( 'WikibaseExampleData' );

@@ -2,7 +2,7 @@
 
 namespace JsonConfig;
 
-use Language;
+use MediaWiki\Language\Language;
 
 /**
  * @package JsonConfig

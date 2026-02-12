@@ -1,5 +1,8 @@
 <?php
 
+declare( strict_types = 1 );
+
+use MediaWiki\MediaWikiServices;
 use Wikibase\Lib\Modules\DataTypesModule;
 use Wikibase\Lib\Modules\MediaWikiConfigModule;
 use Wikibase\Lib\Modules\SettingsValueProvider;
@@ -44,11 +47,11 @@ return call_user_func( function() {
 
 		'wikibase.experts.__namespace' => $expertsPaths + [
 			'scripts' => [
-				'__namespace.js'
+				'__namespace.js',
 			],
 			'dependencies' => [
 				'wikibase',
-			]
+			],
 		],
 
 		'wikibase.experts.Entity' => $expertsPaths + [
@@ -108,14 +111,36 @@ return call_user_func( function() {
 			},
 		],
 
+		'mw.config.values.wbEnableMulLanguageCode' => $moduleTemplate + [
+			'class' => MediaWikiConfigModule::class,
+			'getconfigvalueprovider' => function () {
+				return new SettingsValueProvider(
+					WikibaseRepo::getSettings(),
+					'wbEnableMulLanguageCode',
+					'tmpEnableMulLanguageCode'
+				);
+			},
+		],
+
+		// Temporary, see: T339104, to be removed in T330217
+		'mw.config.values.wbTmpAlwaysShowMulLanguageCode' => $moduleTemplate + [
+			'class' => MediaWikiConfigModule::class,
+			'getconfigvalueprovider' => function () {
+				return new SettingsValueProvider(
+					WikibaseRepo::getSettings(),
+					'wbTmpAlwaysShowMulLanguageCode',
+					'tmpAlwaysShowMulLanguageCode'
+				);
+			},
+		],
+
 		'wikibase.entityPage.entityLoaded' => $moduleTemplate + [
 			'scripts' => [
 				'wikibase.entityPage.entityLoaded.js',
 			],
-			'targets' => [ 'desktop', 'mobile' ],
 			'dependencies' => [
 				'wikibase',
-				'mediawiki.Uri',
+				'web2017-polyfills',
 			],
 		],
 
@@ -127,15 +152,15 @@ return call_user_func( function() {
 					"name" => "config.json",
 					"callback" => function () {
 						return [
-							'entityTypes' => WikibaseRepo::getEntityTypesConfigValue()
+							'entityTypes' => WikibaseRepo::getEntityTypesConfigValue(),
 						];
-					}
+					},
 				],
 			],
 			'dependencies' => [
 				'wikibase',
-				'wikibase.serialization'
-			]
+				'wikibase.serialization',
+			],
 		],
 
 		'wikibase.getUserLanguages' => $moduleTemplate + [
@@ -146,18 +171,16 @@ return call_user_func( function() {
 					'callback' => function () {
 						return WikibaseRepo::getTermsLanguages()->getLanguages();
 					},
-				]
+				],
 			],
 			'dependencies' => [
 				'wikibase',
 			],
-			'targets' => [ 'desktop', 'mobile' ],
 		],
 
 		'wikibase.ui.entityViewInit' => [
 			'packageFiles' => [
 				'repo/resources/wikibase.ui.entityViewInit.js',
-
 				'repo/resources/experts/getStore.js',
 				'repo/resources/dataTypes/wikibase.dataTypeStore.js',
 				'repo/resources/dataTypes/DataTypeStore.js',
@@ -192,22 +215,26 @@ return call_user_func( function() {
 					"name" => "repo/resources/config.json",
 					"callback" => function () {
 						$settings = WikibaseRepo::getSettings();
+						$tempUserEnabled = MediaWikiServices::getInstance()->getTempUserConfig()->isEnabled();
+						$dataTypeDefinitions = WikibaseRepo::getDataTypeDefinitions();
 						return [
 							'geoShapeStorageApiEndpoint' => $settings->getSetting( 'geoShapeStorageApiEndpointUrl' ),
 							'tags' => $settings->getSetting( 'viewUiTags' ),
+							'tempUserEnabled' => $tempUserEnabled,
+							'dataTypes' => $dataTypeDefinitions->getTypeIds(),
+							'valueTypes' => array_values( array_unique( $dataTypeDefinitions->getValueTypes() ) ),
 						];
-					}
+					},
 				],
 			],
 			'styles' => [
-				'view/resources/jquery/wikibase/toolbar/themes/default/jquery.wikibase.toolbaritem.css',
-				'view/resources/jquery/wikibase/toolbar/themes/default/jquery.wikibase.edittoolbar.css',
+				'view/resources/jquery/wikibase/toolbar/themes/default/jquery.wikibase.toolbaritem.less',
+				'view/resources/jquery/wikibase/toolbar/themes/default/jquery.wikibase.edittoolbar.less',
 			],
 			'dependencies' => [
 				'mediawiki.api',
 				'mediawiki.cookie',
 				'mediawiki.page.watch.ajax',
-				'mediawiki.Uri',
 				'mediawiki.user',
 				'mw.config.values.wbRepo',
 				'mw.config.values.wbDataTypes',
@@ -269,7 +296,16 @@ return call_user_func( function() {
 			],
 			'messages' => [
 				'searchsuggest-containing',
-			]
+			],
+		],
+
+		'wikibase.vector.searchClient' => $moduleTemplate + [
+			'packageFiles' => [
+				'wikibase.vector.searchClient.js',
+			],
+			'messages' => [
+				'parentheses',
+			],
 		],
 
 		/* Wikibase special pages */
@@ -279,20 +315,20 @@ return call_user_func( function() {
 				'wikibase.special/wikibase.special.newEntity.js',
 			],
 			'styles' => [
-				'../../view/resources/wikibase/wikibase.less'
-			]
+				'../../view/resources/wikibase/wikibase.less',
+			],
 		],
 
 		'wikibase.special.mergeItems' => $moduleTemplate + [
 			'scripts' => [
 				'wikibase.special/wikibase.special.mergeItems.js',
-			]
+			],
 		],
 
 		'wikibase.experts.modules' => $moduleTemplate + [
 				'factory' => function () {
 					return WikibaseRepo::getPropertyValueExpertsModule();
-				}
+				},
 		],
 
 		'wikibase.sites' => $moduleTemplate + [
@@ -317,7 +353,7 @@ return call_user_func( function() {
 								PHP_URL_HOST
 							);
 						},
-					]
+					],
 				],
 				'dependencies' => [
 					'oojs-ui',
@@ -327,8 +363,8 @@ return call_user_func( function() {
 					'wikibase-federated-properties-leaving-site-notice-continue',
 					'wikibase-federated-properties-leaving-site-notice-notice',
 					'wikibase-federated-properties-leaving-site-notice-header',
-					'wikibase-federated-properties-leaving-site-notice-checkbox-label'
-				]
+					'wikibase-federated-properties-leaving-site-notice-checkbox-label',
+				],
 		],
 
 		'wikibase.federatedPropertiesEditRequestFailureNotice' => $moduleTemplate + [
@@ -342,7 +378,7 @@ return call_user_func( function() {
 				'wikibase-federated-properties-edit-request-failed-notice-try-again',
 				'wikibase-federated-properties-edit-request-failed-notice-notice',
 				'wikibase-federated-properties-edit-request-failed-notice-header',
-			]
+			],
 		],
 
 	];

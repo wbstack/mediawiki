@@ -1,17 +1,28 @@
-var
+const
 	Drawer = require( './Drawer' ),
 	util = require( './util' ),
 	Button = require( './Button' ),
 	Anchor = require( './Anchor' );
 
 /**
- * @typedef {string|number|boolean|undefined} QueryVal
- * @typedef {Object.<string, QueryVal|QueryVal[]>} QueryParams
+ * Represents a query string value.
  *
- * @typedef {Object} Options
+ * @typedef {string|number|boolean|undefined|string[]|boolean[]} module:mobile.startup~QueryVal
+ */
+/**
+ * Describes a combination of query string parameters.
+ *
+ * @typedef {Object.<string, module:mobile.startup~QueryVal>} module:mobile.startup~QueryParams
+ */
+
+/**
+ * Describes a call to action drawer.
+ *
+ * @memberof module:mobile.startup
+ * @typedef {Object} CtaOptions
  * @prop {string} [returnTo]
- * @prop {QueryParams} [queryParams]
- * @prop {QueryParams} [signupQueryParams]
+ * @prop {module:mobile.startup~QueryParams} [queryParams]
+ * @prop {module:mobile.startup~QueryParams} [signupQueryParams]
  * @prop {Object} [progressiveButton] button options for Button element for signing in.
  *  If omitted will create a login URL.
  * @prop {Object} [actionAnchor] anchor options for Anchor element for signing up. If omitted
@@ -20,18 +31,17 @@ var
  */
 
 /**
- * This creates the drawer at the bottom of the screen that appears when an anonymous
+ * Internal for use inside Minerva only, creates the drawer at the bottom of the screen that appears when an anonymous
  * user tries to perform an action that requires being logged in. It presents the user
  * with options to log in or sign up for a new account.
  *
- * @uses Button
- * @uses Icon
- * @uses Anchor
- * @param {Options} options
- * @return {Drawer}
+ * @function CtaDrawer
+ * @memberof module:mobile.startup
+ * @param {module:mobile.startup.CtaOptions} options Options for drawer.
+ * @return {module:mobile.startup/Drawer}
  */
 function CtaDrawer( options = {} ) {
-	var params = redirectParams( options.queryParams, options.returnTo );
+	const params = redirectParams( options.queryParams, options.returnTo );
 	return new Drawer(
 		util.extend( {
 			children: [
@@ -59,6 +69,7 @@ function CtaDrawer( options = {} ) {
 /**
  * Special:UserLogin post-request redirect query parameters.
  *
+ * @ignore
  * @param {QueryParams} params
  * @param {string} [redirectURL]
  * @return {QueryParams}
@@ -73,6 +84,7 @@ function redirectParams( params, redirectURL ) {
 /**
  * Special:UserLogin account creation query parameters.
  *
+ * @ignore
  * @param {...QueryParams} params
  * @return {QueryParams}
  */
@@ -82,8 +94,8 @@ function signUpParams() {
 }
 
 CtaDrawer.prototype.test = {
-	redirectParams: redirectParams,
-	signUpParams: signUpParams
+	redirectParams,
+	signUpParams
 };
 
 module.exports = CtaDrawer;

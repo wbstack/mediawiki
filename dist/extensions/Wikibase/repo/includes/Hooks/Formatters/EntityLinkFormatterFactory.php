@@ -2,7 +2,8 @@
 
 namespace Wikibase\Repo\Hooks\Formatters;
 
-use Language;
+use MediaWiki\Language\Language;
+use MediaWiki\Languages\LanguageFactory;
 use Wikibase\Lib\Store\EntityTitleTextLookup;
 use Wikimedia\Assert\Assert;
 
@@ -23,15 +24,20 @@ class EntityLinkFormatterFactory {
 
 	/**
 	 * @param EntityTitleTextLookup $entityTitleTextLookup
+	 * @param LanguageFactory $languageFactory
 	 * @param callable[] $callbacks maps entity type strings to callbacks returning LinkFormatter
 	 */
-	public function __construct( EntityTitleTextLookup $entityTitleTextLookup, array $callbacks ) {
+	public function __construct(
+		EntityTitleTextLookup $entityTitleTextLookup,
+		LanguageFactory $languageFactory,
+		array $callbacks
+	) {
 		Assert::parameterElementType( 'callable', $callbacks, '$callbacks' );
 
 		$this->callbacks = array_merge(
 			$callbacks,
-			[ 'default' => function ( Language $language ) use ( $entityTitleTextLookup ): EntityLinkFormatter {
-				return new DefaultEntityLinkFormatter( $language, $entityTitleTextLookup );
+			[ 'default' => function ( Language $language ) use ( $entityTitleTextLookup, $languageFactory ): EntityLinkFormatter {
+				return new DefaultEntityLinkFormatter( $language, $entityTitleTextLookup, $languageFactory );
 			} ]
 		);
 	}

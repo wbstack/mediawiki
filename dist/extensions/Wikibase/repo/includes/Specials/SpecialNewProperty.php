@@ -2,8 +2,8 @@
 
 namespace Wikibase\Repo\Specials;
 
-use OutputPage;
-use Status;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Status\Status;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\Property;
 use Wikibase\DataModel\Term\Term;
@@ -12,9 +12,10 @@ use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Summary;
+use Wikibase\Repo\AnonymousEditWarningBuilder;
 use Wikibase\Repo\CopyrightMessageBuilder;
 use Wikibase\Repo\DataTypeSelector;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\Specials\HTMLForm\HTMLAliasesField;
 use Wikibase\Repo\Specials\HTMLForm\HTMLContentLanguageField;
 use Wikibase\Repo\Specials\HTMLForm\HTMLTrimmedTextField;
@@ -36,6 +37,8 @@ class SpecialNewProperty extends SpecialNewEntity {
 	public const FIELD_DESCRIPTION = 'description';
 	public const FIELD_ALIASES = 'aliases';
 
+	private AnonymousEditWarningBuilder $anonymousEditWarningBuilder;
+
 	/** @var DataTypeFactory */
 	private $dataTypeFactory;
 
@@ -56,11 +59,13 @@ class SpecialNewProperty extends SpecialNewEntity {
 		EntityNamespaceLookup $entityNamespaceLookup,
 		SummaryFormatter $summaryFormatter,
 		EntityTitleLookup $entityTitleLookup,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
+		AnonymousEditWarningBuilder $anonymousEditWarningBuilder,
 		DataTypeFactory $dataTypeFactory,
 		TermValidatorFactory $termValidatorFactory,
 		TermsCollisionDetector $termsCollisionDetector,
-		ValidatorErrorLocalizer $errorLocalizer
+		ValidatorErrorLocalizer $errorLocalizer,
+		bool $isMobileView
 	) {
 		parent::__construct(
 			'NewProperty',
@@ -70,9 +75,11 @@ class SpecialNewProperty extends SpecialNewEntity {
 			$entityNamespaceLookup,
 			$summaryFormatter,
 			$entityTitleLookup,
-			$editEntityFactory
+			$editEntityFactory,
+			$isMobileView
 		);
 
+		$this->anonymousEditWarningBuilder = $anonymousEditWarningBuilder;
 		$this->dataTypeFactory = $dataTypeFactory;
 		$this->termValidatorFactory = $termValidatorFactory;
 		$this->termsCollisionDetector = $termsCollisionDetector;
@@ -80,10 +87,12 @@ class SpecialNewProperty extends SpecialNewEntity {
 	}
 
 	public static function factory(
+		AnonymousEditWarningBuilder $anonymousEditWarningBuilder,
 		DataTypeFactory $dataTypeFactory,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		EntityNamespaceLookup $entityNamespaceLookup,
 		EntityTitleLookup $entityTitleLookup,
+		bool $isMobileView,
 		TermsCollisionDetector $propertyTermsCollisionDetector,
 		SettingsArray $repoSettings,
 		SummaryFormatter $summaryFormatter,
@@ -103,10 +112,12 @@ class SpecialNewProperty extends SpecialNewEntity {
 			$summaryFormatter,
 			$entityTitleLookup,
 			$editEntityFactory,
+			$anonymousEditWarningBuilder,
 			$dataTypeFactory,
 			$termValidatorFactory,
 			$propertyTermsCollisionDetector,
-			$errorLocalizer
+			$errorLocalizer,
+			$isMobileView
 		);
 	}
 
@@ -161,7 +172,7 @@ class SpecialNewProperty extends SpecialNewEntity {
 				'class' => HTMLTrimmedTextField::class,
 				'id' => 'wb-newentity-label',
 				'placeholder-message' => 'wikibase-label-edit-placeholder',
-				'label-message' => 'wikibase-newentity-label'
+				'label-message' => 'wikibase-newentity-label',
 			],
 			self::FIELD_DESCRIPTION => [
 				'name' => self::FIELD_DESCRIPTION,
@@ -169,13 +180,13 @@ class SpecialNewProperty extends SpecialNewEntity {
 				'class' => HTMLTrimmedTextField::class,
 				'id' => 'wb-newentity-description',
 				'placeholder-message' => 'wikibase-description-edit-placeholder',
-				'label-message' => 'wikibase-newentity-description'
+				'label-message' => 'wikibase-newentity-description',
 			],
 			self::FIELD_ALIASES => [
 				'name' => self::FIELD_ALIASES,
 				'class' => HTMLAliasesField::class,
 				'id' => 'wb-newentity-aliases',
-			]
+			],
 		];
 
 		$selector = new DataTypeSelector(
@@ -184,7 +195,7 @@ class SpecialNewProperty extends SpecialNewEntity {
 		);
 
 		$options = [
-			$this->msg( 'wikibase-newproperty-pick-data-type' )->text() => ''
+			$this->msg( 'wikibase-newproperty-pick-data-type' )->text() => '',
 		];
 		$formFields[ self::FIELD_DATATYPE ] = [
 			'name' => self::FIELD_DATATYPE,
@@ -199,7 +210,7 @@ class SpecialNewProperty extends SpecialNewEntity {
 
 				return true;
 			},
-			'label-message' => 'wikibase-newproperty-datatype'
+			'label-message' => 'wikibase-newproperty-datatype',
 		];
 
 		return $formFields;
@@ -220,10 +231,7 @@ class SpecialNewProperty extends SpecialNewEntity {
 	protected function getWarnings() {
 		if ( !$this->getUser()->isRegistered() ) {
 			return [
-				$this->msg(
-					'wikibase-anonymouseditwarning',
-					$this->msg( 'wikibase-entity-property' )
-				)->parse(),
+				$this->anonymousEditWarningBuilder->buildAnonymousEditWarningHTML( $this->getFullTitle()->getPrefixedText() ),
 			];
 		}
 
@@ -255,11 +263,19 @@ class SpecialNewProperty extends SpecialNewEntity {
 			$validator = $this->termValidatorFactory->getLabelValidator( $this->getEntityType() );
 			$result = $validator->validate( $formData[self::FIELD_LABEL] );
 			$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
+
+			$validator = $this->termValidatorFactory->getLabelLanguageValidator();
+			$result = $validator->validate( $formData[self::FIELD_LANG] );
+			$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
 		}
 
 		if ( $formData[self::FIELD_DESCRIPTION] != '' ) {
 			$validator = $this->termValidatorFactory->getDescriptionValidator();
 			$result = $validator->validate( $formData[self::FIELD_DESCRIPTION] );
+			$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
+
+			$validator = $this->termValidatorFactory->getDescriptionLanguageValidator();
+			$result = $validator->validate( $formData[self::FIELD_LANG] );
 			$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
 		}
 
@@ -271,6 +287,10 @@ class SpecialNewProperty extends SpecialNewEntity {
 			}
 
 			$result = $validator->validate( implode( '|', $formData[self::FIELD_ALIASES] ) );
+			$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
+
+			$validator = $this->termValidatorFactory->getAliasLanguageValidator();
+			$result = $validator->validate( $formData[self::FIELD_LANG] );
 			$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
 		}
 

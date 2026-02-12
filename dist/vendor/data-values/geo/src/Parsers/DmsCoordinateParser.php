@@ -11,6 +11,7 @@ use ValueParsers\ParserOptions;
  * Parser for geographical coordinates in Degree Minute Second notation.
  *
  * @since 0.1
+ * @api
  *
  * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
@@ -27,13 +28,12 @@ class DmsCoordinateParser extends DmCoordinateParser {
 	public const OPT_SECOND_SYMBOL = 'second';
 
 	/**
-	 * @param ParserOptions|null $options
+	 * @param ?ParserOptions $options
 	 */
-	public function __construct( ParserOptions $options = null ) {
-		$options = $options ?: new ParserOptions();
-		$options->defaultOption( self::OPT_SECOND_SYMBOL, '"' );
-
-		parent::__construct( $options );
+	public function __construct( ?ParserOptions $options = null ) {
+		parent::__construct(
+			( $options ?: new ParserOptions() )->withDefaultOption( self::OPT_SECOND_SYMBOL, '"' )
+		);
 
 		$this->defaultDelimiters = [ $this->getOption( self::OPT_SECOND_SYMBOL ) ];
 	}
@@ -68,14 +68,14 @@ class DmsCoordinateParser extends DmCoordinateParser {
 		$directional = false;
 
 		foreach ( $normalizedCoordinateSegments as $i => $segment ) {
-			$direction = '('
-				. $this->getOption( self::OPT_NORTH_SYMBOL ) . '|'
-				. $this->getOption( self::OPT_SOUTH_SYMBOL ) . ')';
-
 			if ( $i === 1 ) {
 				$direction = '('
 					. $this->getOption( self::OPT_EAST_SYMBOL ) . '|'
 					. $this->getOption( self::OPT_WEST_SYMBOL ) . ')';
+			} else {
+				$direction = '('
+					. $this->getOption( self::OPT_NORTH_SYMBOL ) . '|'
+					. $this->getOption( self::OPT_SOUTH_SYMBOL ) . ')';
 			}
 
 			$match = preg_match(
@@ -130,11 +130,7 @@ class DmsCoordinateParser extends DmCoordinateParser {
 		);
 		$coordinates = str_replace( [ '&acute;', '&#180;' ], $second, $coordinates );
 
-		$coordinates = parent::getNormalizedNotation( $coordinates );
-
-		$coordinates = $this->removeInvalidChars( $coordinates );
-
-		return $coordinates;
+		return $this->removeInvalidChars( parent::getNormalizedNotation( $coordinates ) );
 	}
 
 	/**
@@ -192,7 +188,7 @@ class DmsCoordinateParser extends DmCoordinateParser {
 			$coordinateSegment *= -1;
 		}
 
-		return (float)$coordinateSegment;
+		return $coordinateSegment;
 	}
 
 }

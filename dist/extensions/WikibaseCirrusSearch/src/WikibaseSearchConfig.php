@@ -2,7 +2,9 @@
 
 namespace Wikibase\Search\Elastic;
 
-use Config;
+use MediaWiki\Config\Config;
+use MediaWiki\Config\ConfigException;
+use MediaWiki\Config\GlobalVarConfig;
 
 /**
  * Config class for Wikibase search configs.
@@ -14,7 +16,7 @@ class WikibaseSearchConfig implements Config {
 
 	/**
 	 * Global config.
-	 * @var \GlobalVarConfig
+	 * @var GlobalVarConfig
 	 */
 	private $globals;
 
@@ -25,7 +27,7 @@ class WikibaseSearchConfig implements Config {
 	private $wikibaseSettings;
 
 	public function __construct( array $wikibaseSettings ) {
-		$this->globals = new \GlobalVarConfig( self::WIKIBASE_SEARCH_CONFIG_PREFIX );
+		$this->globals = new GlobalVarConfig( self::WIKIBASE_SEARCH_CONFIG_PREFIX );
 		$this->wikibaseSettings = $wikibaseSettings;
 	}
 
@@ -43,7 +45,7 @@ class WikibaseSearchConfig implements Config {
 	 * @param string $name Name of configuration option
 	 * @param mixed $default Return if value not found.
 	 * @return mixed Value configured
-	 * @throws \ConfigException
+	 * @throws ConfigException
 	 */
 	public function get( $name, $default = null ) {
 		$compat_name = lcfirst( $name );

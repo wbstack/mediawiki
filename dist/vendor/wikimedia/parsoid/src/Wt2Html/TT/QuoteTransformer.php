@@ -158,7 +158,7 @@ class QuoteTransformer extends TokenHandler {
 	 * @return TokenHandlerResult
 	 */
 	private function onQuote( Token $token ): TokenHandlerResult {
-		$v = $token->getAttribute( 'value' );
+		$v = $token->getAttributeV( 'value' );
 		$qlen = strlen( $v );
 		$this->env->log(
 			"trace/quote",
@@ -204,7 +204,7 @@ class QuoteTransformer extends TokenHandler {
 
 		if (
 			( $token->getName() === 'td' || $token->getName() === 'th' ) &&
-			( $token->dataAttribs->stx ?? '' ) === 'html'
+			( $token->dataParsoid->stx ?? '' ) === 'html'
 		) {
 			return null;
 		}
@@ -216,7 +216,7 @@ class QuoteTransformer extends TokenHandler {
 		for ( $i = 1; $i < $chunkCount; $i += 2 ) {
 			// quote token
 			Assert::invariant( count( $this->chunks[$i] ) === 1, 'Expected a single token in the chunk' );
-			$qlen = strlen( $this->chunks[$i][0]->getAttribute( "value" ) );
+			$qlen = strlen( $this->chunks[$i][0]->getAttributeV( "value" ) );
 			if ( $qlen === 2 || $qlen === 5 ) {
 				$numitalics++;
 			}
@@ -233,13 +233,13 @@ class QuoteTransformer extends TokenHandler {
 			$chunkCount = count( $this->chunks );
 			for ( $i = 1; $i < $chunkCount; $i += 2 ) {
 				// only look at bold tags
-				if ( strlen( $this->chunks[$i][0]->getAttribute( "value" ) ) !== 3 ) {
+				if ( strlen( $this->chunks[$i][0]->getAttributeV( "value" ) ) !== 3 ) {
 					continue;
 				}
 
 				$tok = $this->chunks[$i][0];
-				$lastCharIsSpace = $tok->getAttribute( 'isSpace_1' );
-				$secondLastCharIsSpace = $tok->getAttribute( 'isSpace_2' );
+				$lastCharIsSpace = $tok->getAttributeV( 'isSpace_1' );
+				$secondLastCharIsSpace = $tok->getAttributeV( 'isSpace_2' );
 				if ( $lastCharIsSpace && $firstspace === -1 ) {
 					$firstspace = $i;
 				} elseif ( !$lastCharIsSpace ) {
@@ -301,13 +301,13 @@ class QuoteTransformer extends TokenHandler {
 	private function convertBold( int $i ): void {
 		// this should be a bold tag.
 		Assert::invariant( $i > 0 && count( $this->chunks[$i] ) === 1
-			&& strlen( $this->chunks[$i][0]->getAttribute( "value" ) ) === 3,
+			&& strlen( $this->chunks[$i][0]->getAttributeV( "value" ) ) === 3,
 			'this should be a bold tag' );
 
 		// we're going to convert it to a single plain text ' plus an italic tag
 		$this->chunks[$i - 1][] = "'";
 		$oldbold = $this->chunks[$i][0];
-		$tsr = $oldbold->dataAttribs->tsr ?? null;
+		$tsr = $oldbold->dataParsoid->tsr ?? null;
 		if ( $tsr ) {
 			$tsr = new SourceRange( $tsr->start + 1, $tsr->end );
 		}
@@ -329,7 +329,7 @@ class QuoteTransformer extends TokenHandler {
 		$chunkCount = count( $this->chunks );
 		for ( $i = 1; $i < $chunkCount; $i += 2 ) {
 			Assert::invariant( count( $this->chunks[$i] ) === 1, 'expected count chunks[i] == 1' );
-			$qlen = strlen( $this->chunks[$i][0]->getAttribute( "value" ) );
+			$qlen = strlen( $this->chunks[$i][0]->getAttributeV( "value" ) );
 			if ( $qlen === 2 ) {
 				if ( $state === 'i' ) {
 					$this->quoteToTag( $i, [ new EndTagTk( 'i' ) ] );
@@ -407,15 +407,15 @@ class QuoteTransformer extends TokenHandler {
 		}
 		if ( $state === 'b' || $state === 'ib' ) {
 			$this->currentChunk[] = new EndTagTk( 'b' );
-			$this->last["b"]->dataAttribs->autoInsertedEndToken = true;
+			$this->last["b"]->dataParsoid->autoInsertedEndToken = true;
 		}
 		if ( $state === 'i' || $state === 'bi' || $state === 'ib' ) {
 			$this->currentChunk[] = new EndTagTk( 'i' );
-			$this->last["i"]->dataAttribs->autoInsertedEndToken = true;
+			$this->last["i"]->dataParsoid->autoInsertedEndToken = true;
 		}
 		if ( $state === 'bi' ) {
 			$this->currentChunk[] = new EndTagTk( 'b' );
-			$this->last["b"]->dataAttribs->autoInsertedEndToken = true;
+			$this->last["b"]->dataParsoid->autoInsertedEndToken = true;
 		}
 	}
 
@@ -431,22 +431,22 @@ class QuoteTransformer extends TokenHandler {
 		$result = [];
 		$oldtag = $this->chunks[$chunk][0];
 		// make tsr
-		$tsr = $oldtag->dataAttribs->tsr ?? null;
+		$tsr = $oldtag->dataParsoid->tsr ?? null;
 		$startpos = $tsr ? $tsr->start : null;
 		$endpos = $tsr ? $tsr->end : null;
 		$numTags = count( $tags );
 		for ( $i = 0; $i < $numTags; $i++ ) {
 			if ( $tsr ) {
 				if ( $i === 0 && $ignoreBogusTwo ) {
-					$this->last[$tags[$i]->getName()]->dataAttribs->autoInsertedEndToken = true;
+					$this->last[$tags[$i]->getName()]->dataParsoid->autoInsertedEndToken = true;
 				} elseif ( $i === 2 && $ignoreBogusTwo ) {
-					$tags[$i]->dataAttribs->autoInsertedStartToken = true;
+					$tags[$i]->dataParsoid->autoInsertedStartToken = true;
 				} elseif ( $tags[$i]->getName() === 'b' ) {
-					$tags[$i]->dataAttribs->tsr = new SourceRange( $startpos, $startpos + 3 );
-					$startpos = $tags[$i]->dataAttribs->tsr->end;
+					$tags[$i]->dataParsoid->tsr = new SourceRange( $startpos, $startpos + 3 );
+					$startpos = $tags[$i]->dataParsoid->tsr->end;
 				} elseif ( $tags[$i]->getName() === 'i' ) {
-					$tags[$i]->dataAttribs->tsr = new SourceRange( $startpos, $startpos + 2 );
-					$startpos = $tags[$i]->dataAttribs->tsr->end;
+					$tags[$i]->dataParsoid->tsr = new SourceRange( $startpos, $startpos + 2 );
+					$startpos = $tags[$i]->dataParsoid->tsr->end;
 				}
 			}
 			$this->last[$tags[$i]->getName()] = ( $tags[$i]->getType() === "EndTagTk" ) ? null : $tags[$i];

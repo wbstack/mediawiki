@@ -7,6 +7,7 @@
 			"Uzume"
 		]
 	},
+	"content-model-scribunto": "Modul Scribunto",
 	"scribunto-desc": "Ogrodje za vključevanje skriptnih jezikov v strani MediaWiki",
 	"scribunto-line": "v vrstici $1",
 	"scribunto-module-line": "v $1 v vrstici $2",
@@ -55,15 +56,17 @@
 	"scribunto-limitreport-timeusage": "Poraba časa, Lua",
 	"scribunto-limitreport-timeusage-value": "$1/$2 sekund",
 	"scribunto-limitreport-virtmemusage": "Virtualna velikost Lue",
-	"scribunto-limitreport-virtmemusage-value": "$1/$2 {{PLURAL:$2|zlog|zloga|zlogi|zlogov}}",
+	"scribunto-limitreport-virtmemusage-value": "$1/$2 {{PLURAL:$2|bajt|bajta|bajti|bajtov}}",
 	"scribunto-limitreport-estmemusage": "Ocenjena poraba pomnilnika za Luo",
 	"scribunto-limitreport-estmemusage-value": "$1 {{PLURAL:$1|zlog|zloga|zlogi|zlogov}}",
 	"scribunto-limitreport-memusage": "Poraba pomnilnika za Luo",
-	"scribunto-limitreport-memusage-value": "$1/$2 {{PLURAL:$2|zlog|zloga|zlogi|zlogov}}",
+	"scribunto-limitreport-memusage-value": "$1/$2 {{PLURAL:$2|bajt|bajta|bajti|bajtov}}",
 	"scribunto-limitreport-profile": "Profil Lue",
 	"scribunto-limitreport-profile-ms": "$1 ms",
 	"scribunto-limitreport-profile-percent": "$1%",
 	"scribunto-limitreport-logs": "Dnevniki Lue",
 	"nstab-module": "Modul",
-	"tooltip-ca-nstab-module": "Prikaže stran modula"
+	"tooltip-ca-nstab-module": "Prikaže stran modula",
+	"namespaceinfo-description-ns828": "Imenski prostor za module kode Lua, ki jih je mogoče priklicati s strani vikija in njihovih strani z dokumentacijo",
+	"namespaceinfo-description-ns829": "Pogovorne strani za module in dokumentacijo"
 }

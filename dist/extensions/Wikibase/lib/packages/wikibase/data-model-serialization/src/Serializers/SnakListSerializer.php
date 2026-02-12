@@ -1,11 +1,12 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\DataModel\Serializers;
 
 use Serializers\DispatchableSerializer;
 use Serializers\Exceptions\SerializationException;
 use Serializers\Exceptions\UnsupportedObjectException;
-use Serializers\Serializer;
 use Wikibase\DataModel\Snak\Snak;
 use Wikibase\DataModel\Snak\SnakList;
 
@@ -15,25 +16,13 @@ use Wikibase\DataModel\Snak\SnakList;
  * @license GPL-2.0-or-later
  * @author Thomas Pellissier Tanon
  */
-class SnakListSerializer implements DispatchableSerializer {
+class SnakListSerializer extends MapSerializer implements DispatchableSerializer {
 
-	/**
-	 * @var Serializer
-	 */
-	private $snakSerializer;
+	private SnakSerializer $snakSerializer;
 
-	/**
-	 * @var bool
-	 */
-	private $useObjectsForMaps;
-
-	/**
-	 * @param Serializer $snakSerializer
-	 * @param bool $useObjectsForMaps
-	 */
-	public function __construct( Serializer $snakSerializer, $useObjectsForMaps ) {
+	public function __construct( SnakSerializer $snakSerializer, bool $useObjectsForEmptyMaps ) {
+		parent::__construct( $useObjectsForEmptyMaps );
 		$this->snakSerializer = $snakSerializer;
-		$this->useObjectsForMaps = $useObjectsForMaps;
 	}
 
 	/**
@@ -62,11 +51,10 @@ class SnakListSerializer implements DispatchableSerializer {
 				'SnakListSerializer can only serialize SnakList objects'
 			);
 		}
-
-		return $this->getSerialized( $object );
+		return $this->serializeMap( $this->generateSerializedArrayRepresentation( $object ) );
 	}
 
-	private function getSerialized( SnakList $snaks ) {
+	protected function generateSerializedArrayRepresentation( SnakList $snaks ): array {
 		$serialization = [];
 
 		/**
@@ -77,10 +65,6 @@ class SnakListSerializer implements DispatchableSerializer {
 			$serialization[$propertyId][] = $this->snakSerializer->serialize( $snak );
 		}
 
-		if ( $this->useObjectsForMaps ) {
-			$serialization = (object)$serialization;
-		}
 		return $serialization;
 	}
-
 }

@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ne"
+		]
+	},
+	"advancedsearch-options-pane-head": "alasa wawa:",
+	"advancedsearch-optgroup-text": "alasa nimi",
+	"advancedsearch-optgroup-structure": "lipu",
+	"advancedsearch-optgroup-files": "sitelen",
+	"advancedsearch-optgroup-sort": "nasin",
+	"advancedsearch-field-plain": "nimi ni",
+	"advancedsearch-field-phrase": "nimi ale ni",
+	"advancedsearch-field-or": "nimi wan lon kulupu nimi ni",
+	"advancedsearch-field-not": "nimi ni ala",
+	"advancedsearch-field-intitle": "nimi lipu li jo e nimi ni",
+	"advancedsearch-field-deepcategory": "lipu pi kulupu ni",
+	"advancedsearch-field-inlanguage": "lipu pi toki ni",
+	"advancedsearch-namespaces-search-in": "o alasa lon:",
+	"advancedsearch-namespaces-preset-all": "ale",
+	"advancedsearch-namespaces-preset-default": "lipu",
+	"advancedsearch-namespaces-preset-general-help": "sona",
+	"advancedsearch-namespaces-preset-discussion": "toki",
+	"prefs-advancedsearch": "alasa wawa"
+}

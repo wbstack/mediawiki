@@ -26,14 +26,19 @@
  * @file
  */
 
-use MediaWiki\HookContainer\HookContainer;
-use MediaWiki\HookContainer\HookRunner;
+use MediaWiki\Content\TextContent;
+use MediaWiki\Context\IContextSource;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MainConfigNames;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\ParserOptions;
 use MediaWiki\Permissions\PermissionManager;
 use MediaWiki\Permissions\RestrictionStore;
 use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\Session\SessionManager;
+use MediaWiki\User\UserFactory;
+use MediaWiki\User\UserRigorOptions;
 
 /**
  * A simple method to retrieve the plain source of an article,
@@ -43,47 +48,39 @@ use MediaWiki\Revision\SlotRecord;
  */
 class RawAction extends FormlessAction {
 
-	/** @var HookRunner */
-	private $hookRunner;
-
-	/** @var Parser */
-	private $parser;
-
-	/** @var PermissionManager */
-	private $permissionManager;
-
-	/** @var RevisionLookup */
-	private $revisionLookup;
-
-	/** @var RestrictionStore */
-	private $restrictionStore;
+	private Parser $parser;
+	private PermissionManager $permissionManager;
+	private RevisionLookup $revisionLookup;
+	private RestrictionStore $restrictionStore;
+	private UserFactory $userFactory;
 
 	/**
-	 * @param Page $page
+	 * @param Article $article
 	 * @param IContextSource $context
-	 * @param HookContainer $hookContainer
 	 * @param Parser $parser
 	 * @param PermissionManager $permissionManager
 	 * @param RevisionLookup $revisionLookup
 	 * @param RestrictionStore $restrictionStore
+	 * @param UserFactory $userFactory
 	 */
 	public function __construct(
-		Page $page,
+		Article $article,
 		IContextSource $context,
-		HookContainer $hookContainer,
 		Parser $parser,
 		PermissionManager $permissionManager,
 		RevisionLookup $revisionLookup,
-		RestrictionStore $restrictionStore
+		RestrictionStore $restrictionStore,
+		UserFactory $userFactory
 	) {
-		parent::__construct( $page, $context );
-		$this->hookRunner = new HookRunner( $hookContainer );
+		parent::__construct( $article, $context );
 		$this->parser = $parser;
 		$this->permissionManager = $permissionManager;
 		$this->revisionLookup = $revisionLookup;
 		$this->restrictionStore = $restrictionStore;
+		$this->userFactory = $userFactory;
 	}
 
+	/** @inheritDoc */
 	public function getName() {
 		return 'raw';
 	}
@@ -109,7 +106,8 @@ class RawAction extends FormlessAction {
 		if ( $this->getOutput()->checkLastModified(
 			$this->getWikiPage()->getTouched()
 		) ) {
-			return null; // Client cache fresh and headers sent, nothing more to do.
+			// Client cache fresh and headers sent, nothing more to do.
+			return null;
 		}
 
 		$contentType = $this->getContentType();
@@ -118,12 +116,12 @@ class RawAction extends FormlessAction {
 		$smaxage = $request->getIntOrNull( 'smaxage' );
 		if ( $smaxage === null ) {
 			if (
-				$contentType == 'text/css' ||
-				$contentType == 'application/json' ||
-				$contentType == 'text/javascript'
+				$contentType === 'text/css' ||
+				$contentType === 'application/json' ||
+				$contentType === 'text/javascript'
 			) {
 				// CSS/JSON/JS raw content has its own CDN max age configuration.
-				// Note: HtmlCacheUpdater::getUrls() includes action=raw for css/json/js
+				// Note: HTMLCacheUpdater::getUrls() includes action=raw for css/json/js
 				// pages, so if using the canonical url, this will get HTCP purges.
 				$smaxage = intval( $config->get( MainConfigNames::ForcedRawSMaxage ) );
 			} else {
@@ -138,8 +136,8 @@ class RawAction extends FormlessAction {
 		// Output may contain user-specific data;
 		// vary generated content for open sessions on private wikis
 		$privateCache = !$this->permissionManager->isEveryoneAllowed( 'read' ) &&
-			( $smaxage == 0 || MediaWiki\Session\SessionManager::getGlobalSession()->isPersistent() );
-		// Don't accidentally cache cookies if user is registered (T55032)
+			( $smaxage === 0 || SessionManager::getGlobalSession()->isPersistent() );
+		// Don't accidentally cache cookies if the user is registered (T55032)
 		$privateCache = $privateCache || $this->getUser()->isRegistered();
 		$mode = $privateCache ? 'private' : 'public';
 		$response->header(
@@ -155,7 +153,7 @@ class RawAction extends FormlessAction {
 			// not using getRootText() as we want this to work
 			// even if subpages are disabled.
 			$rootPage = strtok( $title->getText(), '/' );
-			$userFromTitle = User::newFromName( $rootPage, 'usable' );
+			$userFromTitle = $this->userFactory->newFromName( $rootPage, UserRigorOptions::RIGOR_USABLE );
 			if ( !$userFromTitle || !$userFromTitle->isRegistered() ) {
 				$elevated = $this->getAuthority()->isAllowed( 'editinterface' );
 				$elevatedText = $elevated ? 'by elevated ' : '';
@@ -174,9 +172,9 @@ class RawAction extends FormlessAction {
 		}
 
 		// Don't allow loading non-protected pages as javascript.
-		// In future we may further restrict this to only CONTENT_MODEL_JAVASCRIPT
+		// In the future, we may further restrict this to only CONTENT_MODEL_JAVASCRIPT
 		// in NS_MEDIAWIKI or NS_USER, as well as including other config types,
-		// but for now be more permissive. Allowing protected pages outside of
+		// but for now be more permissive. Allowing protected pages outside
 		// NS_USER and NS_MEDIAWIKI in particular should be considered a temporary
 		// allowance.
 		$pageRestrictions = $this->restrictionStore->getRestrictions( $title, 'edit' );
@@ -203,14 +201,14 @@ class RawAction extends FormlessAction {
 		$text = $this->getRawText();
 
 		// Don't return a 404 response for CSS or JavaScript;
-		// 404s aren't generally cached and it would create
+		// 404s aren't generally cached, and it would create
 		// extra hits when user CSS/JS are on and the user doesn't
 		// have the pages.
-		if ( $text === false && $contentType == 'text/x-wiki' ) {
+		if ( $text === false && $contentType === 'text/x-wiki' ) {
 			$response->statusHeader( 404 );
 		}
 
-		if ( !$this->hookRunner->onRawPageViewBeforeOutput( $this, $text ) ) {
+		if ( !$this->getHookRunner()->onRawPageViewBeforeOutput( $this, $text ) ) {
 			wfDebug( __METHOD__ . ": RawPageViewBeforeOutput hook broke raw page output." );
 		}
 
@@ -223,7 +221,7 @@ class RawAction extends FormlessAction {
 	 * Get the text that should be returned, or false if the page or revision
 	 * was not found.
 	 *
-	 * @return string|bool
+	 * @return string|false
 	 */
 	public function getRawText() {
 		$text = false;
@@ -233,8 +231,8 @@ class RawAction extends FormlessAction {
 		// Get it from the DB
 		$rev = $this->revisionLookup->getRevisionByTitle( $title, $this->getOldId() );
 		if ( $rev ) {
-			$lastmod = wfTimestamp( TS_RFC2822, $rev->getTimestamp() );
-			$request->response()->header( "Last-modified: $lastmod" );
+			$lastMod = wfTimestamp( TS_RFC2822, $rev->getTimestamp() );
+			$request->response()->header( "Last-modified: $lastMod" );
 
 			// Public-only due to cache headers
 			// Fetch specific slot if defined
@@ -250,11 +248,14 @@ class RawAction extends FormlessAction {
 			}
 
 			if ( $content === null ) {
-				// revision or slot not found (or suppressed)
-			} elseif ( !$content instanceof TextContent ) {
+				// revision or slot was not found (or suppressed)
+			} elseif ( !$content instanceof TextContent && !method_exists( $content, 'getText' ) ) {
 				// non-text content
-				wfHttpError( 415, "Unsupported Media Type", "The requested page uses the content model `"
-					. $content->getModel() . "` which is not supported via this interface." );
+				wfHttpError(
+					415,
+					"Unsupported Media Type", "The requested page uses the content model `"
+					. $content->getModel() . "` which is not supported via this interface."
+				);
 				die();
 			} else {
 				// want a section?
@@ -263,9 +264,8 @@ class RawAction extends FormlessAction {
 					$content = $content->getSection( $section );
 				}
 
-				if ( $content === null || $content === false ) {
-					// section not found (or section not supported, e.g. for JS, JSON, and CSS)
-				} else {
+				if ( $content !== null && $content !== false ) {
+					// section found (and section supported, e.g. not for JS, JSON, and CSS)
 					$text = $content->getText();
 				}
 			}
@@ -283,49 +283,49 @@ class RawAction extends FormlessAction {
 	}
 
 	/**
-	 * Get the ID of the revision that should used to get the text.
+	 * Get the ID of the revision that should be used to get the text.
 	 *
 	 * @return int
 	 */
 	public function getOldId() {
-		$oldid = $this->getRequest()->getInt( 'oldid' );
+		$oldId = $this->getRequest()->getInt( 'oldid' );
 		$rl = $this->revisionLookup;
 		switch ( $this->getRequest()->getText( 'direction' ) ) {
 			case 'next':
 				# output next revision, or nothing if there isn't one
 				$nextRev = null;
-				if ( $oldid ) {
-					$oldRev = $rl->getRevisionById( $oldid );
+				if ( $oldId ) {
+					$oldRev = $rl->getRevisionById( $oldId );
 					if ( $oldRev ) {
 						$nextRev = $rl->getNextRevision( $oldRev );
 					}
 				}
-				$oldid = $nextRev ? $nextRev->getId() : -1;
+				$oldId = $nextRev ? $nextRev->getId() : -1;
 				break;
 			case 'prev':
 				# output previous revision, or nothing if there isn't one
 				$prevRev = null;
-				if ( !$oldid ) {
+				if ( !$oldId ) {
 					# get the current revision so we can get the penultimate one
-					$oldid = $this->getWikiPage()->getLatest();
+					$oldId = $this->getWikiPage()->getLatest();
 				}
-				$oldRev = $rl->getRevisionById( $oldid );
+				$oldRev = $rl->getRevisionById( $oldId );
 				if ( $oldRev ) {
 					$prevRev = $rl->getPreviousRevision( $oldRev );
 				}
-				$oldid = $prevRev ? $prevRev->getId() : -1;
+				$oldId = $prevRev ? $prevRev->getId() : -1;
 				break;
 			case 'cur':
-				$oldid = 0;
+				$oldId = 0;
 				break;
 		}
 
 		// @phan-suppress-next-line PhanTypeMismatchReturnNullable RevisionRecord::getId does not return null here
-		return $oldid;
+		return $oldId;
 	}
 
 	/**
-	 * Get the content type to use for the response
+	 * Get the content type to be used for the response
 	 *
 	 * @return string
 	 */
@@ -343,7 +343,7 @@ class RawAction extends FormlessAction {
 			}
 		}
 
-		$allowedCTypes = [
+		static $allowedCTypes = [
 			'text/x-wiki',
 			'text/javascript',
 			'text/css',

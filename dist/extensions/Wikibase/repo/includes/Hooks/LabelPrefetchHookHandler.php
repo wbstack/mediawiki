@@ -4,8 +4,9 @@ namespace Wikibase\Repo\Hooks;
 
 use ChangesList;
 use MediaWiki\Hook\ChangesListInitRowsHook;
-use Title;
-use TitleFactory;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleFactory;
+use Psr\Log\LoggerInterface;
 use Wikibase\DataAccess\PrefetchingTermLookup;
 use Wikibase\DataModel\Services\Term\TermBuffer;
 use Wikibase\Lib\LanguageFallbackChainFactory;
@@ -70,6 +71,7 @@ class LabelPrefetchHookHandler implements ChangesListInitRowsHook {
 		TitleFactory $titleFactory,
 		EntityIdLookup $entityIdLookup,
 		LanguageFallbackChainFactory $languageFallbackChainFactory,
+		LoggerInterface $logger,
 		PrefetchingTermLookup $prefetchingTermLookup,
 		SettingsArray $repoSettings,
 		TermBuffer $termBuffer
@@ -83,7 +85,7 @@ class LabelPrefetchHookHandler implements ChangesListInitRowsHook {
 			$termTypes,
 			$languageFallbackChainFactory,
 			$repoSettings->getSetting( 'federatedPropertiesEnabled' ),
-			new SummaryParsingPrefetchHelper( $prefetchingTermLookup )
+			new SummaryParsingPrefetchHelper( $prefetchingTermLookup, $logger )
 		);
 	}
 
@@ -116,7 +118,7 @@ class LabelPrefetchHookHandler implements ChangesListInitRowsHook {
 
 	/**
 	 * @param ChangesList $list
-	 * @param IResultWrapper|object[] $rows
+	 * @param IResultWrapper|\stdClass[] $rows
 	 */
 	public function onChangesListInitRows( $list, $rows ): void {
 		try {
@@ -140,7 +142,7 @@ class LabelPrefetchHookHandler implements ChangesListInitRowsHook {
 	}
 
 	/**
-	 * @param IResultWrapper|object[] $rows
+	 * @param IResultWrapper|\stdClass[] $rows
 	 *
 	 * @return Title[]
 	 */

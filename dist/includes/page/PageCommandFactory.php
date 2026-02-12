@@ -21,40 +21,39 @@
 
 namespace MediaWiki\Page;
 
-use ActorMigration;
-use BagOStuff;
-use CommentStore;
-use Config;
-use ContentModelChange;
 use JobQueueGroup;
+use LogFormatterFactory;
 use MediaWiki\Cache\BacklinkCacheFactory;
 use MediaWiki\Collation\CollationFactory;
+use MediaWiki\CommentStore\CommentStore;
+use MediaWiki\Config\Config;
 use MediaWiki\Config\ServiceOptions;
+use MediaWiki\Content\ContentModelChange;
 use MediaWiki\Content\IContentHandlerFactory;
 use MediaWiki\EditPage\SpamChecker;
 use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\Linker\LinkTargetLookup;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Permissions\RestrictionStore;
 use MediaWiki\Revision\ArchivedRevisionLookup;
-use MediaWiki\Revision\RevisionStore;
+use MediaWiki\Revision\RevisionStoreFactory;
 use MediaWiki\Storage\PageUpdaterFactory;
+use MediaWiki\Title\NamespaceInfo;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleFactory;
+use MediaWiki\Title\TitleFormatter;
+use MediaWiki\User\ActorMigration;
 use MediaWiki\User\ActorNormalization;
 use MediaWiki\User\UserEditTracker;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserIdentity;
-use MergeHistory;
-use MovePage;
-use NamespaceInfo;
+use MediaWiki\Watchlist\WatchedItemStoreInterface;
 use Psr\Log\LoggerInterface;
-use ReadOnlyMode;
 use RepoGroup;
-use Title;
-use TitleFactory;
-use TitleFormatter;
-use WatchedItemStoreInterface;
 use Wikimedia\Message\ITextFormatter;
+use Wikimedia\ObjectCache\BagOStuff;
 use Wikimedia\Rdbms\LBFactory;
-use WikiPage;
+use Wikimedia\Rdbms\ReadOnlyMode;
 
 /**
  * Implementation of various page action services.
@@ -70,92 +69,38 @@ class PageCommandFactory implements
 	UndeletePageFactory
 {
 
-	/** @var Config */
-	private $config;
-
-	/** @var LBFactory */
-	private $lbFactory;
-
-	/** @var NamespaceInfo */
-	private $namespaceInfo;
-
-	/** @var WatchedItemStoreInterface */
-	private $watchedItemStore;
-
-	/** @var RepoGroup */
-	private $repoGroup;
-
-	/** @var ReadOnlyMode */
-	private $readOnlyMode;
-
-	/** @var IContentHandlerFactory */
-	private $contentHandlerFactory;
-
-	/** @var RevisionStore */
-	private $revisionStore;
-
-	/** @var SpamChecker */
-	private $spamChecker;
-
-	/** @var TitleFormatter */
-	private $titleFormatter;
-
-	/** @var HookContainer */
-	private $hookContainer;
-
-	/** @var WikiPageFactory */
-	private $wikiPageFactory;
-
-	/** @var UserFactory */
-	private $userFactory;
-
-	/** @var ActorMigration */
-	private $actorMigration;
-
-	/** @var ActorNormalization */
-	private $actorNormalization;
-
-	/** @var TitleFactory */
-	private $titleFactory;
-
-	/** @var UserEditTracker */
-	private $userEditTracker;
-
-	/** @var CollationFactory */
-	private $collationFactory;
-
-	/** @var JobQueueGroup */
-	private $jobQueueGroup;
-
-	/** @var CommentStore */
-	private $commentStore;
-
-	/** @var BagOStuff */
-	private $mainStash;
-
-	/** @var string */
-	private $localWikiID;
-
-	/** @var string */
-	private $webRequestID;
-
-	/** @var BacklinkCacheFactory */
-	private $backlinkCacheFactory;
-
-	/** @var LoggerInterface */
-	private $undeletePageLogger;
-
-	/** @var PageUpdaterFactory */
-	private $pageUpdaterFactory;
-
-	/** @var ITextFormatter */
-	private $contLangMsgTextFormatter;
-
-	/** @var ArchivedRevisionLookup */
-	private $archivedRevisionLookup;
-
-	/** @var RestrictionStore */
-	private $restrictionStore;
+	private Config $config;
+	private LBFactory $lbFactory;
+	private NamespaceInfo $namespaceInfo;
+	private WatchedItemStoreInterface $watchedItemStore;
+	private RepoGroup $repoGroup;
+	private ReadOnlyMode $readOnlyMode;
+	private IContentHandlerFactory $contentHandlerFactory;
+	private RevisionStoreFactory $revisionStoreFactory;
+	private SpamChecker $spamChecker;
+	private TitleFormatter $titleFormatter;
+	private HookContainer $hookContainer;
+	private WikiPageFactory $wikiPageFactory;
+	private UserFactory $userFactory;
+	private ActorMigration $actorMigration;
+	private ActorNormalization $actorNormalization;
+	private TitleFactory $titleFactory;
+	private UserEditTracker $userEditTracker;
+	private CollationFactory $collationFactory;
+	private JobQueueGroup $jobQueueGroup;
+	private CommentStore $commentStore;
+	private BagOStuff $mainStash;
+	private string $localWikiID;
+	private string $webRequestID;
+	private BacklinkCacheFactory $backlinkCacheFactory;
+	private LoggerInterface $undeletePageLogger;
+	private PageUpdaterFactory $pageUpdaterFactory;
+	private ITextFormatter $contLangMsgTextFormatter;
+	private ArchivedRevisionLookup $archivedRevisionLookup;
+	private RestrictionStore $restrictionStore;
+	private LinkTargetLookup $linkTargetLookup;
+	private RedirectStore $redirectStore;
+	private LogFormatterFactory $logFormatterFactory;
 
 	public function __construct(
 		Config $config,
@@ -165,7 +110,7 @@ class PageCommandFactory implements
 		RepoGroup $repoGroup,
 		ReadOnlyMode $readOnlyMode,
 		IContentHandlerFactory $contentHandlerFactory,
-		RevisionStore $revisionStore,
+		RevisionStoreFactory $revisionStoreFactory,
 		SpamChecker $spamChecker,
 		TitleFormatter $titleFormatter,
 		HookContainer $hookContainer,
@@ -186,7 +131,10 @@ class PageCommandFactory implements
 		PageUpdaterFactory $pageUpdaterFactory,
 		ITextFormatter $contLangMsgTextFormatter,
 		ArchivedRevisionLookup $archivedRevisionLookup,
-		RestrictionStore $restrictionStore
+		RestrictionStore $restrictionStore,
+		LinkTargetLookup $linkTargetLookup,
+		RedirectStore $redirectStore,
+		LogFormatterFactory $logFormatterFactory
 	) {
 		$this->config = $config;
 		$this->lbFactory = $lbFactory;
@@ -195,7 +143,7 @@ class PageCommandFactory implements
 		$this->repoGroup = $repoGroup;
 		$this->readOnlyMode = $readOnlyMode;
 		$this->contentHandlerFactory = $contentHandlerFactory;
-		$this->revisionStore = $revisionStore;
+		$this->revisionStoreFactory = $revisionStoreFactory;
 		$this->spamChecker = $spamChecker;
 		$this->titleFormatter = $titleFormatter;
 		$this->hookContainer = $hookContainer;
@@ -217,26 +165,31 @@ class PageCommandFactory implements
 		$this->contLangMsgTextFormatter = $contLangMsgTextFormatter;
 		$this->archivedRevisionLookup = $archivedRevisionLookup;
 		$this->restrictionStore = $restrictionStore;
+		$this->linkTargetLookup = $linkTargetLookup;
+		$this->redirectStore = $redirectStore;
+		$this->logFormatterFactory = $logFormatterFactory;
 	}
 
 	/**
 	 * @param Authority $performer
-	 * @param WikiPage $wikipage
+	 * @param PageIdentity $page
 	 * @param string $newContentModel
 	 * @return ContentModelChange
 	 */
 	public function newContentModelChange(
 		Authority $performer,
-		WikiPage $wikipage,
+		PageIdentity $page,
 		string $newContentModel
 	): ContentModelChange {
 		return new ContentModelChange(
 			$this->contentHandlerFactory,
 			$this->hookContainer,
-			$this->revisionStore,
+			$this->revisionStoreFactory->getRevisionStore(),
 			$this->userFactory,
+			$this->wikiPageFactory,
+			$this->logFormatterFactory,
 			$performer,
-			$wikipage,
+			$page,
 			$newContentModel
 		);
 	}
@@ -247,7 +200,7 @@ class PageCommandFactory implements
 	public function newDeletePage( ProperPageIdentity $page, Authority $deleter ): DeletePage {
 		return new DeletePage(
 			$this->hookContainer,
-			$this->revisionStore,
+			$this->revisionStoreFactory->getRevisionStore(),
 			$this->lbFactory,
 			$this->jobQueueGroup,
 			$this->commentStore,
@@ -260,6 +213,7 @@ class PageCommandFactory implements
 			$this->backlinkCacheFactory,
 			$this->namespaceInfo,
 			$this->contLangMsgTextFormatter,
+			$this->redirectStore,
 			$page,
 			$deleter
 		);
@@ -274,21 +228,23 @@ class PageCommandFactory implements
 	public function newMergeHistory(
 		PageIdentity $source,
 		PageIdentity $destination,
-		string $timestamp = null
+		?string $timestamp = null
 	): MergeHistory {
 		return new MergeHistory(
 			$source,
 			$destination,
 			$timestamp,
-			$this->lbFactory->getMainLB(),
+			$this->lbFactory,
 			$this->contentHandlerFactory,
-			$this->revisionStore,
+			$this->revisionStoreFactory->getRevisionStore(),
 			$this->watchedItemStore,
 			$this->spamChecker,
 			$this->hookContainer,
 			$this->wikiPageFactory,
 			$this->titleFormatter,
-			$this->titleFactory
+			$this->titleFactory,
+			$this->linkTargetLookup,
+			$this
 		);
 	}
 
@@ -302,12 +258,12 @@ class PageCommandFactory implements
 			$from,
 			$to,
 			new ServiceOptions( MovePage::CONSTRUCTOR_OPTIONS, $this->config ),
-			$this->lbFactory->getMainLB(),
+			$this->lbFactory,
 			$this->namespaceInfo,
 			$this->watchedItemStore,
 			$this->repoGroup,
 			$this->contentHandlerFactory,
-			$this->revisionStore,
+			$this->revisionStoreFactory->getRevisionStore(),
 			$this->spamChecker,
 			$this->hookContainer,
 			$this->wikiPageFactory,
@@ -316,7 +272,9 @@ class PageCommandFactory implements
 			$this,
 			$this->collationFactory,
 			$this->pageUpdaterFactory,
-			$this->restrictionStore
+			$this->restrictionStore,
+			$this,
+			$this->logFormatterFactory
 		);
 	}
 
@@ -335,10 +293,10 @@ class PageCommandFactory implements
 	): RollbackPage {
 		return new RollbackPage(
 			new ServiceOptions( RollbackPage::CONSTRUCTOR_OPTIONS, $this->config ),
-			$this->lbFactory->getMainLB(),
+			$this->lbFactory,
 			$this->userFactory,
 			$this->readOnlyMode,
-			$this->revisionStore,
+			$this->revisionStoreFactory->getRevisionStore(),
 			$this->titleFormatter,
 			$this->hookContainer,
 			$this->wikiPageFactory,
@@ -357,11 +315,11 @@ class PageCommandFactory implements
 		return new UndeletePage(
 			$this->hookContainer,
 			$this->jobQueueGroup,
-			$this->lbFactory->getMainLB(),
+			$this->lbFactory,
 			$this->readOnlyMode,
 			$this->repoGroup,
 			$this->undeletePageLogger,
-			$this->revisionStore,
+			$this->revisionStoreFactory->getRevisionStoreForUndelete(),
 			$this->wikiPageFactory,
 			$this->pageUpdaterFactory,
 			$this->contentHandlerFactory,

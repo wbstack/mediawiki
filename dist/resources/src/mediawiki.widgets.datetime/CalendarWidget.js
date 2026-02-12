@@ -1,7 +1,7 @@
 ( function () {
 
 	/**
-	 * CalendarWidget displays a calendar that can be used to select a date. It
+	 * @classdesc CalendarWidget displays a calendar that can be used to select a date. It
 	 * uses {@link mw.widgets.datetime.DateTimeFormatter DateTimeFormatter} to get the details of
 	 * the calendar.
 	 *
@@ -11,27 +11,26 @@
 	 *
 	 * @class
 	 * @extends OO.ui.Widget
-	 * @mixins OO.ui.mixin.TabIndexedElement
+	 * @mixes OO.ui.mixin.TabIndexedElement
 	 *
 	 * @constructor
+	 * @description Create an instance of `mw.widgets.CalendarWidget`.
 	 * @param {Object} [config] Configuration options
-	 * @cfg {Object|mw.widgets.datetime.DateTimeFormatter} [formatter={}] Configuration options for
-	 *  mw.widgets.datetime.ProlepticGregorianDateTimeFormatter, or an mw.widgets.datetime.DateTimeFormatter
-	 *  instance to use.
-	 * @cfg {OO.ui.Widget|null} [widget=null] Widget associated with the calendar.
+	 * @param {Object|mw.widgets.datetime.DateTimeFormatter} [config.formatter={}] Configuration options for
+	 *  {@link mw.widgets.datetime.ProlepticGregorianDateTimeFormatter}, or an
+	 *  {@link mw.widgets.datetime.DateTimeFormatter} instance to use.
+	 * @param {OO.ui.Widget|null} [config.widget=null] Widget associated with the calendar.
 	 *  Specifying this configures the calendar to be used as a popup from the
 	 *  specified widget (e.g. absolute positioning, automatic hiding when clicked
 	 *  outside).
-	 * @cfg {Date|null} [min=null] Minimum allowed date
-	 * @cfg {Date|null} [max=null] Maximum allowed date
-	 * @cfg {Date} [focusedDate] Initially focused date.
-	 * @cfg {Date|Date[]|null} [selected=null] Selected date(s).
+	 * @param {Date|null} [config.min=null] Minimum allowed date
+	 * @param {Date|null} [config.max=null] Maximum allowed date
+	 * @param {Date} [config.focusedDate] Initially focused date.
+	 * @param {Date|Date[]|null} [config.selected=null] Selected date(s).
 	 */
 	mw.widgets.datetime.CalendarWidget = function MwWidgetsDatetimeCalendarWidget( config ) {
-		var $colgroup, $headTR, headings, i;
-
 		// Configuration initialization
-		config = $.extend( {
+		config = Object.assign( {
 			min: null,
 			max: null,
 			focusedDate: new Date(),
@@ -43,7 +42,7 @@
 		mw.widgets.datetime.CalendarWidget.super.call( this, config );
 
 		// Mixin constructors
-		OO.ui.mixin.TabIndexedElement.call( this, $.extend( {}, config, { $tabIndexed: this.$element } ) );
+		OO.ui.mixin.TabIndexedElement.call( this, Object.assign( {}, config, { $tabIndexed: this.$element } ) );
 
 		// Properties
 		if ( config.min instanceof Date && config.min.getTime() >= -62167219200000 ) {
@@ -126,16 +125,16 @@
 				} ).connect( this, { click: 'onNextClick' } ).$element,
 				this.$header
 			);
-		$colgroup = $( '<colgroup>' );
-		$headTR = $( '<tr>' );
+		const $colgroup = $( '<colgroup>' );
+		const $headTR = $( '<tr>' );
 		this.$table
 			.addClass( 'mw-widgets-datetime-calendarWidget-grid' )
 			.append( $colgroup )
 			.append( $( '<thead>' ).append( $headTR ) )
 			.append( this.$tableBody );
 
-		headings = this.formatter.getCalendarHeadings();
-		for ( i = 0; i < headings.length; i++ ) {
+		const headings = this.formatter.getCalendarHeadings();
+		for ( let i = 0; i < headings.length; i++ ) {
 			this.cols[ i ] = $( '<col>' );
 			this.headings[ i ] = $( '<th>' );
 			this.colNullable[ i ] = headings[ i ] === null;
@@ -174,27 +173,30 @@
 	/* Events */
 
 	/**
-	 * A `change` event is emitted when the selected dates change
+	 * A `change` event is emitted when the selected dates change.
 	 *
-	 * @event change
+	 * @event mw.widgets.datetime.CalendarWidget.change
+	 * @param {Date|Date[]|null} dates The new date(s) or null
 	 */
 
 	/**
-	 * A `focusChange` event is emitted when the focused date changes
+	 * A `focusChanged` event is emitted when the focused date changes.
 	 *
-	 * @event focusChange
+	 * @event mw.widgets.datetime.CalendarWidget.focusChanged
+	 * @param {Date} date The newly focused date
 	 */
 
 	/**
-	 * A `page` event is emitted when the current "month" changes
+	 * A `page` event is emitted when the current "month" changes.
 	 *
-	 * @event page
+	 * @event mw.widgets.datetime.CalendarWidget.page
+	 * @param {Date} date The new date
 	 */
 
 	/* Methods */
 
 	/**
-	 * Return the current selected dates
+	 * Return the current selected dates.
 	 *
 	 * @return {Date[]}
 	 */
@@ -203,21 +205,20 @@
 	};
 
 	/**
-	 * Set the selected dates
+	 * Set the selected dates.
 	 *
 	 * @param {Date|Date[]|null} dates
-	 * @fires change
+	 * @fires mw.widgets.datetime.CalendarWidget.change
 	 * @chainable
+	 * @return {mw.widgets.datetime.CalendarWidget}
 	 */
 	mw.widgets.datetime.CalendarWidget.prototype.setSelected = function ( dates ) {
-		var i, changed = false;
+		let i, changed = false;
 
 		if ( dates instanceof Date ) {
 			dates = [ dates ];
 		} else if ( Array.isArray( dates ) ) {
-			dates = dates.filter( function ( dt ) {
-				return dt instanceof Date;
-			} );
+			dates = dates.filter( ( dt ) => dt instanceof Date );
 			dates.sort();
 		} else {
 			dates = [];
@@ -244,7 +245,7 @@
 	};
 
 	/**
-	 * Return the currently-focused date
+	 * Return the currently-focused date.
 	 *
 	 * @return {Date}
 	 */
@@ -253,14 +254,16 @@
 	};
 
 	/**
-	 * Set the currently-focused date
+	 * Set the currently-focused date.
 	 *
 	 * @param {Date} date
-	 * @fires page
+	 * @fires mw.widgets.datetime.CalendarWidget.focusChanged
+	 * @fires mw.widgets.datetime.CalendarWidget.page
 	 * @chainable
+	 * @return {mw.widgets.datetime.CalendarWidget}
 	 */
 	mw.widgets.datetime.CalendarWidget.prototype.setFocusedDate = function ( date ) {
-		var changePage = false,
+		let changePage = false,
 			updateUI = false;
 
 		if ( this.focusedDate.getTime() === date.getTime() ) {
@@ -290,7 +293,7 @@
 	};
 
 	/**
-	 * Adjust a date
+	 * Adjust a date.
 	 *
 	 * @protected
 	 * @param {Date} date Date to adjust
@@ -300,8 +303,9 @@
 	 * @return {Date}
 	 */
 	mw.widgets.datetime.CalendarWidget.prototype.adjustDate = function ( date, component, delta ) {
-		var newDate,
-			data = this.calendarData;
+		let newDate;
+
+		const data = this.calendarData;
 
 		if ( !data ) {
 			return date;
@@ -340,13 +344,15 @@
 	};
 
 	/**
-	 * Update the user interface
+	 * Update the user interface.
 	 *
 	 * @protected
 	 */
 	mw.widgets.datetime.CalendarWidget.prototype.updateUI = function () {
-		var r, c, row, day, k, $cell,
-			width = this.minWidth,
+		let row, day, k, $cell,
+			width = this.minWidth;
+
+		const
 			nullCols = [],
 			focusedDate = this.getFocusedDate(),
 			selected = this.getSelected(),
@@ -359,10 +365,10 @@
 
 		this.$header.text( this.calendarData.header );
 
-		for ( c = 0; c < this.colNullable.length; c++ ) {
+		for ( let c = 0; c < this.colNullable.length; c++ ) {
 			nullCols[ c ] = this.colNullable[ c ];
 			if ( nullCols[ c ] ) {
-				for ( r = 0; r < this.calendarData.rows.length; r++ ) {
+				for ( let r = 0; r < this.calendarData.rows.length; r++ ) {
 					if ( this.calendarData.rows[ r ][ c ] ) {
 						nullCols[ c ] = false;
 						break;
@@ -372,7 +378,7 @@
 		}
 
 		this.$tableBody.children().detach();
-		for ( r = 0; r < this.calendarData.rows.length; r++ ) {
+		for ( let r = 0; r < this.calendarData.rows.length; r++ ) {
 			if ( !this.rows[ r ] ) {
 				this.rows[ r ] = $( '<tr>' );
 			} else {
@@ -380,7 +386,7 @@
 			}
 			this.$tableBody.append( this.rows[ r ] );
 			row = this.calendarData.rows[ r ];
-			for ( c = 0; c < row.length; c++ ) {
+			for ( let c = 0; c < row.length; c++ ) {
 				day = row[ c ];
 				if ( day === null ) {
 					k = 'empty-' + r + '-' + c;
@@ -409,16 +415,17 @@
 						.setData( day.date )
 						.setDisabled( day.date < this.min || day.date > this.max );
 					$cell = this.buttons[ k ].$element;
-					$cell.toggleClass( 'mw-widgets-datetime-calendarWidget-focused',
-						this.formatter.datePartIsEqual( focusedDate, day.date ) );
-					$cell.toggleClass( 'mw-widgets-datetime-calendarWidget-selected',
-						selected.some( isSelected, day.date ) );
+					$cell
+						.toggleClass( 'mw-widgets-datetime-calendarWidget-focused',
+							this.formatter.datePartIsEqual( focusedDate, day.date ) )
+						.toggleClass( 'mw-widgets-datetime-calendarWidget-selected',
+							selected.some( isSelected, day.date ) );
 				}
 				this.rows[ r ].append( $cell );
 			}
 		}
 
-		for ( c = 0; c < this.cols.length; c++ ) {
+		for ( let c = 0; c < this.cols.length; c++ ) {
 			if ( nullCols[ c ] ) {
 				this.cols[ c ].width( 0 );
 			} else {
@@ -430,7 +437,7 @@
 	};
 
 	/**
-	 * Handles formatter 'local' flag changing
+	 * Handles formatter 'local' flag changing.
 	 *
 	 * @protected
 	 */
@@ -443,7 +450,7 @@
 	};
 
 	/**
-	 * Handles previous button click
+	 * Handles previous button click.
 	 *
 	 * @protected
 	 */
@@ -455,7 +462,7 @@
 	};
 
 	/**
-	 * Handles next button click
+	 * Handles next button click.
 	 *
 	 * @protected
 	 */
@@ -467,13 +474,13 @@
 	};
 
 	/**
-	 * Handles day button click
+	 * Handles day button click.
 	 *
 	 * @protected
 	 * @param {OO.ui.ButtonWidget} button
 	 */
 	mw.widgets.datetime.CalendarWidget.prototype.onDayClick = function ( button ) {
-		var data = button.getData();
+		const data = button.getData();
 		this.setFocusedDate( data );
 		this.setSelected( [ data ] );
 		if ( !this.$widget || OO.ui.contains( this.$element[ 0 ], document.activeElement, true ) ) {
@@ -501,10 +508,10 @@
 	 *
 	 * @protected
 	 * @param {jQuery.Event} e Key down event
-	 * @return {boolean} False to cancel the default event
+	 * @return {boolean|undefined} False to cancel the default event
 	 */
 	mw.widgets.datetime.CalendarWidget.prototype.onKeyDown = function ( e ) {
-		var focusedDate = this.getFocusedDate();
+		const focusedDate = this.getFocusedDate();
 
 		if ( !this.isDisabled() ) {
 			switch ( e.which ) {
@@ -541,7 +548,7 @@
 	};
 
 	/**
-	 * Handles focusout events in dependent mode
+	 * Handles focusout events in dependent mode.
 	 *
 	 * @private
 	 */
@@ -555,7 +562,7 @@
 	 * @private
 	 */
 	mw.widgets.datetime.CalendarWidget.prototype.checkFocus = function () {
-		var containers = [ this.$element[ 0 ], this.$widget[ 0 ] ],
+		const containers = [ this.$element[ 0 ], this.$widget[ 0 ] ],
 			activeElement = document.activeElement;
 
 		if ( !activeElement || !OO.ui.contains( containers, activeElement, true ) ) {
@@ -567,10 +574,8 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.datetime.CalendarWidget.prototype.toggle = function ( visible ) {
-		var change;
-
 		visible = ( visible === undefined ? !this.visible : !!visible );
-		change = visible !== this.isVisible();
+		const change = visible !== this.isVisible();
 
 		// Parent method
 		mw.widgets.datetime.CalendarWidget.super.prototype.toggle.call( this, visible );

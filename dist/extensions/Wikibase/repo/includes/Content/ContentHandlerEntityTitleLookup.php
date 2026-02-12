@@ -6,9 +6,8 @@ namespace Wikibase\Repo\Content;
 
 use InvalidArgumentException;
 use MediaWiki\Interwiki\InterwikiLookup;
-use MWException;
+use MediaWiki\Title\Title;
 use OutOfBoundsException;
-use Title;
 use Wikibase\DataAccess\DatabaseEntitySource;
 use Wikibase\DataAccess\EntitySourceDefinitions;
 use Wikibase\DataModel\Entity\EntityId;
@@ -20,6 +19,7 @@ use Wikimedia\Assert\Assert;
  */
 class ContentHandlerEntityTitleLookup implements EntityTitleStoreLookup {
 
+	/** @var Title[] */
 	private $titleForIdCache;
 
 	/**
@@ -46,7 +46,7 @@ class ContentHandlerEntityTitleLookup implements EntityTitleStoreLookup {
 		EntityContentFactory $entityContentFactory,
 		EntitySourceDefinitions $entitySourceDefinitions,
 		DatabaseEntitySource $localEntitySource,
-		InterwikiLookup $interwikiLookup = null
+		InterwikiLookup $interwikiLookup
 	) {
 		$this->entityContentFactory = $entityContentFactory;
 		$this->entitySourceDefinitions = $entitySourceDefinitions;
@@ -57,7 +57,6 @@ class ContentHandlerEntityTitleLookup implements EntityTitleStoreLookup {
 	/**
 	 * Returns the Title object for the item with provided id.
 	 *
-	 * @throws MWException
 	 * @throws OutOfBoundsException
 	 * @throws InvalidArgumentException
 	 */
@@ -80,9 +79,10 @@ class ContentHandlerEntityTitleLookup implements EntityTitleStoreLookup {
 	 * If the EntityId is federated, return a Title for it. Otherwise return null
 	 */
 	private function getTitleForFederatedId( EntityId $id ): ?Title {
-		if ( $this->entityNotFromLocalEntitySource( $id ) ) {
-			$interwiki = $this->entitySourceDefinitions->getDatabaseSourceForEntityType( $id->getEntityType() )->getInterwikiPrefix();
-			if ( $this->interwikiLookup && $this->interwikiLookup->isValidInterwiki( $interwiki ) ) {
+		$entitySource = $this->entitySourceDefinitions->getDatabaseSourceForEntityType( $id->getEntityType() );
+		if ( $entitySource !== null && $entitySource->getSourceName() !== $this->localEntitySource->getSourceName() ) {
+			$interwiki = $entitySource->getInterwikiPrefix();
+			if ( $this->interwikiLookup->isValidInterwiki( $interwiki ) ) {
 				$pageName = 'EntityPage/' . $id->getSerialization();
 
 				// TODO: use a TitleFactory
@@ -100,7 +100,6 @@ class ContentHandlerEntityTitleLookup implements EntityTitleStoreLookup {
 	 *
 	 * @param EntityId[] $ids
 	 *
-	 * @throws MWException
 	 * @throws OutOfBoundsException
 	 * @throws InvalidArgumentException
 	 * @return Title[]
@@ -135,11 +134,6 @@ class ContentHandlerEntityTitleLookup implements EntityTitleStoreLookup {
 		}
 
 		return $titles;
-	}
-
-	private function entityNotFromLocalEntitySource( EntityId $id ): bool {
-		$entitySource = $this->entitySourceDefinitions->getDatabaseSourceForEntityType( $id->getEntityType() );
-		return $entitySource->getSourceName() !== $this->localEntitySource->getSourceName();
 	}
 
 }

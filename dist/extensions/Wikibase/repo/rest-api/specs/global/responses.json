@@ -1,52 +1,69 @@
 {
-	"ResourceDeleted": {
-		"description": "The resource was deleted",
-		"headers": {
-			"Content-Language": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Language code of the language in which response is provided"
-			}
-		},
-		"content": {
-			"application/json": {
-				"schema": {
-					"type": "string"
-				},
-				"example": "Statement deleted"
-			}
-		}
-	},
-	"ItemNotFound": {
-		"description": "The specified Item was not found",
-		"content": {
-			"application/json": {
-				"schema": { "$ref": "./response-parts.json#/Error" },
-				"examples": {
-					"item-not-found": { "$ref": "./examples.json#/ItemNotFoundExample" }
-				}
-			}
-		},
-		"headers": {
-			"Content-Language": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Language code of the language in which error message is provided"
-			}
-		}
-	},
 	"ItemRedirected": {
 		"description": "The specified Item was redirected",
 		"content": {
 			"application/json": {
 				"schema": { "$ref": "./response-parts.json#/Error" },
 				"examples": {
-					"item-redirected": {
+					"redirected-item": { "$ref": "./examples.json#/RedirectedItemExample" }
+				}
+			}
+		},
+		"headers": {
+			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
+				"schema": { "type": "string" },
+				"required": true
+			}
+		}
+	},
+	"DataPolicyViolation": {
+		"description": "The edit request violates data policy",
+		"content": {
+			"application/json": {
+				"schema": { "$ref": "./response-parts.json#/Error" },
+				"examples": {
+					"data-policy-violation": { "$ref": "./examples.json#/DataPolicyViolationExample" }
+				}
+			}
+		},
+		"headers": {
+			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
+				"schema": { "type": "string" },
+				"required": true
+			}
+		}
+	},
+	"PermissionDenied": {
+		"description": "The access to resource was denied",
+		"content": {
+			"application/json": {
+				"schema": { "$ref": "./response-parts.json#/Error" },
+				"examples": {
+					"permission-denied": { "$ref": "./examples.json#/PermissionDeniedExample" }
+				}
+			}
+		},
+		"headers": {
+			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
+				"schema": { "type": "string" },
+				"required": true
+			}
+		}
+	},
+	"RequestLimitReached": {
+		"description": "Too many requests",
+		"content": {
+			"application/json": {
+				"schema": { "$ref": "./response-parts.json#/Error" },
+				"examples": {
+					"request-limit-reached": {
 						"value": {
-							"code": "redirected-item",
-							"message": "Item {item_id} has been merged into {other_id}."
+							"code": "request-limit-reached",
+							"message": "Exceeded the limit of actions that can be performed in a given span of time",
+							"context": { "reason": "{reason_code}" }
 						}
 					}
 				}
@@ -54,90 +71,66 @@
 		},
 		"headers": {
 			"Content-Language": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Language code of the language in which error message is provided"
+				"description": "Language code of the language in which error message is provided",
+				"schema": { "type": "string" },
+				"required": true
 			}
 		}
 	},
-	"StatementNotFound": {
-		"description": "The specified Statement was not found",
-		"content": {
-			"application/json": {
-				"schema": { "$ref": "./response-parts.json#/Error" },
-				"examples": {
-					"statement-not-found": {
-						"$ref": "./examples.json#/StatementNotFoundExample"
-					}
-				}
-			}
-		},
-		"headers": {
-			"Content-Language": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Language code of the language in which error message is provided"
-			}
-		}
-	},
-	"ItemStatementNotFound": {
+	"ResourceNotFound": {
 		"description": "The specified resource was not found",
 		"content": {
 			"application/json": {
 				"schema": { "$ref": "./response-parts.json#/Error" },
 				"examples": {
-					"item-not-found": {
-						"$ref": "./examples.json#/ItemNotFoundExample"
-					},
-					"statement-not-found": {
-						"$ref": "./examples.json#/StatementNotFoundExample"
+					"resource-not-found": {
+						"$ref": "./examples.json#/ResourceNotFoundExample"
 					}
 				}
 			}
 		},
 		"headers": {
 			"Content-Language": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Language code of the language in which error message is provided"
+				"description": "Language code of the language in which error message is provided",
+				"schema": { "type": "string" },
+				"required": true
 			}
 		}
 	},
-	"InvalidItemInput": {
+	"InvalidEntityIdInput": {
 		"description": "The request cannot be processed",
 		"content": {
 			"application/json": {
 				"schema": { "$ref": "./response-parts.json#/Error" },
 				"examples": {
-					"invalid-item-id": { "$ref": "./examples.json#/InvalidItemIdExample" },
-					"invalid-field": { "$ref": "./examples.json#/InvalidFieldExample" }
+					"invalid-path-parameter": { "$ref": "./examples.json#/InvalidPathParameterExample" }
 				}
 			}
 		},
 		"headers": {
 			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
 				"schema": { "type": "string" },
-				"description": "Language code of the language in which error message is provided"
+				"required": true
 			}
 		}
 	},
-	"InvalidStatementListInput": {
+	"InvalidRetrieveStatementsInput": {
 		"description": "The request cannot be processed",
 		"content": {
 			"application/json": {
 				"schema": { "$ref": "./response-parts.json#/Error" },
 				"examples": {
-					"invalid-item-id": { "$ref": "./examples.json#/InvalidItemIdExample" }
+					"invalid-path-parameter": { "$ref": "./examples.json#/InvalidPathParameterExample" },
+					"invalid-query-parameter": { "$ref": "./examples.json#/InvalidQueryParameterExample" }
 				}
 			}
 		},
 		"headers": {
 			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
 				"schema": { "type": "string" },
-				"description": "Language code of the language in which error message is provided"
+				"required": true
 			}
 		}
 	},
@@ -147,216 +140,374 @@
 			"application/json": {
 				"schema": { "$ref": "./response-parts.json#/Error" },
 				"examples": {
-					"invalid-item-id": { "$ref": "./examples.json#/InvalidItemIdExample" },
-					"invalid-edit-tag": { "$ref": "./examples.json#/InvalidEditTagExample" },
-					"invalid-bot-flag": { "$ref": "./examples.json#/InvalidBotFlagExample" },
-					"invalid-statement-data": {
-						"value": {
-							"code": "invalid-statement-data",
-							"message": "Invalid statement data provided"
-						}
-					}
+					"invalid-path-parameter": { "$ref": "./examples.json#/InvalidPathParameterExample" },
+					"invalid-value": { "$ref": "./examples.json#/InvalidValueExample" },
+					"missing-field": { "$ref": "./examples.json#/MissingFieldExample" },
+					"value-too-long": { "$ref": "./examples.json#/ValueTooLongExample" },
+					"resource-too-large": { "$ref": "./examples.json#/ResourceTooLargeExample" },
+					"referenced-resource-not-found": { "$ref": "./examples.json#/ReferencedResourceNotFoundExample" }
 				}
 			}
 		},
 		"headers": {
 			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
 				"schema": { "type": "string" },
-				"description": "Language code of the language in which error message is provided"
+				"required": true
 			}
 		}
 	},
-	"InvalidReplacedStatementInput": {
+	"InvalidSetLabelInput": {
 		"description": "The request cannot be processed",
 		"content": {
 			"application/json": {
 				"schema": { "$ref": "./response-parts.json#/Error" },
 				"examples": {
-					"invalid-statement-id": { "$ref": "./examples.json#/InvalidStatementIdExample" },
-					"invalid-edit-tag": { "$ref": "./examples.json#/InvalidEditTagExample" },
-					"invalid-bot-flag": { "$ref": "./examples.json#/InvalidBotFlagExample" },
-					"invalid-statement-data": { "$ref": "./examples.json#/InvalidStatementDataExample" },
-					"invalid-operation-change-statement-id": {
-						"$ref": "./examples.json#/InvalidOperationChangeStatementId"
-					},
-					"invalid-operation-change-property-of-statement": {
-						"$ref": "./examples.json#/InvalidOperationChangePropertyOfStatement"
-					}
+					"invalid-path-parameter": { "$ref": "./examples.json#/InvalidPathParameterExample" },
+					"value-too-long": { "$ref": "./examples.json#/ValueTooLongExample" },
+					"invalid-value": { "$ref": "./examples.json#/InvalidValueExample" },
+					"missing-field": { "$ref": "./examples.json#/MissingFieldExample" },
+					"resource-too-large": { "$ref": "./examples.json#/ResourceTooLargeExample" }
 				}
 			}
 		},
 		"headers": {
 			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
 				"schema": { "type": "string" },
-				"description": "Language code of the language in which error message is provided"
+				"required": true
 			}
 		}
 	},
-	"InvalidReplacedItemStatementInput": {
+	"InvalidSetDescriptionInput": {
 		"description": "The request cannot be processed",
 		"content": {
 			"application/json": {
 				"schema": { "$ref": "./response-parts.json#/Error" },
 				"examples": {
-					"invalid-item-id": { "$ref": "./examples.json#/InvalidItemIdExample" },
-					"invalid-statement-id": { "$ref": "./examples.json#/InvalidStatementIdExample" },
-					"invalid-edit-tag": { "$ref": "./examples.json#/InvalidEditTagExample" },
-					"invalid-bot-flag": { "$ref": "./examples.json#/InvalidBotFlagExample" },
-					"invalid-statement-data": { "$ref": "./examples.json#/InvalidStatementDataExample" },
-					"invalid-operation-change-statement-id": {
-						"$ref": "./examples.json#/InvalidOperationChangeStatementId"
-					},
-					"invalid-operation-change-property-of-statement": {
-						"$ref": "./examples.json#/InvalidOperationChangePropertyOfStatement"
-					}
+					"invalid-path-parameter": { "$ref": "./examples.json#/InvalidPathParameterExample" },
+					"invalid-value": { "$ref": "./examples.json#/InvalidValueExample" },
+					"missing-field": { "$ref": "./examples.json#/MissingFieldExample" },
+					"value-too-long": { "$ref": "./examples.json#/ValueTooLongExample" },
+					"resource-too-large": { "$ref": "./examples.json#/ResourceTooLargeExample" }
 				}
 			}
 		},
 		"headers": {
 			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
 				"schema": { "type": "string" },
-				"description": "Language code of the language in which error message is provided"
+				"required": true
 			}
 		}
 	},
-	"InvalidStatementInput": {
+	"InvalidRemoveLabelInput": {
 		"description": "The request cannot be processed",
 		"content": {
 			"application/json": {
 				"schema": { "$ref": "./response-parts.json#/Error" },
 				"examples": {
-					"invalid-statement-id": { "$ref": "./examples.json#/InvalidStatementIdExample" }
+					"invalid-path-parameter": { "$ref": "./examples.json#/InvalidPathParameterExample" },
+					"invalid-value": { "$ref": "./examples.json#/InvalidValueExample" },
+					"value-too-long": { "$ref": "./examples.json#/ValueTooLongExample" }
 				}
 			}
 		},
 		"headers": {
 			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
 				"schema": { "type": "string" },
-				"description": "Language code of the language in which error message is provided"
+				"required": true
 			}
 		}
 	},
-	"InvalidItemStatementInput": {
+	"InvalidRemoveDescriptionInput": {
 		"description": "The request cannot be processed",
 		"content": {
 			"application/json": {
 				"schema": { "$ref": "./response-parts.json#/Error" },
 				"examples": {
-					"invalid-item-id": { "$ref": "./examples.json#/InvalidItemIdExample" },
-					"invalid-statement-id": { "$ref": "./examples.json#/InvalidStatementIdExample" }
+					"invalid-path-parameter": { "$ref": "./examples.json#/InvalidPathParameterExample" },
+					"invalid-value": { "$ref": "./examples.json#/InvalidValueExample" },
+					"value-too-long": { "$ref": "./examples.json#/ValueTooLongExample" }
 				}
 			}
 		},
 		"headers": {
 			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
 				"schema": { "type": "string" },
-				"description": "Language code of the language in which error message is provided"
+				"required": true
 			}
 		}
 	},
-	"InvalidStatementPatch": {
-		"description": "The provided JSON Patch is invalid",
+	"InvalidAddAliasesInput": {
+		"description": "The request cannot be processed",
 		"content": {
 			"application/json": {
 				"schema": { "$ref": "./response-parts.json#/Error" },
 				"examples": {
-					"invalid-statement-id": { "$ref": "./examples.json#/InvalidStatementIdExample" },
-					"invalid-operation-change-statement-id": {
-						"$ref": "./examples.json#/InvalidOperationChangeStatementId"
-					},
-					"invalid-operation-change-property-of-statement": {
-						"$ref": "./examples.json#/InvalidOperationChangePropertyOfStatement"
-					},
-					"invalid-patch": { "$ref": "./examples.json#/InvalidPatchExample" }
+					"invalid-path-parameter": { "$ref": "./examples.json#/InvalidPathParameterExample" },
+					"invalid-value": { "$ref": "./examples.json#/InvalidValueExample" },
+					"missing-field": { "$ref": "./examples.json#/MissingFieldExample" },
+					"value-too-long": { "$ref": "./examples.json#/ValueTooLongExample" },
+					"resource-too-large": { "$ref": "./examples.json#/ResourceTooLargeExample" }
 				}
 			}
 		},
 		"headers": {
 			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
 				"schema": { "type": "string" },
-				"description": "Language code of the language in which error message is provided"
+				"required": true
 			}
 		}
 	},
-	"InvalidItemStatementPatch": {
-		"description": "The provided JSON Patch is invalid",
+	"InvalidTermByLanguageInput": {
+		"description": "The request cannot be processed",
 		"content": {
 			"application/json": {
 				"schema": { "$ref": "./response-parts.json#/Error" },
 				"examples": {
-					"invalid-item-id": { "$ref": "./examples.json#/InvalidItemIdExample" },
-					"invalid-statement-id": { "$ref": "./examples.json#/InvalidStatementIdExample" },
-					"invalid-operation-change-statement-id": {
-						"$ref": "./examples.json#/InvalidOperationChangeStatementId"
-					},
-					"invalid-operation-change-property-of-statement": {
-						"$ref": "./examples.json#/InvalidOperationChangePropertyOfStatement"
-					},
-					"invalid-patch": { "$ref": "./examples.json#/InvalidPatchExample" }
+					"invalid-path-parameter": { "$ref": "./examples.json#/InvalidPathParameterExample" }
 				}
 			}
 		},
 		"headers": {
 			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
 				"schema": { "type": "string" },
-				"description": "Language code of the language in which error message is provided"
+				"required": true
+			}
+		}
+	},
+	"InvalidPatch": {
+		"description": "The provided JSON Patch request is invalid",
+		"content": {
+			"application/json": {
+				"schema": { "$ref": "./response-parts.json#/Error" },
+				"examples": {
+					"invalid-path-parameter": { "$ref": "./examples.json#/InvalidPathParameterExample" },
+					"invalid-value": { "$ref": "./examples.json#/InvalidValueExample" },
+					"missing-field": { "$ref": "./examples.json#/MissingFieldExample" },
+					"value-too-long": { "$ref": "./examples.json#/ValueTooLongExample" },
+					"resource-too-large": { "$ref": "./examples.json#/ResourceTooLargeExample" }
+				}
+			}
+		},
+		"headers": {
+			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
+				"schema": { "type": "string" },
+				"required": true
+			}
+		}
+	},
+	"CannotApplyItemPatch": {
+		"description": "The provided JSON Patch cannot be applied",
+		"content": {
+			"application/json": {
+				"schema": { "$ref": "./response-parts.json#/Error" },
+				"examples": {
+					"redirected-item": { "$ref": "./examples.json#/RedirectedItemExample" },
+					"patch-test-failed": { "$ref": "./examples.json#/PatchTestFailedExample" },
+					"patch-target-not-found": { "$ref": "./examples.json#/PatchTargetNotFoundExample" }
+				}
+			}
+		},
+		"headers": {
+			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
+				"schema": { "type": "string" },
+				"required": true
+			}
+		}
+	},
+	"CannotApplyPropertyPatch": {
+		"description": "The provided JSON Patch cannot be applied",
+		"content": {
+			"application/json": {
+				"schema": { "$ref": "./response-parts.json#/Error" },
+				"examples": {
+					"patch-test-failed": { "$ref": "./examples.json#/PatchTestFailedExample" },
+					"patch-target-not-found": { "$ref": "./examples.json#/PatchTargetNotFoundExample" }
+				}
+			}
+		},
+		"headers": {
+			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
+				"schema": { "type": "string" },
+				"required": true
+			}
+		}
+	},
+	"InvalidPatchedItem": {
+		"description": "Applying the provided JSON Patch results in an invalid Property",
+		"content": {
+			"application/json": {
+				"schema": { "$ref": "./response-parts.json#/Error" },
+				"examples": {
+					"patch-result-invalid-value": { "$ref": "./examples.json#/PatchResultInvalidValueExample" },
+					"patched-statement-group-property-id-mismatch": {
+						"$ref": "./examples.json#/PatchedStatementGroupPropertyIdMismatchExample"
+					},
+					"patch-result-referenced-resource-not-found": { "$ref": "./examples.json#/PatchResultResourceNotFoundExample" },
+					"patch-result-missing-field": { "$ref": "./examples.json#/PatchResultMissingFieldExample" },
+					"patch-result-invalid-key": { "$ref": "./examples.json#/PatchResultInvalidKeyExample" },
+					"patch-result-value-too-long": { "$ref": "./examples.json#/PatchResultValueTooLongExample" },
+					"patch-result-modified-read-only-value": {
+						"$ref": "./examples.json#/PatchResultModifiedReadOnlyValue"
+					},
+					"data-policy-violation": { "$ref": "./examples.json#/DataPolicyViolationExample" }
+				}
+			}
+		},
+		"headers": {
+			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
+				"schema": { "type": "string" },
+				"required": true
+			}
+		}
+	},
+	"InvalidPatchedProperty": {
+		"description": "Applying the provided JSON Patch results in an invalid Property",
+		"content": {
+			"application/json": {
+				"schema": { "$ref": "./response-parts.json#/Error" },
+				"examples": {
+					"patch-result-missing-field": { "$ref": "./examples.json#/PatchResultMissingFieldExample" },
+					"patched-statement-group-property-id-mismatch": {
+						"$ref": "./examples.json#/PatchedStatementGroupPropertyIdMismatchExample"
+					},
+					"patch-result-invalid-key": { "$ref": "./examples.json#/PatchResultInvalidKeyExample" },
+					"patch-result-invalid-value": { "$ref": "./examples.json#/PatchResultInvalidValueExample" },
+					"patch-result-referenced-resource-not-found": { "$ref": "./examples.json#/PatchResultResourceNotFoundExample" },
+					"patch-result-value-too-long": { "$ref": "./examples.json#/PatchResultValueTooLongExample" },
+					"patch-result-modified-read-only-value": {
+						"$ref": "./examples.json#/PatchResultModifiedReadOnlyValue"
+					},
+					"data-policy-violation": { "$ref": "./examples.json#/DataPolicyViolationExample" }
+				}
+			}
+		},
+		"headers": {
+			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
+				"schema": { "type": "string" },
+				"required": true
+			}
+		}
+	},
+	"InvalidPatchedLabels": {
+		"description": "Applying the provided JSON Patch results in invalid Labels",
+		"content": {
+			"application/json": {
+				"schema": { "$ref": "./response-parts.json#/Error" },
+				"examples": {
+					"patch-result-invalid-key": { "$ref": "./examples.json#/PatchResultInvalidKeyExample" },
+					"patch-result-invalid-value": { "$ref": "./examples.json#/PatchResultInvalidValueExample" },
+					"patch-result-value-too-long": { "$ref": "./examples.json#/PatchResultValueTooLongExample" },
+					"data-policy-violation": { "$ref": "./examples.json#/DataPolicyViolationExample" }
+				}
+			}
+		},
+		"headers": {
+			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
+				"schema": { "type": "string" },
+				"required": true
+			}
+		}
+	},
+	"InvalidPatchedDescriptions": {
+		"description": "Applying the provided JSON Patch results in invalid descriptions",
+		"content": {
+			"application/json": {
+				"schema": { "$ref": "./response-parts.json#/Error" },
+				"examples": {
+					"patch-result-invalid-key": { "$ref": "./examples.json#/PatchResultInvalidKeyExample" },
+					"patch-result-invalid-value": { "$ref": "./examples.json#/PatchResultInvalidValueExample" },
+					"patch-result-value-too-long": { "$ref": "./examples.json#/PatchResultValueTooLongExample" },
+					"data-policy-violation": { "$ref": "./examples.json#/DataPolicyViolationExample" }
+				}
+			}
+		},
+		"headers": {
+			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
+				"schema": { "type": "string" },
+				"required": true
+			}
+		}
+	},
+	"InvalidPatchedAliases": {
+		"description": "Applying the provided JSON Patch results in invalid Aliases",
+		"content": {
+			"application/json": {
+				"schema": { "$ref": "./response-parts.json#/Error" },
+				"examples": {
+					"patch-result-invalid-value": { "$ref": "./examples.json#/PatchResultInvalidValueExample" },
+					"patch-result-invalid-key": { "$ref": "./examples.json#/PatchResultInvalidKeyExample" },
+					"patch-result-value-too-long": { "$ref": "./examples.json#/PatchResultValueTooLongExample" }
+				}
+			}
+		},
+		"headers": {
+			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
+				"schema": { "type": "string" },
+				"required": true
 			}
 		}
 	},
 	"CannotApplyStatementPatch": {
-		"description": "The provided JSON Patch cannot be applied to the given statement",
+		"description": "The provided JSON Patch cannot be applied",
 		"content": {
 			"application/json": {
 				"schema": { "$ref": "./response-parts.json#/Error" },
 				"examples": {
-					"cannot-apply-patch": { "$ref": "./examples.json#/CannotApplyPatchExample" },
-					"patch-test-failed": { "$ref": "./examples.json#/PatchTestFailedExample" }
+					"patch-test-failed": { "$ref": "./examples.json#/PatchTestFailedExample" },
+					"patch-target-not-found": { "$ref": "./examples.json#/PatchTargetNotFoundExample" }
 				}
 			}
 		},
 		"headers": {
 			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
 				"schema": { "type": "string" },
-				"description": "Language code of the language in which error message is provided"
+				"required": true
 			}
 		}
 	},
 	"InvalidPatchedStatement": {
-		"description": "Applying the provided JSON Patch results in an invalid statement",
+		"description": "Applying the provided JSON Patch results in an invalid Statement",
 		"content": {
 			"application/json": {
 				"schema": {
 					"$ref": "./response-parts.json#/Error"
 				},
-				"example": {
-					"code": "patched-statement-invalid",
-					"message": "The patch results in an invalid statement which cannot be stored"
+				"examples": {
+					"patch-result-missing-field": { "$ref": "./examples.json#/PatchResultMissingFieldExample" },
+					"patch-result-invalid-value": { "$ref": "./examples.json#/PatchResultInvalidValueExample" },
+					"patch-result-modified-read-only-value": {
+						"$ref": "./examples.json#/PatchResultModifiedReadOnlyValue"
+					},
+					"patch-result-referenced-resource-not-found": { "$ref": "./examples.json#/PatchResultResourceNotFoundExample" }
 				}
 			}
 		},
 		"headers": {
 			"Content-Language": {
+				"description": "Language code of the language in which error message is provided",
 				"schema": { "type": "string" },
-				"description": "Language code of the language in which error message is provided"
+				"required": true
 			}
 		}
 	},
 	"PreconditionFailedError": {
-		"description": "The condition defined by the `If-Match` or `If-Unmodified-Since` header is not fulfilled"
-	},
-	"InvalidMediaType": {
-		"description": "The media type specified by the `Content-Type` header is not allowed on this endpoint",
-		"content": {
-			"application/json": {
-				"schema": { "$ref": "./response-parts.json#/Error" },
-				"example": {
-					"code": "unsupported-content-type",
-					"message": "Unsupported Content-Type: 'application/x-www-form-urlencoded'",
-					"httpCode": 415,
-					"httpReason": "Unsupported Media Type"
-				}
-			}
-		}
+		"description": "The condition defined by a conditional request header is not fulfilled"
 	},
 	"UnexpectedError": {
 		"description": "An unexpected error has occurred",
@@ -371,135 +522,286 @@
 		},
 		"headers": {
 			"Content-Language": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Language code of the language in which error message is provided"
+				"description": "Language code of the language in which error message is provided",
+				"schema": { "type": "string" },
+				"required": true
 			}
 		}
 	},
 	"Item": {
 		"description": "A single Wikibase Item",
 		"headers": {
-			"Last-Modified": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Last modified date"
-			},
 			"ETag": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Last entity revision number"
+				"description": "Last entity revision number",
+				"schema": { "type": "string" },
+				"required": true
+			},
+			"Last-Modified": {
+				"description": "Last modified date",
+				"schema": { "type": "string" },
+				"required": true
 			},
 			"X-Authenticated-User": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Optional username of the user making the request"
+				"description": "Optional username of the user making the request",
+				"schema": { "type": "string" }
 			}
 		},
 		"content": {
 			"application/json": {
 				"schema": {
 					"$ref": "./response-parts.json#/ItemResponse"
+				},
+				"example": {
+					"id": "Q24",
+					"type": "item",
+					"labels": {
+						"en": "Jane Doe",
+						"ru": "Джейн Доу"
+					},
+					"descriptions": {
+						"en": "famous person",
+						"ru": "известная личность"
+					},
+					"aliases": {
+						"en": [
+							"Jane M. Doe",
+							"JD"
+						],
+						"ru": [
+							"Джейн М. Доу"
+						]
+					},
+					"statements": {
+						"P694": [
+							{
+								"id": "Q24$BB728546-A400-4116-A772-16D54B62AC2B",
+								"rank": "normal",
+								"property": {
+									"id": "P694",
+									"data_type": "wikibase-item"
+								},
+								"value": {
+									"type": "value",
+									"content": "Q626683"
+								},
+								"qualifiers": [],
+								"references": []
+							}
+						],
+						"P476": [
+							{
+								"id": "Q24$F3B2F956-B6AB-4984-8D89-BEE0FFFA3385",
+								"rank": "normal",
+								"property": {
+									"id": "P476",
+									"data_type": "time"
+								},
+								"value": {
+									"type": "value",
+									"content": {
+										"time": "+1986-01-27T00:00:00Z",
+										"precision": 11,
+										"calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+									}
+								},
+								"qualifiers": [],
+								"references": []
+							}
+						],
+						"P17": [
+							{
+								"id": "Q24$9966A1CA-F3F5-4B1D-A534-7CD5953169DA",
+								"rank": "normal",
+								"property": {
+									"id": "P17",
+									"data_type": "string"
+								},
+								"value": {
+									"type": "value",
+									"content": "Senior Team Supervisor"
+								},
+								"qualifiers": [
+									{
+										"property": {
+											"id": "P706",
+											"data_type": "time"
+										},
+										"value": {
+											"type": "value",
+											"content": {
+												"time": "+2023-06-13T00:00:00Z",
+												"precision": 11,
+												"calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+											}
+										}
+									}
+								],
+								"references": [
+									{
+										"hash": "7ccd777f870b71a4c5056c7fd2a83a22cc39be6d",
+										"parts": [
+											{
+												"property": {
+													"id": "P709",
+													"data_type": "url"
+												},
+												"value": {
+													"type": "value",
+													"content": "https://news.example.org"
+												}
+											}
+										]
+									}
+								]
+							}
+						]
+					},
+					"sitelinks": {
+						"enwiki": {
+							"title": "Jane Doe",
+							"badges": [],
+							"url": "https://enwiki.example.org/wiki/Jane_Doe"
+						},
+						"ruwiki": {
+							"title": "Джейн Доу",
+							"badges": [],
+							"url": "https://ruwiki.example.org/wiki/Джейн_Доу"
+						}
+					}
 				}
 			}
 		}
 	},
-	"Statement": {
-		"description": "A single Wikibase Statement. Please note that the value of the `ETag` header field refers to the entity's revision ID.",
+	"Sitelinks": {
+		"description": "A list of Sitelinks by Item id",
 		"headers": {
-			"Last-Modified": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Last modified date"
-			},
 			"ETag": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Last entity revision number"
+				"description": "Last entity revision number",
+				"schema": { "type": "string" },
+				"required": true
+			},
+			"Last-Modified": {
+				"description": "Last modified date",
+				"schema": { "type": "string" },
+				"required": true
 			},
 			"X-Authenticated-User": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Optional username of the user making the request"
+				"description": "Optional username of the user making the request",
+				"schema": { "type": "string" }
+			}
+		},
+		"content": {
+			"application/json": {
+				"schema": { "$ref": "./schema-parts.json#/Sitelinks" },
+				"example": {
+					"enwiki": {
+						"title": "Jane Doe",
+						"badges": [],
+						"url": "https://enwiki.example.org/wiki/Jane_Doe"
+					},
+					"ruwiki": {
+						"title": "Джейн Доу",
+						"badges": [],
+						"url": "https://ruwiki.example.org/wiki/Джейн_Доу"
+					}
+				}
+			}
+		}
+	},
+	"Sitelink": {
+		"description": "A Sitelink by Item id",
+		"headers": {
+			"ETag": {
+				"description": "Last entity revision number",
+				"schema": { "type": "string" },
+				"required": true
+			},
+			"Last-Modified": {
+				"description": "Last modified date",
+				"schema": { "type": "string" },
+				"required": true
+			},
+			"X-Authenticated-User": {
+				"description": "Optional username of the user making the request",
+				"schema": { "type": "string" }
 			}
 		},
 		"content": {
 			"application/json": {
 				"schema": {
-					"$ref": "./response-parts.json#/StatementResponse"
+					"$ref": "./schemas.json#/Sitelink"
+				},
+				"example": {
+					"title": "Jane Doe",
+					"badges": [],
+					"url": "https://enwiki.example.org/wiki/Jane_Doe"
 				}
 			}
 		}
 	},
-	"StatementCreated": {
-		"description": "A single newly created Wikibase Statement. Please note that the value of the `ETag` header field refers to the entity's revision ID.",
+	"Property": {
+		"description": "A single Wikibase Property",
 		"headers": {
-			"Last-Modified": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Last modified date"
-			},
 			"ETag": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Last entity revision number"
+				"description": "Last entity revision number",
+				"schema": { "type": "string" },
+				"required": true
+			},
+			"Last-Modified": {
+				"description": "Last modified date",
+				"schema": { "type": "string" },
+				"required": true
 			},
 			"X-Authenticated-User": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Optional username of the user making the request"
-			},
-			"Location": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "The URI of the newly created statement"
+				"description": "Optional username of the user making the request",
+				"schema": { "type": "string" }
 			}
 		},
 		"content": {
 			"application/json": {
 				"schema": {
-					"$ref": "./response-parts.json#/StatementResponse"
-				}
-			}
-		}
-	},
-	"Statements": {
-		"description": "The statements of an Item",
-		"headers": {
-			"Last-Modified": {
-				"schema": {
-					"type": "string"
+					"$ref": "./response-parts.json#/PropertyResponse"
 				},
-				"description": "Last modified date"
-			},
-			"ETag": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Last entity revision number"
-			},
-			"X-Authenticated-User": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Optional username of the user making the request"
-			}
-		},
-		"content": {
-			"application/json": {
-				"schema": {
-					"$ref": "./response-parts.json#/StatementsResponse"
+				"example": {
+					"id": "P694",
+					"type": "property",
+					"data_type": "wikibase-item",
+					"labels": {
+						"en": "instance of",
+						"ru": "это частный случай понятия"
+					},
+					"descriptions": {
+						"en": "the subject is a concrete object (instance) of this class, category, or object group",
+						"ru": "данный элемент представляет собой конкретный объект (экземпляр / частный случай) класса, категории."
+					},
+					"aliases": {
+						"en": [
+							"is a",
+							"is an"
+						],
+						"ru": [
+							"представляет собой",
+							"является"
+						]
+					},
+					"statements": {
+						"P1628": [
+							{
+								"id": "P694$B4C349A2-C504-4FC5-B7D5-8B781C719D71",
+								"rank": "normal",
+								"property": {
+									"id":"P1628",
+									"data_type": "url"
+								},
+								"value": {
+									"type": "value",
+									"content": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+								},
+								"qualifiers": [],
+								"references": []
+							}
+						]
+					}
 				}
 			}
 		}
@@ -508,21 +810,29 @@
 		"description": "The specified resource has not been modified since last provided revision number or date",
 		"headers": {
 			"ETag": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "Last entity revision number"
+				"description": "Last entity revision number",
+				"schema": { "type": "string" },
+				"required": true
 			}
 		}
 	},
-	"Moved": {
+	"MovedPermanently": {
 		"description": "The specified resource has permanently moved to the indicated location",
 		"headers": {
 			"Location": {
-				"schema": {
-					"type": "string"
-				},
-				"description": "The URL to which the requested resource has been moved to"
+				"description": "The URL to which the requested resource has been moved",
+				"schema": { "type": "string" },
+				"required": true
+			}
+		}
+	},
+	"MovedTemporarily": {
+		"description": "The specified resource has temporarily moved to the indicated location",
+		"headers": {
+			"Location": {
+				"description": "The URL to which the requested resource has been moved",
+				"schema": { "type": "string" },
+				"required": true
 			}
 		}
 	}

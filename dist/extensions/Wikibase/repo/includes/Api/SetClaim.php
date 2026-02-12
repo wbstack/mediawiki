@@ -4,16 +4,16 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
-use ApiMain;
-use ApiUsageException;
 use DataValues\IllegalValueException;
 use Deserializers\Deserializer;
 use Diff\Comparer\ComparableComparer;
 use Diff\Differ\OrderedListDiffer;
-use IBufferingStatsdDataFactory;
 use InvalidArgumentException;
 use LogicException;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiCreateTempUserTrait;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiUsageException;
 use OutOfBoundsException;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\StatementListProvidingEntity;
@@ -31,6 +31,7 @@ use Wikibase\Repo\Diff\ClaimDiffer;
 use Wikibase\Repo\FederatedProperties\FederatedPropertiesException;
 use Wikibase\Repo\SnakFactory;
 use Wikimedia\ParamValidator\ParamValidator;
+use Wikimedia\Stats\IBufferingStatsdDataFactory;
 
 /**
  * API module for creating or updating an entire Claim.
@@ -43,6 +44,7 @@ use Wikimedia\ParamValidator\ParamValidator;
 class SetClaim extends ApiBase {
 
 	use FederatedPropertyApiValidatorTrait;
+	use ApiCreateTempUserTrait;
 
 	/**
 	 * @var StatementChangeOpFactory
@@ -179,9 +181,12 @@ class SetClaim extends ApiBase {
 		}
 
 		try {
+			// @phan-suppress-next-line PhanTypeMismatchArgumentNullable guid is not-null
 			$statementGuid = $this->guidParser->parse( $guid );
 		} catch ( StatementGuidParsingException $ex ) {
 			$this->errorReporter->dieException( $ex, 'invalid-claim' );
+
+			// @phan-suppress-next-line PhanPluginUnreachableCode Wanted
 			throw new LogicException( 'ApiErrorReporter::dieError did not throw an exception' );
 		}
 
@@ -191,6 +196,8 @@ class SetClaim extends ApiBase {
 
 		if ( !( $entity instanceof StatementListProvidingEntity ) ) {
 			$this->errorReporter->dieError( 'The given entity cannot contain statements', 'not-supported' );
+
+			// @phan-suppress-next-line PhanPluginUnreachableCode Wanted
 			throw new LogicException( 'ApiErrorReporter::dieError did not throw an exception' );
 		}
 
@@ -210,7 +217,9 @@ class SetClaim extends ApiBase {
 		$status = $this->entitySavingHelper->attemptSaveEntity( $entity, $summary, $params, $this->getContext() );
 		$this->resultBuilder->addRevisionIdFromStatusToResult( $status, 'pageinfo' );
 		$this->resultBuilder->markSuccess();
+		// @phan-suppress-next-line PhanTypeMismatchArgumentNullable statement given, guid already validated
 		$this->resultBuilder->addStatement( $statement );
+		$this->resultBuilder->addTempUser( $status, fn( $user ) => $this->getTempUserRedirectUrl( $params, $user ) );
 
 		$this->stats->increment( 'wikibase.repo.api.wbsetclaim.total' );
 		if ( $index !== null ) {
@@ -340,6 +349,7 @@ class SetClaim extends ApiBase {
 				'bot' => false,
 				'ignoreduplicatemainsnak' => false,
 			],
+			$this->getCreateTempUserParams(),
 			parent::getAllowedParams()
 		);
 	}

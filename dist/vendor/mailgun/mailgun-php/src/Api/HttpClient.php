@@ -18,7 +18,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * @see    https://documentation.mailgun.com/api-domains.html
+ * @see https://documentation.mailgun.com/api-domains.html
  *
  * @author Sean Johnson <sean@mailgun.com>
  */
@@ -65,10 +65,11 @@ class HttpClient extends HttpApi
     }
 
     /**
-     * @param  string            $path
-     * @param  array             $parameters
-     * @param  array             $requestHeaders
+     * @param  string                   $path
+     * @param  array                    $parameters
+     * @param  array                    $requestHeaders
      * @return ResponseInterface
+     * @throws ClientExceptionInterface
      */
     public function httpPost(string $path, array $parameters = [], array $requestHeaders = []): ResponseInterface
     {

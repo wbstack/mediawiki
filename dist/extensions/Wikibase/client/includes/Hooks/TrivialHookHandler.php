@@ -4,21 +4,23 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Client\Hooks;
 
-use ContentHandler;
+use MediaWiki\Content\ContentHandler;
 use MediaWiki\Content\Hook\SearchDataForIndexHook;
 use MediaWiki\Hook\AbortEmailNotificationHook;
-use MediaWiki\Hook\BeforePageDisplayHook;
+use MediaWiki\Hook\MaintenanceShellStartHook;
 use MediaWiki\Hook\UnitTestsListHook;
+use MediaWiki\Output\Hook\BeforePageDisplayHook;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Search\Hook\SearchIndexFieldsHook;
 use MediaWiki\SpecialPage\Hook\WgQueryPagesHook;
-use OutputPage;
-use ParserOutput;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use RecentChange;
 use SearchEngine;
 use SearchIndexField;
 use Skin;
-use Title;
-use User;
 use Wikibase\Client\RecentChanges\RecentChangeFactory;
 use Wikibase\Client\Specials\SpecialUnconnectedPages;
 use WikiPage;
@@ -36,7 +38,8 @@ class TrivialHookHandler implements
 	SearchDataForIndexHook,
 	SearchIndexFieldsHook,
 	UnitTestsListHook,
-	WgQueryPagesHook
+	WgQueryPagesHook,
+	MaintenanceShellStartHook
 {
 	/**
 	 * @param User $editor
@@ -71,10 +74,37 @@ class TrivialHookHandler implements
 	 * @param array &$fields
 	 * @param ContentHandler $handler
 	 * @param WikiPage $page
-	 * @param ParserOutput $parserOutput
+	 * @param ParserOutput $output
 	 * @param SearchEngine $engine
 	 */
-	public function onSearchDataForIndex( &$fields, $handler, $page, $parserOutput, $engine ): void {
+	public function onSearchDataForIndex( &$fields, $handler, $page, $output, $engine ): void {
+		$this->doSearchDataForIndex( $fields, $output );
+	}
+
+	/**
+	 * Put wikibase_item into the data.
+	 * @param array &$fields
+	 * @param ContentHandler $handler
+	 * @param WikiPage $page
+	 * @param ParserOutput $output
+	 * @param SearchEngine $engine
+	 */
+	public function onSearchDataForIndex2(
+		array &$fields,
+		ContentHandler $handler,
+		WikiPage $page,
+		ParserOutput $output,
+		SearchEngine $engine,
+		RevisionRecord $revision
+	): void {
+		$this->doSearchDataForIndex( $fields, $output );
+	}
+
+	/**
+	 * @param array &$fields
+	 * @param ParserOutput $parserOutput
+	 */
+	private function doSearchDataForIndex( array &$fields, ParserOutput $parserOutput ): void {
 		$wikibaseItem = $parserOutput->getPageProperty( 'wikibase_item' );
 		if ( $wikibaseItem ) {
 			$fields['wikibase_item'] = $wikibaseItem;
@@ -106,5 +136,9 @@ class TrivialHookHandler implements
 		// SpecialPagesWithBadges and SpecialEntityUsage also extend QueryPage,
 		// but are not useful in the list of query pages,
 		// since they require a parameter (badge, entity id) to operate
+	}
+
+	public function onMaintenanceShellStart(): void {
+		require_once __DIR__ . '/../MaintenanceShellStart.php';
 	}
 }

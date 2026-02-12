@@ -7,11 +7,14 @@
 		]
 	},
 	"templatesandbox": "Пясъчник за шаблони",
+	"templatesandbox-suffix": "пясъчник",
 	"templatesandbox-legend": "Пясъчник за шаблони",
 	"templatesandbox-submit": "Изглед",
 	"templatesandbox-title-output": "Пясъчник за шаблони: $1",
 	"templatesandbox-editform-legend": "Предварителен преглед на страницата с този шаблон",
 	"templatesandbox-editform-page-label": "Заглавие на страницата",
 	"templatesandbox-editform-view-label": "Предварителен преглед",
+	"templatesandbox-preview": "Предварителен преглед на $2",
+	"templatesandbox-previewnote": "'''Не забравяйте, че това е само предварителен преглед на [[:$1]].'''\nВашите промените все още не са съхранени!",
 	"templatesandbox-editform-need-title": "За да прегледате друга страница с този шаблон, трябва да укажете заглавието на страницата."
 }

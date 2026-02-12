@@ -1,3 +1,4 @@
+@import 'mediawiki.skin.variables.less';
 @import 'mediawiki.mixins.less';
 @import '../echo.variables.less';
 
@@ -7,32 +8,27 @@
 	width: 100%;
 
 	&.oo-ui-optionWidget {
-		.transition( ~'background-color 100ms, color 100ms' );
+		transition: background-color 100ms, color 100ms;
 
 		&-highlighted {
-			background-color: #eaecf0;
-			color: @color-base--active;
+			background-color: @background-color-neutral;
+			color: @color-emphasized;
 		}
 
 		&-selected {
-			background-color: @background-color-primary;
-			color: @color-primary;
+			background-color: @background-color-progressive-subtle;
+			color: @color-progressive;
 		}
 
 		&-selected&-highlighted,
 		&-pressed&-highlighted {
 			background-color: rgba( 41, 98, 204, 0.1 );
-			color: @color-primary;
+			color: @color-progressive;
 		}
 	}
 
-	&-table {
-		display: table;
-		width: 100%;
-	}
-
 	&-row {
-		display: table-row;
+		display: flex;
 	}
 
 	&-cell {
@@ -41,7 +37,7 @@
 	}
 
 	&.oo-ui-iconElement &-icon {
-		width: 1em;
+		min-width: 1em;
 
 		.oo-ui-iconElement-icon {
 			position: relative;
@@ -49,34 +45,35 @@
 	}
 
 	&-title {
-		padding: 0;
-		width: 100%;
+		align-items: center;
+		display: flex;
+		flex: 1;
 		line-height: 1em;
+		min-width: 0;
+		padding: 0;
 
 		&-label {
-			display: inline-block;
-			// Sidebar width - icon width - twice padding - counter average width
-			max-width: calc( @specialpage-sidebar-width - 1.865em - 2 * @specialpage-separation-unit - 2em );
+			display: block;
 			// Truncate text with ellipsis.
 			.text-overflow( @visible: false );
 		}
 	}
 
 	&-count {
-		width: 1em;
+		min-width: 1em;
 	}
 
 	&-label-count {
-		background-color: #eaecf0;
-		color: @grey-medium;
+		background-color: @background-color-neutral;
+		color: @color-subtle;
 		padding: 0.2em 0.5em;
 		margin-left: 0.5em;
 		border-radius: @border-radius-base;
 		white-space: nowrap;
 
 		.oo-ui-optionWidget-selected & {
-			background: none; // `background-color: transparent` would be the goto value, but IE 8-9 introduces a bug
-			color: @color-primary;
+			background-color: transparent;
+			color: @color-progressive;
 		}
 	}
 }

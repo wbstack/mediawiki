@@ -5,7 +5,7 @@ namespace CirrusSearch\Job;
 use CirrusSearch\SearchConfig;
 use Job;
 use MediaWiki\MediaWikiServices;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * CirrusSearch Job that is bound to a Title
@@ -28,6 +28,26 @@ use Title;
 abstract class CirrusTitleJob extends Job {
 	use JobTraits;
 
+	// TODO: move these constants to JobTraits once we support php 8.2
+	public const UPDATE_KIND = 'update_kind';
+	public const ROOT_EVENT_TIME = 'root_event_time';
+	/** a change made to the page, new revision/delete/restore */
+	public const PAGE_CHANGE = 'page_change';
+	/** a change that could possibly change the rendered output of the page */
+	public const PAGE_REFRESH = 'page_refresh';
+	/** a change emitted when detecting a visibility change on a past revision
+	 * theoretically not needed but is being triggered out of caution as generally visibility changes
+	 * occur to hide harmful content.
+	 */
+	public const VISIBILITY_CHANGE = "visibility_change";
+	/**
+	 * Change issued from the saneitizer, either a fixup or a forced update
+	 */
+	public const SANEITIZER = "saneitizer";
+
+	/** param key to store the target elastic cluster */
+	public const CLUSTER = 'cluster';
+
 	/**
 	 * @var SearchConfig|null (lazy loaded by getSearchConfig())
 	 */
@@ -38,7 +58,11 @@ abstract class CirrusTitleJob extends Job {
 	 * @param array $params
 	 */
 	public function __construct( $title, $params ) {
-		$params += [ 'cluster' => null ];
+		$params += [
+			self::CLUSTER => null,
+			self::UPDATE_KIND => 'unknown',
+			self::ROOT_EVENT_TIME => null
+		];
 		// eg: DeletePages -> cirrusSearchDeletePages
 		$jobName = self::buildJobName( static::class );
 

@@ -2,8 +2,10 @@
 	"@metadata": {
 		"authors": [
 			"Armin1392",
+			"Ebrahim",
 			"Ebraminio",
 			"Huji",
+			"Jeeputer",
 			"Mjbmr",
 			"Reza1615",
 			"ZxxZxxZ"
@@ -55,5 +57,7 @@
 	"wikihiero-th-meaning": "معنی",
 	"wikihiero-th-result": "نتیجه",
 	"wikihiero-visualeditor-mwhieroinspector-title": "هیروگلیفیک‌ها",
-	"wikihiero-void": "مسدود کردن فضای خالی تمام پهنا"
+	"wikihiero-void": "مسدود کردن فضای خالی تمام پهنا",
+	"wikihiero-usage-tracking-category": "صفحه‌هایی که از افزونه ویکی‌هیرو استفاده می‌کنند",
+	"wikihiero-usage-tracking-category-desc": "این رده به‌طور خودکار به صفحه‌هایی افزوده می‌شود که از افزونهٔ ویکی‌هیرو استفاده می‌کنند"
 }

@@ -23,7 +23,7 @@ class SingleAggResultsType implements ResultsType {
 		return false;
 	}
 
-	public function getStoredFields() {
+	public function getFields() {
 		return [];
 	}
 

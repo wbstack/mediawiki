@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Dowlinme",
+			"Kscanne",
 			"MinecraftAustralia",
 			"Smirkybec",
 			"Tem",
@@ -20,5 +20,5 @@
 	"mobile-frontend-main-menu-watchlist": "Liosta faire",
 	"mobile-frontend-placeholder": "Cuardaigh {{SITENAME}}",
 	"mobile-frontend-random-button": "Randamach",
-	"minerva-page-actions-logs": "Logaí"
+	"minerva-page-actions-overflow": "Tuilleadh"
 }

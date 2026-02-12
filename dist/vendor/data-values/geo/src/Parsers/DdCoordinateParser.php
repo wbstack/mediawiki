@@ -12,6 +12,7 @@ use ValueParsers\ParserOptions;
  * Parser for geographical coordinates in Decimal Degree notation.
  *
  * @since 0.1
+ * @api
  *
  * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
@@ -34,21 +35,16 @@ class DdCoordinateParser extends LatLongParserBase {
 	/**
 	 * @param ParserOptions|null $options
 	 */
-	public function __construct( ParserOptions $options = null ) {
-		$options = $options ?: new ParserOptions();
-		$options->defaultOption( self::OPT_DEGREE_SYMBOL, '°' );
-
-		parent::__construct( $options );
+	public function __construct( ?ParserOptions $options = null ) {
+		parent::__construct(
+			( $options ?: new ParserOptions() )->withDefaultOption( self::OPT_DEGREE_SYMBOL, '°' )
+		);
 
 		$this->defaultDelimiters = [ $this->getOption( self::OPT_DEGREE_SYMBOL ) ];
 	}
 
 	/**
 	 * @see LatLongParserBase::getParsedCoordinate
-	 *
-	 * @param string $coordinateSegment
-	 *
-	 * @return float
 	 */
 	protected function getParsedCoordinate( string $coordinateSegment ): float {
 		$coordinateSegment = $this->resolveDirection( $coordinateSegment );
@@ -73,14 +69,14 @@ class DdCoordinateParser extends LatLongParserBase {
 		$match = false;
 
 		foreach ( $normalizedCoordinateSegments as $i => $segment ) {
-			$direction = '('
-				. $this->getOption( self::OPT_NORTH_SYMBOL ) . '|'
-				. $this->getOption( self::OPT_SOUTH_SYMBOL ) . ')';
-
 			if ( $i === 1 ) {
 				$direction = '('
 					. $this->getOption( self::OPT_EAST_SYMBOL ) . '|'
 					. $this->getOption( self::OPT_WEST_SYMBOL ) . ')';
+			} else {
+				$direction = '('
+					. $this->getOption( self::OPT_NORTH_SYMBOL ) . '|'
+					. $this->getOption( self::OPT_SOUTH_SYMBOL ) . ')';
 			}
 
 			$match = preg_match(
@@ -90,10 +86,12 @@ class DdCoordinateParser extends LatLongParserBase {
 
 			if ( $directional ) {
 				// Directionality is only set after parsing latitude: When the latitude is
-				// is directional, the longitude needs to be as well. Therefore we break here since
+				// directional, the longitude needs to be as well. Therefore, we break here since
 				// checking for directionality is the only check needed for longitude.
 				break;
-			} elseif ( $match ) {
+			}
+
+			if ( $match ) {
 				// Latitude is directional, no need to check for non-directionality.
 				$directional = true;
 				continue;
@@ -107,7 +105,7 @@ class DdCoordinateParser extends LatLongParserBase {
 			}
 		}
 
-		return ( 1 === $match );
+		return ( $match === 1 );
 	}
 
 	/**
@@ -139,9 +137,7 @@ class DdCoordinateParser extends LatLongParserBase {
 			$this->getOption( self::OPT_DEGREE_SYMBOL ), $coordinates
 		);
 
-		$coordinates = $this->removeInvalidChars( $coordinates );
-
-		return $coordinates;
+		return $this->removeInvalidChars( $coordinates );
 	}
 
 	/**
@@ -160,10 +156,6 @@ class DdCoordinateParser extends LatLongParserBase {
 
 	/**
 	 * Converts a coordinate segment to float representation.
-	 *
-	 * @param string $coordinateSegment
-	 *
-	 * @return float
 	 */
 	protected function parseCoordinate( string $coordinateSegment ): float {
 		return (float)str_replace(
@@ -186,7 +178,7 @@ class DdCoordinateParser extends LatLongParserBase {
 		$normalizedCoordinateSegments = explode( $separator, $normalizedCoordinateString );
 
 		if ( count( $normalizedCoordinateSegments ) !== 2 ) {
-			// Separator not present within the string, trying to figure out the segments by
+			// Separator is not present within the string, trying to figure out the segments by
 			// splitting after the first direction character or degree symbol:
 			$delimiters = $this->defaultDelimiters;
 
@@ -201,7 +193,7 @@ class DdCoordinateParser extends LatLongParserBase {
 			];
 
 			foreach ( $ns as $delimiter ) {
-				if ( mb_strpos( $normalizedCoordinateString, $delimiter ) === 0 ) {
+				if ( str_starts_with( $normalizedCoordinateString, $delimiter ) ) {
 					// String starts with "north" or "west" symbol: Separation needs to be done
 					// before the "east" or "west" symbol.
 					$delimiters = array_merge( $ew, $delimiters );

@@ -1,9 +1,42 @@
 {
 	"@metadata": {
 		"authors": [
-			"ToJack"
+			"ToJack",
+			"Vashgird",
+			"Зинҳор Насрӣ"
 		]
 	},
+	"advancedsearch-options-pane-head": "Ҷустуҷӯи васеъ",
+	"advancedsearch-optgroup-text": "Ҷустуҷӯ дар матни саҳифа",
+	"advancedsearch-optgroup-structure": "Сохтор",
+	"advancedsearch-optgroup-files": "Парвандаҳо ва аксҳо",
+	"advancedsearch-optgroup-sort": "Тартиби ҷобаҷогузорӣ",
+	"advancedsearch-field-plain": "Ин вожаҳо",
+	"advancedsearch-field-phrase": "Дақиқан ин матн",
+	"advancedsearch-field-or": "Яке аз ин вожаҳо",
+	"advancedsearch-field-not": "Бидуни ин вожаҳо",
+	"advancedsearch-field-subpageof": "Зерсафҳаҳои ин саҳифа",
+	"advancedsearch-field-intitle": "Сарлавҳаи саҳифа фарогири",
+	"advancedsearch-field-deepcategory": "Саҳифаҳо дар ин гурӯҳҳо",
+	"advancedsearch-field-hastemplate": "Саҳифаҳои дорои ин шаблонҳо",
+	"advancedsearch-field-inlanguage": "Саҳифаҳо ба ин забон",
+	"advancedsearch-field-filetype": "Навъи парванда",
+	"advancedsearch-field-filew": "Паҳнои парванда ба пиксел",
+	"advancedsearch-field-fileh": "Дарозои парванда ба пиксел",
+	"advancedsearch-field-sort": "Тартиби ҷобаҷогузорӣ",
+	"advancedsearch-help-general-instruction": "Дастурҳои муфассал барои $1",
+	"advancedsearch-placeholder-exact-text": "гурба ошиқи буз аст",
+	"advancedsearch-inlanguage-default": "Интихоби забон",
+	"advancedsearch-filetype-section-types": "Навъҳои умумии парвандаҳо",
+	"advancedsearch-filetype-section-image": "Қолабҳои тасвир",
+	"advancedsearch-filetype-section-video": "Қолабҳои видео",
+	"advancedsearch-filetype-section-audio": "Қолабҳои савтӣ",
+	"advancedsearch-filetype-section-document": "Қолабҳои ҳуҷҷатҳо",
+	"advancedsearch-filetype-section-other": "Қолабҳои дигар",
+	"advancedsearch-filetype-default": "Интихоби навъи парванда",
+	"advancedsearch-filetype-bitmap": "Тасвир",
+	"advancedsearch-filetype-drawing": "Наққошӣ",
+	"advancedsearch-filetype-audio": "Савт",
 	"advancedsearch-sort-preview-last-edit-desc": "санаи вироиш",
 	"advancedsearch-sort-preview-create-timestamp-desc": "санаи эҷод",
 	"advancedsearch-namespaces-preset-default": "Пешфарз"

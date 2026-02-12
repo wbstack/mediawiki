@@ -18,6 +18,8 @@
  * @file
  */
 
+use Wikimedia\ObjectCache\BagOStuff;
+
 /**
  * Store an arbitrary value whilst representing several CacheDependency objects as one.
  *
@@ -27,6 +29,7 @@
  * @ingroup Language
  */
 class DependencyWrapper {
+	/** @var mixed */
 	private $value;
 	/** @var CacheDependency[] */
 	private $deps;
@@ -99,7 +102,7 @@ class DependencyWrapper {
 	 * @param BagOStuff $cache
 	 * @param string $key The cache key
 	 * @param int $expiry The expiry timestamp or interval in seconds
-	 * @param bool|callable $callback The callback for generating the value, or false
+	 * @param callable|false $callback The callback for generating the value, or false
 	 * @param array $callbackParams The function parameters for the callback
 	 * @param array $deps The dependencies to store on a cache miss. Note: these
 	 *    are not the dependencies used on a cache hit! Cache hits use the stored

@@ -5,17 +5,21 @@ namespace CirrusSearch;
 use CirrusSearch\Profile\SearchProfileService;
 use CirrusSearch\Profile\SearchProfileServiceFactory;
 use CirrusSearch\Profile\SearchProfileServiceFactoryFactory;
-use Config;
+use LogicException;
+use MediaWiki\Config\Config;
+use MediaWiki\Config\GlobalVarConfig;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
-use RequestContext;
-use WikiMap;
+use MediaWiki\WikiMap\WikiMap;
+use Wikimedia\Assert\Assert;
 
 /**
  * Configuration class encapsulating Searcher environment.
  * This config class can import settings from the environment globals,
  * or from specific wiki configuration.
  */
-class SearchConfig implements \Config {
+class SearchConfig implements Config {
 	// Constants for referring to various config values. Helps prevent fat-fingers
 	public const INDEX_BASE_NAME = 'CirrusSearchIndexBaseName';
 	private const PREFIX_IDS = 'CirrusSearchPrefixIds';
@@ -26,9 +30,9 @@ class SearchConfig implements \Config {
 
 	/** Non cirrus vars to load when loading external wiki config */
 	private const NON_CIRRUS_VARS = [
-		'wgLanguageCode',
-		'wgContentNamespaces',
-		'wgNamespacesToBeSearchedDefault',
+		MainConfigNames::LanguageCode,
+		MainConfigNames::ContentNamespaces,
+		MainConfigNames::NamespacesToBeSearchedDefault,
 	];
 
 	/**
@@ -67,8 +71,8 @@ class SearchConfig implements \Config {
 	 * Create new search config for the current wiki.
 	 * @param SearchProfileServiceFactoryFactory|null $searchProfileServiceFactoryFactory
 	 */
-	public function __construct( SearchProfileServiceFactoryFactory $searchProfileServiceFactoryFactory = null ) {
-		$this->source = new \GlobalVarConfig();
+	public function __construct( ?SearchProfileServiceFactoryFactory $searchProfileServiceFactoryFactory = null ) {
+		$this->source = new GlobalVarConfig();
 		$this->wikiId = WikiMap::getCurrentWikiId();
 		// The only ability to mutate SearchConfig is via a protected method, setSource.
 		// As long as we have an instance of SearchConfig it must then be the hostConfig.
@@ -116,7 +120,7 @@ class SearchConfig implements \Config {
 		// FIXME: this test is somewhat obscure (very indirect to say the least)
 		// problem is that testing $this->wikiId === WikiMap::getCurrentWikiId()
 		// would not work properly during unit tests.
-		return $this->source instanceof \GlobalVarConfig;
+		return $this->source instanceof GlobalVarConfig;
 	}
 
 	/**
@@ -179,6 +183,8 @@ class SearchConfig implements \Config {
 	 * @return string
 	 */
 	public function makeId( $pageId ) {
+		Assert::parameter( is_int( $pageId ) || ( is_string( $pageId ) && ctype_digit( $pageId ) ),
+			'$pageId', "should be an integer or a string with digits, got [$pageId]." );
 		$prefix = $this->get( self::PREFIX_IDS )
 			? $this->getWikiId()
 			: null;
@@ -204,15 +210,15 @@ class SearchConfig implements \Config {
 
 		$pieces = explode( '|', $docId );
 		switch ( count( $pieces ) ) {
-		case 2:
-			return (int)$pieces[1];
-		case 1:
-			// Broken doc id...assume somehow this didn't get prefixed.
-			// Attempt to continue on...but maybe should throw exception
-			// instead?
-			return (int)$docId;
-		default:
-			throw new \Exception( "Invalid document id: $docId" );
+			case 2:
+				return (int)$pieces[1];
+			case 1:
+				// Broken doc id...assume somehow this didn't get prefixed.
+				// Attempt to continue on...but maybe should throw exception
+				// instead?
+				return (int)$docId;
+			default:
+				throw new LogicException( "Invalid document id: $docId" );
 		}
 	}
 

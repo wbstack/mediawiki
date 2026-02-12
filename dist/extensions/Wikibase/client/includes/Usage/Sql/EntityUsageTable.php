@@ -6,8 +6,8 @@ namespace Wikibase\Client\Usage\Sql;
 
 use ArrayIterator;
 use InvalidArgumentException;
+use LogicException;
 use MediaWiki\Logger\LoggerFactory;
-use MWException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Traversable;
@@ -18,8 +18,9 @@ use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\Lib\Rdbms\ClientDomainDb;
-use Wikimedia\Rdbms\DBUnexpectedError;
 use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IReadableDatabase;
+use Wikimedia\Rdbms\SelectQueryBuilder;
 
 /**
  * Helper class for updating the wbc_entity_usage table.
@@ -34,42 +35,23 @@ class EntityUsageTable {
 
 	public const DEFAULT_TABLE_NAME = 'wbc_entity_usage';
 
-	/**
-	 * @var EntityIdParser
-	 */
-	private $idParser;
+	private EntityIdParser $idParser;
 
-	/**
-	 * @var IDatabase
-	 */
-	private $writeConnection;
+	private ?IDatabase $writeConnection;
 
-	/**
-	 * @var ClientDomainDb
-	 */
-	private $db;
+	private ClientDomainDb $db;
 
-	/**
-	 * @var int
-	 */
-	private $batchSize;
+	private int $batchSize;
 
-	/**
-	 * @var string
-	 */
-	private $tableName;
+	private string $tableName;
 
-	/**
-	 * @var int
-	 */
-	private $addUsagesBatchSize;
+	private int $addUsagesBatchSize;
 
-	/** @var LoggerInterface */
-	private $logger;
+	private LoggerInterface $logger;
 
 	/**
 	 * @param EntityIdParser $idParser
-	 * @param IDatabase $writeConnection
+	 * @param IDatabase|null $writeConnection If null, this instance can only be used for “read” queries.
 	 * @param int $batchSize Batch size for database queries on the entity usage table, including
 	 *  INSERTs, SELECTs, and DELETEs. Defaults to 100.
 	 * @param string|null $tableName defaults to wbc_entity_usage
@@ -79,7 +61,7 @@ class EntityUsageTable {
 	 */
 	public function __construct(
 		EntityIdParser $idParser,
-		IDatabase $writeConnection,
+		?IDatabase $writeConnection,
 		int $batchSize = 100,
 		?string $tableName = null,
 		int $addUsagesBatchSize = 500
@@ -93,7 +75,6 @@ class EntityUsageTable {
 		}
 
 		$this->idParser = $idParser;
-		// Several places inject read connection instead. Fix those.
 		$this->writeConnection = $writeConnection;
 		$this->batchSize = $batchSize;
 		$this->tableName = $tableName ?: self::DEFAULT_TABLE_NAME;
@@ -104,23 +85,28 @@ class EntityUsageTable {
 		$this->logger = LoggerFactory::getInstance( 'Wikibase' );
 	}
 
+	private function getWriteConnection(): IDatabase {
+		if ( $this->writeConnection === null ) {
+			throw new LogicException( 'This EntityUsageTable is read-only!' );
+		}
+		return $this->writeConnection;
+	}
+
 	/**
 	 * @param int $pageId
 	 * @param EntityUsage[] $usages
 	 *
 	 * @return int[] affected row ids
-	 * @throws DBUnexpectedError
-	 * @throws MWException
 	 */
 	private function getAffectedRowIds( int $pageId, array $usages ): array {
 		$usageConditions = [];
-		$db = $this->writeConnection;
+		$db = $this->getWriteConnection();
 
 		foreach ( $usages as $usage ) {
-			$usageConditions[] = $db->makeList( [
+			$usageConditions[] = $db->andExpr( [
 				'eu_aspect' => $usage->getAspectKey(),
 				'eu_entity_id' => $usage->getEntityId()->getSerialization(),
-			], LIST_AND );
+			] );
 		}
 
 		// Collect affected row IDs, so we can use them for an
@@ -129,7 +115,7 @@ class EntityUsageTable {
 		foreach ( array_chunk( $usageConditions, $this->batchSize ) as $usageConditionChunk ) {
 			$where = [
 				'eu_page_id' => $pageId,
-				$db->makeList( $usageConditionChunk, LIST_OR )
+				$db->orExpr( $usageConditionChunk ),
 			];
 
 			$rowIds = array_merge(
@@ -167,7 +153,7 @@ class EntityUsageTable {
 			$rows[] = [
 				'eu_page_id' => $pageId,
 				'eu_aspect' => $usage->getAspectKey(),
-				'eu_entity_id' => $usage->getEntityId()->getSerialization()
+				'eu_entity_id' => $usage->getEntityId()->getSerialization(),
 			];
 		}
 
@@ -182,7 +168,7 @@ class EntityUsageTable {
 	 * @return int The number of entries added
 	 */
 	public function addUsages( int $pageId, array $usages ): int {
-		if ( empty( $usages ) ) {
+		if ( !$usages ) {
 			return 0;
 		}
 
@@ -193,9 +179,14 @@ class EntityUsageTable {
 
 		$c = 0;
 
+		$writeConnection = $this->getWriteConnection();
 		foreach ( $batches as $rows ) {
-			$this->writeConnection->insert( $this->tableName, $rows, __METHOD__, [ 'IGNORE' ] );
-			$c += $this->writeConnection->affectedRows();
+			$writeConnection->newInsertQueryBuilder()
+				->insertInto( $this->tableName )
+				->ignore()
+				->rows( $rows )
+				->caller( __METHOD__ )->execute();
+			$c += $writeConnection->affectedRows();
 
 			// Wait for all database replicas to be updated, but only for the affected client wiki.
 			$this->db->replication()->wait();
@@ -211,12 +202,11 @@ class EntityUsageTable {
 	 * @return EntityUsage[] EntityUsage identity string => EntityUsage
 	 */
 	public function queryUsages( int $pageId ): array {
-		$res = $this->db->connections()->getReadConnectionRef()->select(
-			$this->tableName,
-			[ 'eu_aspect', 'eu_entity_id' ],
-			[ 'eu_page_id' => $pageId ],
-			__METHOD__
-		);
+		$res = $this->db->connections()->getReadConnection()->newSelectQueryBuilder()
+			->select( [ 'eu_aspect', 'eu_entity_id' ] )
+			->from( $this->tableName )
+			->where( [ 'eu_page_id' => $pageId ] )
+			->caller( __METHOD__ )->fetchResultSet();
 
 		return $this->convertRowsToUsages( $res );
 	}
@@ -247,7 +237,7 @@ class EntityUsageTable {
 				continue;
 			}
 
-			list( $aspect, $modifier ) = EntityUsage::splitAspectKey( $object->eu_aspect );
+			[ $aspect, $modifier ] = EntityUsage::splitAspectKey( $object->eu_aspect );
 
 			$usage = new EntityUsage( $entityId, $aspect, $modifier );
 			$key = $usage->getIdentityString();
@@ -280,26 +270,27 @@ class EntityUsageTable {
 	 * @throws InvalidArgumentException
 	 */
 	public function removeUsages( int $pageId, array $usages ): void {
-		if ( empty( $usages ) ) {
+		if ( !$usages ) {
 			return;
 		}
 
 		$rowIds = $this->getAffectedRowIds( $pageId, $usages );
 		$rowIdChunks = array_chunk( $rowIds, $this->batchSize );
+		$writeConnection = $this->getWriteConnection();
 
-		$this->writeConnection->startAtomic( __METHOD__ );
+		$writeConnection->startAtomic( __METHOD__ );
 
 		foreach ( $rowIdChunks as $chunk ) {
-			$this->writeConnection->delete(
-				$this->tableName,
-				[
+			$writeConnection->newDeleteQueryBuilder()
+				->deleteFrom( $this->tableName )
+				->where( [
 					'eu_row_id' => $chunk,
-				],
-				__METHOD__
-			);
+				] )
+				->caller( __METHOD__ )
+				->execute();
 		}
 
-		$this->writeConnection->endAtomic( __METHOD__ );
+		$writeConnection->endAtomic( __METHOD__ );
 	}
 
 	/**
@@ -311,24 +302,22 @@ class EntityUsageTable {
 	 * @return Traversable A traversable over PageEntityUsages grouped by page.
 	 */
 	public function getPagesUsing( array $entityIds, array $aspects = [] ) {
-		if ( empty( $entityIds ) ) {
+		if ( !$entityIds ) {
 			return new ArrayIterator();
 		}
 
-		$idStrings = $this->getEntityIdStrings( $entityIds );
-		$where = [ 'eu_entity_id' => $idStrings ];
-
-		if ( !empty( $aspects ) ) {
-			$where['eu_aspect'] = $aspects;
+		$queryBuilder = $this->db->connections()->getReadConnection()->newSelectQueryBuilder()
+			->select( [ 'eu_page_id', 'eu_entity_id', 'eu_aspect' ] )
+			->from( $this->tableName )
+			->where( [
+				'eu_entity_id' => $this->getEntityIdStrings( $entityIds ),
+			] );
+		if ( $aspects ) {
+			$queryBuilder->andWhere( [ 'eu_aspect' => $aspects ] );
 		}
-
-		$res = $this->db->connections()->getReadConnectionRef()->select(
-			$this->tableName,
-			[ 'eu_page_id', 'eu_entity_id', 'eu_aspect' ],
-			$where,
-			__METHOD__,
-			[ 'ORDER BY' => 'eu_page_id' ]
-		);
+		$res = $queryBuilder
+			->orderBy( 'eu_page_id' )
+			->caller( __METHOD__ )->fetchResultSet();
 
 		$pages = $this->foldRowsIntoPageEntityUsages( $res );
 
@@ -359,7 +348,7 @@ class EntityUsageTable {
 			$pageEntityUsages = $usagesPerPage[$pageId] ?? new PageEntityUsages( $pageId );
 
 			$entityId = $this->idParser->parse( $row->eu_entity_id );
-			list( $aspect, $modifier ) = EntityUsage::splitAspectKey( $row->eu_aspect );
+			[ $aspect, $modifier ] = EntityUsage::splitAspectKey( $row->eu_aspect );
 
 			$usage = new EntityUsage( $entityId, $aspect, $modifier );
 			$pageEntityUsages->addUsages( [ $usage ] );
@@ -378,7 +367,7 @@ class EntityUsageTable {
 	 * @return EntityId[]
 	 */
 	public function getUnusedEntities( array $entityIds ): array {
-		if ( empty( $entityIds ) ) {
+		if ( !$entityIds ) {
 			return [];
 		}
 
@@ -404,16 +393,16 @@ class EntityUsageTable {
 	private function getUsedEntityIdStrings( array $idStrings ): array {
 		// Note: We need to use one (sub)query per entity here, per T116404
 		$subQueries = $this->getUsedEntityIdStringsQueries( $idStrings );
-		$readConnection = $this->db->connections()->getReadConnectionRef();
+		$readConnection = $this->db->connections()->getReadConnection();
 
 		if ( $readConnection->getType() === 'mysql' ) {
 			return $this->getUsedEntityIdStringsMySql( $subQueries, $readConnection );
 		} else {
 			$values = [];
-			foreach ( $subQueries as $sql ) {
-				$res = $readConnection->query( $sql, __METHOD__ );
-				if ( $res->numRows() ) {
-					$values[] = $res->current()->eu_entity_id;
+			foreach ( $subQueries as $query ) {
+				$row = $query->caller( __METHOD__ )->fetchRow();
+				if ( $row !== false ) {
+					$values[] = $row->eu_entity_id;
 				}
 			}
 		}
@@ -424,20 +413,18 @@ class EntityUsageTable {
 	/**
 	 * @param string[] $idStrings
 	 *
-	 * @return string[]
+	 * @return SelectQueryBuilder[]
 	 */
 	private function getUsedEntityIdStringsQueries( array $idStrings ): array {
 		$subQueries = [];
-		$readConnection = $this->db->connections()->getReadConnectionRef();
+		$readConnection = $this->db->connections()->getReadConnection();
 
 		foreach ( $idStrings as $idString ) {
-			$subQueries[] = $readConnection->selectSQLText(
-				$this->tableName,
-				'eu_entity_id',
-				[ 'eu_entity_id' => $idString ],
-				'',
-				[ 'LIMIT' => 1 ]
-			);
+			$subQueries[] = $readConnection->newSelectQueryBuilder()
+				->select( 'eu_entity_id' )
+				->from( $this->tableName )
+				->where( [ 'eu_entity_id' => $idString ] )
+				->limit( 1 );
 		}
 
 		return $subQueries;
@@ -452,31 +439,33 @@ class EntityUsageTable {
 	 * @return int[]
 	 */
 	private function getPrimaryKeys( array $where, string $method ): array {
-		$rowIds = $this->db->connections()->getReadConnectionRef()->selectFieldValues(
-			$this->tableName,
-			'eu_row_id',
-			$where,
-			$method
-		);
+		$rowIds = $this->db->connections()->getReadConnection()->newSelectQueryBuilder()
+			->select( [ 'eu_row_id' ] )
+			->from( $this->tableName )
+			->where( $where )
+			->caller( $method )->fetchFieldValues();
 
 		return array_map( 'intval', $rowIds ?: [] );
 	}
 
 	/**
-	 * @param string[] $subQueries
-	 * @param IDatabase $readConnection must have type MySQL
+	 * @param SelectQueryBuilder[] $subQueries
+	 * @param IReadableDatabase $readConnection must have type MySQL
 	 * @return string[]
 	 */
 	private function getUsedEntityIdStringsMySql(
 		array $subQueries,
-		IDatabase $readConnection
+		IReadableDatabase $readConnection
 	): array {
 		$values = [];
 
 		// On MySQL we can UNION up queries and run them at once
 		foreach ( array_chunk( $subQueries, $this->batchSize ) as $queryChunks ) {
-			$sql = $readConnection->unionQueries( $queryChunks, true );
-			$res = $readConnection->query( $sql, __METHOD__ );
+			$uqb = $readConnection->newUnionQueryBuilder();
+			foreach ( $queryChunks as $query ) {
+				$uqb->add( $query );
+			}
+			$res = $uqb->all()->caller( __METHOD__ )->fetchResultSet();
 			foreach ( $res as $row ) {
 				$values[] = $row->eu_entity_id;
 			}
@@ -488,7 +477,6 @@ class EntityUsageTable {
 	/**
 	 * Set the batch size for adding entity usage records.
 	 * This can also be set in the constructor.
-	 * @param int $addUsagesBatchSize
 	 */
 	public function setAddUsagesBatchSize( int $addUsagesBatchSize ): void {
 		if ( $addUsagesBatchSize < 1 ) {

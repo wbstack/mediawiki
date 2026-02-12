@@ -2,8 +2,8 @@
 
 namespace MediaWiki\Extension\OAuth\Backend;
 
-use MWException;
-use User;
+use MediaWiki\User\User;
+use MWCryptRand;
 
 /**
  * (c) Dejan Savuljesku 2019, GPL
@@ -43,9 +43,8 @@ class OAuth1Consumer extends Consumer {
 	 * @param string|null $requestTokenKey
 	 * @return string
 	 * @throws MWOAuthException
-	 * @throws MWException
 	 */
-	public function authorize( \User $mwUser, $update, $grants, $requestTokenKey = null ) {
+	public function authorize( User $mwUser, $update, $grants, $requestTokenKey = null ) {
 		$this->conductAuthorizationChecks( $mwUser );
 
 		// Generate and Update the tokens:
@@ -53,11 +52,15 @@ class OAuth1Consumer extends Consumer {
 		// * Either add or update the authorization
 		// ** Generate a new access token if this is a new authorization
 		// * Resave request token with the access token
-		$verifyCode = \MWCryptRand::generateHex( 32 );
+		$verifyCode = MWCryptRand::generateHex( 32 );
 		$store = Utils::newMWOAuthDataStore();
 		$requestToken = $store->lookup_token( $this, 'request', $requestTokenKey );
 		if ( !$requestToken || !( $requestToken instanceof MWOAuthToken ) ) {
-			throw new MWOAuthException( 'mwoauthserver-invalid-request-token' );
+			throw new MWOAuthException( 'mwoauthserver-invalid-request-token', [
+				'consumer' => $this->getConsumerKey(),
+				'consumer_name' => $this->getName(),
+				'token_key' => $requestTokenKey,
+			] );
 		}
 		$requestToken->addVerifyCode( $verifyCode );
 

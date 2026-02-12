@@ -64,13 +64,14 @@ function customTalkNamespaceProvider( namespaceIds ) {
 
 mw.hook( 'advancedSearch.initNamespacePresetProviders' ).add(
 	function( namespaceProviders ) {
-		// use unique provider ID from PHP config as key
+		// use unique provider name from PHP config as key
 		namespaceProviders[ 'custom-talk' ] = customTalkNamespaceProvider;
 	}
 );
 ```
 
-The provider function `customTalkNamespaceProvider` will get an array of all supported namespaces IDs. If it returns unsupported namespace IDs, the preset will not be shown.
+The provider function `customTalkNamespaceProvider` will get an array of all supported namespaces
+ids. If it returns unsupported namespace ids, the preset will not be shown.
 If the provider function returns an empty array, the preset is not shown. This is for creating presets that depend on the existence of certain namespaces.
 
 ### Category tree support `$wgAdvancedSearchDeepcatEnabled`

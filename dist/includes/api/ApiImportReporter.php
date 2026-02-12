@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2009 Roan Kattouw "<Firstname>.<Lastname>@gmail.com"
+ * Copyright © 2009 Roan Kattouw <roan.kattouw@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,19 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use ImportReporter;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageIdentity;
+use MediaWiki\Title\ForeignTitle;
 
 /**
  * Import reporter for the API
  * @ingroup API
  */
 class ApiImportReporter extends ImportReporter {
+	/** @var array[] */
 	private $mResultArr = [];
 
 	/**
@@ -48,8 +53,7 @@ class ApiImportReporter extends ImportReporter {
 			$r['invalid'] = true;
 		} else {
 			$titleFactory = MediaWikiServices::getInstance()->getTitleFactory();
-			// @phan-suppress-next-line PhanTypeMismatchArgumentNullable castFrom does not return null here
-			ApiQueryBase::addTitleInfo( $r, $titleFactory->castFromPageIdentity( $pageIdentity ) );
+			ApiQueryBase::addTitleInfo( $r, $titleFactory->newFromPageIdentity( $pageIdentity ) );
 			$r['revisions'] = (int)$successCount;
 		}
 
@@ -63,3 +67,6 @@ class ApiImportReporter extends ImportReporter {
 		return $this->mResultArr;
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiImportReporter::class, 'ApiImportReporter' );

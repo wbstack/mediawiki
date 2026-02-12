@@ -5,11 +5,11 @@ const
 	mfExtend = require( '../mobile.startup/mfExtend' );
 
 /**
- * Overlay displaying a structured list of languages for a page
- *
- * @class LanguageSearcher
- * @extends View
- *
+ * @class Hooks~LanguageSearcher
+ * @classdesc Overlay displaying a structured list of languages for a page, only accessible via
+ * the  {@link Hooks~'mobileFrontend.languageSearcher.onOpen' mobileFrontend.languageSearcher.onOpen hook}.
+ * @hideconstructor
+ * @extends module:mobile.startup/View
  * @param {Object} props Configuration options
  * @param {Object[]} props.languages list of language objects as returned by the API
  * @param {Array|boolean} props.variants language variant objects
@@ -18,7 +18,6 @@ const
  *  section should be rendered.
  * @param {string} [props.deviceLanguage] the device's primary language
  * @param {Function} [props.onOpen] callback that fires on opening the searcher
- * @param {Function} [props.onBannerClick] callback that fires when banner is clicked
  */
 function LanguageSearcher( props ) {
 	/**
@@ -38,8 +37,8 @@ function LanguageSearcher( props ) {
 			{
 				className: 'language-searcher',
 				events: {
-					'click .language-search-banner': props.onBannerClick,
 					'click a': 'onLinkClick',
+					'click .language-search-banner': 'onSearchBannerClick',
 					'input .search': 'onSearchInput'
 				},
 				// the rest are template properties
@@ -79,7 +78,7 @@ mfExtend( LanguageSearcher, View, {
 	template: util.template( `
 <div class="panel">
 	<div class="panel-body search-box">
-		<input type="search" class="search mw-ui-background-icon-search" placeholder="{{inputPlaceholder}}">
+		<input type="search" class="search" placeholder="{{inputPlaceholder}}">
 	</div>
 </div>
 
@@ -143,13 +142,19 @@ mfExtend( LanguageSearcher, View, {
 	 * Method that can be called outside MF extension to render
 	 * a banner inside the language overlay.
 	 *
-	 * @stable for use inside ContentTranslation
+	 * Stable for use inside ContentTranslation
+	 * @memberof LanguageSearcher
 	 * @param {string} bannerHTML
+	 * @param {string} firstMissingLanguage
 	 */
-	addBanner: function ( bannerHTML ) {
+	addBanner: function ( bannerHTML, firstMissingLanguage ) {
 		this.options.bannerHTML = bannerHTML;
+		this.options.bannerFirstLanguage = firstMissingLanguage;
 		this.options.showSuggestedLanguagesHeader = true;
 		this.render();
+	},
+	onSearchBannerClick: function () {
+		this.$el.find( '.search' ).val( this.options.bannerFirstLanguage ).trigger( 'input' );
 	},
 	/**
 	 * Article link click event handler
@@ -161,7 +166,12 @@ mfExtend( LanguageSearcher, View, {
 	onLinkClick: function ( ev ) {
 		const $link = this.$el.find( ev.currentTarget ),
 			lang = $link.attr( 'lang' );
-
+		/**
+		 * Internal for use in GrowthExperiments only.
+		 *
+		 * @event ~'mobileFrontend.languageSearcher.linkClick'
+		 * @memberof Hooks
+		 */
 		mw.hook( 'mobileFrontend.languageSearcher.linkClick' ).fire( lang );
 		langUtil.saveLanguageUsageCount( lang, langUtil.getFrequentlyUsedLanguages() );
 	},
@@ -173,7 +183,9 @@ mfExtend( LanguageSearcher, View, {
 	 * @param {jQuery.Event} ev Event object.
 	 */
 	onSearchInput: function ( ev ) {
-		this.filterLanguages( this.$el.find( ev.target ).val().toLowerCase() );
+		const searchOrigin = ev.originalEvent === undefined ? 'entrypoint-banner' : 'ui';
+
+		this.filterLanguages( ev.target.value.toLowerCase(), searchOrigin );
 	},
 	/**
 	 * Filter the language list to only show languages that match the current search term.
@@ -181,8 +193,9 @@ mfExtend( LanguageSearcher, View, {
 	 * @memberof LanguageSearcher
 	 * @instance
 	 * @param {string} searchQuery of search term (lowercase).
+	 * @param {'entrypoint-banner'|'ui'} searchOrigin for internal use by CX entrypoints only
 	 */
-	filterLanguages: function ( searchQuery ) {
+	filterLanguages: function ( searchQuery, searchOrigin ) {
 		const filteredList = [];
 
 		if ( searchQuery ) {
@@ -210,14 +223,22 @@ mfExtend( LanguageSearcher, View, {
 
 			this.$languageItems.addClass( 'hidden' );
 			if ( filteredList.length ) {
-				this.$siteLinksList.find( '.' + filteredList.join( ',.' ) ).removeClass( 'hidden' );
+				this.$siteLinksList.find(
+					`.${ mw.util.escapeRegExp( filteredList.join( ',.' ) ) }`
+				).removeClass( 'hidden' );
 				this.$emptyResultsSection.addClass( 'hidden' );
 			} else {
 				this.$emptyResultsSection.removeClass( 'hidden' );
 				// Fire with the search query and the DOM element corresponding to no-results
 				// message so that it can be customized in hook handler
+				/**
+				 * Internal for use in ContentTranslation only.
+				 *
+				 * @event ~'mobileFrontend.editorOpening'
+				 * @memberof Hooks
+				 */
 				mw.hook( 'mobileFrontend.languageSearcher.noresults' )
-					.fire( searchQuery, this.$emptyResultsSection.get( 0 ) );
+					.fire( searchQuery, this.$emptyResultsSection.get( 0 ), searchOrigin );
 			}
 			this.$siteLinksList.addClass( 'filtered' );
 			this.$subheaders.addClass( 'hidden' );

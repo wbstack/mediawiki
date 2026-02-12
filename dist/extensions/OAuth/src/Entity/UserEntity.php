@@ -4,15 +4,15 @@ namespace MediaWiki\Extension\OAuth\Entity;
 
 use League\OAuth2\Server\Entities\UserEntityInterface;
 use MediaWiki\Extension\OAuth\Backend\Utils;
+use MediaWiki\User\User;
 use MWException;
-use User;
 
 class UserEntity implements UserEntityInterface {
 
 	/**
 	 * @var int
 	 */
-	private $identifier = 0;
+	private $identifier;
 
 	/**
 	 * @param User $user
@@ -47,7 +47,7 @@ class UserEntity implements UserEntityInterface {
 	}
 
 	/**
-	 * @return bool|User
+	 * @return User|false
 	 */
 	public function getMWUser() {
 		return Utils::getLocalUserFromCentralId( $this->identifier );

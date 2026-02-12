@@ -36,7 +36,7 @@ class PropertyValueSnakTest extends \PHPUnit\Framework\TestCase {
 		$this->assertInstanceOf( PropertyValueSnak::class, $snak );
 	}
 
-	public function validConstructorArgumentsProvider() {
+	public static function validConstructorArgumentsProvider() {
 		return [
 			[ 1, new StringValue( 'a' ) ],
 			[ new NumericPropertyId( 'P1' ), new StringValue( 'a' ) ],
@@ -55,7 +55,7 @@ class PropertyValueSnakTest extends \PHPUnit\Framework\TestCase {
 		new PropertyValueSnak( $propertyId, $dataValue );
 	}
 
-	public function invalidConstructorArgumentsProvider() {
+	public static function invalidConstructorArgumentsProvider() {
 		$stringValue = new StringValue( 'a' );
 
 		return [
@@ -107,32 +107,27 @@ class PropertyValueSnakTest extends \PHPUnit\Framework\TestCase {
 		$this->assertFalse( $snak2->equals( $snak1 ) );
 	}
 
-	public function notEqualsProvider() {
+	public static function notEqualsProvider() {
 		return [
 			[
 				new PropertyValueSnak( new NumericPropertyId( 'P1' ), new StringValue( 'a' ) ),
-				new PropertyValueSnak( new NumericPropertyId( 'P2' ), new StringValue( 'a' ) )
+				new PropertyValueSnak( new NumericPropertyId( 'P2' ), new StringValue( 'a' ) ),
 			],
 			[
 				new PropertyValueSnak( new NumericPropertyId( 'P1' ), new StringValue( 'a' ) ),
-				new PropertyValueSnak( new NumericPropertyId( 'P1' ), new StringValue( 'b' ) )
+				new PropertyValueSnak( new NumericPropertyId( 'P1' ), new StringValue( 'b' ) ),
 			],
 		];
 	}
 
-	public function provideDataToSerialize() {
+	public static function provideDataToSerialize() {
 		$p2 = new NumericPropertyId( 'P2' );
-		$p2foo = new NumericPropertyId( 'foo:P2' );
 		$value = new StringValue( 'b' );
 
 		return [
 			'string' => [
-				'a:2:{i:0;s:2:"P2";i:1;C:22:"DataValues\StringValue":1:{b}}',
+				'a:2:{i:0;s:2:"P2";i:1;O:22:"DataValues\StringValue":1:{i:0;s:1:"b";}}',
 				new PropertyValueSnak( $p2, $value ),
-			],
-			'foreign' => [
-				'a:2:{i:0;s:6:"foo:P2";i:1;C:22:"DataValues\StringValue":1:{b}}',
-				new PropertyValueSnak( $p2foo, $value ),
 			],
 		];
 	}
@@ -149,23 +144,22 @@ class PropertyValueSnakTest extends \PHPUnit\Framework\TestCase {
 		$this->assertTrue( $snak->equals( $snak2 ), 'round trip' );
 	}
 
-	public function provideDataToUnserialize() {
+	public static function provideDataToUnserialize() {
 		$p2 = new NumericPropertyId( 'P2' );
-		$p2foo = new NumericPropertyId( 'foo:P2' );
 		$value = new StringValue( 'b' );
 
 		return [
-			'legacy' => [
+			'legacy (int property ID)' => [
 				new PropertyValueSnak( $p2, $value ),
-				'a:2:{i:0;i:2;i:1;C:22:"DataValues\StringValue":1:{b}}'
+				'a:2:{i:0;i:2;i:1;C:22:"DataValues\StringValue":1:{b}}',
 			],
-			'current' => [
+			'legacy (PHP < 7.4 serialization)' => [
 				new PropertyValueSnak( $p2, $value ),
-				'a:2:{i:0;s:2:"P2";i:1;C:22:"DataValues\StringValue":1:{b}}'
+				'a:2:{i:0;s:2:"P2";i:1;C:22:"DataValues\StringValue":1:{b}}',
 			],
-			'foreign' => [
-				new PropertyValueSnak( $p2foo, $value ),
-				'a:2:{i:0;s:6:"foo:P2";i:1;C:22:"DataValues\StringValue":1:{b}}'
+			'PHP >= 7.4 serialization' => [
+				new PropertyValueSnak( $p2, $value ),
+				'a:2:{i:0;s:2:"P2";i:1;O:22:"DataValues\StringValue":1:{i:0;s:1:"b";}}',
 			],
 		];
 	}

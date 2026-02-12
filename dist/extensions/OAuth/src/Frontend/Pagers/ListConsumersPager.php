@@ -4,8 +4,10 @@ namespace MediaWiki\Extension\OAuth\Frontend\Pagers;
 
 use MediaWiki\Extension\OAuth\Backend\Utils;
 use MediaWiki\Extension\OAuth\Frontend\SpecialPages\SpecialMWOAuthListConsumers;
-
-use Mediawiki\MediaWikiServices;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Pager\AlphabeticPager;
+use MediaWiki\Title\Title;
+use stdClass;
 
 /**
  * (c) Aaron Schulz 2013, GPL
@@ -29,7 +31,7 @@ use Mediawiki\MediaWikiServices;
 /**
  * Query to list out consumers
  */
-class ListConsumersPager extends \AlphabeticPager {
+class ListConsumersPager extends AlphabeticPager {
 	/** @var SpecialMWOAuthListConsumers */
 	public $mForm;
 
@@ -74,14 +76,14 @@ class ListConsumersPager extends \AlphabeticPager {
 	}
 
 	/**
-	 * @return \Title
+	 * @return Title
 	 */
 	public function getTitle() {
 		return $this->mForm->getFullTitle();
 	}
 
 	/**
-	 * @param \stdClass $row
+	 * @param stdClass $row
 	 * @return string
 	 */
 	public function formatRow( $row ) {

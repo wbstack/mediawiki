@@ -15,8 +15,8 @@ module.exports = ( function () {
 	 */
 	return function ( store, template, lemmaWidget, languageAndCategoryWidget, messages ) {
 		return {
+			compatConfig: { MODE: 3 },
 			template: template,
-			store: store,
 
 			data: function () {
 				return {
@@ -49,11 +49,14 @@ module.exports = ( function () {
 							lexicalCategory: this.lexicalCategory,
 							language: this.language
 						}
-					).then( function () {
-						this.inEditMode = false;
+					).then( function ( valueChangeResult ) {
+						this.setEditMode( false );
 						this.lemmas = this.$store.state.lemmas.copy();
 						this.language = this.$store.state.language;
 						this.lexicalCategory = this.$store.state.lexicalCategory;
+						if ( valueChangeResult.getTempUserWatcher().getRedirectUrl() ) {
+							window.location.href = valueChangeResult.getTempUserWatcher().getRedirectUrl();
+						}
 					}
 						.bind( this ) )
 						.catch( function ( error ) {
@@ -62,12 +65,12 @@ module.exports = ( function () {
 				},
 
 				edit: function () {
-					this.inEditMode = true;
+					this.setEditMode( true );
 					this.$nextTick( focusElement( 'input' ) );
 				},
 
 				cancel: function () {
-					this.inEditMode = false;
+					this.setEditMode( false );
 					this.lemmas = this.$store.state.lemmas.copy();
 					this.language = this.$store.state.language;
 					this.lexicalCategory = this.$store.state.lexicalCategory;
@@ -86,6 +89,20 @@ module.exports = ( function () {
 						code: 'save-failed',
 						info: messages.get( 'wikibaselexeme-error-cannot-remove-last-lemma' )
 					} );
+				},
+
+				message: function ( key ) {
+					return messages.get( key );
+				},
+
+				setEditMode: function ( inEditMode ) {
+					this.inEditMode = inEditMode;
+					// Dispatch an event like jQuery.ui.EditableTemplatedWidget.startEditing/stopEditing would
+					if ( inEditMode ) {
+						this.$el.dispatchEvent( new Event( 'lexemeheaderafterstartediting', { bubbles: true } ) );
+					} else {
+						this.$el.dispatchEvent( new Event( 'lexemeheaderafterstopediting', { bubbles: true } ) );
+					}
 				}
 			},
 
@@ -110,12 +127,6 @@ module.exports = ( function () {
 			components: {
 				'lemma-widget': lemmaWidget,
 				'language-and-category-widget': languageAndCategoryWidget
-			},
-
-			filters: {
-				message: function ( key ) {
-					return messages.get( key );
-				}
 			}
 		};
 	};

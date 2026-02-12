@@ -2,10 +2,10 @@
 
 namespace Wikibase\View;
 
-use LanguageCode;
-use Sanitizer;
-use Site;
-use SiteList;
+use MediaWiki\Language\LanguageCode;
+use MediaWiki\Parser\Sanitizer;
+use MediaWiki\Site\Site;
+use MediaWiki\Site\SiteList;
 use ValueFormatters\NumberLocalizer;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Services\EntityId\EntityIdFormatter;
@@ -112,7 +112,7 @@ class SiteLinksView {
 	public function getHtml( array $siteLinks, ?ItemId $itemId, array $groups ) {
 		$html = '';
 
-		if ( empty( $groups ) ) {
+		if ( !$groups ) {
 			return $html;
 		}
 
@@ -175,7 +175,7 @@ class SiteLinksView {
 					[
 						$this->numberLocalizer->localizeNumber( $count ),
 					]
-				)
+				),
 			] ),
 			$this->templateFactory->render(
 				'wikibase-sitelinklistview',
@@ -233,13 +233,12 @@ class SiteLinksView {
 
 			$siteLinksForTable[] = [
 				'siteLink' => $siteLink,
-				'site' => $site
+				'site' => $site,
 			];
 		}
 
 		// Sort the sitelinks according to their global id
-		$safetyCopy = $siteLinksForTable; // keep a shallow copy
-		$sortOk = usort(
+		usort(
 			$siteLinksForTable,
 			function( array $a, array $b ) {
 				/** @var SiteLink[] $a */
@@ -247,10 +246,6 @@ class SiteLinksView {
 				return strcmp( $a['siteLink']->getSiteId(), $b['siteLink']->getSiteId() );
 			}
 		);
-
-		if ( !$sortOk ) {
-			$siteLinksForTable = $safetyCopy;
-		}
 
 		return $siteLinksForTable;
 	}
@@ -357,7 +352,7 @@ class SiteLinksView {
 
 			$html .= $this->templateFactory->render( 'wb-badge',
 				$classes,
-				$this->entityIdFormatter->formatEntityId( $badge ),
+				htmlspecialchars( $this->entityIdFormatter->formatEntityId( $badge ) ),
 				$badge
 			);
 		}

@@ -55,6 +55,7 @@ class PropertyStubRdfBuilder implements PrefetchingEntityStubRdfBuilder {
 	 */
 	private $dataTypes;
 
+	/** @var EntityId[] */
 	private $idsToPrefetch = [];
 
 	public function __construct(
@@ -90,6 +91,7 @@ class PropertyStubRdfBuilder implements PrefetchingEntityStubRdfBuilder {
 			$this->getLabelPredicates( $entityId )
 		);
 		$this->addDescriptions( $entityNamespace, $entityLName, $propertyDescriptions );
+		// @phan-suppress-next-line PhanTypeMismatchArgumentSuperType
 		$this->addProperty( $entityId );
 	}
 
@@ -102,7 +104,7 @@ class PropertyStubRdfBuilder implements PrefetchingEntityStubRdfBuilder {
 	 */
 	private function addDescriptions( $entityNamespace, $entityLName, array $descriptions ) {
 		foreach ( $descriptions as $languageCode => $description ) {
-		$this->writer->about( $entityNamespace, $entityLName )
+			$this->writer->about( $entityNamespace, $entityLName )
 			->say( RdfVocabulary::NS_SCHEMA_ORG, 'description' )->text( $description, $languageCode );
 		}
 	}
@@ -116,7 +118,7 @@ class PropertyStubRdfBuilder implements PrefetchingEntityStubRdfBuilder {
 	 * @param string[][] $labelPredicates array of [ ns, local ] for each label predicate
 	 */
 	private function addLabels( $entityNamespace, $entityLName, array $labels, array $labelPredicates ) {
-		if ( empty( $labelPredicates ) ) {
+		if ( !$labelPredicates ) {
 			// If we want no predicates, no need to bother with the rest.
 			return;
 		}

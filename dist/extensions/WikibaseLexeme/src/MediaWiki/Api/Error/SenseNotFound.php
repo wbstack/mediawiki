@@ -2,8 +2,8 @@
 
 namespace Wikibase\Lexeme\MediaWiki\Api\Error;
 
-use ApiMessage;
-use Message;
+use MediaWiki\Api\ApiMessage;
+use MediaWiki\Message\Message;
 use Wikibase\Lexeme\Domain\Model\SenseId;
 
 /**
@@ -26,11 +26,11 @@ class SenseNotFound implements ApiError {
 	public function asApiMessage( $parameterName, array $path ) {
 		$message = new Message(
 			'apierror-wikibaselexeme-sense-not-found',
-			[ $parameterName, $this->senseId->serialize() ]
+			[ $parameterName, $this->senseId->getSerialization() ]
 		);
 		return new ApiMessage( $message, 'not-found', [
 			'parameterName' => $parameterName,
-			'fieldPath' => []
+			'fieldPath' => [],
 		] );
 	}
 

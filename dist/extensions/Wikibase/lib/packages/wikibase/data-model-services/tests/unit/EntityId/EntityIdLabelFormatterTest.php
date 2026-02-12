@@ -24,7 +24,7 @@ class EntityIdLabelFormatterTest extends TestCase {
 	/**
 	 * @return array
 	 */
-	public function validProvider() {
+	public static function validProvider() {
 		$argLists = [];
 
 		$argLists[] = [ new ItemId( 'Q42' ), 'es', 'foo' ];
@@ -64,13 +64,13 @@ class EntityIdLabelFormatterTest extends TestCase {
 
 		$labelLookup->expects( $this->any() )
 			->method( 'getLabel' )
-			->will( $this->returnCallback( static function( EntityId $id ) use ( $languageCode ) {
+			->willReturnCallback( static function( EntityId $id ) use ( $languageCode ) {
 				if ( $id->getSerialization() === 'Q42' && $languageCode === 'es' ) {
 					return new Term( 'es', 'foo' );
 				} else {
 					throw new LabelDescriptionLookupException( $id, 'Label not found' );
 				}
-			} ) );
+			} );
 
 		return $labelLookup;
 	}

@@ -20,7 +20,7 @@
 	"requestaccount-ext-text": "Le sequente information resta private e essera usate solmente pro iste requesta.\nTu ha le possibilitate de listar contactos como un numero de telephono pro adjutar in le confirmation de tu identitate.",
 	"requestaccount-bio-text": "Essaya includer omne qualificationes relevante in tu biographia hic infra.",
 	"requestaccount-bio-text-i": "'''Le biographia essera inserite como le contento initial de tu pagina de usator.'''\nAssecura te que tu sia confortabile con le publication de tal informationes.",
-	"requestaccount-real": "Nomine real:",
+	"requestaccount-real": "Nomine real (optional):",
 	"requestaccount-same": "(equal al nomine real)",
 	"requestaccount-email": "Adresse de e-mail:",
 	"requestaccount-reqtype": "Position:",

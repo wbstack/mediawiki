@@ -10,7 +10,7 @@
 	"license-name": "GPL-3.0-or-later",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"MessagesDirs": {
 		"Score": [
@@ -22,8 +22,11 @@
 	},
 	"ResourceModules": {
 		"ext.score.visualEditor": {
-			"class": "MediaWiki\\Extension\\Score\\ScoreVeResourceLoaderModule",
 			"scripts": [
+				{
+					"name": "ve-score/MWScoreConfig.js",
+					"callback": "MediaWiki\\Extension\\Score\\ScoreVeConfig::makeScript"
+				},
 				"ve-score/ve.dm.MWScoreNode.js",
 				"ve-score/ve.ce.MWScoreNode.js",
 				"ve-score/ve.ui.MWScoreContextItem.js",
@@ -52,14 +55,10 @@
 				"score-visualeditor-mwscoredialog-override-midi-placeholder",
 				"score-visualeditor-mwscoredialog-raw",
 				"score-visualeditor-mwscoredialog-title"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
 			]
 		},
 		"ext.score.visualEditor.icons": {
-			"class": "ResourceLoaderImageModule",
+			"class": "MediaWiki\\ResourceLoader\\ImageModule",
 			"selectorWithoutVariant": ".oo-ui-icon-{name}",
 			"selectorWithVariant": ".oo-ui-image-{variant}.oo-ui-icon-{name}",
 			"variants": {
@@ -92,8 +91,10 @@
 				"score-download-source-file"
 			]
 		},
-		"ext.score.errors": {
-			"styles": "ext.score.errors/ext.score.errors.css"
+		"ext.score.styles": {
+			"styles": [
+				"ext.score.styles.less"
+			]
 		}
 	},
 	"ResourceFileModulePaths": {
@@ -101,18 +102,22 @@
 		"remoteExtPath": "Score/modules"
 	},
 	"Hooks": {
-		"ParserFirstCallInit": [
-			"MediaWiki\\Extension\\Score\\Hooks::onParserFirstCallInit"
-		],
-		"SoftwareInfo": [
-			"MediaWiki\\Extension\\Score\\Hooks::onSoftwareInfo"
-		],
+		"ParserFirstCallInit": "main",
+		"SoftwareInfo": "main",
 		"WikibaseClientDataTypes": [
 			"MediaWiki\\Extension\\Score\\Hooks::onWikibaseClientDataTypes"
 		],
 		"WikibaseRepoDataTypes": [
 			"MediaWiki\\Extension\\Score\\Hooks::onWikibaseRepoDataTypes"
 		]
+	},
+	"HookHandlers": {
+		"main": {
+			"class": "MediaWiki\\Extension\\Score\\Hooks",
+			"services": [
+				"MainConfig"
+			]
+		}
 	},
 	"config": {
 		"ScoreTrim": {
@@ -122,10 +127,6 @@
 		"ScoreUseSvg": {
 			"value": false,
 			"description": "Set to true to output SVG images with PNG fallback. Requires LilyPond version >= 2.23.82 with libcairo support"
-		},
-		"ScoreShell": {
-			"value": "/bin/sh",
-			"description": "The shell to use to run the rendering script. On Windows this should be the full path to bash.exe, not git-bash.exe."
 		},
 		"ScoreLilyPond": {
 			"value": "/usr/bin/lilypond"

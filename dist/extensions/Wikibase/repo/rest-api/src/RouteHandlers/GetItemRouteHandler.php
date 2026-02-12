@@ -2,83 +2,79 @@
 
 namespace Wikibase\Repo\RestApi\RouteHandlers;
 
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Rest\Handler;
 use MediaWiki\Rest\RequestInterface;
 use MediaWiki\Rest\Response;
+use MediaWiki\Rest\ResponseInterface;
 use MediaWiki\Rest\SimpleHandler;
 use MediaWiki\Rest\StringStream;
-use Wikibase\Repo\RestApi\Domain\Model\ItemData;
-use Wikibase\Repo\RestApi\Domain\Serializers\ItemDataSerializer;
-use Wikibase\Repo\RestApi\Presentation\Presenters\ErrorJsonPresenter;
-use Wikibase\Repo\RestApi\Presentation\Presenters\GetItemJsonPresenter;
+use Wikibase\Repo\RestApi\Application\Serialization\AliasesSerializer;
+use Wikibase\Repo\RestApi\Application\Serialization\DescriptionsSerializer;
+use Wikibase\Repo\RestApi\Application\Serialization\ItemPartsSerializer;
+use Wikibase\Repo\RestApi\Application\Serialization\LabelsSerializer;
+use Wikibase\Repo\RestApi\Application\Serialization\SitelinkSerializer;
+use Wikibase\Repo\RestApi\Application\Serialization\SitelinksSerializer;
+use Wikibase\Repo\RestApi\Application\Serialization\StatementListSerializer;
+use Wikibase\Repo\RestApi\Application\UseCases\GetItem\GetItem;
+use Wikibase\Repo\RestApi\Application\UseCases\GetItem\GetItemRequest;
+use Wikibase\Repo\RestApi\Application\UseCases\GetItem\GetItemResponse;
+use Wikibase\Repo\RestApi\Application\UseCases\ItemRedirect;
+use Wikibase\Repo\RestApi\Application\UseCases\UseCaseError;
+use Wikibase\Repo\RestApi\Domain\ReadModel\ItemParts;
 use Wikibase\Repo\RestApi\RouteHandlers\Middleware\AuthenticationMiddleware;
 use Wikibase\Repo\RestApi\RouteHandlers\Middleware\MiddlewareHandler;
-use Wikibase\Repo\RestApi\RouteHandlers\Middleware\UnexpectedErrorHandlerMiddleware;
-use Wikibase\Repo\RestApi\UseCases\GetItem\GetItem;
-use Wikibase\Repo\RestApi\UseCases\GetItem\GetItemErrorResponse;
-use Wikibase\Repo\RestApi\UseCases\GetItem\GetItemRequest;
-use Wikibase\Repo\RestApi\UseCases\GetItem\GetItemSuccessResponse;
-use Wikibase\Repo\RestApi\UseCases\ItemRedirectResponse;
+use Wikibase\Repo\RestApi\RouteHandlers\Middleware\UserAgentCheckMiddleware;
 use Wikibase\Repo\RestApi\WbRestApi;
-use Wikibase\Repo\WikibaseRepo;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * @license GPL-2.0-or-later
  */
 class GetItemRouteHandler extends SimpleHandler {
-	private const ITEM_ID_PATH_PARAM = 'item_id';
+
+	public const ROUTE = '/wikibase/v1/entities/items/{item_id}';
+	public const ITEM_ID_PATH_PARAM = 'item_id';
 	private const FIELDS_QUERY_PARAM = '_fields';
 
-	/**
-	 * @var GetItem
-	 */
-	private $getItem;
+	private GetItem $getItem;
 
-	/**
-	 * @var GetItemJsonPresenter
-	 */
-	private $successPresenter;
+	private ItemPartsSerializer $itemPartsSerializer;
 
-	/**
-	 * @var ResponseFactory
-	 */
-	private $responseFactory;
+	private ResponseFactory $responseFactory;
 
-	/**
-	 * @var MiddlewareHandler
-	 */
-	private $middlewareHandler;
+	private MiddlewareHandler $middlewareHandler;
 
 	public function __construct(
 		GetItem $getItem,
-		GetItemJsonPresenter $presenter,
+		ItemPartsSerializer $itemPartsSerializer,
 		ResponseFactory $responseFactory,
 		MiddlewareHandler $middlewareHandler
 	) {
 		$this->getItem = $getItem;
-		$this->successPresenter = $presenter;
+		$this->itemPartsSerializer = $itemPartsSerializer;
 		$this->responseFactory = $responseFactory;
 		$this->middlewareHandler = $middlewareHandler;
 	}
 
 	public static function factory(): Handler {
-		$serializerFactory = WbRestApi::getSerializerFactory();
-		$responseFactory = new ResponseFactory( new ErrorJsonPresenter() );
+		$responseFactory = new ResponseFactory();
 		return new self(
 			WbRestApi::getGetItem(),
-			new GetItemJsonPresenter( new ItemDataSerializer(
-				$serializerFactory->newStatementListSerializer(),
-				$serializerFactory->newSiteLinkListSerializer()
-			) ),
+			new ItemPartsSerializer(
+				new LabelsSerializer(),
+				new DescriptionsSerializer(),
+				new AliasesSerializer(),
+				new StatementListSerializer( WbRestApi::getStatementSerializer() ),
+				new SitelinksSerializer( new SitelinkSerializer() )
+			),
 			$responseFactory,
 			new MiddlewareHandler( [
-				new UnexpectedErrorHandlerMiddleware( $responseFactory, WikibaseRepo::getLogger() ),
-				new AuthenticationMiddleware(),
+				WbRestApi::getUnexpectedErrorHandlerMiddleware(),
+				new UserAgentCheckMiddleware(),
+				new AuthenticationMiddleware( MediaWikiServices::getInstance()->getUserIdentityUtils() ),
 				WbRestApi::getPreconditionMiddlewareFactory()->newPreconditionMiddleware(
-					function ( RequestInterface $request ): string {
-							return $request->getPathParam( self::ITEM_ID_PATH_PARAM );
-					}
+					fn( RequestInterface $request ): string => $request->getPathParam( self::ITEM_ID_PATH_PARAM )
 				),
 			] )
 		);
@@ -93,37 +89,36 @@ class GetItemRouteHandler extends SimpleHandler {
 
 	public function runUseCase( string $id ): Response {
 		$fields = explode( ',', $this->getValidatedParams()[self::FIELDS_QUERY_PARAM] );
-		$useCaseResponse = $this->getItem->execute( new GetItemRequest( $id, $fields ) );
 
-		if ( $useCaseResponse instanceof GetItemSuccessResponse ) {
-			$httpResponse = $this->newSuccessHttpResponse( $useCaseResponse );
-		} elseif ( $useCaseResponse instanceof ItemRedirectResponse ) {
-			$httpResponse = $this->newRedirectHttpResponse( $useCaseResponse );
-		} elseif ( $useCaseResponse instanceof GetItemErrorResponse ) {
-			$httpResponse = $this->responseFactory->newErrorResponse( $useCaseResponse );
-		} else {
-			throw new \LogicException( 'Received an unexpected use case result in ' . __CLASS__ );
+		try {
+			return $this->newSuccessHttpResponse(
+				$this->getItem->execute( new GetItemRequest( $id, $fields ) )
+			);
+		} catch ( ItemRedirect $e ) {
+			return $this->newRedirectHttpResponse( $e );
+		} catch ( UseCaseError $e ) {
+			return $this->responseFactory->newErrorResponseFromException( $e );
 		}
-
-		return $httpResponse;
 	}
 
-	private function newSuccessHttpResponse( GetItemSuccessResponse $useCaseResponse ): Response {
+	private function newSuccessHttpResponse( GetItemResponse $useCaseResponse ): Response {
 		$httpResponse = $this->getResponseFactory()->create();
 		$httpResponse->setHeader( 'Content-Type', 'application/json' );
 		$httpResponse->setHeader( 'Last-Modified', wfTimestamp( TS_RFC2822, $useCaseResponse->getLastModified() ) );
 		$this->setEtagFromRevId( $httpResponse, $useCaseResponse->getRevisionId() );
-		$httpResponse->setBody( new StringStream( $this->successPresenter->getJson( $useCaseResponse ) ) );
+		$httpResponse->setBody( new StringStream(
+			json_encode( $this->itemPartsSerializer->serialize( $useCaseResponse->getItemParts() ), JSON_UNESCAPED_SLASHES )
+		) );
 
 		return $httpResponse;
 	}
 
-	private function newRedirectHttpResponse( ItemRedirectResponse $useCaseResponse ): Response {
+	private function newRedirectHttpResponse( ItemRedirect $e ): Response {
 		$httpResponse = $this->getResponseFactory()->create();
 		$httpResponse->setHeader(
 			'Location',
 			$this->getRouteUrl(
-				[ self::ITEM_ID_PATH_PARAM => $useCaseResponse->getRedirectTargetId() ],
+				[ self::ITEM_ID_PATH_PARAM => $e->getRedirectTargetId() ],
 				$this->getRequest()->getQueryParams()
 			)
 		);
@@ -148,13 +143,20 @@ class GetItemRouteHandler extends SimpleHandler {
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => false,
 				ParamValidator::PARAM_ISMULTI => false,
-				ParamValidator::PARAM_DEFAULT => implode( ',', ItemData::VALID_FIELDS )
+				ParamValidator::PARAM_DEFAULT => implode( ',', ItemParts::VALID_FIELDS ),
 			],
 		];
 	}
 
 	public function needsWriteAccess(): bool {
 		return false;
+	}
+
+	/**
+	 * Preconditions are checked via {@link PreconditionMiddleware}
+	 */
+	public function checkPreconditions(): ?ResponseInterface {
+		return null;
 	}
 
 }

@@ -19,6 +19,10 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use ChangeTags;
+use UnexpectedValueException;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -102,6 +106,7 @@ class ApiManageTags extends ApiBase {
 			'operation' => [
 				ParamValidator::PARAM_TYPE => [ 'create', 'delete', 'activate', 'deactivate' ],
 				ParamValidator::PARAM_REQUIRED => true,
+				ApiBase::PARAM_HELP_MSG_PER_VALUE => [],
 			],
 			'tag' => [
 				ParamValidator::PARAM_TYPE => 'string',
@@ -143,3 +148,6 @@ class ApiManageTags extends ApiBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Tag_management';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiManageTags::class, 'ApiManageTags' );

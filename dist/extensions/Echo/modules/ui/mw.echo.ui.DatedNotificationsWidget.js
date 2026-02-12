@@ -4,14 +4,14 @@
 	 *
 	 * @class
 	 * @extends OO.ui.Widget
-	 * @mixins OO.ui.mixin.PendingElement
+	 * @mixes OO.ui.mixin.PendingElement
 	 *
 	 * @constructor
 	 * @param {mw.echo.Controller} controller Echo controller
 	 * @param {mw.echo.dm.ModelManager} modelManager Model manager
 	 * @param {Object} [config] Configuration object
-	 * @cfg {boolean} [animateSorting=false] Animate the sorting of items
-	 * @cfg {jQuery} [$overlay] An overlay for the popup menus
+	 * @param {boolean} [config.animateSorting=false] Animate the sorting of items
+	 * @param {jQuery} [config.$overlay] An overlay for the popup menus
 	 */
 	mw.echo.ui.DatedNotificationsWidget = function MwEchoUiDatedNotificationsListWidget( controller, modelManager, config ) {
 		config = config || {};
@@ -30,14 +30,14 @@
 
 		this.listWidget = new mw.echo.ui.SortedListWidget(
 			// Sorting callback
-			function ( a, b ) {
+			( ( a, b ) => {
 				// Reverse sorting
 				if ( b.getTimestamp() < a.getTimestamp() ) {
 					return -1;
 				} else if ( b.getTimestamp() > a.getTimestamp() ) {
 					return 1;
 				}
-			},
+			} ),
 			// Config
 			{
 				classes: [ 'mw-echo-ui-datedNotificationsWidget-group' ],
@@ -65,12 +65,11 @@
 	OO.mixinClass( mw.echo.ui.DatedNotificationsWidget, OO.ui.mixin.PendingElement );
 
 	mw.echo.ui.DatedNotificationsWidget.prototype.onManagerDiscardModel = function ( modelId ) {
-		var group,
-			model = this.models[ modelId ],
+		const model = this.models[ modelId ],
 			list = this.getList();
 
 		if ( model ) {
-			group = list.getItemFromId( model.getName() );
+			const group = list.getItemFromId( model.getName() );
 			list.removeItems( [ group ] );
 		}
 	};
@@ -80,7 +79,7 @@
 	 * @param {string} source Symbolic name of the source group
 	 */
 	mw.echo.ui.DatedNotificationsWidget.prototype.onModelRemoveSource = function ( source ) {
-		var list = this.getList(),
+		const list = this.getList(),
 			group = list.getItemFromId( source );
 
 		list.removeItems( [ group ] );
@@ -94,17 +93,16 @@
 	 * @param {Object} models List models, indexed by ID
 	 */
 	mw.echo.ui.DatedNotificationsWidget.prototype.populateFromModel = function ( models ) {
-		var modelId, model, subgroupWidget,
-			groupWidgets = [];
+		const groupWidgets = [];
 
 		// Detach all attached models
-		for ( modelId in this.models ) {
+		for ( const modelId in this.models ) {
 			this.detachModel( modelId );
 		}
 
-		for ( model in models ) {
+		for ( const model in models ) {
 			// Create SubGroup widgets
-			subgroupWidget = new mw.echo.ui.DatedSubGroupListWidget(
+			const subgroupWidget = new mw.echo.ui.DatedSubGroupListWidget(
 				this.controller,
 				models[ model ],
 				{
@@ -120,7 +118,7 @@
 			groupWidgets.push( subgroupWidget );
 		}
 
-		this.getList().getItems().forEach( function ( widget ) {
+		this.getList().getItems().forEach( ( widget ) => {
 			// Destroy all available widgets
 			widget.destroy();
 		} );
@@ -165,11 +163,10 @@
 	 * @return {number} The number of all notifications
 	 */
 	mw.echo.ui.DatedNotificationsWidget.prototype.getAllNotificationCount = function () {
-		var i,
-			count = 0,
-			groups = this.getList().getItems();
+		const groups = this.getList().getItems();
 
-		for ( i = 0; i < groups.length; i++ ) {
+		let count = 0;
+		for ( let i = 0; i < groups.length; i++ ) {
 			count += groups[ i ].getListWidget().getItemCount();
 		}
 

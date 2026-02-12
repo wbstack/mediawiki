@@ -21,7 +21,6 @@ namespace MediaWiki\Parser\Parsoid\Config;
 
 use InvalidArgumentException;
 use MediaWiki\Revision\RevisionRecord;
-
 use Wikimedia\Parsoid\Config\PageContent as IPageContent;
 
 /**
@@ -30,9 +29,7 @@ use Wikimedia\Parsoid\Config\PageContent as IPageContent;
  * @since 1.39
  */
 class PageContent extends IPageContent {
-
-	/** @var RevisionRecord */
-	private $rev;
+	private RevisionRecord $rev;
 
 	/**
 	 * @param RevisionRecord $rev
@@ -77,14 +74,7 @@ class PageContent extends IPageContent {
 	/** @inheritDoc */
 	public function getContent( string $role ): string {
 		$this->checkRole( $role );
-		return $this->rev->getContent( $role )->serialize();
-	}
-
-	/** @inheritDoc */
-	public function getRedirectTarget(): ?string {
-		$content = $this->rev->getContent( 'main' );
-		$target = $content ? $content->getRedirectTarget() : null;
-		return $target ? $target->getPrefixedDBkey() : null;
+		return $this->rev->getContentOrThrow( $role )->serialize();
 	}
 
 }

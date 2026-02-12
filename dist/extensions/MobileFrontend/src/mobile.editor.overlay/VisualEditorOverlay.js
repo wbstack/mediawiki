@@ -1,20 +1,22 @@
 /* global ve, $ */
-var EditorOverlayBase = require( './EditorOverlayBase' ),
+const EditorOverlayBase = require( './EditorOverlayBase' ),
 	EditorGateway = require( './EditorGateway' ),
 	fakeToolbar = require( '../mobile.init/fakeToolbar' ),
 	mfExtend = require( '../mobile.startup/mfExtend' ),
-	router = mw.loader.require( 'mediawiki.router' ),
+	router = __non_webpack_require__( 'mediawiki.router' ),
 	identifyLeadParagraph = require( './identifyLeadParagraph' ),
 	setPreferredEditor = require( './setPreferredEditor' ),
 	util = require( '../mobile.startup/util' ),
 	OverlayManager = require( '../mobile.startup/OverlayManager' ),
-	overlayManager = OverlayManager.getSingleton();
+	overlayManager = OverlayManager.getSingleton(),
+	currentPage = require( '../mobile.startup/currentPage' );
 
 /**
  * Overlay for VisualEditor view
  *
  * @class VisualEditorOverlay
  * @extends EditorOverlayBase
+ * @private
  *
  * @param {Object} options Configuration options
  * @param {SourceEditorOverlay} options.SourceEditorOverlay Class to use for standard
@@ -22,7 +24,7 @@ var EditorOverlayBase = require( './EditorOverlayBase' ),
  *  dependency between VisualEditorOverlay and SourceEditorOverlay
  */
 function VisualEditorOverlay( options ) {
-	var surfaceReady = util.Deferred();
+	const surfaceReady = util.Deferred();
 
 	EditorOverlayBase.call( this,
 		util.extend( {
@@ -47,8 +49,7 @@ function VisualEditorOverlay( options ) {
 		api: options.api,
 		title: options.title,
 		sectionId: options.sectionId,
-		oldId: options.oldId,
-		isNewPage: options.isNewPage
+		oldId: options.oldId
 	} );
 
 	this.origDataPromise = this.options.dataPromise || mw.libs.ve.targetLoader.requestPageData(
@@ -58,14 +59,29 @@ function VisualEditorOverlay( options ) {
 			sessionStore: true,
 			section: options.sectionId || null,
 			oldId: options.oldId || undefined,
-			targetName: ve.init.mw.MobileArticleTarget.static.trackingName
+			targetName: ve.init.mw.MobileArticleTarget.static.trackingName,
+			preload: options.preload,
+			preloadparams: options.preloadparams,
+			editintro: options.editintro
 		}
 	);
+
+	const modes = [];
+	this.currentPage = currentPage();
+	if ( this.currentPage.isVEVisualAvailable() ) {
+		modes.push( 'visual' );
+	}
+	if ( this.currentPage.isVESourceAvailable() ) {
+		modes.push( 'source' );
+	}
 
 	this.target = ve.init.mw.targetFactory.create( 'article', this, {
 		$element: this.$el,
 		// string or null, but not undefined
-		section: this.options.sectionId || null
+		section: this.options.sectionId || null,
+		modes: modes,
+		// If source is passed in without being in modes, it'll just fall back to visual
+		defaultMode: this.options.mode === 'source' ? 'source' : 'visual'
 	} );
 	this.target.once( 'surfaceReady', function () {
 		surfaceReady.resolve();
@@ -74,12 +90,25 @@ function VisualEditorOverlay( options ) {
 			this.log( { action: 'firstChange' } );
 		}.bind( this ) );
 	}.bind( this ) );
+	let firstLoad = true;
+	this.target.on( 'surfaceReady', function () {
+		setPreferredEditor( this.target.getDefaultMode() === 'source' ? 'SourceEditor' : 'VisualEditor' );
+		// On first surfaceReady we wait for any dialogs to be closed before running targetInit.
+		// On subsequent surfaceReady's (i.e. edit mode switch) we can initialize immediately.
+		if ( !firstLoad ) {
+			this.targetInit();
+		}
+		firstLoad = false;
+	}.bind( this ) );
 
 	this.target.load( this.origDataPromise );
 
 	// Overlay is only shown after this is resolved. It must be resolved
 	// with the API response regardless of what we are waiting for.
 	this.dataPromise = this.origDataPromise.then( function ( data ) {
+		this.gateway.wouldautocreate =
+			data && data.visualeditor && data.visualeditor.wouldautocreate;
+
 		return surfaceReady.then( function () {
 			this.$el.removeClass( 'editor-overlay-ve-initializing' );
 			return data && data.visualeditor;
@@ -127,7 +156,7 @@ mfExtend( VisualEditorOverlay, EditorOverlayBase, {
 	 * @instance
 	 */
 	show: function () {
-		var
+		const
 			options = this.options,
 			showAnonWarning = options.isAnon && !options.switched;
 
@@ -150,12 +179,14 @@ mfExtend( VisualEditorOverlay, EditorOverlayBase, {
 	},
 	/**
 	 * Initialize the target after it has been made visible
+	 * @memberof VisualEditorOverlay
 	 */
 	targetInit: function () {
 		// Note this.target will not be set if an error occurred and/or destroyTarget was called.
 		if ( this.target ) {
 			this.target.afterSurfaceReady();
 			this.scrollToLeadParagraph();
+			this.showEditNotices();
 		}
 	},
 	/**
@@ -165,9 +196,12 @@ mfExtend( VisualEditorOverlay, EditorOverlayBase, {
 	 * Their normal position is different because of (most importantly) the lead paragraph
 	 * transformation to move it before the infobox, and also invisible templates and slugs
 	 * caused by the presence of hatnote templates (both only shown in edit mode).
+	 * @memberof VisualEditorOverlay
 	 */
 	scrollToLeadParagraph: function () {
-		var editLead, editLeadView, readLead, offset, initialCursorOffset,
+		let editLead, editLeadView, readLead, offset, initialCursorOffset;
+
+		const
 			currentPageHTMLParser = this.options.currentPageHTMLParser,
 			fakeScroll = this.options.fakeScroll,
 			$window = $( window ),
@@ -204,7 +238,7 @@ mfExtend( VisualEditorOverlay, EditorOverlayBase, {
 	 * @instance
 	 */
 	onBeforeExit: function ( exit, cancel ) {
-		var overlay = this;
+		const overlay = this;
 		EditorOverlayBase.prototype.onBeforeExit.call( this, function () {
 			// If this function is called, the parent method has decided that we should exit
 			exit();
@@ -227,7 +261,7 @@ mfExtend( VisualEditorOverlay, EditorOverlayBase, {
 	 * @instance
 	 */
 	onClickAnonymous: function () {
-		var self = this;
+		const self = this;
 		this.$anonWarning.hide();
 		this.$anonTalkWarning.hide();
 		self.$el.find( '.overlay-content' ).show();
@@ -250,9 +284,8 @@ mfExtend( VisualEditorOverlay, EditorOverlayBase, {
 	 * @param {jQuery.Promise} [dataPromise] Optional promise for loading content
 	 */
 	switchToSourceEditor: function ( dataPromise ) {
-		var self = this,
+		const self = this,
 			SourceEditorOverlay = this.SourceEditorOverlay,
-			newOverlay,
 			options = this.getOptionsForSwitch();
 		this.log( {
 			action: 'abort',
@@ -281,7 +314,7 @@ mfExtend( VisualEditorOverlay, EditorOverlayBase, {
 				useReplaceState: true
 			} );
 		}
-		newOverlay = new SourceEditorOverlay( options, dataPromise );
+		const newOverlay = new SourceEditorOverlay( options, dataPromise );
 		newOverlay.getLoadingPromise().then( function () {
 			self.switching = true;
 			self.overlayManager.replaceCurrent( newOverlay );

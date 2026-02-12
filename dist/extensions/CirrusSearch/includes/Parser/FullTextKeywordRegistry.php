@@ -6,10 +6,10 @@ use CirrusSearch\CirrusSearchHookRunner;
 use CirrusSearch\Query\BoostTemplatesFeature;
 use CirrusSearch\Query\ContentModelFeature;
 use CirrusSearch\Query\DeepcatFeature;
-use CirrusSearch\Query\FileNumericFeature;
 use CirrusSearch\Query\FileTypeFeature;
 use CirrusSearch\Query\HasTemplateFeature;
 use CirrusSearch\Query\InCategoryFeature;
+use CirrusSearch\Query\IndexedNumericFieldFeature;
 use CirrusSearch\Query\InSourceFeature;
 use CirrusSearch\Query\InTitleFeature;
 use CirrusSearch\Query\KeywordFeature;
@@ -46,9 +46,9 @@ class FullTextKeywordRegistry implements KeywordRegistry {
 	 */
 	public function __construct(
 		SearchConfig $config,
-		CirrusSearchHookRunner $cirrusSearchHookRunner = null,
-		NamespacePrefixParser $namespacePrefixParser = null,
-		SparqlClient $client = null
+		?CirrusSearchHookRunner $cirrusSearchHookRunner = null,
+		?NamespacePrefixParser $namespacePrefixParser = null,
+		?SparqlClient $client = null
 	) {
 		$this->features = [
 			// Handle morelike keyword (greedy). Kept for BC reasons with existing clients.
@@ -80,7 +80,7 @@ class FullTextKeywordRegistry implements KeywordRegistry {
 			// File mime types
 			new TextFieldFilterFeature( 'filemime', 'file_mime' ),
 			// File numeric characteristics - size, resolution, etc.
-			new FileNumericFeature(),
+			new IndexedNumericFieldFeature(),
 			// Content model feature
 			new ContentModelFeature(),
 			// subpageof keyword

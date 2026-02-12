@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bangrapip"
+		]
+	},
+	"torblock-desc": "Ngijinin sumpé kuar Tor bakal digibang deri mermak wiki",
+	"action-torunblocked": "terabas gibangan sendèwèk bakal sumpé kuar Tor",
+	"right-torunblocked": "terabas gibangan sendèwèk bakal sumpé kuar Tor",
+	"tag-tor-description": "Kalo ni tenger disetèl, permakan dikeja deri sumpé kuar Tor.",
+	"tag-tor": "Dikeja liwat Tor",
+	"abusefilter-edit-builder-vars-tor-exit-node": "Mao tu perobahan dikeja liwat sumpé kuar Tor kè', kaga' kè'"
+}

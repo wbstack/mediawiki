@@ -20,6 +20,10 @@
 
 declare( strict_types = 1 );
 
+namespace MediaWiki\Password;
+
+use LogicException;
+
 /**
  * Implements Argon2, a modern key derivation algorithm designed to resist GPU cracking and
  * side-channel attacks.
@@ -40,8 +44,7 @@ class Argon2Password extends Password {
 	 * @inheritDoc
 	 */
 	protected function isSupported(): bool {
-		// It is actually possible to have a PHP build with Argon2i but not Argon2id
-		return defined( 'PASSWORD_ARGON2I' ) || defined( 'PASSWORD_ARGON2ID' );
+		return defined( 'PASSWORD_ARGON2ID' );
 	}
 
 	/**
@@ -53,10 +56,8 @@ class Argon2Password extends Password {
 				$algo = PASSWORD_ARGON2I;
 				break;
 			case 'argon2id':
-				$algo = PASSWORD_ARGON2ID;
-				break;
 			case 'auto':
-				$algo = defined( 'PASSWORD_ARGON2ID' ) ? PASSWORD_ARGON2ID : PASSWORD_ARGON2I;
+				$algo = PASSWORD_ARGON2ID;
 				break;
 			default:
 				throw new LogicException( "Unexpected algo: {$this->config['algo']}" );
@@ -72,7 +73,7 @@ class Argon2Password extends Password {
 	 * @inheritDoc
 	 */
 	public function crypt( string $password ): void {
-		list( $algo, $params ) = $this->prepareParams();
+		[ $algo, $params ] = $this->prepareParams();
 		$this->hash = password_hash( $password, $algo, $params );
 	}
 
@@ -96,7 +97,10 @@ class Argon2Password extends Password {
 	 * @inheritDoc
 	 */
 	public function needsUpdate(): bool {
-		list( $algo, $params ) = $this->prepareParams();
+		[ $algo, $params ] = $this->prepareParams();
 		return password_needs_rehash( $this->hash, $algo, $params );
 	}
 }
+
+/** @deprecated since 1.43 use MediaWiki\\Password\\Argon2Password */
+class_alias( Argon2Password::class, 'Argon2Password' );

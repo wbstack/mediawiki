@@ -156,7 +156,7 @@
 	 * @param {string} entityType
 	 */
 	function attachAnonymousEditWarningTrigger( $entityview, viewName, entityType ) {
-		if ( !mw.user || !mw.user.isAnon() ) {
+		if ( config.tempUserEnabled || !mw.user || !mw.user.isAnon() ) {
 			return;
 		}
 
@@ -164,15 +164,11 @@
 			if ( !$.find( '.mw-notification-content' ).length
 				&& !mw.cookie.get( 'wikibase-no-anonymouseditwarning' )
 			) {
-				var message = mw.message(
-					'wikibase-anonymouseditwarning',
-					// The following messages can be used here:
-					// * wikibase-entity-item
-					// * wikibase-entity-property
-					// * wikibase-entity-query
-					mw.msg( 'wikibase-entity-' + entityType )
-				);
-				mw.notify( message, { autoHide: false, type: 'warn', tag: 'wikibase-anonymouseditwarning' } );
+				var currentPage = mw.config.get( 'wgPageName' );
+				var userLoginUrl = mw.util.getUrl( 'Special:UserLogin', { returnto: currentPage } );
+				var createAccountUrl = mw.util.getUrl( 'Special:CreateAccount', { returnto: currentPage } );
+				var message = mw.message( 'wikibase-anonymouseditwarning', userLoginUrl, createAccountUrl );
+				mw.notify( message, { autoHide: false, type: 'warn', tag: 'wikibase-anonymouseditpopup' } );
 			}
 		} );
 	}
@@ -230,8 +226,9 @@
 	 * @param {jQuery} $entityview
 	 * @param {jQuery} $origin
 	 * @param {string} gravity
+	 * @param {string} viewName
 	 */
-	function showCopyrightTooltip( $entityview, $origin, gravity ) {
+	function showCopyrightTooltip( $entityview, $origin, gravity, viewName ) {
 		if ( !mw.config.exists( 'wbCopyright' ) ) {
 			return;
 		}
@@ -257,10 +254,12 @@
 				.appendTo( $message ),
 			editableTemplatedWidget = $origin.data( 'EditableTemplatedWidget' );
 
-		// TODO: Use notification system for copyright messages on all widgets.
+		// TODO: Use editableTemplatedWidget's notification system for copyright messages on all widgets
 		if ( editableTemplatedWidget
 			&& !( editableTemplatedWidget instanceof $.wikibase.statementview )
-			&& !( editableTemplatedWidget instanceof $.wikibase.aliasesview )
+			&& !( editableTemplatedWidget instanceof $.wikibase.entitytermsview )
+			&& editableTemplatedWidget.widgetName !== 'lexemeformview'
+			&& editableTemplatedWidget.widgetName !== 'senseview'
 		) {
 			editableTemplatedWidget.notification( $message, 'wb-edit' );
 
@@ -277,16 +276,21 @@
 			return;
 		}
 
-		var edittoolbar = $origin.data( 'edittoolbar' );
-
-		if ( !edittoolbar ) {
+		// Tooltip gets its own anchor since other toolbar elements might have their own tooltip.
+		var $edittoolbarContainer, $tooltipAnchor;
+		if ( $origin.data( 'edittoolbar' ) ) {
+			$edittoolbarContainer = $origin.data( 'edittoolbar' ).getContainer();
+			$tooltipAnchor = $( '<span>' )
+				.appendTo( $edittoolbarContainer.children( ':wikibase-toolbar' ) );
+		} else if ( $origin.find( '.lemma-widget_controls' ).length ) {
+			// HACK: WikibaseLexeme's lemma widget is implemented in Vue, thus doesn't feature a legacy edittoolbar (T343999)
+			$edittoolbarContainer = $origin.find( '.lemma-widget_controls' );
+			$tooltipAnchor = $( '<span>' )
+				.appendTo( $edittoolbarContainer );
+		} else {
 			return;
 		}
 
-		// Tooltip gets its own anchor since other elements might have their own tooltip.
-		// we don't even have to add this new toolbar element to the toolbar, we only use it
-		// to manage the tooltip which will have the 'save' button as element to point to.
-		// The 'save' button can still have its own tooltip though.
 		var $messageAnchor = $( '<span>' )
 			.appendTo( document.body )
 			.toolbaritem()
@@ -294,13 +298,20 @@
 				content: $message,
 				permanent: true,
 				gravity: gravity,
-				$anchor: edittoolbar.getContainer()
+				$anchor: $tooltipAnchor
 			} );
+
+		var eventNamespace = '.wbCopyrightTooltip' + Math.random().toString( 36 ).slice( 2 );
+
+		// Remove the no longer needed tooltip anchor
+		$messageAnchor.one( 'wbtooltipafterhide', function () {
+			$tooltipAnchor.remove();
+		} );
 
 		$hideMessage.on( 'click', function ( event ) {
 			event.preventDefault();
 			$messageAnchor.data( 'wbtooltip' ).degrade( true );
-			$( window ).off( '.wbCopyrightTooltip' );
+			$( window ).off( eventNamespace );
 			if ( mw.user.isAnon() ) {
 				mw.cookie.set( cookieKey, copyRightVersion, { expires: 3 * 365 * 24 * 60 * 60, path: '/' } );
 			} else {
@@ -311,34 +322,58 @@
 
 		$messageAnchor.data( 'wbtooltip' ).show();
 
-		// destroy tooltip after edit mode gets closed again:
-		$entityview
-		.one( 'entityviewafterstopediting.wbCopyRightTooltip', function ( event, origin ) {
-			var tooltip = $messageAnchor.data( 'wbtooltip' );
-			if ( tooltip ) {
-				tooltip.degrade( true );
+		// Record the initial edit toolbar offset.
+		var initialToolbarOffset = $edittoolbarContainer.offset().top;
+		// Destroy tooltip after edit mode gets closed again or if the position of the toolbar changed.
+		$entityview.on(
+			`${viewName}afterstopediting${eventNamespace} ${viewName}afterstartediting${eventNamespace}`,
+			function ( event, origin ) {
+				var tooltip = $messageAnchor.data( 'wbtooltip' );
+				// Don't close this copyright notice if we're still in edit mode (another widget left edit mode)
+				// and the position of the toolbar is unchanged (we don't bother re-positioning the tooltip).
+				var isInEditMode = event.type === viewName + 'afterstartediting' || ( editableTemplatedWidget && editableTemplatedWidget.isInEditMode() );
+				if ( $edittoolbarContainer.offset().top === initialToolbarOffset && isInEditMode ) {
+					return;
+				}
+				if ( tooltip ) {
+					tooltip.degrade( true );
+				}
+				$( window ).off( eventNamespace );
 			}
-			$( window ).off( '.wbCopyrightTooltip' );
-		} );
+		);
 
 		$( window ).one(
-			'scroll.wbCopyrightTooltip touchmove.wbCopyrightTooltip resize.wbCopyrightTooltip',
+			`scroll${eventNamespace} touchmove${eventNamespace} resize${eventNamespace}`,
 			function () {
 				var tooltip = $messageAnchor.data( 'wbtooltip' );
 				if ( tooltip ) {
 					$messageAnchor.data( 'wbtooltip' ).hide();
 				}
-				$entityview.off( '.wbCopyRightTooltip' );
+				$entityview.off( eventNamespace );
 			}
 		);
 	}
 
 	/**
 	 * @param {jQuery} $entityview
+	 * @param {string} viewName
 	 */
-	function attachCopyrightTooltip( $entityview ) {
+	function attachCopyrightTooltip( $entityview, viewName ) {
+		var startEditingEvents = [
+			'entitytermsviewafterstartediting',
+			'sitelinkgroupviewafterstartediting',
+			'statementviewafterstartediting'
+		];
+		if ( viewName === 'lexemeview' ) {
+			// WikibaseLexeme specific events. These are handled here, as this legacy code can't be nicely extended/ re-used without a bigger refactoring.
+			startEditingEvents.push(
+				'senseviewafterstartediting',
+				'lexemeformviewafterstartediting',
+				'lexemeheaderafterstartediting'
+			);
+		}
 		$entityview.on(
-			'entitytermsafterstartediting sitelinkgroupviewafterstartediting statementviewafterstartediting',
+			startEditingEvents.join( ' ' ),
 			function ( event ) {
 				var $target = $( event.target ),
 					gravity = 'sw';
@@ -346,17 +381,23 @@
 				if ( $target.data( 'sitelinkgroupview' ) ) {
 					gravity = 'nw';
 				} else if ( $target.data( 'entitytermsview' ) ) {
-					gravity = 'w';
+					gravity = 'ne';
+				} else if ( $target.find( '.lemma-widget_controls' ).length ) {
+					// WikibaseLexeme's lemma widget
+					gravity = 'nw';
 				}
 
-				showCopyrightTooltip( $entityview, $target, gravity );
+				// Break out of stack to make sure this runs only after the editing toolbar is fully initialized.
+				// This is needed as showCopyrightTooltip manipulates the toolbar's DOM.
+				setTimeout( function () {
+					showCopyrightTooltip( $entityview, $target, gravity, viewName );
+				}, 0 );
 			}
 		);
 	}
 
 	mw.hook( 'wikipage.content' ).add( function () {
 		// This is copied from startup.js in MediaWiki core.
-		// eslint-disable-next-line compat/compat
 		var mwPerformance = window.performance && performance.mark ? performance : {
 			mark: function () {}
 		};
@@ -365,46 +406,49 @@
 		var $entityview = $( '.wikibase-entityview' );
 		var canEdit = isEditable();
 
-		wb.EntityInitializer.newFromEntityLoadedHook().getEntity().done( function ( entity ) {
+		wb.EntityInitializer.newFromEntityLoadedHook().getEntity().then( function ( entity ) {
 			var viewNamePromise = createEntityView( entity, $entityview.first() );
-			viewNamePromise.then( function ( viewName ) {
+			return viewNamePromise.then( function ( viewName ) {
 				if ( canEdit ) {
 					attachAnonymousEditWarningTrigger( $entityview, viewName, entity.getType() );
 					attachWatchLinkUpdater( $entityview, viewName );
+					attachCopyrightTooltip( $entityview, viewName );
 				}
 
 				mw.hook( 'wikibase.entityPage.entityView.rendered' ).fire();
 
 				mwPerformance.mark( 'wbInitEnd' );
 			} );
-		} );
+		} ).catch( mw.log.error );
 
 		if ( canEdit ) {
 			$entityview
 			.on( 'entitytermsviewchange entitytermsviewafterstopediting', function ( event, lang ) {
 				var userLanguage = mw.config.get( 'wgUserLanguage' );
 
-				if ( typeof lang === 'string' && lang !== userLanguage ) {
-					return;
-				}
-
 				var $entitytermsview = $( event.target ),
 					entitytermsview = $entitytermsview.data( 'entitytermsview' ),
 					fingerprint = entitytermsview.value(),
-					label = fingerprint.getLabelFor( userLanguage ),
+					label = wb.view.termFallbackResolver.getTerm( fingerprint.getLabels(), userLanguage ),
 					isEmpty = !label || label.getText() === '';
 
-				$( 'title' ).text(
-					mw.msg( 'pagetitle', isEmpty ? mw.config.get( 'wgTitle' ) : label.getText() )
-				);
+				if ( isEmpty ) {
+					$( 'h1' ).find( '.wikibase-title' )
+						.toggleClass( 'wb-empty', true )
+						.find( '.wikibase-title-label' )
+						.text( mw.msg( 'wikibase-label-empty' ) );
+				} else {
+					var indicator = wb.view.languageFallbackIndicator.getHtml( label, userLanguage );
+					$( 'h1' ).find( '.wikibase-title' )
+						.toggleClass( 'wb-empty', false )
+						.find( '.wikibase-title-label' )
+						.html( mw.html.escape( label.getText() ) + indicator );
+				}
 
-				$( 'h1' ).find( '.wikibase-title' )
-					.toggleClass( 'wb-empty', isEmpty )
-					.find( '.wikibase-title-label' )
-					.text( isEmpty ? mw.msg( 'wikibase-label-empty' ) : label.getText() );
+				if ( event.type === 'entitytermsviewafterstopediting' ) {
+					$( 'title' ).text( mw.msg( 'pagetitle', isEmpty ? mw.config.get( 'wgTitle' ) : label.getText() ) );
+				}
 			} );
-
-			attachCopyrightTooltip( $entityview );
 		}
 	} );
 

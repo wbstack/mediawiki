@@ -26,11 +26,11 @@ use ManualLogEntry;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\Permissions\Authority;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\TitleValue;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserIdentity;
 use RevisionDeleteUser;
-use Status;
-use TitleValue;
 
 /**
  * Backend class for unblocking users
@@ -38,20 +38,11 @@ use TitleValue;
  * @since 1.36
  */
 class UnblockUser {
-	/** @var BlockPermissionChecker */
-	private $blockPermissionChecker;
-
-	/** @var DatabaseBlockStore */
-	private $blockStore;
-
-	/** @var BlockUtils */
-	private $blockUtils;
-
-	/** @var UserFactory */
-	private $userFactory;
-
-	/** @var HookRunner */
-	private $hookRunner;
+	private BlockPermissionChecker $blockPermissionChecker;
+	private DatabaseBlockStore $blockStore;
+	private BlockUtils $blockUtils;
+	private UserFactory $userFactory;
+	private HookRunner $hookRunner;
 
 	/** @var UserIdentity|string */
 	private $target;
@@ -105,7 +96,7 @@ class UnblockUser {
 		$this->hookRunner = new HookRunner( $hookContainer );
 
 		// Process params
-		list( $this->target, $this->targetType ) = $this->blockUtils->parseBlockTarget( $target );
+		[ $this->target, $this->targetType ] = $this->blockUtils->parseBlockTarget( $target );
 		if (
 			$this->targetType === AbstractBlock::TYPE_AUTO &&
 			is_numeric( $this->target )
@@ -113,7 +104,7 @@ class UnblockUser {
 			// Needed, because BlockUtils::parseBlockTarget will strip the # from autoblocks.
 			$this->target = '#' . $this->target;
 		}
-		$this->block = DatabaseBlock::newFromTarget( $this->target );
+		$this->block = $this->blockStore->newFromTarget( $this->target );
 		$this->performer = $performer;
 		$this->reason = $reason;
 		$this->tags = $tags;

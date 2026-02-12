@@ -6,33 +6,31 @@
 *
 * - mw-ui-icon = base class. 20px square with icon.
 * - mw-ui-icon + mw-ui-icon-element = icon with padding & pseudo-states.
-* - mw-ui-icon + mw-ui-icon-small = small icon with padding & pseudo-states.
-* - mw-ui-icon + mw-ui-icon-flush-left = negative right-margin.
-* - mw-ui-icon + mw-ui-icon-flush-right = negative left-margin.
 * - mw-ui-icon + mw-ui-icon-before = *deprecated*, icon with text.
 *   Labels should be placed in a separate element beside the icon.
 *
 */
 
-@import 'mediawiki.ui/variables.less';
+@import 'mediawiki.skin.variables.less';
 @import 'mediawiki.mixins.less';
 
 // == Icons ==
-@icon-touch-area-sm: 34;
+@icon-touch-area-sm: 32; // This is also used for touch areas at DESKTOP resolutions.
 @icon-touch-area-md: 44;
 @font-size-browser: 16; // Assumed browser default of `16px`.
-// Small icon
-@icon-glyph-size-sm: 16;
-@icon-size-sm: unit( @icon-glyph-size-sm / @font-size-browser, em );
-@icon-padding-sm: unit( ( @icon-touch-area-sm - @icon-glyph-size-sm ) / 2 / @font-size-browser, em );
 // Medium icon
 @icon-glyph-size-md: 20;
 @icon-size-md: unit( @icon-glyph-size-md / @font-size-browser, em );
 @icon-padding-md: unit( ( @icon-touch-area-md - @icon-glyph-size-md ) / 2 / @font-size-browser, em );
+
+// Includes 2px mw-ui-button border
+@icon-padding-md-button: unit( ( @icon-touch-area-md - @icon-glyph-size-md - 2 ) / 2 / @font-size-browser, em );
+// At desktop resolution the icon touch area will shrink from @icon-touch-area-md to @icon-touch-area-sm
+@icon-padding-md-button--desktop: unit( ( @icon-touch-area-sm - @icon-glyph-size-md - 2 ) / 2 / @font-size-browser, em );
+
 // Colors
-@icon-color: @colorGray5;
-@margin-icon-md-labelled: 8px;
-@icon-background-color--selected:  rgba( 0, 0, 0, 0.03 );
+@icon-color: @color-subtle;
+@margin-icon-md-labelled: 6px;
 
 /**
 * Mixin for a pseudo-element with a background image.
@@ -64,7 +62,6 @@
 .mw-ui-icon {
 	// reset font-size so the "em" value is relative to the more
 	// predictable rem font size ...and no rems because we can't have nice things.
-	/* stylelint-disable-next-line plugin/no-unsupported-browser-features */
 	font-size: initial;
 
 	// sizing
@@ -90,9 +87,7 @@
 	.text-overflow( @visible: false );
 
 	// resetting styles for <button> elements
-	/* stylelint-disable-next-line plugin/no-unsupported-browser-features */
 	-moz-appearance: none;
-	/* stylelint-disable-next-line plugin/no-unsupported-browser-features */
 	-webkit-appearance: none;
 	background-color: transparent;
 	margin: 0;
@@ -102,7 +97,7 @@
 		border: 0;
 	}
 
-	&:before {
+	&::before {
 		.mixin-background-square( @icon-size-md );
 	}
 
@@ -113,28 +108,16 @@
 	}
 }
 
-/**
-* When aligning a series of similar icons (e.g. list items)
-* prefer using a `:first-child` or `:last-child` selector.
-* The flush-left/right classes are appropriate when that's unavailable.
-*/
-.mw-ui-icon-flush-top {
-	margin-top: -@icon-padding-md;
-}
-
-.mw-ui-icon-flush-left {
-	margin-left: -@icon-padding-md;
-}
-
-.mw-ui-icon-flush-right {
-	margin-right: -@icon-padding-md;
-}
-
 .mw-ui-icon-element {
 	border-radius: @border-radius-base;
 	padding: @icon-padding-md;
+	// Override line-height applied by `.mw-ui-button`.
+	line-height: 0;
 	transition: background-color @transition-duration-base;
 
+	&.mw-ui-button {
+		padding: @icon-padding-md-button;
+	}
 	// Combined with nowrap & ellipsis from .mw-ui-icon, forms safe "screen-reader" text.
 	color: transparent;
 
@@ -144,60 +127,21 @@
 		color: transparent;
 	}
 
-	// Assume a mobile device - and avoid tap state remaining after click (T233046).
-	&:active {
-		background-color: @icon-background-color--selected;
+	// In desktop these icons shrink in size as touch area no longer important.
+	@media ( min-width: @min-width-breakpoint-desktop ) {
+		&.mw-ui-button {
+			padding: @icon-padding-md-button--desktop;
+		}
 	}
-}
-
-// When the user's device primary input is capable of hover, like a mouse,
-// use hover (T233046). Only on active elements.
-@media ( hover: hover ) {
-	// stylelint-disable-next-line selector-class-pattern
-	.mw-ui-icon-element:not( .disabled ):hover {
-		background-color: @icon-background-color--selected;
-	}
-}
-
-.mw-ui-icon-small {
-	width: @icon-size-sm;
-	height: @icon-size-sm;
-	min-width: @icon-size-sm;
-	min-height: @icon-size-sm;
-	flex-basis: @icon-size-sm;
-	line-height: @icon-size-sm;
-
-	&:before {
-		.mixin-background-square( @icon-size-sm );
-	}
-}
-
-.mw-ui-icon-small.mw-ui-icon-element {
-	padding: @icon-padding-sm;
-}
-
-.mw-ui-icon-small.mw-ui-icon-flush-left {
-	margin-left: -@icon-padding-sm;
-}
-
-.mw-ui-icon-small.mw-ui-icon-flush-right {
-	margin-right: -@icon-padding-sm;
-}
-
-.mw-ui-icon-small.mw-ui-icon-before:before {
-	min-width: @icon-size-sm;
-	min-height: @icon-size-sm;
-	margin-right: @icon-padding-sm;
 }
 
 .mw-ui-icon-before {
 	width: auto;
 	max-width: 100%;
 
-	&:before {
+	&::before {
 		// sizing
 		display: inline-block;
-		/* stylelint-disable-next-line plugin/no-unsupported-browser-features */
 		font-size: initial;
 		width: auto;
 		min-width: @icon-size-md;
@@ -213,7 +157,7 @@
 	}
 }
 
-@media all and ( min-width: @width-breakpoint-desktop ) {
+@media all and ( min-width: @min-width-breakpoint-desktop ) {
 	.mw-ui-icon-with-label-desktop {
 		// stylelint-disable-next-line declaration-no-important
 		color: @icon-color !important;
@@ -233,7 +177,7 @@
 			text-decoration: none;
 		}
 
-		&:before {
+		&::before {
 			width: auto;
 			display: inline-block;
 			// Don't use `@icon-padding-md` as we are adjacent to text.

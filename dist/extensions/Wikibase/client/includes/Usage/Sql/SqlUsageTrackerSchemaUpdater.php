@@ -4,10 +4,10 @@ declare( strict_types=1 );
 
 namespace Wikibase\Client\Usage\Sql;
 
-use DatabaseUpdater;
+use MediaWiki\Installer\DatabaseUpdater;
 use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
-use MWException;
 use Onoi\MessageReporter\CallbackMessageReporter;
+use RuntimeException;
 use Wikibase\Client\WikibaseClient;
 
 /**
@@ -72,7 +72,7 @@ class SqlUsageTrackerSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 	private function getScriptPath( string $name, string $type ): string {
 		$types = [
 			$type,
-			'mysql'
+			'mysql',
 		];
 
 		foreach ( $types as $type ) {
@@ -83,7 +83,7 @@ class SqlUsageTrackerSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 			}
 		}
 
-		throw new MWException( "Could not find schema script '$name'" );
+		throw new RuntimeException( "Could not find schema script '$name'" );
 	}
 
 }

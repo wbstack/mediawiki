@@ -2,17 +2,20 @@
 	"@metadata": {
 		"authors": [
 			"Afaz",
-			"Shirayuki"
+			"Kkairri",
+			"Shirayuki",
+			"Winston Sung"
 		]
 	},
+	"datatypes-type-entity-schema": "スキーマ",
 	"entityschema-desc": "ウィキベース・エンティティのスキーマの格納、および議論",
 	"special-newschema": "スキーマの新規作成",
+	"nstab-entityschema": "スキーマ",
 	"entityschema-newschema-label": "ラベル:",
 	"entityschema-newschema-description": "説明:",
 	"entityschema-newschema-aliases": "別名（複数ある場合、縦線<code>|</code>で区切り）:",
 	"entityschema-newschema-schema-shexc": "ShExコード:",
 	"entityschema-newschema-submit": "作成",
-	"entityschema-newschema-copyright": "「$1」をクリックすることで、あなたは[[$2|利用規約]]に同意し、自分の投稿内容を$3のもとで公開することに撤回不可能な形で同意することになります。",
 	"entityschema-anonymouseditwarning": "警告: ログインしていません。\n編集すると、IP アドレスがこのスキーマの編集履歴に記録されます。",
 	"entityschema-label-edit-placeholder": "$1でのラベル名を設定してください",
 	"entityschema-description-edit-placeholder": "説明を$1で入力してください",
@@ -23,7 +26,6 @@
 	"entityschema-error-schemaupdate-failed": "スキーマを変更できませんでした",
 	"entityschema-error-schematext-conflict": "編集中にこのスキーマは変更されました。スキーマのページに戻り、再度編集してください。",
 	"entityschema-error-namebadge-conflict": "編集中にこのスキーマは変更されました。スキーマのページに戻り、この言語のラベル、説明、および別名を再度編集してください。",
-	"entityschema-error-saving-failed": "スキーマの保存が以下の理由で失敗しました: $1",
 	"entityschema-error-not-post": "この操作はPOSTリクエストで実行する必要があります。",
 	"entityschema-error-inconsistent-id": "指定された版のすべてが指定されたページ名に属していません。",
 	"entityschema-error-wrong-page-revisions": "指定された版は現在のページに属していません。",
@@ -79,5 +81,7 @@
 	"entityschema-special-setlabeldescriptionaliases-info": "'''$1'''でスキーマ「[[$3|$2]]」にラベル、説明、別名を設定しようとしています。",
 	"entityschema-special-label": "ラベル:",
 	"entityschema-special-description": "説明:",
-	"entityschema-special-aliases": "別名（複数ある場合、縦線<code>|</code>で区切り）:"
+	"entityschema-special-aliases": "別名（複数ある場合、縦線<code>|</code>で区切り）:",
+	"wikibase-listdatatypes-entity-schema-head": "スキーマ",
+	"wikibase-validator-illegal-entity-schema-title": "値は、<code>E</code>から始まり、2文字目以降はすべて数字でなければなりません。"
 }

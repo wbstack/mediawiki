@@ -1,7 +1,5 @@
 <?php
 /**
- * Shortcut to construct an includable special page.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,8 +16,9 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
+
+namespace MediaWiki\SpecialPage;
 
 /**
  * Shortcut to construct an includable special page.
@@ -37,3 +36,6 @@ class IncludableSpecialPage extends SpecialPage {
 		return true;
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( IncludableSpecialPage::class, 'IncludableSpecialPage' );

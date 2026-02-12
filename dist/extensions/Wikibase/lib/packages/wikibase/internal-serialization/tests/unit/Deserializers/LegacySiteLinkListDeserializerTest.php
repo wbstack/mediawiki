@@ -26,7 +26,7 @@ class LegacySiteLinkListDeserializerTest extends \PHPUnit\Framework\TestCase {
 		$this->deserializer = new LegacySiteLinkListDeserializer();
 	}
 
-	public function invalidSerializationProvider() {
+	public static function invalidSerializationProvider() {
 		return [
 			[ null ],
 			[ 42 ],
@@ -58,7 +58,7 @@ class LegacySiteLinkListDeserializerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertInstanceOf( SiteLinkList::class, $list );
 	}
 
-	public function serializationProvider() {
+	public static function serializationProvider() {
 		return [
 			[ [
 			] ],
@@ -71,14 +71,14 @@ class LegacySiteLinkListDeserializerTest extends \PHPUnit\Framework\TestCase {
 				'baz' => [
 					'name' => 'bah',
 					'badges' => [],
-				]
+				],
 			] ],
 
 			[ [
 				'foo' => [
 					'name' => 'bar',
 					'badges' => [ 'Q42', 'Q1337' ],
-				]
+				],
 			] ],
 
 			[ [
@@ -105,7 +105,7 @@ class LegacySiteLinkListDeserializerTest extends \PHPUnit\Framework\TestCase {
 			new SiteLinkList(
 				[
 					new SiteLink( 'foo', 'bar', [ new ItemId( 'Q42' ), new ItemId( 'Q1337' ) ] ),
-					new SiteLink( 'bar', 'baz' )
+					new SiteLink( 'bar', 'baz' ),
 				]
 			),
 			$this->deserializer->deserialize(
@@ -114,7 +114,7 @@ class LegacySiteLinkListDeserializerTest extends \PHPUnit\Framework\TestCase {
 						'name' => 'bar',
 						'badges' => [ 'Q42', 'Q1337' ],
 					],
-					'bar' => 'baz'
+					'bar' => 'baz',
 				]
 			)
 		);

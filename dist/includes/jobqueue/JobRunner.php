@@ -1,7 +1,5 @@
 <?php
 /**
- * Job queue runner utility methods
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,29 +16,27 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup JobQueue
  */
 
 use Liuggio\StatsdClient\Factory\StatsdDataFactoryInterface;
+use MediaWiki\Cache\LinkCache;
 use MediaWiki\Config\ServiceOptions;
-use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\Deferred\DeferredUpdates;
+use MediaWiki\Http\Telemetry;
 use MediaWiki\MainConfigNames;
-use MediaWiki\MediaWikiServices;
-use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Wikimedia\Rdbms\DBConnectionError;
-use Wikimedia\Rdbms\DBError;
 use Wikimedia\Rdbms\DBReadOnlyError;
 use Wikimedia\Rdbms\ILBFactory;
-use Wikimedia\ScopedCallback;
+use Wikimedia\Rdbms\ReadOnlyMode;
 
 /**
- * Job queue runner utility methods
+ * Job queue runner utility methods.
  *
- * @ingroup JobQueue
  * @since 1.24
+ * @ingroup JobQueue
  */
-class JobRunner implements LoggerAwareInterface {
+class JobRunner {
 
 	/**
 	 * @internal For use by ServiceWiring
@@ -48,7 +44,6 @@ class JobRunner implements LoggerAwareInterface {
 	public const CONSTRUCTOR_OPTIONS = [
 		MainConfigNames::JobBackoffThrottling,
 		MainConfigNames::JobClasses,
-		MainConfigNames::JobSerialCommitThreshold,
 		MainConfigNames::MaxJobDBWriteDuration,
 		MainConfigNames::TrxProfilerLimits,
 	];
@@ -96,51 +91,32 @@ class JobRunner implements LoggerAwareInterface {
 	}
 
 	/**
+	 * @internal For use by ServiceWiring
+	 * @param ServiceOptions $serviceOptions
+	 * @param ILBFactory $lbFactory
+	 * @param JobQueueGroup $jobQueueGroup The JobQueueGroup for this wiki
+	 * @param ReadOnlyMode $readOnlyMode
+	 * @param LinkCache $linkCache
+	 * @param StatsdDataFactoryInterface $statsdDataFactory
 	 * @param LoggerInterface $logger
-	 * @return void
-	 * @deprecated since 1.35. Rely on the logger passed in the constructor.
-	 */
-	public function setLogger( LoggerInterface $logger ) {
-		wfDeprecated( __METHOD__, '1.35' );
-		$this->logger = $logger;
-	}
-
-	/**
-	 * Calling this directly is deprecated.
-	 * Obtain an instance via MediaWikiServices instead.
-	 * @param ServiceOptions|LoggerInterface|null $serviceOptions
-	 * @param ILBFactory|null $lbFactory
-	 * @param JobQueueGroup|null $jobQueueGroup The JobQueueGroup for this wiki
-	 * @param ReadOnlyMode|null $readOnlyMode
-	 * @param LinkCache|null $linkCache
-	 * @param StatsdDataFactoryInterface|null $statsdDataFactory
-	 * @param LoggerInterface|null $logger
 	 */
 	public function __construct(
-		$serviceOptions = null,
-		ILBFactory $lbFactory = null,
-		JobQueueGroup $jobQueueGroup = null,
-		ReadOnlyMode $readOnlyMode = null,
-		LinkCache $linkCache = null,
-		StatsdDataFactoryInterface $statsdDataFactory = null,
-		LoggerInterface $logger = null
+		ServiceOptions $serviceOptions,
+		ILBFactory $lbFactory,
+		JobQueueGroup $jobQueueGroup,
+		ReadOnlyMode $readOnlyMode,
+		LinkCache $linkCache,
+		StatsdDataFactoryInterface $statsdDataFactory,
+		LoggerInterface $logger
 	) {
-		if ( !$serviceOptions || $serviceOptions instanceof LoggerInterface ) {
-			wfDeprecated( __METHOD__ . ' called directly. Use MediaWikiServices instead', '1.39' );
-			$logger = $serviceOptions;
-			$serviceOptions = new ServiceOptions(
-				static::CONSTRUCTOR_OPTIONS,
-				MediaWikiServices::getInstance()->getMainConfig()
-			);
-		}
-
+		$serviceOptions->assertRequiredOptions( self::CONSTRUCTOR_OPTIONS );
 		$this->options = $serviceOptions;
-		$this->lbFactory = $lbFactory ?? MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
-		$this->jobQueueGroup = $jobQueueGroup ?? MediaWikiServices::getInstance()->getJobQueueGroup();
-		$this->readOnlyMode = $readOnlyMode ?: MediaWikiServices::getInstance()->getReadOnlyMode();
-		$this->linkCache = $linkCache ?? MediaWikiServices::getInstance()->getLinkCache();
-		$this->stats = $statsdDataFactory ?? MediaWikiServices::getInstance()->getStatsdDataFactory();
-		$this->logger = $logger ?? LoggerFactory::getInstance( 'runJobs' );
+		$this->lbFactory = $lbFactory;
+		$this->jobQueueGroup = $jobQueueGroup;
+		$this->readOnlyMode = $readOnlyMode;
+		$this->linkCache = $linkCache;
+		$this->stats = $statsdDataFactory;
+		$this->logger = $logger;
 	}
 
 	/**
@@ -191,7 +167,7 @@ class JobRunner implements LoggerAwareInterface {
 			return $response;
 		}
 
-		list( , $maxLag ) = $this->lbFactory->getMainLB()->getMaxLag();
+		[ , $maxLag ] = $this->lbFactory->getMainLB()->getMaxLag();
 		if ( $maxLag >= self::MAX_ALLOWED_LAG ) {
 			// DB lag is already too high; caller can immediately try other wikis if applicable
 			$response['reached'] = 'replica-lag-limit';
@@ -323,7 +299,7 @@ class JobRunner implements LoggerAwareInterface {
 	 * Wraps the job's run() and tearDown() methods into appropriate transaction rounds.
 	 * During execution, SPI-based logging will use the ID of the HTTP request that spawned
 	 * the job (instead of the current one). Large DB write transactions will be subject to
-	 * $wgJobSerialCommitThreshold and $wgMaxJobDBWriteDuration.
+	 * $wgMaxJobDBWriteDuration.
 	 *
 	 * This should never be called if there are explicit transaction rounds or pending DB writes
 	 *
@@ -336,16 +312,25 @@ class JobRunner implements LoggerAwareInterface {
 	 * @since 1.35
 	 */
 	public function executeJob( RunnableJob $job ) {
-		$oldRequestId = WebRequest::getRequestId();
-		// Temporarily inherit the original ID of the web request that spawned this job
-		WebRequest::overrideRequestId( $job->getRequestId() );
+		$telemetry = Telemetry::getInstance();
+		$oldRequestId = $telemetry->getRequestId();
+
+		if ( $job->getRequestId() !== null ) {
+			// Temporarily inherit the original ID of the web request that spawned this job
+			$telemetry->overrideRequestId( $job->getRequestId() );
+		} else {
+			// TODO: do we need to regenerate if job doesn't have the request id?
+			// If JobRunner was called with X-Request-ID header, regeneration will generate the
+			// same value
+			$telemetry->regenerateRequestId();
+		}
 		// Use an appropriate timeout to balance lag avoidance and job progress
 		$oldTimeout = $this->lbFactory->setDefaultReplicationWaitTimeout( self::SYNC_TIMEOUT );
 		try {
 			return $this->doExecuteJob( $job );
 		} finally {
 			$this->lbFactory->setDefaultReplicationWaitTimeout( $oldTimeout );
-			WebRequest::overrideRequestId( $oldRequestId );
+			$telemetry->overrideRequestId( $oldRequestId );
 		}
 	}
 
@@ -380,17 +365,21 @@ class JobRunner implements LoggerAwareInterface {
 				$this->lbFactory->beginPrimaryChanges( $fnameTrxOwner ); // new explicit round
 			}
 			// Clear any stale REPEATABLE-READ snapshots from replica DB connections
-			$this->lbFactory->flushReplicaSnapshots( $fnameTrxOwner );
 			$status = $job->run();
 			$error = $job->getLastError();
 			// Commit all pending changes from this job
-			$this->commitPrimaryChanges( $job, $fnameTrxOwner );
+			$this->lbFactory->commitPrimaryChanges(
+				$fnameTrxOwner,
+				// Abort if any transaction was too big
+				$this->options->get( MainConfigNames::MaxJobDBWriteDuration )
+			);
 			// Run any deferred update tasks; doUpdates() manages transactions itself
 			DeferredUpdates::doUpdates();
 		} catch ( Throwable $e ) {
 			MWExceptionHandler::rollbackPrimaryChangesAndLog( $e );
 			$status = false;
-			$error = get_class( $e ) . ': ' . $e->getMessage();
+			$error = get_class( $e ) . ': ' . $e->getMessage() . ' in '
+				. $e->getFile() . ' on line ' . $e->getLine();
 			$caught[] = get_class( $e );
 		}
 		// Always attempt to call teardown(), even if Job throws exception
@@ -590,7 +579,7 @@ class JobRunner implements LoggerAwareInterface {
 		if ( $maxBytes === null ) {
 			$m = [];
 			if ( preg_match( '!^(\d+)(k|m|g|)$!i', ini_get( 'memory_limit' ), $m ) ) {
-				list( , $num, $unit ) = $m;
+				[ , $num, $unit ] = $m;
 				$conv = [ 'g' => 1073741824, 'm' => 1048576, 'k' => 1024, '' => 1 ];
 				$maxBytes = (int)$num * $conv[strtolower( $unit )];
 			} else {
@@ -622,83 +611,5 @@ class JobRunner implements LoggerAwareInterface {
 		if ( $this->debug ) {
 			call_user_func_array( $this->debug, [ wfTimestamp( TS_DB ) . " $msg\n" ] );
 		}
-	}
-
-	/**
-	 * Issue a commit on all masters who are currently in a transaction and have
-	 * made changes to the database. It also supports sometimes waiting for the
-	 * local wiki's replica DBs to catch up. See the documentation for
-	 * $wgJobSerialCommitThreshold for more.
-	 *
-	 * @param RunnableJob $job
-	 * @param string $fnameTrxOwner
-	 * @throws DBError
-	 */
-	private function commitPrimaryChanges( RunnableJob $job, $fnameTrxOwner ) {
-		$syncThreshold = $this->options->get( MainConfigNames::JobSerialCommitThreshold );
-
-		$time = false;
-		$lb = $this->lbFactory->getMainLB();
-		if ( $syncThreshold !== false && $lb->hasStreamingReplicaServers() ) {
-			// Generally, there is one primary connection to the local DB
-			$dbwSerial = $lb->getAnyOpenConnection( $lb->getWriterIndex() );
-			// We need natively blocking fast locks
-			if ( $dbwSerial && $dbwSerial->namedLocksEnqueue() ) {
-				$time = $dbwSerial->pendingWriteQueryDuration( $dbwSerial::ESTIMATE_DB_APPLY );
-				if ( $time < $syncThreshold ) {
-					$dbwSerial = false;
-				}
-			} else {
-				$dbwSerial = false;
-			}
-		} else {
-			// There are no replica DBs or writes are all to foreign DB (we don't handle that)
-			$dbwSerial = false;
-		}
-
-		if ( !$dbwSerial ) {
-			$this->lbFactory->commitPrimaryChanges(
-				$fnameTrxOwner,
-				// Abort if any transaction was too big
-				[ 'maxWriteDuration' =>
-					$this->options->get( MainConfigNames::MaxJobDBWriteDuration ) ]
-			);
-
-			return;
-		}
-
-		$ms = intval( 1000 * $time );
-
-		$msg = $job->toString() . " COMMIT ENQUEUED [{job_commit_write_ms}ms of writes]";
-		$this->logger->info( $msg, [
-			'job_type' => $job->getType(),
-			'job_commit_write_ms' => $ms,
-		] );
-
-		$msg = $job->toString() . " COMMIT ENQUEUED [{$ms}ms of writes]";
-		$this->debugCallback( $msg );
-
-		// Wait for an exclusive lock to commit
-		if ( !$dbwSerial->lock( 'jobrunner-serial-commit', $fnameTrxOwner, 30 ) ) {
-			// This will trigger a rollback in the main loop
-			throw new DBError( $dbwSerial, "Timed out waiting on commit queue." );
-		}
-		$unlocker = new ScopedCallback( static function () use ( $dbwSerial, $fnameTrxOwner ) {
-			$dbwSerial->unlock( 'jobrunner-serial-commit', $fnameTrxOwner );
-		} );
-
-		// Wait for the replica DBs to catch up
-		$pos = $lb->getPrimaryPos();
-		if ( $pos ) {
-			$lb->waitForAll( $pos );
-		}
-
-		// Actually commit the DB primary changes
-		$this->lbFactory->commitPrimaryChanges(
-			$fnameTrxOwner,
-			// Abort if any transaction was too big
-			[ 'maxWriteDuration' => $this->options->get( MainConfigNames::MaxJobDBWriteDuration ) ]
-		);
-		ScopedCallback::consume( $unlocker );
 	}
 }

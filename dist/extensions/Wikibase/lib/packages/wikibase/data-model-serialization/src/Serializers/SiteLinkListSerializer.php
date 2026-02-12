@@ -1,30 +1,33 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\DataModel\Serializers;
 
-use Serializers\Serializer;
 use Wikibase\DataModel\SiteLinkList;
 
 /**
  * @license GPL-2.0-or-later
  */
-class SiteLinkListSerializer {
+class SiteLinkListSerializer extends MapSerializer {
 
-	private $siteLinkSerializer;
-	private $useObjectsForMaps;
+	private SiteLinkSerializer $siteLinkSerializer;
 
-	public function __construct( Serializer $siteLinkSerializer, bool $useObjectsForMaps ) {
+	public function __construct( SiteLinkSerializer $siteLinkSerializer, bool $useObjectsForEmptyMaps ) {
+		parent::__construct( $useObjectsForEmptyMaps );
 		$this->siteLinkSerializer = $siteLinkSerializer;
-		$this->useObjectsForMaps = $useObjectsForMaps;
 	}
 
 	public function serialize( SiteLinkList $siteLinkList ) {
+		return $this->serializeMap( $this->generateSerializedArrayRepresentation( $siteLinkList ) );
+	}
+
+	protected function generateSerializedArrayRepresentation( SiteLinkList $siteLinkList ): array {
 		$serialization = [];
 		foreach ( $siteLinkList->toArray() as $siteLink ) {
 			$serialization[$siteLink->getSiteId()] = $this->siteLinkSerializer->serialize( $siteLink );
 		}
 
-		return $this->useObjectsForMaps ? (object)$serialization : $serialization;
+		return $serialization;
 	}
-
 }

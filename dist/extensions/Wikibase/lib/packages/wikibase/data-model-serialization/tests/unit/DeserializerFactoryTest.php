@@ -7,6 +7,7 @@ use Deserializers\Deserializer;
 use PHPUnit\Framework\TestCase;
 use Wikibase\DataModel\Deserializers\DeserializerFactory;
 use Wikibase\DataModel\Entity\BasicEntityIdParser;
+use Wikibase\DataModel\Services\Lookup\InMemoryDataTypeLookup;
 
 /**
  * @covers Wikibase\DataModel\DeserializerFactory
@@ -18,7 +19,13 @@ use Wikibase\DataModel\Entity\BasicEntityIdParser;
 class DeserializerFactoryTest extends TestCase {
 
 	private function buildDeserializerFactory() {
-		return new DeserializerFactory( new DataValueDeserializer(), new BasicEntityIdParser() );
+		return new DeserializerFactory(
+			new DataValueDeserializer(),
+			new BasicEntityIdParser(),
+			new InMemoryDataTypeLookup(),
+			[],
+			[]
+		);
 	}
 
 	private function assertDeserializesWithoutException(
@@ -32,12 +39,12 @@ class DeserializerFactoryTest extends TestCase {
 	public function testNewEntityDeserializer() {
 		$this->assertTrue( $this->buildDeserializerFactory()->newEntityDeserializer()->isDeserializerFor(
 			[
-				'type' => 'item'
+				'type' => 'item',
 			]
 		) );
 		$this->assertTrue( $this->buildDeserializerFactory()->newEntityDeserializer()->isDeserializerFor(
 			[
-				'type' => 'property'
+				'type' => 'property',
 			]
 		) );
 	}
@@ -46,7 +53,7 @@ class DeserializerFactoryTest extends TestCase {
 		$this->assertDeserializesWithoutException(
 			$this->buildDeserializerFactory()->newItemDeserializer(),
 			[
-				'type' => 'item'
+				'type' => 'item',
 			]
 		);
 	}
@@ -56,7 +63,7 @@ class DeserializerFactoryTest extends TestCase {
 			$this->buildDeserializerFactory()->newPropertyDeserializer(),
 			[
 				'type' => 'property',
-				'datatype' => 'string'
+				'datatype' => 'string',
 			]
 		);
 	}
@@ -66,7 +73,7 @@ class DeserializerFactoryTest extends TestCase {
 			$this->buildDeserializerFactory()->newSiteLinkDeserializer(),
 			[
 				'site' => 'enwiki',
-				'title' => 'Nyan Cat'
+				'title' => 'Nyan Cat',
 			]
 		);
 	}
@@ -77,9 +84,9 @@ class DeserializerFactoryTest extends TestCase {
 				[
 					'mainsnak' => [
 						'snaktype' => 'novalue',
-						'property' => 'P42'
+						'property' => 'P42',
 					],
-					'type' => 'claim'
+					'type' => 'claim',
 				]
 			)
 		);
@@ -90,7 +97,7 @@ class DeserializerFactoryTest extends TestCase {
 			$this->buildDeserializerFactory()->newStatementListDeserializer(),
 			[
 				'P42' => [
-				]
+				],
 			]
 		);
 	}
@@ -101,8 +108,8 @@ class DeserializerFactoryTest extends TestCase {
 			[
 				[
 					'hash' => 'da39a3ee5e6b4b0d3255bfef95601890afd80709',
-					'snaks' => []
-				]
+					'snaks' => [],
+				],
 			]
 		);
 	}
@@ -112,7 +119,7 @@ class DeserializerFactoryTest extends TestCase {
 			$this->buildDeserializerFactory()->newReferenceDeserializer(),
 			[
 				'hash' => 'da39a3ee5e6b4b0d3255bfef95601890afd80709',
-				'snaks' => []
+				'snaks' => [],
 			]
 		);
 	}
@@ -122,7 +129,7 @@ class DeserializerFactoryTest extends TestCase {
 			$this->buildDeserializerFactory()->newSnakDeserializer(),
 			[
 				'snaktype' => 'novalue',
-				'property' => 'P42'
+				'property' => 'P42',
 			]
 		);
 	}

@@ -1,15 +1,15 @@
 /*!
  * VisualEditor DataModel MWMapsNode class.
  *
- * @copyright 2011-2015 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
- * DataModel MW Maps node.
+ * DataModel node for a <mapframe> extension tag.
  *
  * @class
  * @extends ve.dm.MWBlockExtensionNode
- * @mixins ve.dm.ResizableNode
+ * @mixes ve.dm.ResizableNode
  *
  * @constructor
  * @param {Object} [element] Reference to element in linear model
@@ -43,7 +43,7 @@ ve.dm.MWMapsNode.static.matchTagNames = [ 'div' ];
  * @return {Object}
  */
 ve.dm.MWMapsNode.static.toDataElement = function () {
-	var dataElement = ve.dm.MWMapsNode.super.static.toDataElement.apply( this, arguments );
+	const dataElement = ve.dm.MWMapsNode.super.static.toDataElement.apply( this, arguments );
 
 	dataElement.attributes.width = +dataElement.attributes.mw.attrs.width;
 	dataElement.attributes.height = +dataElement.attributes.mw.attrs.height;
@@ -58,16 +58,24 @@ ve.dm.MWMapsNode.static.toDataElement = function () {
  * @return {string}
  */
 ve.dm.MWMapsNode.static.getUrl = function ( dataElement, width, height ) {
-	var mwAttrs = dataElement.attributes.mw.attrs,
-		util = require( 'ext.kartographer.util' ),
-		lang = mwAttrs.lang || util.getDefaultLanguage();
+	const mwAttrs = dataElement.attributes.mw.attrs;
+	const util = require( 'ext.kartographer.util' );
+	const lang = mwAttrs.lang || util.getDefaultLanguage();
+
+	width = width || mwAttrs.width;
+	if ( width === 'full' || width === '100%' ) {
+		width = mw.config.get( 'wgKartographerStaticFullWidth' );
+	} else if ( !isFinite( width ) ) {
+		// This fallback for deprecated percentages other than 100% is hard-coded in the backend
+		width = 300;
+	}
 
 	return mw.config.get( 'wgKartographerMapServer' ) + '/img/' +
 		mw.config.get( 'wgKartographerDfltStyle' ) + ',' +
 		mwAttrs.zoom + ',' +
 		mwAttrs.latitude + ',' +
 		mwAttrs.longitude + ',' +
-		( width || mwAttrs.width ) + 'x' +
+		width + 'x' +
 		( height || mwAttrs.height ) +
 		'.jpeg?' + $.param( { lang: lang } );
 };
@@ -88,7 +96,7 @@ ve.dm.MWMapsNode.static.createScalable = function ( dimensions ) {
 			height: 100
 		},
 		maxDimensions: {
-			width: 1000,
+			width: 2000,
 			height: 1000
 		}
 	} );
@@ -98,9 +106,17 @@ ve.dm.MWMapsNode.static.createScalable = function ( dimensions ) {
  * @return {{width: number, height: number}}
  */
 ve.dm.MWMapsNode.prototype.getCurrentDimensions = function () {
+	const mwAttrs = this.getAttribute( 'mw' ).attrs;
+	let width = mwAttrs.width;
+	if ( width === 'full' || width === '100%' ) {
+		width = mw.config.get( 'wgKartographerStaticFullWidth' );
+	} else if ( !isFinite( width ) ) {
+		// This fallback for deprecated percentages other than 100% is hard-coded in the backend
+		width = 300;
+	}
 	return {
-		width: +this.getAttribute( 'mw' ).attrs.width,
-		height: +this.getAttribute( 'mw' ).attrs.height
+		width: +width,
+		height: +mwAttrs.height
 	};
 };
 
@@ -129,7 +145,7 @@ ve.dm.MWMapsNode.prototype.createScalable = function () {
  * @inheritdoc
  */
 ve.dm.MWMapsNode.prototype.isEditable = function () {
-	var containsDynamicFeatures = this.usesAutoPositioning() || this.usesExternalData();
+	const containsDynamicFeatures = this.usesAutoPositioning() || this.usesExternalData();
 	return !this.usesMapData() || !containsDynamicFeatures;
 };
 
@@ -139,7 +155,7 @@ ve.dm.MWMapsNode.prototype.isEditable = function () {
  * @return {boolean}
  */
 ve.dm.MWMapsNode.prototype.usesAutoPositioning = function () {
-	var mwAttrs = this.getAttribute( 'mw' ).attrs;
+	const mwAttrs = this.getAttribute( 'mw' ).attrs;
 	return !( mwAttrs.latitude && mwAttrs.longitude && mwAttrs.zoom );
 };
 
@@ -149,8 +165,8 @@ ve.dm.MWMapsNode.prototype.usesAutoPositioning = function () {
  * @return {boolean}
  */
 ve.dm.MWMapsNode.prototype.usesExternalData = function () {
-	var mwData = this.getAttribute( 'mw' ),
-		geoJson = ( mwData.body && mwData.body.extsrc ) || '';
+	const mwData = this.getAttribute( 'mw' );
+	const geoJson = ( mwData.body && mwData.body.extsrc ) || '';
 	return geoJson.indexOf( 'ExternalData' ) !== -1;
 };
 
@@ -160,7 +176,7 @@ ve.dm.MWMapsNode.prototype.usesExternalData = function () {
  * @return {boolean}
  */
 ve.dm.MWMapsNode.prototype.usesMapData = function () {
-	var mwData = this.getAttribute( 'mw' );
+	const mwData = this.getAttribute( 'mw' );
 	return !!( mwData.body && mwData.body.extsrc );
 };
 
@@ -170,8 +186,8 @@ ve.dm.MWMapsNode.prototype.usesMapData = function () {
  * @return {string} Language code
  */
 ve.dm.MWMapsNode.prototype.getLanguage = function () {
-	var mwAttrs = this.getAttribute( 'mw' ).attrs,
-		util = require( 'ext.kartographer.util' );
+	const mwAttrs = this.getAttribute( 'mw' ).attrs;
+	const util = require( 'ext.kartographer.util' );
 	return mwAttrs.lang || util.getDefaultLanguage();
 };
 

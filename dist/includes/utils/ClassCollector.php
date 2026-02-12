@@ -68,14 +68,14 @@ class ClassCollector {
 		$matches = null;
 		preg_match_all(
 			// phpcs:ignore Generic.Files.LineLength.TooLong
-			'#^\t*(?:namespace |(final )?(abstract )?(class|interface|trait) |class_alias\()[^;{]+[;{]\s*\}?#m',
+			'#^\t*(?:namespace |(final )?(abstract )?(class|interface|trait|enum) |class_alias\()[^;{]+[;{]\s*\}?#m',
 			$code,
 			$matches
 		);
 		if ( isset( $matches[0][0] ) ) {
 			foreach ( $matches[0] as $match ) {
 				$match = trim( $match );
-				if ( substr( $match, -1 ) === '{' ) {
+				if ( str_ends_with( $match, '{' ) ) {
 					// Keep it balanced
 					$match .= '}';
 				}
@@ -109,6 +109,7 @@ class ClassCollector {
 		switch ( $token[0] ) {
 			case T_NAMESPACE:
 			case T_CLASS:
+			case T_ENUM:
 			case T_INTERFACE:
 			case T_TRAIT:
 			case T_DOUBLE_COLON:
@@ -138,7 +139,7 @@ class ClassCollector {
 				$this->startToken = null;
 				break;
 			case T_NEW:
-				// Skip over T_CLASS after T_NEW because this is a PHP 7 anonymous class.
+				// Skip over T_CLASS after T_NEW because this is an anonymous class.
 				if ( !is_array( $token ) || $token[0] !== T_WHITESPACE ) {
 					$this->startToken = null;
 				}
@@ -204,6 +205,7 @@ class ClassCollector {
 				break;
 
 			case T_CLASS:
+			case T_ENUM:
 			case T_INTERFACE:
 			case T_TRAIT:
 				$this->tokens[] = $token;

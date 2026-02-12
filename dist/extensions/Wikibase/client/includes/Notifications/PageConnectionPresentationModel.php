@@ -2,9 +2,9 @@
 
 namespace Wikibase\Client\Notifications;
 
-use EchoEvent;
-use EchoEventPresentationModel;
-use Title;
+use MediaWiki\Extension\Notifications\Formatters\EchoEventPresentationModel;
+use MediaWiki\Extension\Notifications\Model\Event;
+use MediaWiki\Title\Title;
 use Wikibase\Client\Hooks\EchoNotificationsHandlers;
 
 /**
@@ -16,11 +16,11 @@ use Wikibase\Client\Hooks\EchoNotificationsHandlers;
 class PageConnectionPresentationModel extends EchoEventPresentationModel {
 
 	/**
-	 * @param EchoEvent $event
+	 * @param Event $event
 	 *
 	 * @return string|null
 	 */
-	public function callbackForBundleCount( EchoEvent $event ) {
+	public function callbackForBundleCount( Event $event ) {
 		$title = $event->getTitle();
 		if ( $title !== null ) {
 			return $title->getPrefixedText();
@@ -40,12 +40,7 @@ class PageConnectionPresentationModel extends EchoEventPresentationModel {
 	 */
 	public function canRender() {
 		$title = $this->event->getTitle();
-
-		if ( $title !== null ) {
-			return $title->exists();
-		}
-
-		return false;
+		return $title && $title->exists();
 	}
 
 	/**
@@ -87,7 +82,7 @@ class PageConnectionPresentationModel extends EchoEventPresentationModel {
 		$title = $this->event->getTitle();
 		return [
 			'url' => $title->getFullURL(),
-			'label' => $title->getFullText()
+			'label' => $title->getFullText(),
 		];
 	}
 

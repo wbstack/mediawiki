@@ -5,9 +5,9 @@ namespace Wikibase\Lib\Formatters;
 use DataValues\Geo\Formatters\GlobeCoordinateFormatter;
 use DataValues\Geo\Formatters\LatLongFormatter;
 use DataValues\Geo\Values\GlobeCoordinateValue;
-use Html;
 use InvalidArgumentException;
-use Message;
+use MediaWiki\Html\Html;
+use MediaWiki\Message\Message;
 use ValueFormatters\FormatterOptions;
 use ValueFormatters\ValueFormatter;
 
@@ -34,13 +34,9 @@ class GlobeCoordinateDetailsFormatter implements ValueFormatter {
 	 */
 	private $options;
 
-	/**
-	 * @param ValueFormatter $vocabularyUriFormatter
-	 * @param FormatterOptions|null $options
-	 */
 	public function __construct(
 		ValueFormatter $vocabularyUriFormatter,
-		FormatterOptions $options = null
+		?FormatterOptions $options = null
 	) {
 		$this->options = $options ?: new FormatterOptions();
 
@@ -79,11 +75,11 @@ class GlobeCoordinateDetailsFormatter implements ValueFormatter {
 
 		//TODO: nicer formatting and localization of numbers.
 		$html .= $this->renderLabelValuePair( 'latitude',
-			$value->getLatitude() );
+			(string)$value->getLatitude() );
 		$html .= $this->renderLabelValuePair( 'longitude',
-			$value->getLongitude() );
+			(string)$value->getLongitude() );
 		$html .= $this->renderLabelValuePair( 'precision',
-			$value->getPrecision() );
+			(string)$value->getPrecision() );
 		$html .= $this->renderLabelValuePair( 'globe',
 			$this->formatGlobe( $value->getGlobe() ) );
 

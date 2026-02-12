@@ -26,36 +26,6 @@
 	require( './ext.uls.actions.menu.items.registry.js' );
 
 	/**
-	 * Construct the display settings link
-	 *
-	 * @return {jQuery}
-	 */
-	function displaySettings() {
-		return $( '<button>' )
-			.addClass( 'display-settings-block' )
-			.attr( {
-				title: $.i18n( 'ext-uls-display-settings-desc' ),
-				'data-i18n': 'ext-uls-display-settings-title'
-			} )
-			.i18n();
-	}
-
-	/**
-	 * Construct the input settings link
-	 *
-	 * @return {jQuery}
-	 */
-	function inputSettings() {
-		return $( '<button>' )
-			.addClass( 'input-settings-block' )
-			.attr( {
-				title: $.i18n( 'ext-uls-input-settings-desc' ),
-				'data-i18n': 'ext-uls-input-settings-title'
-			} )
-			.i18n();
-	}
-
-	/**
 	 * For Vector, check if the language button id exists.
 	 * For other skins, check wgULSDisplaySettingsInInterlanguage for the current skin.
 	 *
@@ -64,47 +34,6 @@
 	function isUsingStandaloneLanguageButton() {
 		// Checking for the ULS language button id returns true for Vector, false for other skins.
 		return $( '#p-lang-btn' ).length > 0 || mw.config.get( 'wgULSDisplaySettingsInInterlanguage' );
-	}
-
-	/**
-	 * @return {jQuery}
-	 */
-	function createActionsMenuTrigger() {
-		var classes = [ 'mw-ui-button', 'mw-ui-quiet', 'uls-language-actions-button' ];
-		return $( '<button>' ).addClass( classes );
-	}
-
-	/**
-	 * @param {jQuery} actionsMenuTrigger
-	 * @param {number} menuItemsCount
-	 */
-	function setActionsMenuTriggerIconClass( actionsMenuTrigger, menuItemsCount ) {
-		var iconClass, iconClasses = {
-			single: 'uls-language-actions-button--single',
-			multiple: 'uls-language-actions-button--multiple'
-		};
-		if ( menuItemsCount > 1 ) {
-			iconClass = iconClasses.multiple;
-		} else {
-			iconClass = iconClasses.single;
-		}
-		iconClasses = Object.keys( iconClasses ).map( function ( key ) {
-			return iconClasses[ key ];
-		} );
-		// reset icon classes
-		// The following classes are being removed here (if present):
-		// * uls-language-actions-button--multiple
-		// * uls-language-actions-button--single
-		actionsMenuTrigger.removeClass( iconClasses );
-		// One of the following classes are being added here:
-		// * uls-language-actions-button--multiple
-		// OR
-		// * uls-language-actions-button--single
-		actionsMenuTrigger.addClass( iconClass );
-	}
-
-	function hideLanguageSettingsFooter( uls ) {
-		uls.$menu.find( '#uls-settings-block' ).eq( 0 ).hide();
 	}
 
 	/**
@@ -149,8 +78,6 @@
 		var actionItemsRegistry = mw.uls.ActionsMenuItemsRegistry;
 		actionItemsRegistry.register( languageSettingsMenuItem );
 
-		var $actionsMenuTrigger = createActionsMenuTrigger();
-		setActionsMenuTriggerIconClass( $actionsMenuTrigger, actionItemsRegistry.size() );
 		var $header = $( '<h3>' )
 			.addClass( 'uls-empty-state__header' )
 			.text( $.i18n( 'ext-uls-empty-state-header' ) );
@@ -160,9 +87,7 @@
 		$emptyStateContainer.append( $header, $desc );
 		uls.$resultsView.append( $emptyStateContainer );
 
-		var actionItems = actionItemsRegistry.getItems();
-
-		if ( actionItems.length > 1 ) {
+		if ( actionItemsRegistry.size() > 1 ) {
 			// languageSettingsMenuItem will be always there.
 			// If other actions available, change text
 			$header.text( $.i18n( 'ext-uls-empty-state-header-actions-available' ) );
@@ -172,7 +97,7 @@
 		// Action menu items need OOUI widgets. Load them and register trigger event handler.
 		mw.loader.using( [ 'oojs-ui-widgets', 'oojs-ui.styles.icons-interactions' ] ).done( function () {
 			var $actionsList = $( '<ul>' ).addClass( 'uls-language-action-items' );
-			actionItems.forEach( function ( actionItem ) {
+			actionItemsRegistry.getItems().forEach( function ( actionItem ) {
 				var actionButton = new ActionsMenuItem(
 					actionItem.icon,
 					actionItem.text,
@@ -184,117 +109,94 @@
 
 			$emptyStateContainer.append( $actionsList );
 		} );
-
 	}
 
 	/**
-	 * Add language actions menu
+	 * Helper method for creating jQuery buttons, used in "addActionsMenuTriggers" method below
+	 *
+	 * @param {string} buttonClass a class to be added to the created button class list
+	 * @return {jQuery}
+	 */
+	function createMenuButton( buttonClass ) {
+		var classes = [
+			'cdx-button',
+			'cdx-button--weight-quiet',
+			buttonClass
+		];
+		// eslint-disable-next-line mediawiki/class-doc
+		return $( '<button>' ).addClass( classes );
+	}
+
+	/**
+	 * @param {Object} uls The ULS object
+	 * @return {jQuery}
+	 */
+	function addLanguageSettingsTrigger( uls ) {
+		var $ulsSettingsBlock = uls.$menu.find( '#uls-settings-block' ).eq( 0 );
+		$ulsSettingsBlock.addClass( 'uls-settings-block--vector-2022' );
+
+		var $languageSettingsMenuButton = createMenuButton( 'uls-language-settings-button' );
+		$languageSettingsMenuButton.one( 'click', function () {
+			openLanguageSettings( $languageSettingsMenuButton, uls.show.bind( uls ), uls );
+		} );
+		$ulsSettingsBlock.append( $languageSettingsMenuButton );
+
+		uls.$menu.addClass( 'notheme skin-invert' ); // T365990
+		return $ulsSettingsBlock;
+	}
+
+	/**
+	 * Add the button that opens the "Add languages" menu (that contain options
+	 * like "Translate this page" and "Edit language links") and the button that
+	 * opens the "Language settings" menu.
 	 *
 	 * @param {Object} uls The ULS object
 	 */
-	function addActionsMenuTrigger( uls ) {
-		var actionsMenuDialog;
-
-		function openActionsMenuEventHandler( event ) {
-			event.stopPropagation();
-
-			function onMenuClose() {
-				actionsMenuDialog.hide();
-				uls.show();
-			}
-			openLanguageSettings( $( event.target ), onMenuClose, uls );
-		}
-
-		var languageSettingsMenuItem = {
-			name: 'languageSettings',
-			icon: 'settings',
-			text: $.i18n( 'ext-uls-actions-menu-language-settings-item-label' ),
-			handler: openActionsMenuEventHandler
-		};
+	function addActionsMenuTriggers( uls ) {
+		var $ulsSettingsBlock = addLanguageSettingsTrigger( uls );
 
 		var actionItemsRegistry = mw.uls.ActionsMenuItemsRegistry;
-		actionItemsRegistry.register( languageSettingsMenuItem );
+		actionItemsRegistry.on( 'register', onActionItemAdded );
 
-		var $actionsMenuTrigger = createActionsMenuTrigger();
-		setActionsMenuTriggerIconClass( $actionsMenuTrigger, actionItemsRegistry.size() );
+		var addLanguagesMenuDialog;
+		var $addLanguagesMenuButton;
 
-		function registerTriggerListener() {
-			$actionsMenuTrigger.off( 'click' );
-			$actionsMenuTrigger.on( 'click', function () {
-				var menuItemsLength = actionItemsRegistry.size();
+		var prependAddLanguagesMenuButton = function () {
+			$addLanguagesMenuButton = createMenuButton( 'uls-add-languages-button' ).attr( {
+				'data-i18n': 'ext-uls-add-languages-button-label'
+			} ).i18n();
 
-				if ( menuItemsLength === 1 ) {
-					openLanguageSettings( $actionsMenuTrigger, uls.show.bind( uls ), uls );
-					$actionsMenuTrigger.off( 'click' );
-				} else if ( menuItemsLength > 1 ) {
-					actionsMenuDialog = actionsMenuDialog || new ActionsMenu( {
+			$ulsSettingsBlock.addClass( 'uls-settings-block--with-add-languages' );
+			$ulsSettingsBlock.prepend( $addLanguagesMenuButton );
+
+			// Action menu items need OOUI widgets. Load them and register trigger event handler.
+			mw.loader.using( [ 'oojs-ui-widgets', 'oojs-ui.styles.icons-interactions' ] ).done( function () {
+				$addLanguagesMenuButton.on( 'click', function () {
+					addLanguagesMenuDialog = addLanguagesMenuDialog || new ActionsMenu( {
 						actions: actionItemsRegistry.getItems(),
 						onPosition: uls.position.bind( uls ),
 						onClose: uls.show.bind( uls )
 					} );
-					actionsMenuDialog.render();
+					addLanguagesMenuDialog.render();
 					uls.hide();
-				}
+				} );
 			} );
+		};
+
+		if ( actionItemsRegistry.size() ) {
+			prependAddLanguagesMenuButton();
 		}
-		function onActionItemAdded( item ) {
-			var itemsLength = actionItemsRegistry.size();
-			setActionsMenuTriggerIconClass( $actionsMenuTrigger, itemsLength );
-			registerTriggerListener();
-			if ( actionsMenuDialog ) {
-				actionsMenuDialog.renderAction( item );
+		function onActionItemAdded( itemName, item ) {
+			if ( !$addLanguagesMenuButton ) {
+				prependAddLanguagesMenuButton();
+			} else if ( addLanguagesMenuDialog ) {
+				addLanguagesMenuDialog.renderAction( item );
 			}
 		}
-		actionItemsRegistry.on( 'register', onActionItemAdded );
-		uls.$menu.append( $actionsMenuTrigger );
-		// Action menu items need OOUI widgets. Load them and register trigger event handler.
-		mw.loader.using( [ 'oojs-ui-widgets', 'oojs-ui.styles.icons-interactions' ] ).done( function () {
-			registerTriggerListener();
-		} );
-	}
-
-	/**
-	 * Add display settings link to the settings bar in ULS
-	 *
-	 * @param {Object} uls The ULS object
-	 */
-	function addDisplaySettings( uls ) {
-		var $displaySettings = displaySettings();
-
-		uls.$menu.find( '#uls-settings-block' ).append( $displaySettings );
-		// Initialize the trigger
-		$displaySettings.one( 'click', function () {
-			$displaySettings.languagesettings( {
-				defaultModule: 'display',
-				onClose: uls.show.bind( uls ),
-				onPosition: uls.position.bind( uls ),
-				onVisible: uls.hide.bind( uls )
-			} ).trigger( 'click' );
-		} );
-	}
-
-	/**
-	 * Add input settings link to the settings bar in ULS
-	 *
-	 * @param {Object} uls The ULS object
-	 */
-	function addInputSettings( uls ) {
-		var $inputSettings = inputSettings();
-
-		uls.$menu.find( '#uls-settings-block' ).append( $inputSettings );
-		// Initialize the trigger
-		$inputSettings.one( 'click', function () {
-			$inputSettings.languagesettings( {
-				defaultModule: 'input',
-				onClose: uls.show.bind( uls ),
-				onPosition: uls.position.bind( uls ),
-				onVisible: uls.hide.bind( uls )
-			} ).trigger( 'click' );
-		} );
 	}
 
 	function userCanChangeLanguage() {
-		return mw.config.get( 'wgULSAnonCanChangeLanguage' ) || !mw.user.isAnon();
+		return mw.config.get( 'wgULSAnonCanChangeLanguage' ) || mw.user.isNamed();
 	}
 
 	/**
@@ -405,19 +307,6 @@
 			if ( !$( '.uls-menu:visible' ).length ) {
 				showTipsy( 3000 );
 			}
-		} );
-	}
-
-	/**
-	 * Adds display and input settings to the ULS dialog after loading their code.
-	 *
-	 * @param {Object} uls The ULS instance
-	 * @return {jQuery.Promise}
-	 */
-	function loadDisplayAndInputSettings( uls ) {
-		return mw.loader.using( languageSettingsModules ).then( function () {
-			addDisplaySettings( uls );
-			addInputSettings( uls );
 		} );
 	}
 
@@ -544,8 +433,37 @@
 							quickList: function () {
 								return mw.uls.getFrequentLanguageList();
 							},
+							// partially copied from ext.uls.lauch
+							onPosition: function () {
+								// Default positioning of jquery.uls is middle of the screen under
+								// the trigger. This code aligns it under the trigger and to the
+								// trigger edge depending on which side of the page the trigger is
+								// It should work automatically both LTR and RTL.
+								var offset, height, width, positionCSS;
+								offset = $trigger.offset();
+								width = $trigger.outerWidth();
+								height = $trigger.outerHeight();
+
+								if ( offset.left + ( width / 2 ) > $( window ).width() / 2 ) {
+									// Midpoint of the trigger is on the right side of the viewport.
+									positionCSS = {
+										// Right dialog edge aligns with right edge of the trigger.
+										right: $( window ).width() - ( offset.left + width ),
+										top: offset.top + height
+									};
+								} else {
+									// Midpoint of the trigger is on the left side of the viewport.
+									positionCSS = {
+										// Left dialog edge aligns with left edge of the trigger.
+										left: offset.left,
+										top: offset.top + height
+									};
+								}
+
+								return positionCSS;
+							},
 							onReady: function () {
-								loadDisplayAndInputSettings( this );
+								addLanguageSettingsTrigger( this );
 							},
 							onSelect: function ( language ) {
 								mw.uls.changeLanguage( language );
@@ -587,7 +505,7 @@
 		previousLanguage = mw.storage.get( 'uls-previous-language-code' );
 		currentLanguage = mw.config.get( 'wgUserLanguage' );
 		previousAutonym = mw.storage.get( 'uls-previous-language-autonym' );
-		currentAutonym = mw.config.get( 'wgULSCurrentAutonym' );
+		currentAutonym = require( '../data.json' ).currentAutonym;
 
 		// If storage is empty, i.e. first visit, then store the current language
 		// immediately so that we know when it changes.
@@ -659,17 +577,16 @@
 		if ( $target.attr( 'data-uls-loaded' ) ) {
 			return;
 		}
+		$target.attr( 'data-uls-loaded', true );
 
 		ev.preventDefault();
 
-		mw.loader.using( 'ext.uls.mediawiki' ).then( function () {
+		mw.loader.using( [ 'ext.uls.mediawiki', '@wikimedia/codex' ] ).then( function () {
 			var parent, languageNodes, standalone, uls;
 
 			parent = document.querySelectorAll( '.mw-portlet-lang, #p-lang' )[ 0 ];
 			languageNodes = parent ? parent.querySelectorAll( '.interlanguage-link-target' ) : [];
 			standalone = isUsingStandaloneLanguageButton();
-
-			$target.attr( 'data-uls-loaded', true );
 
 			// Setup click handler for ULS
 			launchULS(
@@ -685,12 +602,12 @@
 				// Provide access to display and input settings if this entry point is the single
 				// point of access to all language settings.
 				uls = $target.data( 'uls' );
-				// first hide #uls-settings-block div since it's unused, and it causes
-				// an unwanted extra border to show up at the bottom of the menu
-				hideLanguageSettingsFooter( uls );
 				if ( languageNodes.length ) {
-					addActionsMenuTrigger( uls );
+					addActionsMenuTriggers( uls );
 				} else {
+					// first hide #uls-settings-block div since it's unused, and it causes
+					// an unwanted extra border to show up at the bottom of the menu
+					uls.$menu.find( '#uls-settings-block' ).eq( 0 ).hide();
 					// There are no languages - The article exist only the current language wiki
 					// Provide entry points to create article in other languages. T290436
 					addEmptyState( uls );
@@ -719,7 +636,54 @@
 		}
 	}
 
+	/**
+	 * The new Vector 2022 skin uses a less prominent language button for non-content pages.
+	 * For these pages, the ULS should not be displayed, but a dropdown with an appropriate message
+	 * should appear. The UniversalLanguageSelector extension should add a button to open the
+	 * language settings, inside this dropdown.
+	 * This method adds this button inside the dropdown.
+	 */
+	function addLanguageSettingsToNonContentPages() {
+		var $languageBtn = $( '#p-lang-btn' );
+		var clickHandler = function ( event ) {
+			event.stopPropagation();
+			mw.loader.using( languageSettingsModules ).then( function () {
+				$( event.target ).languagesettings( {
+					autoOpen: true,
+					onPosition: function () {
+						var offset = $languageBtn.offset();
+						var top = offset.top + $languageBtn.outerHeight();
+						var right = $( window ).width() - offset.left - $languageBtn.outerWidth();
+						return { top: top, right: right };
+					}
+				} );
+			} );
+		};
+		// the first time the language button is clicked inside a non-content page,
+		// we should add the "Open language settings" button inside the dropdown
+		$languageBtn.one( 'mouseover', function () {
+			mw.loader.using( [ 'oojs-ui-widgets', 'oojs-ui.styles.icons-interactions', 'ext.uls.messages' ] )
+				.done( function () {
+					var actionButton = new ActionsMenuItem(
+						'settings',
+						$.i18n( 'ext-uls-actions-menu-language-settings-item-label' ),
+						clickHandler,
+						null
+					).render();
+					actionButton.$element.addClass( 'empty-language-selector__language-settings-button' );
+					var $emptyLanguageSelectorBody = $( '.mw-portlet-empty-language-selector-body' );
+					$emptyLanguageSelectorBody.after( actionButton.$element );
+				} );
+		} );
+	}
 	function init() {
+		// if it's not Vector skin, nothing to be done here
+		if ( mw.config.get( 'skin' ) === 'vector-2022' && mw.config.get( 'wgULSisLanguageSelectorEmpty' ) ) {
+			// if this is a non-content page, we should add the "Open language settings" button
+			// inside the language dropdown
+			addLanguageSettingsToNonContentPages();
+		}
+
 		initLanguageChangeUndoTooltip();
 		initIme();
 
@@ -755,11 +719,12 @@
 			initPersonalEntryPoint();
 		}
 
+		// whether to load compact language links
 		var compact = mw.config.get( 'wgULSisCompactLinksEnabled' );
-		// The scope of the compact language links user preference has been expanded to also
-		// determine whether to show the omni box or not. Compact language links is already not
-		// loaded server side, so this is only relevant for the omnibox.
-		if ( compact ) {
+		// whether to show the omni box or not
+		var languageInHeader = mw.config.get( 'wgVector2022LanguageInHeader' );
+
+		if ( compact || languageInHeader ) {
 			// Init compact languages OR omni selector using the mw-interlanguage-selector class
 			initContentLanguageSelectorClickHandler();
 		} else {

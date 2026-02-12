@@ -18,6 +18,13 @@
  * @file
  */
 
+use MediaWiki\Html\Html;
+use MediaWiki\Html\TemplateParser;
+use MediaWiki\Language\Language;
+use MediaWiki\Skin\SkinComponentTempUserBanner;
+use MediaWiki\Skin\SkinComponentUtils;
+use MediaWiki\Title\Title;
+
 /**
  * Generic template for use with Mustache templates.
  * @since 1.35
@@ -45,6 +52,34 @@ class SkinMustache extends SkinTemplate {
 	}
 
 	/**
+	 * Creates a banner notifying IP masked users (temporary accounts)
+	 * That they are editing via a temporary account.
+	 *
+	 * @return string
+	 */
+	private function createTempUserBannerHTML() {
+		$isSupportedSkin = $this->getOptions()['tempUserBanner'];
+		$isTempUser = $this->getUser()->isTemp();
+
+		if ( !$isSupportedSkin || !$isTempUser ) {
+			return '';
+		}
+
+		$returntoParam = SkinComponentUtils::getReturnToParam(
+			$this->getTitle(),
+			$this->getRequest(),
+			$this->getAuthority()
+		);
+
+		$tempUserBanner = new SkinComponentTempUserBanner(
+			$returntoParam,
+			$this->getContext(),
+			$this->getUser(),
+		);
+		return $tempUserBanner->getTemplateData()['html'];
+	}
+
+	/**
 	 * @inheritDoc
 	 * Render the associated template. The master template is assumed
 	 * to be 'skin' unless `template` has been passed in the skin options
@@ -56,15 +91,23 @@ class SkinMustache extends SkinTemplate {
 		$tp = $this->getTemplateParser();
 		$template = $this->options['template'] ?? 'skin';
 		$data = $this->getTemplateData();
-
-		// T259955: OutputPage::headElement must be called last (after getTemplateData)
-		// as it calls OutputPage::getRlClient, which freezes the ResourceLoader
-		// modules queue for the current page load.
-		$html = $out->headElement( $this );
-
+		$html = $this->createTempUserBannerHTML();
 		$html .= $tp->processTemplate( $template, $data );
-		$html .= $out->tailElement( $this );
 		return $html;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected function doEditSectionLinksHTML( array $links, Language $lang ) {
+		$template = $this->getOptions()['templateSectionLinks'] ?? null;
+		if ( !$template ) {
+			return parent::doEditSectionLinksHTML( $links, $lang );
+		}
+		return $this->getTemplateParser()->processTemplate( $template, [
+			'class' => 'mw-editsection',
+			'array-links' => $links
+		] );
 	}
 
 	/**
@@ -78,7 +121,7 @@ class SkinMustache extends SkinTemplate {
 			[
 				'class' => 'printfooter',
 				'data-nosnippet' => ''
-			],
+			] + $this->getUserLanguageAttributes(),
 			$this->printSource()
 		);
 		$bodyContent = $out->getHTML() . "\n" . $printSource;
@@ -100,7 +143,7 @@ class SkinMustache extends SkinTemplate {
 			'html-user-language-attributes' => $this->prepareUserLanguageAttributes(),
 
 			// links
-			'link-mainpage' => Title::newMainPage()->getLocalUrl(),
+			'link-mainpage' => Title::newMainPage()->getLocalURL(),
 		];
 
 		foreach ( $this->options['messages'] ?? [] as $message ) {

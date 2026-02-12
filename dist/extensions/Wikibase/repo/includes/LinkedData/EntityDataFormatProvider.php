@@ -2,10 +2,10 @@
 
 namespace Wikibase\Repo\LinkedData;
 
-use ApiMain;
-use DerivativeContext;
-use DerivativeRequest;
-use RequestContext;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Context\DerivativeContext;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Request\DerivativeRequest;
 use Wikimedia\Purtle\RdfWriterFactory;
 
 /**
@@ -46,7 +46,7 @@ class EntityDataFormatProvider {
 	/**
 	 * @param string[]|null $allowedFormats
 	 */
-	public function setAllowedFormats( array $allowedFormats = null ) {
+	public function setAllowedFormats( ?array $allowedFormats ) {
 		$this->allowedFormats = $allowedFormats;
 
 		// force re-init of format maps

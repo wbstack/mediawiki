@@ -1,44 +1,21 @@
 /**
  * Wikivoyage Map class.
  *
- * @alternateClassName WVMap
+ * @borrows Kartographer.Wikivoyage.WVMap as WVMap
  * @class Kartographer.Wikivoyage.WVMap
  */
-var wikivoyage = require( './wikivoyage.js' ),
-	WVMapLayers = require( './WVMapLayers.js' ),
-	ControlNearby = require( './ControlNearby.js' );
+const WVMapLayers = require( './WVMapLayers.js' );
 
 /* eslint-disable no-underscore-dangle */
 
 /**
+ * @constructor
+ * @memberof Kartographer.Wikivoyage.WVMapLayers
  * @param {L.Map} map
  */
 function WVMap( map ) {
 	this.map = map;
 }
-
-/**
- * Adds the nearby articles control to the map.
- *
- * @return {Kartographer.Wikivoyage.ControlNearby}
- */
-WVMap.prototype.nearby = function () {
-	var control = this._controlNearby;
-	if ( control ) {
-		return control;
-	}
-
-	control = this._controlNearby = new ControlNearby();
-	control.addTo( this.map );
-
-	this.controlLayers().addLayer(
-		control.pruneCluster,
-		wikivoyage.formatLayerName( mw.msg( 'kartographer-wv-layer-nearby-articles' ), control.pruneCluster.options ),
-		true
-	).update();
-
-	return control;
-};
 
 /**
  * Adds the layer switcher control to the map.

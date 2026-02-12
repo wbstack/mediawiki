@@ -22,7 +22,6 @@
 	"cite-ve-citationneeded-title": "सन्दर्भ आवश्यक छ",
 	"cite-ve-dialog-reference-options-group-label": "यो समूह प्रयोग गर्नुहोस्",
 	"cite-ve-dialog-reference-options-group-placeholder": "सामान्य सन्दर्भ",
-	"cite-ve-dialog-reference-options-name-label": "यो नाम द्वारा पुन: प्रयोग गर्नुहोस्",
 	"cite-ve-dialog-reference-options-section": "विकल्पहरू",
 	"cite-ve-dialog-reference-title": "सन्दर्भ",
 	"cite-ve-dialog-reference-useexisting-tool": "पुनः प्रयोग",
@@ -35,8 +34,9 @@
 	"cite-ve-dialogbutton-reference-title": "सन्दर्भ",
 	"cite-ve-dialogbutton-reference-tooltip": "सामान्य",
 	"cite-ve-dialogbutton-referenceslist-tooltip": "सन्दर्भ सामग्रीहरू",
+	"cite-ve-referenceslist-isempty": "यस पृष्ठमा यो सूचीमा समावेश गर्नको लागि समूह \"$1\" सँग कुनै सन्दर्भहरू छैनन्।",
+	"cite-ve-referenceslist-isempty-default": "यो सूचीमा समावेश गर्न यस पृष्ठमा कुनै सन्दर्भहरू छैनन्।",
 	"cite-ve-referenceslist-missingreflist": "यो सन्दर्भसूची ढाँचाद्वारा उत्पन्न गरिएको हो, र अहिलेको लागि मात्र स्रोत सम्पादकमा सम्पादन गर्न सकिन्छ।",
 	"cite-ve-toolbar-group-label": "उर्ध्वभरण",
-	"cite-ve-othergroup-item": "$1 सन्दर्भ",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "सन्दर्भहरू"
+	"cite-ve-othergroup-item": "$1 सन्दर्भ"
 }

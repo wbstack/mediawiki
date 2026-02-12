@@ -20,7 +20,13 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
 use MediaWiki\MainConfigNames;
+use MediaWiki\Page\PageIdentity;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleFormatter;
+use MediaWiki\User\User;
 use MediaWiki\Watchlist\WatchlistManager;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\ExpiryDef;
@@ -31,6 +37,7 @@ use Wikimedia\ParamValidator\TypeDef\ExpiryDef;
  * @ingroup API
  */
 class ApiWatch extends ApiBase {
+	/** @var ApiPageSet|null */
 	private $mPageSet = null;
 
 	/** @var bool Whether watchlist expiries are enabled. */
@@ -39,20 +46,28 @@ class ApiWatch extends ApiBase {
 	/** @var string Relative maximum expiry. */
 	private $maxDuration;
 
-	/** @var WatchlistManager */
-	protected $watchlistManager;
+	protected WatchlistManager $watchlistManager;
+	private TitleFormatter $titleFormatter;
 
-	public function __construct( ApiMain $mainModule, $moduleName, WatchlistManager $watchlistManager ) {
+	public function __construct(
+		ApiMain $mainModule,
+		string $moduleName,
+		WatchlistManager $watchlistManager,
+		TitleFormatter $titleFormatter
+	) {
 		parent::__construct( $mainModule, $moduleName );
 
 		$this->watchlistManager = $watchlistManager;
+		$this->titleFormatter = $titleFormatter;
 		$this->expiryEnabled = $this->getConfig()->get( MainConfigNames::WatchlistExpiry );
 		$this->maxDuration = $this->getConfig()->get( MainConfigNames::WatchlistExpiryMaxDuration );
 	}
 
 	public function execute() {
 		$user = $this->getUser();
-		if ( !$user->isRegistered() ) {
+		if ( !$user->isRegistered()
+			|| ( $user->isTemp() && !$user->isAllowed( 'editmywatchlist' ) )
+		) {
 			$this->dieWithError( 'watchlistanontext', 'notloggedin' );
 		}
 
@@ -76,14 +91,14 @@ class ApiWatch extends ApiBase {
 				'interwikiTitles'
 			] );
 
-			foreach ( $pageSet->getMissingTitles() as $title ) {
-				$r = $this->watchTitle( $title, $user, $params );
+			foreach ( $pageSet->getMissingPages() as $page ) {
+				$r = $this->watchTitle( $page, $user, $params );
 				$r['missing'] = true;
 				$res[] = $r;
 			}
 
-			foreach ( $pageSet->getGoodTitles() as $title ) {
-				$r = $this->watchTitle( $title, $user, $params );
+			foreach ( $pageSet->getGoodPages() as $page ) {
+				$r = $this->watchTitle( $page, $user, $params );
 				$res[] = $r;
 			}
 			ApiResult::setIndexedTagName( $res, 'w' );
@@ -116,18 +131,18 @@ class ApiWatch extends ApiBase {
 		$continuationManager->setContinuationIntoResult( $this->getResult() );
 	}
 
-	private function watchTitle( Title $title, User $user, array $params,
+	private function watchTitle( PageIdentity $page, User $user, array $params,
 		$compatibilityMode = false
 	) {
-		$res = [ 'title' => $title->getPrefixedText(), 'ns' => $title->getNamespace() ];
+		$res = [ 'title' => $this->titleFormatter->getPrefixedText( $page ), 'ns' => $page->getNamespace() ];
 
-		if ( !$this->watchlistManager->isWatchable( $title ) ) {
+		if ( !$this->watchlistManager->isWatchable( $page ) ) {
 			$res['watchable'] = 0;
 			return $res;
 		}
 
 		if ( $params['unwatch'] ) {
-			$status = $this->watchlistManager->removeWatch( $user, $title );
+			$status = $this->watchlistManager->removeWatch( $user, $page );
 			$res['unwatched'] = $status->isOK();
 		} else {
 			$expiry = null;
@@ -138,7 +153,7 @@ class ApiWatch extends ApiBase {
 				$res['expiry'] = ApiResult::formatExpiry( $expiry );
 			}
 
-			$status = $this->watchlistManager->addWatch( $user, $title, $expiry );
+			$status = $this->watchlistManager->addWatch( $user, $page, $expiry );
 			$res['watched'] = $status->isOK();
 		}
 
@@ -161,9 +176,7 @@ class ApiWatch extends ApiBase {
 	 * @return ApiPageSet
 	 */
 	private function getPageSet() {
-		if ( $this->mPageSet === null ) {
-			$this->mPageSet = new ApiPageSet( $this );
-		}
+		$this->mPageSet ??= new ApiPageSet( $this );
 
 		return $this->mPageSet;
 	}
@@ -210,18 +223,21 @@ class ApiWatch extends ApiBase {
 	}
 
 	protected function getExamplesMessages() {
+		$title = Title::newMainPage()->getPrefixedText();
+		$mp = rawurlencode( $title );
+
 		// Logically expiry example should go before unwatch examples.
 		$examples = [
-			'action=watch&titles=Main_Page&token=123ABC'
+			"action=watch&titles={$mp}&token=123ABC"
 				=> 'apihelp-watch-example-watch',
 		];
 		if ( $this->expiryEnabled ) {
-			$examples['action=watch&titles=Main_Page|Foo|Bar&expiry=1%20month&token=123ABC']
+			$examples["action=watch&titles={$mp}|Foo|Bar&expiry=1%20month&token=123ABC"]
 				= 'apihelp-watch-example-watch-expiry';
 		}
 
 		return array_merge( $examples, [
-			'action=watch&titles=Main_Page&unwatch=&token=123ABC'
+			"action=watch&titles={$mp}&unwatch=&token=123ABC"
 				=> 'apihelp-watch-example-unwatch',
 			'action=watch&generator=allpages&gapnamespace=0&token=123ABC'
 				=> 'apihelp-watch-example-generator',
@@ -232,3 +248,6 @@ class ApiWatch extends ApiBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Watch';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiWatch::class, 'ApiWatch' );

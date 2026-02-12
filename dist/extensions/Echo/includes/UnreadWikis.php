@@ -1,12 +1,17 @@
 <?php
 
+namespace MediaWiki\Extension\Notifications;
+
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\CentralId\CentralIdLookup;
 use MediaWiki\User\UserIdentity;
+use MediaWiki\Utils\MWTimestamp;
+use Wikimedia\Rdbms\IDatabase;
 
 /**
  * Manages what wikis a user has unread notifications on
  */
-class EchoUnreadWikis {
+class UnreadWikis {
 
 	private const DEFAULT_TS = '00000000000000';
 	private const DEFAULT_TS_DB = '00010101010101';
@@ -17,7 +22,7 @@ class EchoUnreadWikis {
 	private $id;
 
 	/**
-	 * @var MWEchoDbFactory
+	 * @var DbFactory
 	 */
 	private $dbFactory;
 
@@ -26,14 +31,14 @@ class EchoUnreadWikis {
 	 */
 	public function __construct( $id ) {
 		$this->id = $id;
-		$this->dbFactory = MWEchoDbFactory::newFromDefault();
+		$this->dbFactory = DbFactory::newFromDefault();
 	}
 
 	/**
 	 * Use the user id provided by the CentralIdLookup
 	 *
 	 * @param UserIdentity $user
-	 * @return EchoUnreadWikis|false
+	 * @return UnreadWikis|false
 	 */
 	public static function newFromUser( UserIdentity $user ) {
 		$id = MediaWikiServices::getInstance()
@@ -48,7 +53,8 @@ class EchoUnreadWikis {
 
 	/**
 	 * @param int $index DB_* constant
-	 * @return bool|\Wikimedia\Rdbms\IDatabase
+	 *
+	 * @return bool|IDatabase
 	 */
 	private function getDB( $index ) {
 		return $this->dbFactory->getSharedDb( $index );
@@ -63,16 +69,16 @@ class EchoUnreadWikis {
 			return [];
 		}
 
-		$rows = $dbr->select(
-			'echo_unread_wikis',
-			[
+		$rows = $dbr->newSelectQueryBuilder()
+			->select( [
 				'euw_wiki',
 				'euw_alerts', 'euw_alerts_ts',
 				'euw_messages', 'euw_messages_ts',
-			],
-			[ 'euw_user' => $this->id ],
-			__METHOD__
-		);
+			] )
+			->from( 'echo_unread_wikis' )
+			->where( [ 'euw_user' => $this->id ] )
+			->caller( __METHOD__ )
+			->fetchResultSet();
 
 		$wikis = [];
 		foreach ( $rows as $row ) {
@@ -81,12 +87,12 @@ class EchoUnreadWikis {
 				continue;
 			}
 			$wikis[$row->euw_wiki] = [
-				EchoAttributeManager::ALERT => [
+				AttributeManager::ALERT => [
 					'count' => $row->euw_alerts,
 					'ts' => wfTimestamp( TS_MW, $row->euw_alerts_ts ) === static::DEFAULT_TS_DB ?
 						static::DEFAULT_TS : wfTimestamp( TS_MW, $row->euw_alerts_ts ),
 				],
-				EchoAttributeManager::MESSAGE => [
+				AttributeManager::MESSAGE => [
 					'count' => $row->euw_messages,
 					'ts' => wfTimestamp( TS_MW, $row->euw_messages_ts ) === static::DEFAULT_TS_DB ?
 						static::DEFAULT_TS : wfTimestamp( TS_MW, $row->euw_messages_ts ),
@@ -134,20 +140,21 @@ class EchoUnreadWikis {
 			];
 
 			// when there is unread alert(s) and/or message(s), upsert the row
-			$dbw->upsert(
-				'echo_unread_wikis',
-				$conditions + $values,
-				[ [ 'euw_user', 'euw_wiki' ] ],
-				$values,
-				__METHOD__
-			);
+			$dbw->newInsertQueryBuilder()
+				->insertInto( 'echo_unread_wikis' )
+				->row( $conditions + $values )
+				->onDuplicateKeyUpdate()
+				->uniqueIndexFields( [ 'euw_user', 'euw_wiki' ] )
+				->set( $values )
+				->caller( __METHOD__ )
+				->execute();
 		} else {
 			// No unread notifications, delete the row
-			$dbw->delete(
-				'echo_unread_wikis',
-				$conditions,
-				__METHOD__
-			);
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( 'echo_unread_wikis' )
+				->where( $conditions )
+				->caller( __METHOD__ )
+				->execute();
 		}
 	}
 }

@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Abijeet Patro",
+			"AnupamM"
+		]
+	},
+	"codemirror-toggle-label-short": "वाक्यविन्यास",
+	"codemirror-find": "खोजें",
+	"codemirror-next": "अगला",
+	"codemirror-previous": "पिछला",
+	"codemirror-all": "सभी",
+	"codemirror-by-word": "शब्द से",
+	"codemirror-replace": "बदलें",
+	"codemirror-replace-placeholder": "बदलें",
+	"codemirror-replace-all": "सभी बदलें",
+	"codemirror-done": "पूर्ण हुआ",
+	"codemirror-goto-line-go": "जाएँ"
+}

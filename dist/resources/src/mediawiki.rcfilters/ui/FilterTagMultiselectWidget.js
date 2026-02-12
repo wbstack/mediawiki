@@ -1,29 +1,27 @@
-var ViewSwitchWidget = require( './ViewSwitchWidget.js' ),
+const ViewSwitchWidget = require( './ViewSwitchWidget.js' ),
 	SaveFiltersPopupButtonWidget = require( './SaveFiltersPopupButtonWidget.js' ),
 	MenuSelectWidget = require( './MenuSelectWidget.js' ),
-	FilterTagItemWidget = require( './FilterTagItemWidget.js' ),
-	FilterTagMultiselectWidget;
+	FilterTagItemWidget = require( './FilterTagItemWidget.js' );
 
 /**
- * List displaying all filter groups
+ * List displaying all filter groups.
  *
  * @class mw.rcfilters.ui.FilterTagMultiselectWidget
+ * @ignore
  * @extends OO.ui.MenuTagMultiselectWidget
- * @mixins OO.ui.mixin.PendingElement
+ * @mixes OO.ui.mixin.PendingElement
  *
- * @constructor
  * @param {mw.rcfilters.Controller} controller Controller
  * @param {mw.rcfilters.dm.FiltersViewModel} model View model
  * @param {mw.rcfilters.dm.SavedQueriesModel} savedQueriesModel Saved queries model
  * @param {Object} config Configuration object
- * @cfg {jQuery} [$overlay] A jQuery object serving as overlay for popups
- * @cfg {jQuery} [$wrapper] A jQuery object for the wrapper of the general
+ * @param {jQuery} [config.$overlay] A jQuery object serving as overlay for popups
+ * @param {jQuery} [config.$wrapper] A jQuery object for the wrapper of the general
  *  system. If not given, falls back to this widget's $element
- * @cfg {boolean} [collapsed] Filter area is collapsed
+ * @param {boolean} [config.collapsed] Filter area is collapsed
  */
-FilterTagMultiselectWidget = function MwRcfiltersUiFilterTagMultiselectWidget( controller, model, savedQueriesModel, config ) {
-	var $rcFiltersRow,
-		title = new OO.ui.LabelWidget( {
+const FilterTagMultiselectWidget = function MwRcfiltersUiFilterTagMultiselectWidget( controller, model, savedQueriesModel, config ) {
+	const title = new OO.ui.LabelWidget( {
 			label: mw.msg( 'rcfilters-activefilters' ),
 			classes: [ 'mw-rcfilters-ui-filterTagMultiselectWidget-wrapper-content-title' ]
 		} ),
@@ -50,7 +48,7 @@ FilterTagMultiselectWidget = function MwRcfiltersUiFilterTagMultiselectWidget( c
 	} );
 
 	// Parent
-	FilterTagMultiselectWidget.parent.call( this, $.extend( true, {
+	FilterTagMultiselectWidget.super.call( this, $.extend( true, {
 		label: mw.msg( 'rcfilters-filterlist-title' ),
 		placeholder: mw.msg( 'rcfilters-empty-filter' ),
 		inputPosition: 'outline',
@@ -82,6 +80,8 @@ FilterTagMultiselectWidget = function MwRcfiltersUiFilterTagMultiselectWidget( c
 		 * rather than a text input. Mobile screens are too small to accommodate both an
 		 * onscreen keyboard and a popup-menu, so readyOnly is set to disable the keyboard.
 		 * A different icon and shorter message is used for mobile as well. (See T224655 for details).
+		 *
+		 * @ignore
 		 */
 		input: {
 			icon: this.isMobile ? 'funnel' : 'menu',
@@ -119,7 +119,7 @@ FilterTagMultiselectWidget = function MwRcfiltersUiFilterTagMultiselectWidget( c
 			}
 		);
 
-		this.saveQueryButton.$element.on( 'mousedown', function ( e ) {
+		this.saveQueryButton.$element.on( 'mousedown', ( e ) => {
 			e.stopPropagation();
 		} );
 
@@ -141,10 +141,10 @@ FilterTagMultiselectWidget = function MwRcfiltersUiFilterTagMultiselectWidget( c
 	this.hideShowButton.connect( this, { click: 'onHideShowButtonClick' } );
 	// Stop propagation for mousedown, so that the widget doesn't
 	// trigger the focus on the input and scrolls up when we click the reset button
-	this.resetButton.$element.on( 'mousedown', function ( e ) {
+	this.resetButton.$element.on( 'mousedown', ( e ) => {
 		e.stopPropagation();
 	} );
-	this.hideShowButton.$element.on( 'mousedown', function ( e ) {
+	this.hideShowButton.$element.on( 'mousedown', ( e ) => {
 		e.stopPropagation();
 	} );
 	this.model.connect( this, {
@@ -163,7 +163,7 @@ FilterTagMultiselectWidget = function MwRcfiltersUiFilterTagMultiselectWidget( c
 	// wide the button is; the button also changes its width depending
 	// on language and its state, so the safest way to present both side
 	// by side is with a table layout
-	$rcFiltersRow = $( '<div>' )
+	const $rcFiltersRow = $( '<div>' )
 		.addClass( 'mw-rcfilters-ui-row' )
 		.append(
 			this.$content
@@ -249,7 +249,7 @@ OO.inheritClass( FilterTagMultiselectWidget, OO.ui.MenuTagMultiselectWidget );
  * @return {OO.ui.ButtonGroupWidget}
  */
 FilterTagMultiselectWidget.prototype.createViewsSelectWidget = function () {
-	var viewsSelectWidget = new OO.ui.ButtonGroupWidget( {
+	const viewsSelectWidget = new OO.ui.ButtonGroupWidget( {
 		classes: this.isMobile ?
 			[
 				'mw-rcfilters-ui-table',
@@ -278,7 +278,7 @@ FilterTagMultiselectWidget.prototype.createViewsSelectWidget = function () {
 		]
 	} );
 
-	viewsSelectWidget.items.forEach( function ( item ) {
+	viewsSelectWidget.items.forEach( ( item ) => {
 		item.$button.attr( 'aria-label', item.title );
 	} );
 
@@ -384,16 +384,22 @@ FilterTagMultiselectWidget.prototype.onSavedQueriesItemUpdate = function ( item 
  */
 FilterTagMultiselectWidget.prototype.onMenuToggle = function ( isVisible ) {
 
-	var scrollToElement = this.isMobile ? this.input.$input : this.$element;
+	const scrollToElement = this.isMobile ? this.input.$input : this.$element;
 
 	// Parent
-	FilterTagMultiselectWidget.parent.prototype.onMenuToggle.call( this );
+	FilterTagMultiselectWidget.super.prototype.onMenuToggle.call( this );
 
 	if ( isVisible ) {
 		if ( !this.isMobile ) {
 			this.focus();
 		}
 
+		/**
+		 * Fires when the RCFilters tag multi selector menu is toggled.
+		 *
+		 * @event ~'RcFilters.popup.open'
+		 * @memberof Hooks
+		 */
 		mw.hook( 'RcFilters.popup.open' ).fire();
 
 		if ( !this.getMenu().findSelectedItem() ) {
@@ -401,9 +407,9 @@ FilterTagMultiselectWidget.prototype.onMenuToggle = function ( isVisible ) {
 			// This has to be in a setTimeout so the menu has time
 			// to be positioned and fixed
 			setTimeout(
-				function () {
+				() => {
 					this.getMenu().scrollToTop();
-				}.bind( this )
+				}
 			);
 		}
 
@@ -419,9 +425,6 @@ FilterTagMultiselectWidget.prototype.onMenuToggle = function ( isVisible ) {
 
 		// Clear the search
 		this.controller.setSearch( '' );
-
-		// Log filter grouping
-		this.controller.trackFilterGroupings( 'filtermenu' );
 
 		this.blur();
 	}
@@ -444,7 +447,7 @@ FilterTagMultiselectWidget.prototype.onInputFocus = function () {
 		this.getMenu().toggle();
 	} else {
 		// Parent
-		FilterTagMultiselectWidget.parent.prototype.onInputFocus.call( this );
+		FilterTagMultiselectWidget.super.prototype.onInputFocus.call( this );
 	}
 };
 
@@ -453,7 +456,7 @@ FilterTagMultiselectWidget.prototype.onInputFocus = function () {
  */
 FilterTagMultiselectWidget.prototype.doInputEscape = function () {
 	// Parent
-	FilterTagMultiselectWidget.parent.prototype.doInputEscape.call( this );
+	FilterTagMultiselectWidget.super.prototype.doInputEscape.call( this );
 
 	// Blur the input
 	this.input.$input.trigger( 'blur' );
@@ -476,7 +479,7 @@ FilterTagMultiselectWidget.prototype.onMouseDown = function ( e ) {
 FilterTagMultiselectWidget.prototype.onChangeTags = function () {
 	// If initialized, call parent method.
 	if ( this.controller.isInitialized() ) {
-		FilterTagMultiselectWidget.parent.prototype.onChangeTags.call( this );
+		FilterTagMultiselectWidget.super.prototype.onChangeTags.call( this );
 	}
 
 	this.emptyFilterMessage.toggle( this.isEmpty() );
@@ -500,8 +503,8 @@ FilterTagMultiselectWidget.prototype.onModelUpdate = function () {
  * Update the elements in the widget to the current view
  */
 FilterTagMultiselectWidget.prototype.updateElementsForView = function () {
-	var view = this.model.getCurrentView(),
-		inputValue = this.input.getValue().trim(),
+	let inputValue = this.input.getValue().trim();
+	const view = this.model.getCurrentView(),
 		inputView = this.model.getViewByTrigger( inputValue.slice( 0, 1 ) );
 
 	if ( inputView !== 'default' ) {
@@ -608,23 +611,23 @@ FilterTagMultiselectWidget.prototype.onMenuChoose = function ( item ) {
  * @param {boolean} isHighlightEnabled Highlight is enabled
  */
 FilterTagMultiselectWidget.prototype.onModelHighlightChange = function ( isHighlightEnabled ) {
-	var highlightedItems = this.model.getHighlightedItems();
+	const highlightedItems = this.model.getHighlightedItems();
 
 	if ( isHighlightEnabled ) {
 		// Add capsule widgets
-		highlightedItems.forEach( function ( filterItem ) {
+		highlightedItems.forEach( ( filterItem ) => {
 			this.addTag( filterItem.getName(), filterItem.getLabel() );
-		}.bind( this ) );
+		} );
 	} else {
 		// Remove capsule widgets if they're not selected
-		highlightedItems.forEach( function ( filterItem ) {
+		highlightedItems.forEach( ( filterItem ) => {
 			if ( !filterItem.isSelected() ) {
 				// Only attempt to remove the tag if we can find an item for it (T198140, T198231)
 				if ( this.findItemFromData( filterItem.getName() ) !== null ) {
 					this.removeTagByData( filterItem.getName() );
 				}
 			}
-		}.bind( this ) );
+		} );
 	}
 
 	this.setSavedQueryVisibility();
@@ -634,11 +637,11 @@ FilterTagMultiselectWidget.prototype.onModelHighlightChange = function ( isHighl
  * @inheritdoc
  */
 FilterTagMultiselectWidget.prototype.onTagSelect = function ( tagItem ) {
-	var menuOption = this.menu.getItemFromModel( tagItem.getModel() );
+	const menuOption = this.menu.getItemFromModel( tagItem.getModel() );
 
 	this.menu.setUserSelecting( true );
 	// Parent method
-	FilterTagMultiselectWidget.parent.prototype.onTagSelect.call( this, tagItem );
+	FilterTagMultiselectWidget.super.prototype.onTagSelect.call( this, tagItem );
 
 	// Switch view
 	this.controller.resetSearchForView( tagItem.getView() );
@@ -657,7 +660,7 @@ FilterTagMultiselectWidget.prototype.onTagSelect = function ( tagItem ) {
  *  omit to deselect all
  */
 FilterTagMultiselectWidget.prototype.selectTag = function ( item ) {
-	var i, len, selected;
+	let i, len, selected;
 
 	for ( i = 0, len = this.items.length; i < len; i++ ) {
 		selected = this.items[ i ] === item;
@@ -671,7 +674,7 @@ FilterTagMultiselectWidget.prototype.selectTag = function ( item ) {
  */
 FilterTagMultiselectWidget.prototype.onTagRemove = function ( tagItem ) {
 	// Parent method
-	FilterTagMultiselectWidget.parent.prototype.onTagRemove.call( this, tagItem );
+	FilterTagMultiselectWidget.super.prototype.onTagRemove.call( this, tagItem );
 
 	this.controller.clearFilter( tagItem.getName() );
 
@@ -734,7 +737,7 @@ FilterTagMultiselectWidget.prototype.toggleCollapsed = function ( isCollapsed ) 
  * Reevaluate the restore state for the widget between setting to defaults and clearing all filters
  */
 FilterTagMultiselectWidget.prototype.reevaluateResetRestoreState = function () {
-	var defaultsAreEmpty = this.controller.areDefaultsEmpty(),
+	const defaultsAreEmpty = this.controller.areDefaultsEmpty(),
 		currFiltersAreEmpty = this.model.areVisibleFiltersEmpty(),
 		hideResetButton = currFiltersAreEmpty && defaultsAreEmpty;
 
@@ -768,13 +771,13 @@ FilterTagMultiselectWidget.prototype.createMenuWidget = function ( menuConfig ) 
  * @inheritdoc
  */
 FilterTagMultiselectWidget.prototype.createTagItemWidget = function ( data ) {
-	var filterItem = this.model.getItemByName( data );
+	const filterItem = this.model.getItemByName( data );
 
 	if ( filterItem ) {
 		return new FilterTagItemWidget(
 			this.controller,
 			this.model,
-			this.model.getInvertModel(),
+			this.model.getInvertModel( filterItem.getGroupModel().getView() ),
 			filterItem,
 			{
 				$overlay: this.$overlay
@@ -792,15 +795,15 @@ FilterTagMultiselectWidget.prototype.emphasize = function () {
 			.addClass( 'mw-rcfilters-ui-filterTagMultiselectWidget-emphasize' )
 			.addClass( 'mw-rcfilters-ui-filterTagMultiselectWidget-animate' );
 
-		setTimeout( function () {
+		setTimeout( () => {
 			this.$handle
 				.removeClass( 'mw-rcfilters-ui-filterTagMultiselectWidget-emphasize' );
 
-			setTimeout( function () {
+			setTimeout( () => {
 				this.$handle
 					.removeClass( 'mw-rcfilters-ui-filterTagMultiselectWidget-animate' );
-			}.bind( this ), 1000 );
-		}.bind( this ), 500 );
+			}, 1000 );
+		}, 500 );
 
 	}
 };
@@ -816,7 +819,7 @@ FilterTagMultiselectWidget.prototype.emphasize = function () {
  * @param {number} [threshold.max] Minimum distance below the element
  */
 FilterTagMultiselectWidget.prototype.scrollToTop = function ( $element, marginFromTop, threshold ) {
-	var container = OO.ui.Element.static.getClosestScrollableContainer( $element[ 0 ], 'y' ),
+	const container = OO.ui.Element.static.getClosestScrollableContainer( $element[ 0 ], 'y' ),
 		pos = OO.ui.Element.static.getRelativePosition( $element, $( container ) ),
 		containerScrollTop = $( container ).scrollTop(),
 		effectiveScrollTop = $( container ).is( 'body, html' ) ? 0 : containerScrollTop,

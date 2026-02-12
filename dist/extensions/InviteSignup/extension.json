@@ -9,12 +9,12 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "specialpage",
 	"requires": {
-		"MediaWiki": ">= 1.36.0"
+		"MediaWiki": ">= 1.39.0"
 	},
 	"AutoloadClasses": {
-		"InviteSignupHooks": "InviteSignupHooks.php",
-		"InviteStore": "InviteStore.php",
-		"SpecialInviteSignup": "SpecialInviteSignup.php"
+		"InviteSignupHooks": "includes/InviteSignupHooks.php",
+		"InviteStore": "includes/InviteStore.php",
+		"SpecialInviteSignup": "includes/SpecialInviteSignup.php"
 	},
 	"AvailableRights": [
 		"invitesignup"
@@ -30,8 +30,12 @@
 		"UserGetRights": "InviteSignupHooks::onUserGetRights"
 	},
 	"config": {
-		"ISGroups": [],
-		"InviteSignupHash": null
+		"ISGroups": {
+			"value": []
+		},
+		"InviteSignupHash": {
+			"value": null
+		}
 	},
 	"MessagesDirs": {
 		"InviteSignup": [
@@ -41,5 +45,5 @@
 	"SpecialPages": {
 		"InviteSignup": "SpecialInviteSignup"
 	},
-	"manifest_version": 1
+	"manifest_version": 2
 }

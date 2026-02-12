@@ -1,9 +1,13 @@
 <?php
+
+use MediaWiki\SpecialPage\RedirectSpecialPage;
+
 /**
  * Redirect from Special:Uploads to Special:ListFiles
  *
  * @file
  * @ingroup SpecialPage
+ * @codeCoverageIgnore
  */
 class SpecialUploads extends RedirectSpecialPage {
 	public function __construct() {

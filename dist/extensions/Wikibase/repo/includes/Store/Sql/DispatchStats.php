@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace Wikibase\Repo\Store\Sql;
 
 use Wikibase\Lib\Rdbms\RepoDomainDb;
-use Wikimedia\Rdbms\DBConnRef;
+use Wikimedia\Rdbms\IReadableDatabase;
 
 /**
  * Utility class for collecting dispatch statistics.
@@ -14,17 +14,14 @@ use Wikimedia\Rdbms\DBConnRef;
  */
 class DispatchStats {
 
-	/**
-	 * @var RepoDomainDb
-	 */
-	private $db;
+	private RepoDomainDb $db;
 
 	public function __construct( RepoDomainDb $repoDomainDb ) {
 		$this->db = $repoDomainDb;
 	}
 
 	public function getDispatchStats(): array {
-		$db = $this->db->connections()->getReadConnectionRef();
+		$db = $this->db->connections()->getReadConnection();
 		$limit = 5000;
 
 		$limitedNumberOfChanges = $this->loadLimitedNumberOfChanges( $db, $limit );
@@ -46,7 +43,7 @@ class DispatchStats {
 		return $this->buildExactNumberOfChangesStats( $limitedNumberOfChanges, $numberOfEntities, $changeTimesStats );
 	}
 
-	private function loadLimitedNumberOfChanges( DBConnRef $db, $limit ): int {
+	private function loadLimitedNumberOfChanges( IReadableDatabase $db, $limit ): int {
 		return $db->newSelectQueryBuilder()
 			->select( '*' )
 			->from( 'wb_changes' )
@@ -55,7 +52,7 @@ class DispatchStats {
 			->fetchRowCount();
 	}
 
-	private function getWbChangesRowEstimate( DBConnRef $db ): int {
+	private function getWbChangesRowEstimate( IReadableDatabase $db ): int {
 		return $db->newSelectQueryBuilder()
 			->select( '*' )
 			->from( 'wb_changes' )
@@ -63,7 +60,7 @@ class DispatchStats {
 			->estimateRowCount();
 	}
 
-	private function loadNumberOfEntities( DBConnRef $db ): int {
+	private function loadNumberOfEntities( IReadableDatabase $db ): int {
 		return (int)$db->newSelectQueryBuilder()
 			->select( 'COUNT( DISTINCT change_object_id )' )
 			->from( 'wb_changes' )
@@ -71,7 +68,7 @@ class DispatchStats {
 			->fetchField();
 	}
 
-	private function loadChangeTimes( DBConnRef $db ): array {
+	private function loadChangeTimes( IReadableDatabase $db ): array {
 		$statsRow = $db->newSelectQueryBuilder()
 			->select( [
 				'stalestTime' => 'MIN( change_time )',
@@ -90,7 +87,7 @@ class DispatchStats {
 			] + $changeTimesStats;
 	}
 
-	private function buildEstimateStats( $estimate, array $changeTimesStats ): array {
+	private function buildEstimateStats( int $estimate, array $changeTimesStats ): array {
 		return [
 				'estimatedNumberOfChanges' => $estimate,
 			] + $changeTimesStats;

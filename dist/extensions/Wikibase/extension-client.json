@@ -8,7 +8,7 @@
 	"descriptionmsg": "wikibase-client-desc",
 	"license-name": "GPL-2.0-or-later",
 	"requires": {
-		"MediaWiki": ">= 1.38"
+		"MediaWiki": ">= 1.43"
 	},
 	"APIListModules": {
 		"wblistentityusage": {
@@ -71,6 +71,7 @@
 			"class": "\\Wikibase\\Client\\Hooks\\BeforePageDisplayHandler",
 			"factory": "\\Wikibase\\Client\\Hooks\\BeforePageDisplayHandler::factory",
 			"services": [
+				"WikibaseClient.MobileSite",
 				"WikibaseClient.NamespaceChecker",
 				"WikibaseClient.Settings"
 			]
@@ -92,6 +93,7 @@
 			"services": [
 				"UserOptionsLookup",
 				"WikibaseClient.ClientDomainDbFactory",
+				"WikibaseClient.MobileSite",
 				"WikibaseClient.Settings"
 			]
 		},
@@ -126,6 +128,9 @@
 		"LibHooks": {
 			"class": "\\Wikibase\\Lib\\LibHooks"
 		},
+		"DataBridgeResourceLoaderModules": {
+			"class": "\\Wikibase\\Client\\DataBridge\\DataBridgeResourceLoaderModules"
+		},
 		"DescriptionProvider": {
 			"class": "\\Wikibase\\Client\\Hooks\\DescriptionProviderHookHandler",
 			"factory": "\\Wikibase\\Client\\Hooks\\DescriptionProviderHookHandler::factory",
@@ -146,6 +151,7 @@
 			"factory": "\\Wikibase\\Client\\Hooks\\EditActionHookHandler::factory",
 			"services": [
 				"WikibaseClient.FallbackLabelDescriptionLookupFactory",
+				"WikibaseClient.MobileSite",
 				"WikibaseClient.RepoLinker",
 				"WikibaseClient.Store"
 			]
@@ -175,6 +181,7 @@
 			"class": "\\Wikibase\\Client\\Hooks\\MovePageNotice",
 			"factory": "\\Wikibase\\Client\\Hooks\\MovePageNotice::factory",
 			"services": [
+				"WikibaseClient.MobileSite",
 				"WikibaseClient.RepoLinker",
 				"WikibaseClient.Settings",
 				"WikibaseClient.Store"
@@ -199,7 +206,8 @@
 			"class": "\\Wikibase\\Client\\Hooks\\SidebarHookHandler",
 			"services": [
 				"WikibaseClient.LanguageLinkBadgeDisplay",
-				"WikibaseClient.NamespaceChecker"
+				"WikibaseClient.NamespaceChecker",
+				"WikibaseClient.Settings"
 			]
 		},
 		"SkinAfterPortlet": {
@@ -230,6 +238,9 @@
 				"WikibaseClient.Settings",
 				"WikibaseClient.Store"
 			]
+		},
+		"LoginFormValidErrorMessages": {
+			"class": "Wikibase\\Client\\Hooks\\LoginFormValidErrorMessagesHandler"
 		}
 	},
 	"Hooks": {
@@ -255,7 +266,7 @@
 		"EnhancedChangesListModifyLineData": "ChangesListLines",
 		"ExtensionTypes": "LibHooks",
 		"FormatAutocomments": "\\Wikibase\\Client\\ClientHooks::onFormat",
-		"GetDoubleUnderscoreIDs": "\\Wikibase\\Client\\ClientHooks::onGetDoubleUnderscoreIDs",
+		"GetDoubleUnderscoreIDs": "ParserFunctionRegistrant",
 		"GetPreferences": "\\Wikibase\\Client\\ClientHooks::onGetPreferences",
 		"InfoAction": "InfoAction",
 		"LinksUpdateComplete": "DataUpdate",
@@ -263,9 +274,10 @@
 			"LoadExtensionSchemaUpdates",
 			"SqlUsageTrackerSchemaUpdater"
 		],
-		"LoginFormValidErrorMessages": "\\Wikibase\\Client\\Hooks\\LoginFormValidErrorMessagesHandler::handle",
+		"LocalUserCreated": "Wikibase\\Client\\Hooks\\EchoNotificationsHandlers::onLocalUserCreated",
+		"LoginFormValidErrorMessages": "LoginFormValidErrorMessages",
 		"MagicWordwgVariableIDs": "Magic",
-		"MaintenanceShellStart": "\\Wikibase\\Client\\ClientHooks::onMaintenanceShellStart",
+		"MaintenanceShellStart": "Trivial",
 		"OldChangesListRecentChangesLine": "ChangesListLines",
 		"OutputPageParserOutput": "Sidebar",
 		"ParserCacheSaveComplete": "DataUpdate",
@@ -274,9 +286,16 @@
 		"ParserGetVariableValueSwitch": "Magic",
 		"ParserLimitReportPrepare": "Parser",
 		"ResourceLoaderJqueryMsgModuleMagicWords": "Magic",
-		"ResourceLoaderRegisterModules": "LibHooks",
+		"ResourceLoaderRegisterModules": [
+			"LibHooks",
+			"DataBridgeResourceLoaderModules"
+		],
 		"ScribuntoExternalLibraries": "\\Wikibase\\Client\\ClientHooks::onScribuntoExternalLibraries",
-		"SearchDataForIndex": "Trivial",
+		"SearchDataForIndex": {
+			"handler": "Trivial",
+			"deprecated": true
+		},
+		"SearchDataForIndex2": "Trivial",
 		"SearchIndexFields": "Trivial",
 		"SearchResultProvideDescription": "DescriptionProvider",
 		"SidebarBeforeOutput": "Sidebar",
@@ -290,11 +309,13 @@
 			"LibHooks"
 		],
 		"wgQueryPages": "Trivial",
-		"WikibaseContentLanguages": "\\Wikibase\\Client\\ClientHooks::onWikibaseContentLanguages"
+		"WikibaseContentLanguages": "\\Wikibase\\Client\\ClientHooks::onWikibaseContentLanguages",
+		"WikibaseHandleChange": "Wikibase\\Client\\Hooks\\EchoNotificationsHandlers::onWikibaseHandleChange"
 	},
 	"TrackingCategories": [
 		"unresolved-property-category",
-		"connected-redirect-category"
+		"connected-redirect-category",
+		"exceeded-entity-limit-category"
 	],
 	"AutoloadNamespaces": {
 		"Wikibase\\Client\\": "client/includes/",
@@ -314,7 +335,9 @@
 		"Wikibase\\Client\\Tests\\Mocks\\": "client/tests/phpunit/mocks/",
 		"Wikibase\\Lib\\Tests\\": "lib/tests/phpunit/",
 		"Wikibase\\DataModel\\Fixtures\\": "lib/packages/wikibase/data-model/tests/fixtures/",
+		"Tests\\Wikibase\\DataModel\\": "lib/packages/wikibase/data-model-serialization/tests/unit/",
 		"Wikibase\\DataModel\\Services\\Fixtures\\": "lib/packages/wikibase/data-model-services/tests/fixtures/",
+		"Wikibase\\DataModel\\Services\\Tests\\": "lib/packages/wikibase/data-model-services/tests/unit/",
 		"Wikibase\\DataModel\\Tests\\": "lib/packages/wikibase/data-model/tests/unit/",
 		"Wikibase\\Lib\\Tests\\FederatedProperties\\": "lib/packages/wikibase/federated-properties/tests/",
 		"Wikibase\\Lib\\Tests\\Changes\\": "lib/packages/wikibase/changes/tests/",
@@ -323,7 +346,6 @@
 	},
 	"JobClasses": {
 		"wikibase-addUsagesForPage": "\\Wikibase\\Client\\Store\\AddUsagesForPageJob",
-		"ChangeNotification": "\\Wikibase\\Client\\ChangeNotificationJob",
 		"EntityChangeNotification": "\\Wikibase\\Client\\EntityChangeNotificationJob::newFromGlobalState",
 		"ChangeVisibilityNotification": "\\Wikibase\\Client\\ChangeModification\\ChangeVisibilityNotificationJob::newFromGlobalState",
 		"ChangeDeletionNotification": "\\Wikibase\\Client\\ChangeModification\\ChangeDeletionNotificationJob::newFromGlobalState",
@@ -350,10 +372,6 @@
 				"vector": [
 					"wikibase.client.css",
 					"wikibase.client.vector.css"
-				],
-				"vector-2022": [
-					"wikibase.client.css",
-					"wikibase.client.vector.css"
 				]
 			}
 		},
@@ -361,6 +379,14 @@
 			"styles": [
 				"wikibase.client.page-move.css",
 				"wikibase.client.changeslist.css"
+			]
+		},
+		"wikibase.client.vector-2022": {
+			"skinScripts": {
+				"vector-2022": "wikibase.client.vector-2022.js"
+			},
+			"messages": [
+				"wikibase-editlinkstitle"
 			]
 		},
 		"wikibase.client.linkitem.init": {
@@ -386,6 +412,7 @@
 				"client/resources/wikibase.sites.js",
 				"client/resources/jquery.wikibase/jquery.wikibase.siteselector.js",
 				"client/resources/jquery.wikibase/jquery.wikibase.wbtooltip.js",
+				"client/resources/jquery.wikibase/jquery.tipsy/jquery.tipsy.js",
 				"client/resources/wikibase.buildErrorOutput.js",
 				"client/resources/util.highlightSubstring.js",
 				"client/resources/jquery.ui/jquery.ui.suggester.js",
@@ -401,13 +428,13 @@
 			"styles": [
 				"client/resources/jquery.wikibase/jquery.wikibase.linkitem.css",
 				"client/resources/jquery.wikibase/jquery.wikibase.wbtooltip.css",
+				"client/resources/jquery.wikibase/jquery.tipsy/jquery.tipsy.css",
 				"client/resources/jquery.ui/jquery.ui.suggester.css",
 				"client/resources/jquery.ui/jquery.ui.ooMenu.css"
 			],
 			"dependencies": [
 				"jquery.spinner",
 				"jquery.ui",
-				"jquery.tipsy",
 				"mediawiki.api",
 				"mediawiki.user",
 				"mediawiki.util",
@@ -452,27 +479,18 @@
 			"scripts": "wikibase.client.action.edit.collapsibleFooter.js",
 			"dependencies": [
 				"jquery.makeCollapsible",
-				"mediawiki.storage",
-				"mediawiki.icon"
+				"mediawiki.storage"
 			]
 		},
-		"wikibase.client.data-bridge.init": {
-			"factory": "\\Wikibase\\Client\\DataBridge\\DataBridgeResourceLoaderModules::initModule"
-		},
-		"wikibase.client.data-bridge.externalModifiers": {
-			"factory": "\\Wikibase\\Client\\DataBridge\\DataBridgeResourceLoaderModules::externalModifiersModule"
-		},
-		"mw.config.values.wbDataBridgeConfig": {
-			"factory": "\\Wikibase\\Client\\DataBridge\\DataBridgeResourceLoaderModules::configModule"
-		},
-		"wikibase.client.data-bridge.app": {
-			"factory": "\\Wikibase\\Client\\DataBridge\\DataBridgeResourceLoaderModules::appModule"
+		"wikibase.sidebar.tracking": {
+			"scripts": "wikibase.sidebar.tracking.js"
 		}
 	},
 	"SpecialPages": {
 		"UnconnectedPages": {
 			"class": "Wikibase\\Client\\Specials\\SpecialUnconnectedPages",
 			"services": [
+				"ConnectionProvider",
 				"NamespaceInfo",
 				"TitleFactory",
 				"WikibaseClient.ClientDomainDbFactory",
@@ -510,5 +528,6 @@
 		"wlshowwikibase": 0
 	},
 	"callback": "\\Wikibase\\Lib\\LibHooks::onRegistration",
+	"load_composer_autoloader": true,
 	"manifest_version": 2
 }

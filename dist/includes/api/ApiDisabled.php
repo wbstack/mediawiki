@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2008 Roan Kattouw "<Firstname>.<Lastname>@gmail.com"
+ * Copyright © 2008 Roan Kattouw <roan.kattouw@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@
  *
  * @file
  */
+
+namespace MediaWiki\Api;
 
 /**
  * API module that dies with an error immediately.
@@ -51,3 +53,6 @@ class ApiDisabled extends ApiBase {
 		] ];
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiDisabled::class, 'ApiDisabled' );

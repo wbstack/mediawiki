@@ -26,6 +26,8 @@
  * @ingroup Media
  */
 
+use MediaWiki\Libs\UnpackFailedException;
+
 /**
  * Handler for the Gimp's native file format; getimagesize() doesn't
  * support these files
@@ -92,7 +94,7 @@ class XCFHandler extends BitmapHandler {
 		 *        (enum GimpImageBaseType in libgimpbase/gimpbaseenums.h)
 		 */
 		try {
-			$header = wfUnpack(
+			$header = StringUtils::unpack(
 				"A9magic" . # A: space padded
 					"/a5version" . # a: zero padded
 					"/Nwidth" . # \
@@ -100,7 +102,7 @@ class XCFHandler extends BitmapHandler {
 					"/Nbase_type", # /
 				$binaryHeader
 			);
-		} catch ( MWException $mwe ) {
+		} catch ( UnpackFailedException $_ ) {
 			return null;
 		}
 
@@ -160,20 +162,13 @@ class XCFHandler extends BitmapHandler {
 		if ( !$file->getMetadataArray() ) {
 			// Old metadata when we just put an empty string in there
 			return self::METADATA_BAD;
-		} else {
-			return self::METADATA_GOOD;
 		}
+
+		return self::METADATA_GOOD;
 	}
 
-	/**
-	 * Must use "im" for XCF
-	 *
-	 * @param string|null $dstPath
-	 * @param bool $checkDstPath
-	 * @return string
-	 */
-	protected function getScalerType( $dstPath, $checkDstPath = true ) {
-		return "im";
+	protected function hasGDSupport() {
+		return false;
 	}
 
 	/**

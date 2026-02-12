@@ -63,12 +63,12 @@ class InterWikiLinkExistsValidator implements ValueValidator {
 			);
 		}
 
-		return empty( $errors ) ? Result::newSuccess() : Result::newError( $errors );
+		return !$errors ? Result::newSuccess() : Result::newError( $errors );
 	}
 
 	/**
 	 * @param string $pageName
-	 * @return boolean
+	 * @return bool
 	 */
 	private function isPageNameExisting( $pageName ) {
 		$actualPageName = $this->mediaWikiPageNameNormalizer->normalizePageName(

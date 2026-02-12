@@ -96,7 +96,6 @@
 	"config-upload-enable": "ගොනු උඩුගත කිරීම් සක්‍රිය කරන්න",
 	"config-upload-deleted": "මැකූ ගොනු සඳහා නාමාවලිය:",
 	"config-instantcommons": "ක්ෂණික කොමන්ස් සක්‍රිය කරන්න",
-	"config-cc-again": "නැවත ඇහිඳගන්න...",
 	"config-advanced-settings": "උසස් වින්‍යාසගතකෙරුම",
 	"config-cache-options": "වස්තු කෑෂය සඳහා සැකසුම්:",
 	"config-memcached-servers": "මතකකෑෂිත සර්වරයන්:",
@@ -107,7 +106,6 @@
 	"config-install-database": "දත්ත සංචිතය සකසමින්",
 	"config-install-schema": "සංක්ෂිප්ත නිරූපණය තනමින්",
 	"config-install-pg-schema-not-exist": "PostgreSQL සංක්ෂිප්ත නිරූපණය නොපවතියි.",
-	"config-install-pg-commit": "වෙනස්කම් ප්‍රයාපනය කරමින්",
 	"config-install-pg-plpgsql": "PL/pgSQL භාෂාව සඳහා පරික්ෂා කරමින්",
 	"config-install-user": "දත්ත සංචිත පරිශීලක තනමින්",
 	"config-install-user-alreadyexists": "\"$1\" පරිශීලක දැනටමත් පවතී",
@@ -125,5 +123,5 @@
 	"config-help": "උදව්",
 	"config-nofile": "\"$1\" ගොනුව සොයාගත නොහැක. එක මැකිලා ගියාවත්ද?",
 	"mainpagetext": "'''මීඩියාවිකි සාර්ථක ලෙස ස්ථාපනය කරන ලදි.'''",
-	"mainpagedocfooter": "විකි මෘදුකාංග භාවිතා කිරීම පිළිබඳ තොරතුරු සඳහා  [https://meta.wikimedia.org/wiki/Help:Contents පරිශීලකයන් සඳහා නියමුව] හදාරන්න.\n\n== ඇරඹුම ==\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings වින්‍යාස සැකසුම්]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ මීඩියාවිකි නිති-විමසන-පැන]\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-announce.lists.wikimedia.org/ මීඩියාවිකි නිකුතුව තැපැල් ලැයිස්තුව]"
+	"mainpagedocfooter": "විකි මෘදුකාංග භාවිතා කිරීම පිළිබඳ තොරතුරු සඳහා  [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Contents පරිශීලකයන් සඳහා නියමුව] හදාරන්න.\n\n== ඇරඹුම ==\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings වින්‍යාස සැකසුම්]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ මීඩියාවිකි නිති-විමසන-පැන]\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-announce.lists.wikimedia.org/ මීඩියාවිකි නිකුතුව තැපැල් ලැයිස්තුව]"
 }

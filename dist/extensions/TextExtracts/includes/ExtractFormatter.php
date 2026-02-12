@@ -1,9 +1,10 @@
 <?php
 
-namespace TextExtracts;
+namespace MediaWiki\Extension\TextExtracts;
 
 use DOMElement;
 use HtmlFormatter\HtmlFormatter;
+use Wikimedia\Parsoid\Utils\DOMCompat;
 
 /**
  * Provides text-only or limited-HTML extracts of page HTML
@@ -44,7 +45,7 @@ class ExtractFormatter extends HtmlFormatter {
 	 * Ignored
 	 * @return string Processed HTML
 	 */
-	public function getText( $element = null ) {
+	public function getText( $element = null ): string {
 		$this->filterContent();
 		$text = parent::getText();
 		if ( $this->plainText ) {
@@ -63,7 +64,7 @@ class ExtractFormatter extends HtmlFormatter {
 	 * @param string $html HTML string to process
 	 * @return string Processed HTML
 	 */
-	public function onHtmlReady( $html ) {
+	public function onHtmlReady( string $html ): string {
 		if ( $this->plainText ) {
 			$html = preg_replace( '/\s*(<h([1-6])\b)/i',
 				"\n\n" . self::SECTION_MARKER_START . '$2' . self::SECTION_MARKER_END . '$1',
@@ -79,10 +80,22 @@ class ExtractFormatter extends HtmlFormatter {
 	 *
 	 * @return array Array of removed DOMElements
 	 */
-	public function filterContent() {
+	public function filterContent(): array {
+		$doc = $this->getDoc();
+
+		// Headings in a DIV wrapper may get removed by $wgExtractsRemoveClasses,
+		// move it outside the header to rescue it (T363445)
+		// https://www.mediawiki.org/wiki/Heading_HTML_changes
+		$headings = DOMCompat::querySelectorAll( $doc->documentElement, 'h1, h2, h3, h4, h5, h6' );
+		foreach ( $headings as $heading ) {
+			// @phan-suppress-next-line PhanTypeMismatchArgumentSuperType
+			if ( DOMCompat::getClassList( $heading->parentNode )->contains( 'mw-heading' ) ) {
+				$heading->parentNode->parentNode->insertBefore( $heading, $heading->parentNode );
+			}
+		}
+
 		$removed = parent::filterContent();
 
-		$doc = $this->getDoc();
 		$spans = $doc->getElementsByTagName( 'span' );
 
 		/** @var DOMElement $span */

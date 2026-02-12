@@ -1,3 +1,4 @@
+@import 'mediawiki.skin.variables.less';
 @import '../../mobile.less/mobile.variables.less';
 @import '../../mobile.less/mobile.mixins.less';
 
@@ -100,23 +101,34 @@
 	top: 0;
 	left: 0;
 	width: 100%;
-	background: #fff;
+	background: @background-color-base;
 	z-index: @z-indexOverlay;
 	display: none;
+
+	.cdx-button {
+		border-radius: 0;
+	}
 
 	&.visible {
 		display: block;
 	}
 
-	input, textarea {
+	input,
+	textarea {
 		// Without declaring a minimum font-size of 16px, iOS will autozoom in on textareas when clicked (T215619)
 		// https://blog.osmosys.asia/2017/01/05/prevent-ios-from-zooming-in-on-input-fields/
 		font-size: 16px;
 	}
 
-	// FIXME: Use generic class for these input fields - can't use .panel currently due to languageOverlay
-	.captcha-word,
-	.summary {
+	.summary.oo-ui-textInputWidget {
+		max-width: none;
+
+		textarea {
+			width: 100%;
+		}
+	}
+
+	.captcha-word {
 		margin: 0 0 0.7em;
 		width: 100%;
 	}
@@ -130,7 +142,7 @@
 	.panel {
 		padding-top: 12px;
 		padding-bottom: 12px;
-		border-bottom: 1px solid @grayLightest;
+		border-bottom: @border-width-base @border-style-base @border-color-muted;
 	}
 }
 
@@ -142,51 +154,23 @@
 	}
 
 	.header-action {
+		// TODO: Remove these styles once Codex icons are fully implemented
 		a,
 		button {
 			&[ disabled ] {
 				opacity: 0.5;
 			}
-
-			&:focus {
-				outline: 0;
-			}
-		}
-
-		// FIXME: Overlay buttons should be given the mw-ui-button class instead
-		// of re-implementing it's properties here.
-		.continue,
-		.submit,
-		.progressive {
-			// FIXME: Use WikimediaUI `@background-color*` variable when available.
-			background-color: @color-primary;
-			color: @color-base--inverted;
-			width: auto;
-
-			&:not( .mw-ui-icon-element ) {
-				padding: 0 1.2em;
-			}
-
-			&[ disabled ] {
-				background-color: @colorGray12;
-				opacity: 1;
-			}
 		}
 
 		// Some overlays e.g. NotificationOverlay use an OOUI icon as the header action.
 		.oo-ui-widget {
-			margin-right: @iconGutterWidth;
+			margin-right: @width-icon-gutter;
 		}
 	}
 
-	button {
-		cursor: pointer;
-	}
-
 	.submit {
-		// FIXME: Use WikimediaUI `@background-color*` variable when available.
-		background-color: @color-primary;
-		color: @color-base--inverted;
+		background-color: @background-color-progressive;
+		color: @color-inverted;
 	}
 
 	h2 {
@@ -220,7 +204,7 @@
 .overlay-footer-container {
 	width: 100%;
 	background: @background-color-base;
-	// prevent .page-list or VE surface overlaping the header when scrolling
+	// prevent .mw-mf-page-list or VE surface overlaping the header when scrolling
 	z-index: @z-indexOverOverlay;
 
 	&.position-fixed {
@@ -241,7 +225,7 @@
 .overlay-footer-container {
 	background-color: @background-color-base;
 	bottom: 0;
-	border-top: 1px solid @grayLight;
+	border-top: @border-width-base @border-style-base @border-color-subtle;
 
 	a {
 		display: block;
@@ -273,18 +257,18 @@
 //   <div class="content"></div>
 // </div>
 .overlay-bottom {
-	border-top: 1px solid @grayLight;
+	border-top: @border-width-base @border-style-base @border-color-subtle;
 	top: auto;
 	bottom: 0;
 	height: auto !important;
-	background: @colorGray15;
+	background: @background-color-interactive-subtle;
 
 	.overlay-header-container {
-		background: @colorGray15;
+		background: @background-color-interactive-subtle;
 	}
 }
 
-@media all and ( min-width: @width-breakpoint-tablet ) {
+@media all and ( min-width: @min-width-breakpoint-tablet ) {
 	.overlay {
 		.panel {
 			padding-top: 12px;

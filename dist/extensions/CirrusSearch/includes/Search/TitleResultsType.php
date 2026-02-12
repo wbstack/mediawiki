@@ -14,14 +14,14 @@ class TitleResultsType extends BaseResultsType {
 	 */
 	private $titleHelper;
 
-	public function __construct( TitleHelper $titleHelper = null ) {
+	public function __construct( ?TitleHelper $titleHelper = null ) {
 		$this->titleHelper = $titleHelper ?: new TitleHelper();
 	}
 
 	/**
 	 * @return array corresponding to Elasticsearch fields syntax
 	 */
-	public function getStoredFields() {
+	public function getFields() {
 		return [];
 	}
 

@@ -22,10 +22,12 @@
 
 namespace MediaWiki\Block\Restriction;
 
+use MediaWiki\Title\Title;
+
 interface Restriction {
 
 	/**
-	 * Gets the id of the block.
+	 * Get the ID of the block.
 	 *
 	 * @since 1.33
 	 * @return int
@@ -33,7 +35,7 @@ interface Restriction {
 	public function getBlockId();
 
 	/**
-	 * Sets the id of the block.
+	 * Set the ID of the block.
 	 *
 	 * @since 1.33
 	 * @param int $blockId
@@ -42,7 +44,7 @@ interface Restriction {
 	public function setBlockId( $blockId );
 
 	/**
-	 * Gets the value of the restriction.
+	 * Get the value of the restriction.
 	 *
 	 * @since 1.33
 	 * @return int
@@ -50,7 +52,7 @@ interface Restriction {
 	public function getValue();
 
 	/**
-	 * Gets the type of restriction
+	 * Get the type of restriction
 	 *
 	 * @since 1.33
 	 * @return string
@@ -58,7 +60,7 @@ interface Restriction {
 	public static function getType();
 
 	/**
-	 * Gets the id of the type of restriction. This id is used in the database.
+	 * Get the ID of the type of restriction. This ID is used in the database.
 	 *
 	 * @since 1.33
 	 * @return int
@@ -66,7 +68,7 @@ interface Restriction {
 	public static function getTypeId();
 
 	/**
-	 * Creates a new Restriction from a database row.
+	 * Create a new Restriction from a database row.
 	 *
 	 * @since 1.33
 	 * @param \stdClass $row
@@ -86,10 +88,10 @@ interface Restriction {
 	 * Determine if a restriction matches a given title.
 	 *
 	 * @since 1.33
-	 * @param \Title $title
+	 * @param Title $title
 	 * @return bool
 	 */
-	public function matches( \Title $title );
+	public function matches( Title $title );
 
 	/**
 	 * Determine if a restriction equals another restriction.

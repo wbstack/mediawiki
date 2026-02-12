@@ -14,7 +14,7 @@
 			"WikibaseCirrusSearch": "*",
 			"WikibaseLexeme": "*"
 		},
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"AutoloadNamespaces": {
 		"Wikibase\\Lexeme\\Search\\Elastic\\": "src/"
@@ -46,12 +46,15 @@
 		"CirrusSearchProfileService": [
 			"Wikibase\\Lexeme\\Search\\Elastic\\Hooks::onCirrusSearchProfileService"
 		],
-		"ShowSearchHit": [
-			"Wikibase\\Lexeme\\Search\\Elastic\\Hooks::onShowSearchHit"
-		],
+		"ShowSearchHit": "main",
 		"WikibaseRepoEntityTypes": [
 			"Wikibase\\Lexeme\\Search\\Elastic\\Hooks::onWikibaseRepoEntityTypes"
 		]
+	},
+	"HookHandlers": {
+		"main": {
+			"class": "Wikibase\\Lexeme\\Search\\Elastic\\Hooks"
+		}
 	},
 	"MessagesDirs": {
 		"WikibaseCirrusSearch": [

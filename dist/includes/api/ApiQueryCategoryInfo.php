@@ -20,6 +20,10 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use MediaWiki\Title\Title;
+
 /**
  * This query adds the "<categories>" subelement to all pages with the list of
  * categories the page is in.
@@ -28,7 +32,7 @@
  */
 class ApiQueryCategoryInfo extends ApiQueryBase {
 
-	public function __construct( ApiQuery $query, $moduleName ) {
+	public function __construct( ApiQuery $query, string $moduleName ) {
 		parent::__construct( $query, $moduleName, 'ci' );
 	}
 
@@ -68,8 +72,7 @@ class ApiQueryCategoryInfo extends ApiQueryBase {
 		$this->addWhere( [ 'cat_title' => $cattitles ] );
 
 		if ( $params['continue'] !== null ) {
-			$title = $this->getDB()->addQuotes( $params['continue'] );
-			$this->addWhere( "cat_title >= $title" );
+			$this->addWhere( $this->getDB()->expr( 'cat_title', '>=', $params['continue'] ) );
 		}
 		$this->addOption( 'ORDER BY', 'cat_title' );
 
@@ -114,3 +117,6 @@ class ApiQueryCategoryInfo extends ApiQueryBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Categoryinfo';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryCategoryInfo::class, 'ApiQueryCategoryInfo' );

@@ -15,11 +15,13 @@ use Wikimedia\Purtle\RdfWriter;
  */
 class ItemStubRdfBuilder implements PrefetchingEntityStubRdfBuilder {
 
-	private $termLookup;
-	private $vocabulary;
-	private $writer;
-	private $languageCodes;
-	private $labelPredicates;
+	private PrefetchingTermLookup $termLookup;
+	private RdfVocabulary $vocabulary;
+	private RdfWriter $writer;
+	/** @var string[] */
+	private array $languageCodes;
+	/** @var string[][][] */
+	private array $labelPredicates;
 	/** @var EntityId[] using serialization as key to avoid duplicates */
 	private $idsToPrefetch = [];
 
@@ -111,7 +113,7 @@ class ItemStubRdfBuilder implements PrefetchingEntityStubRdfBuilder {
 	 * @param string[][] $labelPredicates array of [ ns, local ] for each label predicate
 	 */
 	private function addLabels( $entityNamespace, $entityLName, array $labels, array $labelPredicates ) {
-		if ( empty( $labelPredicates ) ) {
+		if ( !$labelPredicates ) {
 			// If we want no predicates, no need to bother with the rest.
 			return;
 		}

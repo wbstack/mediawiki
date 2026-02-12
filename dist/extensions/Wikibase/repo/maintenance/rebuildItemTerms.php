@@ -2,8 +2,8 @@
 
 namespace Wikibase\Repo\Maintenance;
 
-use ExtensionRegistry;
-use Maintenance;
+use MediaWiki\Maintenance\Maintenance;
+use MediaWiki\Registration\ExtensionRegistry;
 use Onoi\MessageReporter\CallbackMessageReporter;
 use Onoi\MessageReporter\MessageReporter;
 use Wikibase\DataModel\Entity\Item;
@@ -139,13 +139,12 @@ class RebuildItemTerms extends Maintenance {
 		$highestId = WikibaseRepo::getRepoDomainDbFactory()
 			->newRepoDb()
 			->connections()
-			->getReadConnectionRef()
-			->selectRow(
-			'wb_id_counters',
-			'id_value',
-			[ 'id_type' => 'wikibase-item' ],
-			__METHOD__
-		);
+			->getReadConnection()
+			->newSelectQueryBuilder()
+			->select( 'id_value' )
+			->from( 'wb_id_counters' )
+			->where( [ 'id_type' => 'wikibase-item' ] )
+			->caller( __METHOD__ )->fetchRow();
 		return (int)$highestId->id_value;
 	}
 

@@ -5,7 +5,9 @@
 			"Ⲁϩⲙⲉⲧ"
 		]
 	},
-	"wikibase-edit": "ⲫⲱⲛϩ",
+	"wikibase-edit": "ϣⲉⲃⲓⲱ̀",
 	"wikibase-add": "ⲧⲟⲩϩⲟ",
-	"wikibase-sitelinks-special": "ϩⲁⲛⲕⲉⲙⲁⲛ̀ⲛⲁⲧ"
+	"wikibase-label-empty": "Ⲙ̀ⲡⲟⲩⲑⲱϣ ⲛ̀ⲟⲩⲥⲏⲙⲓⲱⲛ",
+	"wikibase-description-empty": "Ⲙ̀ⲡⲟⲩⲑⲱϣ ⲛ̀ⲟⲩⲥⲩⲅⲅⲣⲁⲫⲏ",
+	"wikibase-sitelinks-special": "Ϩⲁⲛⲕⲉⲙⲁ ⲛ̀ⲛⲁⲧ"
 }

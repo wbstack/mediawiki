@@ -7,7 +7,7 @@ use CirrusSearch\SearchConfig;
 use CirrusSearch\WarningCollector;
 use Elastica\Query\MoreLikeThis;
 use MediaWiki\MediaWikiServices;
-use Title;
+use MediaWiki\Title\Title;
 
 trait MoreLikeTrait {
 	/**
@@ -22,7 +22,7 @@ trait MoreLikeTrait {
 		// in $this->getConfig()->get( 'CirrusSearchMoreLikeThisAllowedFields' )
 		// (see Hooks.php)
 		if ( !$this->getConfig()->get( 'CirrusSearchMoreLikeThisFields' ) ) {
-			$warningCollector->addWarning( "cirrussearch-mlt-not-configured",  $key );
+			$warningCollector->addWarning( "cirrussearch-mlt-not-configured", $key );
 			return [];
 		}
 		$titles = $this->collectTitles( $term );
@@ -55,7 +55,7 @@ trait MoreLikeTrait {
 		$titles = [];
 		foreach ( explode( '|', $terms ) as $term ) {
 			$title = null;
-			Hooks::onSearchGetNearMatch( $term, $title );
+			Hooks::handleSearchGetNearMatch( $term, $title );
 			if ( $title != null ) {
 				$titles[] = $title;
 			}
@@ -70,9 +70,10 @@ trait MoreLikeTrait {
 	private function collectTitlesFromDB( $term ) {
 		$titles = [];
 		$found = [];
+		$titleFactory = MediaWikiServices::getInstance()->getTitleFactory();
 		$wikiPageFactory = MediaWikiServices::getInstance()->getWikiPageFactory();
 		foreach ( explode( '|', $term ) as $title ) {
-			$title = Title::newFromText( trim( $title ) );
+			$title = $titleFactory->newFromText( trim( $title ) );
 			while ( true ) {
 				if ( !$title ) {
 					continue 2;

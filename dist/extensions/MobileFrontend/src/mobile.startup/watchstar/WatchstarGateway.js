@@ -1,18 +1,22 @@
-var util = require( '../util' ),
+const util = require( '../util' ),
 	actionParams = require( '../actionParams' );
 
 /**
+ * @ignore
  * @typedef {string|number} PageID Page ID. 0 / "0" is a special no-ID value.
  * {@link https://www.mediawiki.org/wiki/Manual:Page_table#page_id Page ID}
  *
+ * @ignore
  * @typedef {string} PageTitle Canonical page title.
  * {@link https://www.mediawiki.org/wiki/Manual:Title.php#Canonical_forms Canonical forms}
  *
+ * @ignore
  * @typedef {boolean} WatchStatus Page watch status; true if watched, false if
  *                                unwatched.
  * {@link https://www.mediawiki.org/wiki/API:Info API:Info} (see inprop.watched)
  * {@link https://www.mediawiki.org/wiki/API:Watch API:Watch} (see unwatch)
  *
+ * @ignore
  * @typedef {Object.<PageTitle, WatchStatus>} WatchStatusMap
  */
 
@@ -22,6 +26,7 @@ var util = require( '../util' ),
  *
  * @class WatchstarGateway
  * @param {mw.Api} api
+ * @ignore
  */
 function WatchstarGateway( api ) {
 	this.api = api;
@@ -50,12 +55,14 @@ WatchstarGateway.prototype = {
 	 * @param {PageTitle[]} titles
 	 * @return {jQuery.Deferred<WatchStatusMap>}
 	 */
-	getStatuses: function ( ids, titles ) {
+	getStatuses( ids, titles ) {
 		// Issue two requests and coalesce the results.
 		return util.Promise.all( [
 			this.getStatusesByID( ids ),
 			this.getStatusesByTitle( titles )
-		] ).then( function () { return util.extend.apply( util, arguments ); } );
+		] ).then( function () {
+			return util.extend.apply( util, arguments );
+		} );
 	},
 
 	/**
@@ -64,8 +71,8 @@ WatchstarGateway.prototype = {
 	 * @param {PageID[]} ids
 	 * @return {jQuery.Deferred<WatchStatusMap>}
 	 */
-	getStatusesByID: function ( ids ) {
-		var self = this;
+	getStatusesByID( ids ) {
+		const self = this;
 		if ( !ids.length ) {
 			return util.Deferred().resolve( {} );
 		}
@@ -76,9 +83,7 @@ WatchstarGateway.prototype = {
 			prop: 'info',
 			inprop: 'watched',
 			pageids: ids
-		} ).then( function ( rsp ) {
-			return self._unmarshalGetResponse( rsp );
-		} );
+		} ).then( ( rsp ) => self._unmarshalGetResponse( rsp ) );
 	},
 
 	/**
@@ -87,8 +92,8 @@ WatchstarGateway.prototype = {
 	 * @param {PageTitle[]} titles
 	 * @return {jQuery.Deferred<WatchStatusMap>}
 	 */
-	getStatusesByTitle: function ( titles ) {
-		var self = this;
+	getStatusesByTitle( titles ) {
+		const self = this;
 		if ( !titles.length ) {
 			return util.Deferred().resolve( {} );
 		}
@@ -96,10 +101,8 @@ WatchstarGateway.prototype = {
 		return this.api.get( actionParams( {
 			prop: 'info',
 			inprop: 'watched',
-			titles: titles
-		} ) ).then( function ( rsp ) {
-			return self._unmarshalGetResponse( rsp );
-		} );
+			titles
+		} ) ).then( ( rsp ) => self._unmarshalGetResponse( rsp ) );
 	},
 
 	/**
@@ -109,10 +112,10 @@ WatchstarGateway.prototype = {
 	 * @param {WatchStatus} watched
 	 * @return {jQuery.Deferred}
 	 */
-	postStatusesByTitle: function ( titles, watched ) {
-		var params = {
+	postStatusesByTitle( titles, watched ) {
+		const params = {
 			action: 'watch',
-			titles: titles
+			titles
 		};
 		if ( !watched ) {
 			params.unwatch = !watched;
@@ -127,10 +130,11 @@ WatchstarGateway.prototype = {
 	 * @return {jQuery.Deferred<WatchStatusMap>}
 	 * @see getStatusesByID
 	 * @see getStatusesByTitle
+	 * @ignore
 	 */
-	_unmarshalGetResponse: function ( rsp ) {
-		var pages = rsp && rsp.query && rsp.query.pages || [];
-		return pages.reduce( function ( statuses, page ) {
+	_unmarshalGetResponse( rsp ) {
+		const pages = rsp && rsp.query && rsp.query.pages || [];
+		return pages.reduce( ( statuses, page ) => {
 			statuses[page.title] = page.watched;
 			return statuses;
 		}, {} );

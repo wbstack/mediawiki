@@ -14,6 +14,7 @@ return [
 	'folded' => 1.5,
 	'prefix' => 1,
 	'space-discount' => 0.8,
-	'form-discount' => 1,
+	'form-discount' => 0.95,
+	'tie-breaker' => 0.02,
 ],
 ];

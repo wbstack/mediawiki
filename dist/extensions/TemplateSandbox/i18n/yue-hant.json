@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"JeffreyKim",
+			"Ktchankt",
+			"H78c67c"
+		]
+	},
+	"templatesandbox": "模沙盒",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|渲染頁面]]喺沙盒入面包含嘅範本",
+	"templatesandbox-suffix": "沙盒",
+	"templatesandbox-legend": "模沙盒",
+	"templatesandbox-text": "你可以用適當嘅沙盒前綴揀一組儲存喺你嘅沙盒空間入面嘅範本。\n例如，如果你想預覽一個你已經儲存為\"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test\"嘅版本嘅\"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\"作為。",
+	"templatesandbox-prefix-label": "沙盒前綴：",
+	"templatesandbox-page-label": "渲染頁面：",
+	"templatesandbox-revid-label": "渲染修訂版：",
+	"templatesandbox-text-label": "渲染維基文字：",
+	"templatesandbox-submit": "睇",
+	"templatesandbox-title-output": "模沙盒: $1",
+	"templatesandbox-editform-legend": "用呢個模嚟預覽版面",
+	"templatesandbox-editform-page-label": "頁面標題",
+	"templatesandbox-editform-view-label": "顯示預覽",
+	"templatesandbox-preview": "預覽 $2",
+	"templatesandbox-previewnote": "'''記住呢個淨係[[:$1]]嘅預覽。'''\n你嘅變更仲未儲存！",
+	"templatesandbox-invalid-title": "你指定嘅標題無效。",
+	"templatesandbox-title-not-exists": "你指定嘅標題唔存在。",
+	"templatesandbox-revision-not-exists": "你指定嘅修訂版本唔存在。",
+	"templatesandbox-revision-no-content": "你指定嘅修訂版本冇內容，或者你冇權限睇到佢。",
+	"templatesandbox-invalid-prefix": "你指定嘅沙盒前綴無效。",
+	"templatesandbox-prefix-not-local": "你指定嘅沙盒前綴唔係本地嘅。",
+	"templatesandbox-page-or-revid": "你一定要輸入頁面標題或者修訂ID號。",
+	"templatesandbox-fail-post": "<em>由於工作階段資料遺失，預覽會隱藏，以防止JavaScript攻擊。</em>\n\n<strong>如果呢個係正當嘅預覽嘗試，請再試多次。</strong>\n如果仲係唔得，試吓[[Special:UserLogout|簽走]]，然後重新簽到。",
+	"templatesandbox-fail-post-anon": "<em>由於你冇簽到，所以預覽會隱藏，以防止JavaScript攻擊。</em>\n\n<strong>如果呢個係正當嘅預覽嘗試，請[[Special:UserLogin|簽到]]然後再試一次。</strong>",
+	"templatesandbox-anon-limited-preview": "喺未簽到嗰陣會停用 JavaScript 同 CSS 變更嘅預覽。如果你需要預覽呢啲變更，請[[Special:UserLogin|簽到]]，然後再試多一次。",
+	"templatesandbox-editform-need-template": "如果要預覽另一個用呢個模嘅頁面，必須指定模名。",
+	"templatesandbox-editform-need-title": "如果要預覽另一個用呢個範本嘅頁面，就要指定頁面標題。",
+	"templatesandbox-editform-invalid-template": "你指定嘅模名無效。",
+	"templatesandbox-editform-invalid-title": "你指定用嚟預覽嘅標題無效。",
+	"templatesandbox-editform-title-not-exists": "你指定嚟預覽嘅標題唔存在。",
+	"templatesandbox-failed-replace-section": "未能取代現有頁面嘅部分。"
+}

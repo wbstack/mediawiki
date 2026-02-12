@@ -4,12 +4,12 @@ declare( strict_types=1 );
 
 namespace Wikibase\Client\Api;
 
-use ApiBase;
-use ApiPageSet;
-use ApiQuery;
-use ApiQueryGeneratorBase;
-use ApiResult;
-use Title;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiPageSet;
+use MediaWiki\Api\ApiQuery;
+use MediaWiki\Api\ApiQueryGeneratorBase;
+use MediaWiki\Api\ApiResult;
+use MediaWiki\Title\Title;
 use Wikibase\Client\RepoLinker;
 use Wikibase\Client\Usage\EntityUsage;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -30,7 +30,7 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 	private $repoLinker;
 
 	public function __construct( ApiQuery $query, string $moduleName, RepoLinker $repoLinker ) {
-		parent::__construct( $query, $moduleName, 'wbeu' );
+		parent::__construct( $query, $moduleName, 'wbleu' );
 
 		$this->repoLinker = $repoLinker;
 	}
@@ -48,8 +48,9 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 		$this->run();
 	}
 
-	public function run( ApiPageSet $resultPageSet = null ): void {
+	public function run( ?ApiPageSet $resultPageSet = null ): void {
 		$params = $this->extractRequestParams();
+
 		$res = $this->doQuery( $params, $resultPageSet );
 		if ( !$res ) {
 			return;
@@ -71,7 +72,7 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 		IResultWrapper $res,
 		int $limit,
 		array $prop,
-		ApiPageSet $resultPageSet = null
+		?ApiPageSet $resultPageSet
 	): void {
 		$entry = [];
 		$count = 0;
@@ -88,11 +89,12 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 
 			if ( $resultPageSet !== null ) {
 				$resultPageSet->processDbRow( $row );
+				continue;
 			}
 
 			if ( $previousRow !== null && $row->eu_page_id !== $previousRow->eu_page_id ) {
 				// finish previous entry: Let's add the data and check if it needs continuation
-				$fit = $this->formatPageData( $previousRow, $previousRow->eu_page_id, $entry, $result );
+				$fit = $this->formatPageData( $previousRow, intval( $previousRow->eu_page_id ), $entry, $result );
 				if ( !$fit ) {
 					$this->setContinueFromRow( $row );
 					break;
@@ -110,7 +112,7 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 
 		}
 		if ( $entry ) {
-			$this->formatPageData( $previousRow, $previousRow->eu_page_id, $entry, $result );
+			$this->formatPageData( $previousRow, intval( $previousRow->eu_page_id ), $entry, $result );
 		}
 	}
 
@@ -127,13 +129,20 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 	}
 
 	/**
-	 * @param int|string $pageId
+	 * @return bool True the result fits into the output, false otherwise
 	 */
-	private function formatPageData( object $row, $pageId, array $entry, object $result ): bool {
+	private function formatPageData(
+		object $row,
+		int $pageId,
+		array $entry,
+		ApiResult $result
+	): bool {
 		$pageData = $this->addPageData( $row );
-		$result->addValue( [ 'query', 'pages' ], intval( $pageId ), $pageData );
-		$fit = $this->addPageSubItems( $pageId, $entry );
-		return $fit;
+		$result->addIndexedTagName( [ 'query', 'entityusage' ], 'page' );
+
+		$value = array_merge( $pageData, [ $this->getModuleName() => $entry ] );
+		ApiResult::setIndexedTagName( $value[$this->getModuleName()], 'wbleu' );
+		return $result->addValue( [ 'query', 'entityusage' ], null, $value );
 	}
 
 	private function setContinueFromRow( object $row ): void {
@@ -152,7 +161,7 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 		return 'public';
 	}
 
-	public function doQuery( array $params, ApiPageSet $resultPageSet = null ): ?IResultWrapper {
+	public function doQuery( array $params, ?ApiPageSet $resultPageSet ): ?IResultWrapper {
 		if ( !$params['entities'] ) {
 			return null;
 		}
@@ -160,7 +169,7 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 		$this->addFields( [
 			'eu_page_id',
 			'eu_entity_id',
-			'eu_aspect'
+			'eu_aspect',
 		] );
 
 		$this->addTables( 'wbc_entity_usage' );
@@ -180,7 +189,7 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 			$this->addContinue( $params['continue'] );
 		}
 
-		$orderBy = [ 'eu_page_id' , 'eu_entity_id' ];
+		$orderBy = [ 'eu_page_id', 'eu_entity_id' ];
 		if ( isset( $params['aspect'] ) ) {
 			$this->addWhereFld( 'eu_aspect', $params['aspect'] );
 		} else {
@@ -195,19 +204,14 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 
 	private function addContinue( string $continueParam ): void {
 		$db = $this->getDB();
-		[ $pageContinueSql, $entityContinueSql, $aspectContinueSql ] = explode( '|', $continueParam, 3 );
-		$pageContinueSql = (int)$pageContinueSql;
-		$entityContinueSql = $db->addQuotes( $entityContinueSql );
-		$aspectContinueSql = $db->addQuotes( $aspectContinueSql );
+		[ $pageContinue, $entityContinue, $aspectContinue ] = explode( '|', $continueParam, 3 );
 		// Filtering out results that have been shown already and
 		// starting the query from where it ended.
-		$this->addWhere(
-			"eu_page_id > $pageContinueSql OR " .
-			"(eu_page_id = $pageContinueSql AND " .
-			"(eu_entity_id > $entityContinueSql OR " .
-			"(eu_entity_id = $entityContinueSql AND " .
-			"eu_aspect >= $aspectContinueSql)))"
-		);
+		$this->addWhere( $db->buildComparison( '>=', [
+			'eu_page_id' => (int)$pageContinue,
+			'eu_entity_id' => $entityContinue,
+			'eu_aspect' => $aspectContinue,
+		] ) );
 	}
 
 	public function getAllowedParams(): array {
@@ -250,7 +254,7 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 				ParamValidator::PARAM_TYPE => 'limit',
 				IntegerDef::PARAM_MIN => 1,
 				IntegerDef::PARAM_MAX => ApiBase::LIMIT_BIG1,
-				IntegerDef::PARAM_MAX2 => ApiBase::LIMIT_BIG2
+				IntegerDef::PARAM_MAX2 => ApiBase::LIMIT_BIG2,
 			],
 			'continue' => [
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
@@ -260,11 +264,11 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 
 	protected function getExamplesMessages(): array {
 		return [
-			'action=query&list=wblistentityusage&wbeuentities=Q2'
+			'action=query&list=wblistentityusage&wbleuentities=Q2'
 				=> 'apihelp-query+wblistentityusage-example-simple',
-			'action=query&list=wblistentityusage&wbeuentities=Q2&wbeuprop=url'
+			'action=query&list=wblistentityusage&wbleuentities=Q2&wbleuprop=url'
 				=> 'apihelp-query+wblistentityusage-example-url',
-			'action=query&list=wblistentityusage&wbeuentities=Q2&wbeuaspect=S|O'
+			'action=query&list=wblistentityusage&wbleuentities=Q2&wbleuaspect=S|O'
 				=> 'apihelp-query+wblistentityusage-example-aspect',
 		];
 	}

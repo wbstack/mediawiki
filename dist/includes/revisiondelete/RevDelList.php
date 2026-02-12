@@ -19,8 +19,13 @@
  * @ingroup RevisionDelete
  */
 
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Deferred\DeferredUpdates;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\RevisionList\RevisionListBase;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
 use Wikimedia\Rdbms\LBFactory;
 
 /**
@@ -35,6 +40,9 @@ use Wikimedia\Rdbms\LBFactory;
  * @method RevDelItem current()
  */
 abstract class RevDelList extends RevisionListBase {
+
+	/** Flag used for suppression, depending on the type of log */
+	protected const SUPPRESS_BIT = RevisionRecord::DELETED_RESTRICTED;
 
 	/** @var LBFactory */
 	private $lbFactory;
@@ -106,11 +114,9 @@ abstract class RevDelList extends RevisionListBase {
 	 * @return bool
 	 */
 	public function areAnySuppressed() {
-		$bit = $this->getSuppressBit();
-
 		/** @var RevDelItem $item */
 		foreach ( $this as $item ) {
-			if ( $item->getBits() & $bit ) {
+			if ( $item->getBits() & self::SUPPRESS_BIT ) {
 				return true;
 			}
 		}
@@ -137,9 +143,14 @@ abstract class RevDelList extends RevisionListBase {
 		$comment = $params['comment'];
 		$perItemStatus = $params['perItemStatus'] ?? false;
 
+		// T387638 - Always ensure ->value['itemStatuses'] is set if requested
+		if ( $perItemStatus ) {
+			$status->value['itemStatuses'] = [];
+		}
+
 		// CAS-style checks are done on the _deleted fields so the select
 		// does not need to use FOR UPDATE nor be in the atomic section
-		$dbw = $this->lbFactory->getMainLB()->getConnectionRef( DB_PRIMARY );
+		$dbw = $this->lbFactory->getPrimaryDatabase();
 		$this->res = $this->doQuery( $dbw );
 
 		$status->merge( $this->acquireItemLocks() );
@@ -160,10 +171,6 @@ abstract class RevDelList extends RevisionListBase {
 		$this->clearFileOps();
 		$idsForLog = [];
 		$authorActors = [];
-
-		if ( $perItemStatus ) {
-			$status->value['itemStatuses'] = [];
-		}
 
 		// For multi-item deletions, set the old/new bitfields in log_params such that "hid X"
 		// shows in logs if field X was hidden from ANY item and likewise for "unhid Y". Note the
@@ -218,7 +225,7 @@ abstract class RevDelList extends RevisionListBase {
 				$status->failCount++;
 				continue;
 			// Cannot just "hide from Sysops" without hiding any fields
-			} elseif ( $newBits == RevisionRecord::DELETED_RESTRICTED ) {
+			} elseif ( $newBits == self::SUPPRESS_BIT ) {
 				$itemStatus->warning(
 					'revdelete-only-restricted', $item->formatDate(), $item->formatTime() );
 				$status->failCount++;
@@ -231,7 +238,7 @@ abstract class RevDelList extends RevisionListBase {
 			if ( $ok ) {
 				$idsForLog[] = $item->getId();
 				// If any item field was suppressed or unsuppressed
-				if ( ( $oldBits | $newBits ) & $this->getSuppressBit() ) {
+				if ( ( $oldBits | $newBits ) & self::SUPPRESS_BIT ) {
 					$logType = 'suppress';
 				}
 				// Track which fields where (un)hidden for each item
@@ -338,16 +345,8 @@ abstract class RevDelList extends RevisionListBase {
 	 * @since 1.37
 	 */
 	public function reloadFromPrimary() {
-		$dbw = $this->lbFactory->getMainLB()->getConnectionRef( DB_PRIMARY );
+		$dbw = $this->lbFactory->getPrimaryDatabase();
 		$this->res = $this->doQuery( $dbw );
-	}
-
-	/**
-	 * @deprecated since 1.37; please use reloadFromPrimary() instead.
-	 */
-	public function reloadFromMaster() {
-		wfDeprecated( __METHOD__, '1.37' );
-		$this->reloadFromPrimary();
 	}
 
 	/**
@@ -361,13 +360,12 @@ abstract class RevDelList extends RevisionListBase {
 	 *     comment:         The log comment
 	 *     authorActors:    The array of the actor IDs of the offenders
 	 *     tags:            The array of change tags to apply to the log entry
-	 * @throws MWException
 	 */
 	private function updateLog( $logType, $params ) {
 		// Get the URL param's corresponding DB field
 		$field = RevisionDeleter::getRelationType( $this->getType() );
 		if ( !$field ) {
-			throw new MWException( "Bad log URL param type!" );
+			throw new UnexpectedValueException( "Bad log URL param type!" );
 		}
 		// Add params for affected page and ids
 		$logParams = $this->getLogParams( $params );
@@ -441,8 +439,4 @@ abstract class RevDelList extends RevisionListBase {
 		return Status::newGood();
 	}
 
-	/**
-	 * Get the integer value of the flag used for suppression
-	 */
-	abstract public function getSuppressBit();
 }

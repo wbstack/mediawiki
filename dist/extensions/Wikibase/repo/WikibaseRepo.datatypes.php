@@ -18,21 +18,27 @@
  *
  * @see ValidatorsBuilders
  * @see WikibaseValueFormatterBuilders
- * @see @ref md_docs_topics_datatypes Documentation on how to add new data type
+ * @see @ref docs_topics_datatypes Documentation on how to add new data type
  *
  * @license GPL-2.0-or-later
  * @author Daniel Kinzler
  */
 
 use DataValues\Geo\Parsers\GlobeCoordinateParser;
+use DataValues\Geo\Values\GlobeCoordinateValue;
+use DataValues\MonolingualTextValue;
+use DataValues\QuantityValue;
 use DataValues\StringValue;
+use DataValues\TimeValue;
 use DataValues\UnboundedQuantityValue;
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
 use ValueFormatters\FormatterOptions;
 use ValueParsers\ParserOptions;
 use ValueParsers\QuantityParser;
 use ValueParsers\StringParser;
 use ValueParsers\ValueParser;
+use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Entity\EntityIdValue;
 use Wikibase\Lib\Formatters\EntityIdValueFormatter;
 use Wikibase\Lib\Formatters\SnakFormat;
@@ -86,7 +92,7 @@ return call_user_func( function() {
 			'formatter-factory-callback' => function( $format, FormatterOptions $options ) {
 				$factory = WikibaseRepo::getDefaultValueFormatterBuilders();
 				return $factory->newUnDeserializableValueFormatter( $format, $options );
-			}
+			},
 		],
 		'PT:commonsMedia' => [
 			'expert-module' => 'jquery.valueview.experts.CommonsMediaType',
@@ -173,32 +179,13 @@ return call_user_func( function() {
 				return PropertySpecificComponentsRdfBuilder::OBJECT_PROPERTY;
 			},
 		],
-		'PT:entity-schema' => [
-			'validator-factory-callback' => function() {
-				$factory = WikibaseRepo::getDefaultValidatorBuilders();
-				// Don't go for commons during unit tests.
-				return $factory->buildEntitySchemaValidators();
-			},
-			'formatter-factory-callback' => function( $format, FormatterOptions $options ) {
-				$factory = WikibaseRepo::getDefaultValueFormatterBuilders();
-				return $factory->newEntitySchemaFormatter( $format, $options );
-			},
-			'rdf-builder-factory-callback' => function (
-				$flags,
-				RdfVocabulary $vocab,
-				RdfWriter $writer,
-				EntityMentionListener $tracker,
-				DedupeBag $dedupe
-			) {
-				return new LiteralValueRdfBuilder( null, null );
-			},
-		],
 		'VT:globecoordinate' => [
 			'expert-module' => 'jquery.valueview.experts.GlobeCoordinateInput',
 			'validator-factory-callback' => function() {
 				$factory = WikibaseRepo::getDefaultValidatorBuilders();
 				return $factory->buildCoordinateValidators();
 			},
+			'deserializer-builder' => GlobeCoordinateValue::class,
 			'parser-factory-callback' => function( ParserOptions $options ) {
 				return new GlobeCoordinateParser( $options );
 			},
@@ -227,12 +214,13 @@ return call_user_func( function() {
 				$factory = WikibaseRepo::getDefaultValidatorBuilders();
 				return $factory->buildMonolingualTextValidators( $maxLength );
 			},
+			'deserializer-builder' => MonolingualTextValue::class,
 			'parser-factory-callback' => function( ParserOptions $options ) {
 				return new MonolingualTextParser( $options );
 			},
 			'formatter-factory-callback' => function( $format, FormatterOptions $options ) {
 				$factory = WikibaseRepo::getDefaultValueFormatterBuilders();
-				return $factory->newMonolingualFormatter( $format );
+				return $factory->newMonolingualFormatter( $format, $options );
 			},
 			'rdf-builder-factory-callback' => function (
 				$flags,
@@ -250,8 +238,10 @@ return call_user_func( function() {
 				$factory = WikibaseRepo::getDefaultValidatorBuilders();
 				return $factory->buildQuantityValidators();
 			},
+			'deserializer-builder' => QuantityValue::class,
 			'parser-factory-callback' => function( ParserOptions $options ) {
-				$language = Language::factory( $options->getOption( ValueParser::OPT_LANG ) );
+				$language = MediaWikiServices::getInstance()->getLanguageFactory()
+					->getLanguage( $options->getOption( ValueParser::OPT_LANG ) );
 				$unlocalizer = new MediaWikiNumberUnlocalizer( $language );
 				return new QuantityParser( $options, $unlocalizer );
 			},
@@ -286,6 +276,7 @@ return call_user_func( function() {
 				// max length is also used in MetaDataBridgeConfig, make sure to keep in sync
 				return $factory->buildStringValidators( $maxLength );
 			},
+			'deserializer-builder' => StringValue::class,
 			'parser-factory-callback' => function ( ParserOptions $options ) {
 				$normalizer = WikibaseRepo::getStringNormalizer();
 				return new StringParser( new WikibaseStringValueNormalizer( $normalizer ) );
@@ -316,6 +307,7 @@ return call_user_func( function() {
 				$factory = WikibaseRepo::getDefaultValidatorBuilders();
 				return $factory->buildTimeValidators();
 			},
+			'deserializer-builder' => TimeValue::class,
 			'parser-factory-callback' => function( ParserOptions $options ) {
 				$factory = new TimeParserFactory( $options );
 				return $factory->getTimeParser();
@@ -377,7 +369,7 @@ return call_user_func( function() {
 				DedupeBag $dedupe
 			) {
 				$uriPatternProvider = new FieldPropertyInfoProvider(
-					WikibaseRepo::getStore()->getPropertyInfoLookup(),
+					WikibaseRepo::getPropertyInfoLookup(),
 					PropertyInfoStore::KEY_CANONICAL_URI
 				);
 				return new ExternalIdentifierRdfBuilder( $vocab, $uriPatternProvider );
@@ -387,6 +379,27 @@ return call_user_func( function() {
 			'validator-factory-callback' => function() {
 				$factory = WikibaseRepo::getDefaultValidatorBuilders();
 				return $factory->buildEntityValidators();
+			},
+			'deserializer-builder' => static function ( $value ) {
+				// TODO this should perhaps be factored out into a class
+				if ( isset( $value['id'] ) ) {
+					try {
+						return new EntityIdValue( WikibaseRepo::getEntityIdParser()->parse( $value['id'] ) );
+					} catch ( EntityIdParsingException $parsingException ) {
+						if ( is_string( $value['id'] ) ) {
+							$message = 'Can not parse id \'' . $value['id'] . '\' to build EntityIdValue with';
+						} else {
+							$message = 'Can not parse id of type ' . get_debug_type( $value['id'] ) . ' to build EntityIdValue with';
+						}
+						throw new InvalidArgumentException(
+							$message,
+							0,
+							$parsingException
+						);
+					}
+				} else {
+					return EntityIdValue::newFromArray( $value );
+				}
 			},
 			'parser-factory-callback' => function ( ParserOptions $options ) {
 				$entityIdParser = WikibaseRepo::getEntityIdParser();
@@ -472,6 +485,6 @@ return call_user_func( function() {
 			'rdf-data-type' => function() {
 				return PropertySpecificComponentsRdfBuilder::OBJECT_PROPERTY;
 			},
-		]
+		],
 	];
 } );

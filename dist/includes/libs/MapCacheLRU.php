@@ -1,7 +1,5 @@
 <?php
 /**
- * Per-process memory cache for storing items.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -23,7 +21,7 @@
 use Wikimedia\LightweightObjectStore\ExpirationAwareness;
 
 /**
- * Handles a simple LRU key/value map with a maximum number of entries
+ * Store key-value entries in a size-limited in-memory LRU cache.
  *
  * The last-modification timestamp of entries is internally tracked so that callers can
  * specify the maximum acceptable age of entries in calls to the has() method. As a convenience,
@@ -33,7 +31,7 @@ use Wikimedia\LightweightObjectStore\ExpirationAwareness;
  * @ingroup Cache
  * @since 1.23
  */
-class MapCacheLRU implements ExpirationAwareness, Serializable {
+class MapCacheLRU implements ExpirationAwareness {
 	/** @var array Map of (key => value) */
 	private $cache = [];
 	/** @var array Map of (key => (UNIX timestamp, (field => UNIX timestamp))) */
@@ -110,8 +108,7 @@ class MapCacheLRU implements ExpirationAwareness, Serializable {
 		if ( $this->has( $key ) ) {
 			$this->ping( $key );
 		} elseif ( count( $this->cache ) >= $this->maxCacheKeys ) {
-			reset( $this->cache );
-			$evictKey = key( $this->cache );
+			$evictKey = array_key_first( $this->cache );
 			unset( $this->cache[$evictKey] );
 			unset( $this->timestamps[$evictKey] );
 		}
@@ -190,7 +187,7 @@ class MapCacheLRU implements ExpirationAwareness, Serializable {
 			$this->ping( $key );
 
 			if ( !is_array( $this->cache[$key] ) ) {
-				$type = gettype( $this->cache[$key] );
+				$type = get_debug_type( $this->cache[$key] );
 				throw new UnexpectedValueException( "Cannot add field to non-array value ('$key' is $type)" );
 			}
 		} else {
@@ -281,6 +278,29 @@ class MapCacheLRU implements ExpirationAwareness, Serializable {
 	}
 
 	/**
+	 * Format a cache key string
+	 *
+	 * @since 1.41
+	 * @param string|int ...$components Key components
+	 * @return string
+	 */
+	public function makeKey( ...$components ) {
+		// Based on BagOStuff::makeKeyInternal, except without a required
+		// $keygroup prefix. While MapCacheLRU can and is used as cache for
+		// multiple groups of keys, it is equally common for the instance itself
+		// to represent a single group, and thus have keys where the first component
+		// can directly be a user-controlled variable.
+		$key = '';
+		foreach ( $components as $i => $component ) {
+			if ( $i > 0 ) {
+				$key .= ':';
+			}
+			$key .= strtr( $component, [ '%' => '%25', ':' => '%3A' ] );
+		}
+		return $key;
+	}
+
+	/**
 	 * Clear one or several cache entries, or all cache entries
 	 *
 	 * @param string|int|array|null $keys
@@ -322,8 +342,7 @@ class MapCacheLRU implements ExpirationAwareness, Serializable {
 
 		$this->maxCacheKeys = $maxKeys;
 		while ( count( $this->cache ) > $this->maxCacheKeys ) {
-			reset( $this->cache );
-			$evictKey = key( $this->cache );
+			$evictKey = array_key_first( $this->cache );
 			unset( $this->cache[$evictKey] );
 			unset( $this->timestamps[$evictKey] );
 		}
@@ -369,20 +388,12 @@ class MapCacheLRU implements ExpirationAwareness, Serializable {
 		];
 	}
 
-	public function serialize(): string {
-		return serialize( $this->__serialize() );
-	}
-
 	public function __unserialize( $data ) {
 		$this->cache = $data['entries'] ?? [];
 		$this->timestamps = $data['timestamps'] ?? [];
 		// Fallback needed for serializations prior to T218511
 		$this->maxCacheKeys = $data['maxCacheKeys'] ?? ( count( $this->cache ) + 1 );
 		$this->epoch = $this->getCurrentTime();
-	}
-
-	public function unserialize( $serialized ): void {
-		$this->__unserialize( unserialize( $serialized ) );
 	}
 
 	/**

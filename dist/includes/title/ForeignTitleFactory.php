@@ -18,6 +18,8 @@
  * @file
  */
 
+namespace MediaWiki\Title;
+
 /**
  * A parser that translates page titles into ForeignTitle objects.
  */
@@ -35,3 +37,6 @@ interface ForeignTitleFactory {
 	 */
 	public function createForeignTitle( $title, $ns = null );
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( ForeignTitleFactory::class, 'ForeignTitleFactory' );

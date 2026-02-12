@@ -3,10 +3,10 @@
 namespace MobileFrontend\Models;
 
 use File;
-use Html;
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * Retrieves information specific to a mobile page
@@ -14,11 +14,11 @@ use Title;
  * @todo FIXME: Rename this class when its purpose becomes clearer
  */
 class MobilePage {
-	public const SMALL_IMAGE_WIDTH = 150;
-	public const TINY_IMAGE_WIDTH = 80;
+	public const SMALL_IMAGE_WIDTH = 220;
+	public const TINY_IMAGE_WIDTH = 120;
 
 	/**
-	 * @var Title Title for page
+	 * @var Title
 	 */
 	private $title;
 	/**
@@ -67,14 +67,6 @@ class MobilePage {
 	}
 
 	/**
-	 * Set rev_timestamp of latest edit to this page
-	 * @param string $timestamp Timestamp (MW format)
-	 */
-	public function setLatestTimestamp( $timestamp ) {
-		$this->revisionTimestamp = $timestamp;
-	}
-
-	/**
 	 * Retrieve the last edit to this page.
 	 * @return array defining edit with keys:
 	 * - string name
@@ -110,27 +102,6 @@ class MobilePage {
 	}
 
 	/**
-	 * Get a placeholder div container for thumbnails
-	 * @param string $className Class for element
-	 * @param string $iconClassName controls size of thumbnail, defaults to empty string
-	 * @return string
-	 */
-	public static function getPlaceHolderThumbnailHtml( $className, $iconClassName = '' ) {
-		return Html::element( 'div', [
-			'class' => 'list-thumb list-thumb-placeholder ' . $iconClassName . ' ' . $className,
-		] );
-	}
-
-	/**
-	 * Check whether a page has a thumbnail associated with it
-	 *
-	 * @return bool whether the page has an image associated with it
-	 */
-	public function hasThumbnail() {
-		return $this->file ? true : false;
-	}
-
-	/**
 	 * Get a small sized thumbnail in div container.
 	 *
 	 * @param bool $useBackgroundImage Whether the thumbnail should have a background image
@@ -162,9 +133,10 @@ class MobilePage {
 				'class' => $className,
 			];
 
-			$imgUrl = wfExpandUrl( $thumb->getUrl(), PROTO_CURRENT );
+			$urlUtils = MediaWikiServices::getInstance()->getUrlUtils();
+			$imgUrl = $urlUtils->expand( (string)$thumb->getUrl(), PROTO_CURRENT ) ?? '';
 			if ( $useBackgroundImage ) {
-				$props['style'] = 'background-image: url("' . wfExpandUrl( $imgUrl, PROTO_CURRENT ) . '")';
+				$props['style'] = 'background-image: url("' . $urlUtils->expand( $imgUrl, PROTO_CURRENT ) . '")';
 				$text = '';
 			} else {
 				$props['src'] = $imgUrl;

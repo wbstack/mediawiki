@@ -4,8 +4,7 @@ require_once __DIR__ . '/wbstack/src/Shim/Web.php';
 
 
 /**
- * The web entry point for @ref ResourceLoader, which serves static CSS/JavaScript
- * via @ref MediaWiki\ResourceLoader\Module Module subclasses.
+ * @see MediaWiki\ResourceLoader\ResourceLoaderEntryPoint
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +22,14 @@ require_once __DIR__ . '/wbstack/src/Shim/Web.php';
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup entrypoint
- * @ingroup ResourceLoader
  * @author Roan Kattouw
  * @author Trevor Parscal
  */
 
+use MediaWiki\Context\RequestContext;
+use MediaWiki\EntryPointEnvironment;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\ResourceLoader\Context;
+use MediaWiki\ResourceLoader\ResourceLoaderEntryPoint;
 
 // This endpoint is supposed to be independent of request cookies and other
 // details of the session. Enforce this constraint with respect to session use.
@@ -40,27 +39,8 @@ define( 'MW_ENTRY_POINT', 'load' );
 
 require __DIR__ . '/includes/WebStart.php';
 
-wfLoadMain();
-
-function wfLoadMain() {
-	global $wgRequest;
-
-	$services = MediaWikiServices::getInstance();
-	// Disable ChronologyProtector so that we don't wait for unrelated MediaWiki
-	// writes when getting database connections for ResourceLoader. (T192611)
-	$services->getDBLoadBalancerFactory()->disableChronologyProtection();
-
-	$resourceLoader = $services->getResourceLoader();
-	$context = new Context( $resourceLoader, $wgRequest );
-
-	// Respond to ResourceLoader request
-	$resourceLoader->respond( $context );
-
-	// Append any visible profiling data in a manner appropriate for the Content-Type
-	$profiler = Profiler::instance();
-	$profiler->setAllowOutput();
-	$profiler->logDataPageOutputOnly();
-
-	$mediawiki = new MediaWiki();
-	$mediawiki->doPostOutputShutdown();
-}
+( new ResourceLoaderEntryPoint(
+	RequestContext::getMain(),
+	new EntryPointEnvironment(),
+	MediaWikiServices::getInstance()
+) )->run();

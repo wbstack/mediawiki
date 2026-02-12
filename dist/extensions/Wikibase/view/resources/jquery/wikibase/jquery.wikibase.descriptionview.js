@@ -17,6 +17,11 @@
 	 *
 	 * @option {string} [inputNodeName='TEXTAREA']
 	 *         Should either be 'TEXTAREA' or 'INPUT'.
+	 * @option {boolean} [readOnly=false]
+	 *         Whether the input should be read only.
+	 * @option {string} [placeholderMessage='wikibase-description-edit-placeholder-language-aware']
+	 * @option {string|null} [accessibilityLabel]
+	 *         Will be added to the input/textarea as aria-label.
 	 */
 	$.widget( 'wikibase.descriptionview', PARENT, {
 		/**
@@ -33,7 +38,10 @@
 				$text: '.wikibase-descriptionview-text'
 			},
 			value: null,
-			inputNodeName: 'TEXTAREA'
+			inputNodeName: 'TEXTAREA',
+			readOnly: false,
+			placeholderMessage: 'wikibase-description-edit-placeholder-language-aware',
+			accessibilityLabel: null
 		},
 
 		/**
@@ -108,7 +116,13 @@
 			this.element[ descriptionText ? 'removeClass' : 'addClass' ]( 'wb-empty' );
 
 			if ( !this.isInEditMode() && !descriptionText ) {
-				this.$text.text( mw.msg( 'wikibase-description-empty' ) );
+				if ( languageCode === 'mul' ) {
+					this.$text.empty().append(
+						this._createDescriptionNotApplicableElements()
+					);
+				} else {
+					this.$text.text( mw.msg( 'wikibase-description-empty' ) );
+				}
 				// Apply lang and dir of UI language
 				// instead language of that row
 				var userLanguage = mw.config.get( 'wgUserLanguage' );
@@ -131,10 +145,12 @@
 
 			$input
 			.addClass( this.widgetFullName + '-input' )
-			// TODO: Inject correct placeholder via options
 			.attr( 'placeholder', mw.msg(
-				'wikibase-description-edit-placeholder-language-aware',
-				wb.getLanguageNameByCode( languageCode )
+				// The following messages can be used here:
+				// * wikibase-description-edit-placeholder-language-aware
+				// * wikibase-description-edit-placeholder-not-applicable
+				this.options.placeholderMessage,
+				wb.getLanguageNameByCodeForTerms( languageCode )
 			) )
 			.attr( 'lang', languageCode )
 			.attr( 'dir', $.util.getDirectionality( languageCode ) )
@@ -156,6 +172,14 @@
 					expandHeight: true,
 					suppressNewLine: true
 				} );
+			}
+
+			if ( this.options.readOnly ) {
+				$input.prop( 'readOnly', true );
+			}
+
+			if ( this.options.accessibilityLabel ) {
+				$input.attr( 'aria-label', this.options.accessibilityLabel );
 			}
 
 			this.$text.empty().append( $input );
@@ -187,6 +211,15 @@
 			}
 
 			return response;
+		},
+
+		_createDescriptionNotApplicableElements: function () {
+			var $abbr = $( '<abbr>' ).attr( 'title', mw.msg( 'wikibase-description-not-applicable-title' ) );
+			var $abbrText = $( '<span>' )
+				.text( mw.msg( 'wikibase-description-not-applicable' ) )
+				.attr( 'aria-hidden', 'true' );
+			$abbr.append( $abbrText );
+			return $abbr;
 		},
 
 		/**

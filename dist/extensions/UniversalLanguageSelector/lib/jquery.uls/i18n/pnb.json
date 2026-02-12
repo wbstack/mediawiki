@@ -1,7 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Abbas dhothar"
+			"Abbas dhothar",
+			"Amire80",
+			"Bgo eiu"
 		]
 	},
 	"uls-region-WW": "جگ بھر",
@@ -13,9 +15,10 @@
 	"uls-region-ME": "مشرق وسطی",
 	"uls-region-PA": "بحر الکاہل",
 	"uls-region-all": "ساریاں بولیاں",
-	"uls-no-results-found": "کوئی نتیجے نئیں لبھے",
+	"uls-no-results-found": "کوئی نتیجے نہیں لبھے",
 	"uls-common-languages": "تجویز کردہ بولیاں",
 	"uls-no-results-suggestion-title": "توانوں اس وچ دلچسپی ہوسکدی اے:",
 	"uls-search-help": "تسیں بولی دے ناں ، اسکرپٹ دا ناں ، بولی دے آئی ایس او کوڈ دے ذریعہ تلاش کرسکدے نيں یا آپ علاقے دے ذریعہ براؤز کرسکدے او۔",
-	"uls-search-placeholder": "بولی دی کھوج"
+	"uls-search-placeholder": "بولی لئی کھوجو",
+	"uls-search-placeholder-short": "کھوجو"
 }

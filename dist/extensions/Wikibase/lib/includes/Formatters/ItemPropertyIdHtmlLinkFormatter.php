@@ -2,8 +2,8 @@
 
 namespace Wikibase\Lib\Formatters;
 
-use Html;
-use Title;
+use MediaWiki\Html\Html;
+use MediaWiki\Title\Title;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\EntityId\EntityIdLabelFormatter;
 use Wikibase\DataModel\Services\Lookup\LabelDescriptionLookup;
@@ -97,10 +97,10 @@ class ItemPropertyIdHtmlLinkFormatter extends EntityIdLabelFormatter {
 	 *
 	 * @return string[]
 	 */
-	private function getAttributes( Title $title, Term $term = null ) {
+	private function getAttributes( Title $title, ?Term $term ) {
 		$attributes = [
 			'title' => $title->getPrefixedText(),
-			'href' => $title->isLocal() ? $title->getLocalURL() : $title->getFullURL()
+			'href' => $title->isLocal() ? $title->getLocalURL() : $title->getFullURL(),
 		];
 
 		if ( $term instanceof TermFallback

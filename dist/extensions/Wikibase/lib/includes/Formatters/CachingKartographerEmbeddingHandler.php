@@ -3,16 +3,16 @@
 namespace Wikibase\Lib\Formatters;
 
 use DataValues\Geo\Values\GlobeCoordinateValue;
-use FormatJson;
-use Html;
 use InvalidArgumentException;
-use Language;
 use MapCacheLRU;
-use Parser;
-use ParserOptions;
-use ParserOutput;
-use RequestContext;
-use Title;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Html\Html;
+use MediaWiki\Json\FormatJson;
+use MediaWiki\Language\Language;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Title\Title;
 
 /**
  * Service for embedding Kartographer mapframes for GlobeCoordinateValues.
@@ -60,7 +60,7 @@ class CachingKartographerEmbeddingHandler {
 		if ( !$this->cache->has( $cacheKey ) ) {
 			$parserOutput = $this->parser->parse(
 				$this->getWikiText( $value ),
-				Title::newFromText( 'Special:BlankPage' ),
+				RequestContext::getMain()->getTitle() ?? Title::makeTitle( NS_SPECIAL, 'BlankPage' ),
 				$this->getParserOptions( $language )
 			);
 			$this->cache->set( $this->getCacheKey( $value, $language ), $parserOutput->getText() );
@@ -85,7 +85,7 @@ class CachingKartographerEmbeddingHandler {
 
 		$parserOutput = $this->getParserOutput( [ $value ], $language );
 
-		$containerDivId = 'wb-globeCoordinateValue-preview-' . base_convert( mt_rand( 1, PHP_INT_MAX ), 10, 36 );
+		$containerDivId = 'wb-globeCoordinateValue-preview-' . base_convert( (string)mt_rand( 1, PHP_INT_MAX ), 10, 36 );
 
 		$html = '<div id="' . $containerDivId . '">' . $parserOutput->getText() . '</div>';
 		$html .= $this->getMapframeInitJS(
@@ -119,7 +119,7 @@ class CachingKartographerEmbeddingHandler {
 
 		return $this->parser->parse(
 			$wikiText,
-			Title::newFromText( 'Special:BlankPage' ),
+			RequestContext::getMain()->getTitle() ?? Title::makeTitle( NS_SPECIAL, 'BlankPage' ),
 			$this->getParserOptions( $language )
 		);
 	}
@@ -164,7 +164,7 @@ class CachingKartographerEmbeddingHandler {
 		// Require all needed RL modules, then call initMapframeFromElement with the injected mapframe HTML
 		$javaScript .= "mw.loader.using( $rlModulesJson ).then( " .
 				"function( require ) { require( 'ext.kartographer.frame' ).initMapframeFromElement( " .
-				"\$( $jsMapPreviewId ).find( '.mw-kartographer-map[data-mw=\"interface\"]' ).get( 0 ) ); } );";
+				"\$( $jsMapPreviewId ).find( '.mw-kartographer-map[data-mw-kartographer]' ).get( 0 ) ); } );";
 
 		return Html::inlineScript( $javaScript );
 	}

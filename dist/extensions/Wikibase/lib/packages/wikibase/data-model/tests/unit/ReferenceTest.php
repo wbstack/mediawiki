@@ -23,7 +23,7 @@ use Wikibase\DataModel\Snak\SnakList;
  */
 class ReferenceTest extends \PHPUnit\Framework\TestCase {
 
-	public function snakListProvider() {
+	public static function snakListProvider() {
 		$snakLists = [];
 
 		$snakLists[] = new SnakList();
@@ -35,7 +35,7 @@ class ReferenceTest extends \PHPUnit\Framework\TestCase {
 		$snakLists[] = new SnakList( [
 			new PropertyValueSnak( new NumericPropertyId( 'P1' ), new StringValue( 'a' ) ),
 			new PropertySomeValueSnak( new NumericPropertyId( 'P2' ) ),
-			new PropertyNoValueSnak( new NumericPropertyId( 'P3' ) )
+			new PropertyNoValueSnak( new NumericPropertyId( 'P3' ) ),
 		] );
 
 		$argLists = [];
@@ -47,7 +47,7 @@ class ReferenceTest extends \PHPUnit\Framework\TestCase {
 		return $argLists;
 	}
 
-	public function instanceProvider() {
+	public static function instanceProvider() {
 		$references = [];
 
 		$references[] = new Reference();
@@ -117,7 +117,7 @@ class ReferenceTest extends \PHPUnit\Framework\TestCase {
 	 * would result from issuing SnakList::orderByProperty().
 	 * @return array
 	 */
-	public function unorderedReferenceProvider() {
+	public static function unorderedReferenceProvider() {
 		$ids = [
 			new NumericPropertyId( 'P1' ),
 			new NumericPropertyId( 'P2' ),
@@ -136,7 +136,7 @@ class ReferenceTest extends \PHPUnit\Framework\TestCase {
 					new PropertyValueSnak( $ids[0], new StringValue( 'a' ) ),
 					new PropertySomeValueSnak( $ids[0] ),
 					new PropertyNoValueSnak( $ids[1] ),
-				] )
+				] ),
 			],
 			[
 				new SnakList( [
@@ -257,7 +257,7 @@ class ReferenceTest extends \PHPUnit\Framework\TestCase {
 		new Reference( $snaks );
 	}
 
-	public function invalidConstructorArgumentsProvider() {
+	public static function invalidConstructorArgumentsProvider() {
 		$id1 = new NumericPropertyId( 'P1' );
 
 		return [

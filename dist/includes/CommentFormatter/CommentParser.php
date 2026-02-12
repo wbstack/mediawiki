@@ -4,22 +4,27 @@ namespace MediaWiki\CommentFormatter;
 
 use File;
 use HtmlArmor;
-use Language;
-use LinkBatch;
-use LinkCache;
-use Linker;
-use MalformedTitleException;
+use MediaWiki\Cache\LinkBatch;
 use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\Cache\LinkCache;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
+use MediaWiki\Html\Html;
+use MediaWiki\Language\Language;
+use MediaWiki\Linker\Linker;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
-use NamespaceInfo;
-use Parser;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\Sanitizer;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\MalformedTitleException;
+use MediaWiki\Title\NamespaceInfo;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleParser;
+use MediaWiki\Title\TitleValue;
+use MediaWiki\WikiMap\WikiMap;
 use RepoGroup;
-use Title;
-use TitleParser;
-use TitleValue;
+use StringUtils;
 
 /**
  * The text processing backend for CommentFormatter.
@@ -61,6 +66,8 @@ class CommentParser {
 
 	/** @var int The maximum number of digits in a marker ID */
 	private const MAX_ID_SIZE = 7;
+	/** @var string Prefix for marker. ' and " included to break attributes (T355538) */
+	private const MARKER_PREFIX = "\x1B\"'";
 
 	/**
 	 * @param LinkRenderer $linkRenderer
@@ -106,7 +113,7 @@ class CommentParser {
 	 * @param bool $enableSectionLinks
 	 * @return string
 	 */
-	public function preprocess( string $comment, LinkTarget $selfLinkTarget = null,
+	public function preprocess( string $comment, ?LinkTarget $selfLinkTarget = null,
 		$samePage = false, $wikiId = false, $enableSectionLinks = true
 	) {
 		return $this->preprocessInternal( $comment, false, $selfLinkTarget,
@@ -123,7 +130,7 @@ class CommentParser {
 	 * @param bool $enableSectionLinks
 	 * @return string
 	 */
-	public function preprocessUnsafe( $comment, LinkTarget $selfLinkTarget = null,
+	public function preprocessUnsafe( $comment, ?LinkTarget $selfLinkTarget = null,
 		$samePage = false, $wikiId = false, $enableSectionLinks = true
 	) {
 		return $this->preprocessInternal( $comment, true, $selfLinkTarget,
@@ -140,7 +147,7 @@ class CommentParser {
 	public function finalize( $comments ) {
 		$this->flushLinkBatches();
 		return preg_replace_callback(
-			'/\x1b([0-9]{' . self::MAX_ID_SIZE . '})/',
+			'/' . self::MARKER_PREFIX . '([0-9]{' . self::MAX_ID_SIZE . '})/',
 			function ( $m ) {
 				$callback = $this->links[(int)$m[1]] ?? null;
 				if ( $callback ) {
@@ -170,7 +177,7 @@ class CommentParser {
 		$comment = strtr( $comment, "\n\x1b", "  " );
 		// Allow HTML entities (for T15815)
 		if ( !$unsafe ) {
-			$comment = \Sanitizer::escapeHtmlAllowEntities( $comment );
+			$comment = Sanitizer::escapeHtmlAllowEntities( $comment );
 		}
 		if ( $enableSectionLinks ) {
 			$comment = $this->doSectionLinks( $comment, $selfLinkTarget, $samePage, $wikiId );
@@ -200,12 +207,6 @@ class CommentParser {
 		$samePage = false,
 		$wikiId = false
 	) {
-		// @todo $append here is something of a hack to preserve the status
-		// quo. Someone who knows more about bidi and such should decide
-		// (1) what sensible rendering even *is* for an LTR edit summary on an RTL
-		// wiki, both when autocomments exist and when they don't, and
-		// (2) what markup will make that actually happen.
-		$append = '';
 		$comment = preg_replace_callback(
 		// To detect the presence of content before or after the
 		// auto-comment, we use capturing groups inside optional zero-width
@@ -213,7 +214,7 @@ class CommentParser {
 		// zero-width assertions optional, so wrap them in a non-capturing
 		// group.
 			'!(?:(?<=(.)))?/\*\s*(.*?)\s*\*/(?:(?=(.)))?!',
-			function ( $match ) use ( &$append, $selfLinkTarget, $samePage, $wikiId ) {
+			function ( $match ) use ( $selfLinkTarget, $samePage, $wikiId ) {
 				// Ensure all match positions are defined
 				$match += [ '', '', '', '' ];
 
@@ -254,8 +255,10 @@ class CommentParser {
 						}
 						$auto = $this->makeSectionLink(
 							$sectionTitle,
-							$this->userLang->getArrow() . $this->userLang->getDirMark() . $sectionText,
-							$wikiId
+							$this->userLang->getArrow() .
+								Html::rawElement( 'bdi', [ 'dir' => $this->userLang->getDir() ], $sectionText ),
+							$wikiId,
+							$selfLinkTarget
 						);
 					}
 				}
@@ -268,15 +271,13 @@ class CommentParser {
 					$auto .= wfMessage( 'colon-separator' )->inContentLanguage()->escaped();
 				}
 				if ( $auto ) {
-					$auto = '<span dir="auto"><span class="autocomment">' . $auto . '</span>';
-					$append .= '</span>';
+					$auto = Html::rawElement( 'span', [ 'class' => 'autocomment' ], $auto );
 				}
-				$comment = $pre . $auto;
-				return $comment;
+				return $pre . $auto;
 			},
 			$comment
 		);
-		return $comment . $append;
+		return $comment;
 	}
 
 	/**
@@ -287,15 +288,16 @@ class CommentParser {
 	 * @param string $text
 	 * @param string|false|null $wikiId Id of the wiki to link to (if not the local wiki),
 	 *  as used by WikiMap.
+	 * @param LinkTarget $contextTitle
 	 *
 	 * @return string HTML link
 	 */
 	private function makeSectionLink(
-		LinkTarget $target, $text, $wikiId
+		LinkTarget $target, $text, $wikiId, LinkTarget $contextTitle
 	) {
 		if ( $wikiId !== null && $wikiId !== false && !$target->isExternal() ) {
-			return Linker::makeExternalLink(
-				\WikiMap::getForeignURL(
+			return $this->linkRenderer->makeExternalLink(
+				WikiMap::getForeignURL(
 					$wikiId,
 					$target->getNamespace() === 0
 						? $target->getDBkey()
@@ -303,8 +305,8 @@ class CommentParser {
 						':' . $target->getDBkey(),
 					$target->getFragment()
 				),
-				$text,
-				/* escape = */ false // Already escaped
+				new HtmlArmor( $text ), // Already escaped
+				$contextTitle
 			);
 		}
 		return $this->linkRenderer->makePreloadedLink( $target, new HtmlArmor( $text ), '' );
@@ -396,7 +398,7 @@ class CommentParser {
 							$trail = "";
 						}
 						$linkRegexp = '/\[\[(.*?)\]\]' . preg_quote( $trail, '/' ) . '/';
-						list( $inside, $trail ) = Linker::splitTrail( $trail );
+						[ $inside, $trail ] = Linker::splitTrail( $trail );
 
 						$linkText = $text;
 						$linkTarget = Linker::normalizeSubpageLink( $selfLinkTarget, $match[1], $linkText );
@@ -410,7 +412,17 @@ class CommentParser {
 								$target = $selfLinkTarget->createFragmentTarget( $target->getFragment() );
 							}
 
-							$linkMarker = $this->addPageLink( $target, $linkText . $inside, $wikiId );
+							// We should deprecate `null` as a valid value for
+							// $selfLinkTarget to ensure that we can use it as
+							// the title context for the external link.
+							// phpcs:ignore MediaWiki.Usage.DeprecatedGlobalVariables.Deprecated$wgTitle
+							global $wgTitle;
+							$linkMarker = $this->addPageLink(
+								$target,
+								$linkText . $inside,
+								$wikiId,
+								$selfLinkTarget ?? $wgTitle ?? SpecialPage::getTitleFor( 'Badtitle' )
+							);
 							$linkMarker .= $trail;
 						} catch ( MalformedTitleException $e ) {
 							// Fall through
@@ -423,7 +435,7 @@ class CommentParser {
 						// @phan-suppress-next-next-line PhanPossiblyUndeclaredVariable linkRegexp set when used
 						// @phan-suppress-next-line PhanTypeMismatchArgumentNullableInternal linkRegexp set when used
 						$linkRegexp,
-						$linkMarker,
+						StringUtils::escapeRegexReplacement( $linkMarker ),
 						$comment,
 						1
 					);
@@ -447,7 +459,7 @@ class CommentParser {
 			throw new \RuntimeException( 'Too many links in comment batch' );
 		}
 		$this->links[] = $callback;
-		return sprintf( "\x1b%0" . self::MAX_ID_SIZE . 'd', $nextId );
+		return sprintf( self::MARKER_PREFIX . "%0" . self::MAX_ID_SIZE . 'd', $nextId );
 	}
 
 	/**
@@ -457,13 +469,14 @@ class CommentParser {
 	 * @param LinkTarget $target
 	 * @param string $text
 	 * @param string|false|null $wikiId
+	 * @param LinkTarget $contextTitle
 	 * @return string
 	 */
-	private function addPageLink( LinkTarget $target, $text, $wikiId ) {
+	private function addPageLink( LinkTarget $target, $text, $wikiId, LinkTarget $contextTitle ) {
 		if ( $wikiId !== null && $wikiId !== false && !$target->isExternal() ) {
 			// Handle links from a foreign wiki ID
-			return Linker::makeExternalLink(
-				\WikiMap::getForeignURL(
+			return $this->linkRenderer->makeExternalLink(
+				WikiMap::getForeignURL(
 					$wikiId,
 					$target->getNamespace() === 0
 						? $target->getDBkey()
@@ -471,8 +484,8 @@ class CommentParser {
 						':' . $target->getDBkey(),
 					$target->getFragment()
 				),
-				$text,
-				/* escape = */ false // Already escaped
+				new HtmlArmor( $text ), // Already escaped
+				$contextTitle
 			);
 		} elseif ( $this->linkCache->getGoodLinkID( $target ) ||
 			Title::newFromLinkTarget( $target )->isAlwaysKnown()

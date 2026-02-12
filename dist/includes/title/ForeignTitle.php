@@ -21,11 +21,16 @@
  * @author This, that and the other
  */
 
+namespace MediaWiki\Title;
+
+use RuntimeException;
+use Stringable;
+
 /**
  * A simple, immutable structure to hold the title of a page on a foreign
  * MediaWiki installation.
  */
-class ForeignTitle {
+class ForeignTitle implements Stringable {
 	/**
 	 * @var int|null
 	 * Null if we don't know the namespace ID (e.g. interwiki links)
@@ -63,13 +68,12 @@ class ForeignTitle {
 	}
 
 	/**
+	 * @note Callers should make sure that isNamespaceIdKnown() is true before calling this method.
 	 * @return int
-	 * @throws MWException If isNamespaceIdKnown() is false, it does not make
-	 * sense to call this function.
 	 */
 	public function getNamespaceId() {
 		if ( $this->namespaceId === null ) {
-			throw new MWException(
+			throw new RuntimeException(
 				"Attempted to call getNamespaceId when the namespace ID is not known" );
 		}
 		return $this->namespaceId;
@@ -115,3 +119,6 @@ class ForeignTitle {
 		return $name;
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( ForeignTitle::class, 'ForeignTitle' );

@@ -21,6 +21,9 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 
@@ -31,11 +34,7 @@ use Wikimedia\ParamValidator\TypeDef\IntegerDef;
  */
 class ApiQueryRandom extends ApiQueryGeneratorBase {
 
-	/**
-	 * @param ApiQuery $query
-	 * @param string $moduleName
-	 */
-	public function __construct( ApiQuery $query, $moduleName ) {
+	public function __construct( ApiQuery $query, string $moduleName ) {
 		parent::__construct( $query, $moduleName, 'rn' );
 	}
 
@@ -78,16 +77,20 @@ class ApiQueryRandom extends ApiQueryGeneratorBase {
 		$this->addOption( 'LIMIT', $limit + 1 );
 
 		if ( $start !== null ) {
-			$start = $this->getDB()->addQuotes( $start );
+			$db = $this->getDB();
 			if ( $startId > 0 ) {
-				$startId = (int)$startId; // safety
-				$this->addWhere( "page_random = $start AND page_id >= $startId OR page_random > $start" );
+				$this->addWhere( $db->buildComparison( '>=', [
+					'page_random' => $start,
+					'page_id' => $startId,
+				] ) );
 			} else {
-				$this->addWhere( "page_random >= $start" );
+				$this->addWhere( $db->buildComparison( '>=', [
+					'page_random' => $start,
+				] ) );
 			}
 		}
 		if ( $end !== null ) {
-			$this->addWhere( 'page_random < ' . $this->getDB()->addQuotes( $end ) );
+			$this->addWhere( $this->getDB()->expr( 'page_random', '<', $end ) );
 		}
 		$this->addOption( 'ORDER BY', [ 'page_random', 'page_id' ] );
 
@@ -140,15 +143,13 @@ class ApiQueryRandom extends ApiQueryGeneratorBase {
 		}
 
 		if ( isset( $params['continue'] ) ) {
-			$cont = explode( '|', $params['continue'] );
-			$this->dieContinueUsageIf( count( $cont ) != 4 );
+			$cont = $this->parseContinueParamOrDie( $params['continue'], [ 'string', 'string', 'int', 'string' ] );
 			$rand = $cont[0];
 			$start = $cont[1];
-			$startId = (int)$cont[2];
+			$startId = $cont[2];
 			$end = $cont[3] ? $rand : null;
 			$this->dieContinueUsageIf( !preg_match( '/^0\.\d+$/', $rand ) );
 			$this->dieContinueUsageIf( !preg_match( '/^0\.\d+$/', $start ) );
-			$this->dieContinueUsageIf( $cont[2] !== (string)$startId );
 			$this->dieContinueUsageIf( $cont[3] !== '0' && $cont[3] !== '1' );
 		} else {
 			$rand = wfRandom();
@@ -166,14 +167,14 @@ class ApiQueryRandom extends ApiQueryGeneratorBase {
 			);
 		}
 
-		list( $left, $continue ) =
+		[ $left, $continue ] =
 			$this->runQuery( $resultPageSet, $params['limit'], $start, $startId, $end );
 		if ( $end === null && $continue === null ) {
 			// Wrap around. We do this even if $left === 0 for continuation
 			// (saving a DB query in this rare case probably isn't worth the
 			// added code complexity it would require).
 			$end = $rand;
-			list( $left, $continue ) = $this->runQuery( $resultPageSet, $left, null, null, $end );
+			[ , $continue ] = $this->runQuery( $resultPageSet, $left, null, null, $end );
 		}
 
 		if ( $continue !== null ) {
@@ -230,3 +231,6 @@ class ApiQueryRandom extends ApiQueryGeneratorBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Random';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryRandom::class, 'ApiQueryRandom' );

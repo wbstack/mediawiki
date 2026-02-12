@@ -13,6 +13,7 @@
 	"requestaccount-loginnotice": "Om een gebruiker te krijgen, moet u '''[[Special:RequestAccount|een aanvraag doen]]'''.",
 	"action-confirmaccount": "accounts te bekijken en te accepteren",
 	"right-confirmaccount": "[[Special:ConfirmAccounts|Wachtrij met gebruikersaanvragen]] bekijken",
+	"right-confirmaccount-notify": "Via e-mail bericht over pas goedgekeurde accountverzoeken ontvangen",
 	"action-requestips": "de IP-adressen van aanvragers te bekijken bij het verwerken bij het verwerken van gebruikersaanvragen",
 	"right-requestips": "De IP-adressen van aanvragers bekijken bij het verwerken bij het verwerken van gebruikersaanvragen",
 	"action-lookupcredentials": "gebruikersreferenties te bekijken",

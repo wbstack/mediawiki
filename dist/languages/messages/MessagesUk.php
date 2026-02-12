@@ -1,8 +1,6 @@
 <?php
 /** Ukrainian (українська)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -58,7 +56,7 @@ $separatorTransformTable = [
 	',' => "\u{00A0}", # nbsp
 	'.' => ','
 ];
-$minimumGroupingDigits = 2; // As per CLDR 31, this value is 1 (T262500)
+$minimumGroupingDigits = 2; // intentional deviation from CLDR (T262500)
 
 $fallback8bitEncoding = 'windows-1251';
 $linkPrefixExtension = true;
@@ -205,6 +203,7 @@ $specialPageAliases = [
 	'Recentchanges'             => [ 'Нові_редагування', 'Свежие_правки' ],
 	'Recentchangeslinked'       => [ 'Пов\'язані_редагування', 'Связанные_правки' ],
 	'Redirect'                  => [ 'Перенаправлення' ],
+	'Renameuser'                => [ 'Перейменувати_користувача', 'Переименовать_участника' ],
 	'Revisiondelete'            => [ 'Вилучити_редагування', 'Удаление_правки' ],
 	'Search'                    => [ 'Пошук', 'Поиск' ],
 	'Shortpages'                => [ 'Короткі_сторінки', 'Короткие_страницы' ],
@@ -297,7 +296,7 @@ $magicWords = [
 	'img_width'                 => [ '1', '$1пкс', '$1px' ],
 	'index'                     => [ '1', '__ІНДЕКС__', '__ИНДЕКС__', '__INDEX__' ],
 	'int'                       => [ '0', 'ВНУТР:', 'INT:' ],
-	'language'                  => [ '0', '#МОВА:', '#ЯЗЫК:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#МОВА', '#ЯЗЫК', '#LANGUAGE' ],
 	'lc'                        => [ '0', 'НР:', 'НИЖНІЙ_РЕГІСТР:', 'МАЛИМИ_БУКВАМИ:', 'МАЛИМИ_ЛІТЕРАМИ:', 'МАЛЕНЬКИМИ_БУКВАМИ:', 'LC:' ],
 	'lcfirst'                   => [ '0', 'НР_ПЕРША:', 'ПЕРША_БУКВА_МАЛА:', 'ПЕРША_ЛІТЕРА_МАЛА:', 'МАЛА_ПЕРША_ЛІТЕРА:', 'ПЕРВАЯ_БУКВА_МАЛЕНЬКАЯ:', 'LCFIRST:' ],
 	'localday'                  => [ '1', 'ЛОКАЛЬНИЙ_ДЕНЬ', 'МІСЦЕВИЙ_ДЕНЬ', 'МЕСТНЫЙ_ДЕНЬ', 'LOCALDAY' ],

@@ -20,9 +20,13 @@
 
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Status\Status;
+use MediaWiki\Utils\UrlUtils;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Wikimedia\Http\TelemetryHeadersInterface;
 
 /**
  * This wrapper class will call out to curl (if available) or fallback
@@ -39,23 +43,37 @@ abstract class MWHttpRequest implements LoggerAwareInterface {
 	 */
 	protected $timeout = 'default';
 
+	/** @var string|null */
 	protected $content;
+	/** @var bool|null */
 	protected $headersOnly = null;
+	/** @var array|null */
 	protected $postData = null;
+	/** @var string|null */
 	protected $proxy = null;
+	/** @var bool */
 	protected $noProxy = false;
+	/** @var bool */
 	protected $sslVerifyHost = true;
+	/** @var bool */
 	protected $sslVerifyCert = true;
+	/** @var string|null */
 	protected $caInfo = null;
+	/** @var string */
 	protected $method = "GET";
 	/** @var array */
 	protected $reqHeaders = [];
+	/** @var string */
 	protected $url;
+	/** @var array|false */
 	protected $parsedUrl;
 	/** @var callable */
 	protected $callback;
+	/** @var int */
 	protected $maxRedirects = 5;
+	/** @var bool */
 	protected $followRedirects = false;
+	/** @var int */
 	protected $connectTimeout;
 
 	/**
@@ -63,8 +81,11 @@ abstract class MWHttpRequest implements LoggerAwareInterface {
 	 */
 	protected $cookieJar;
 
+	/** @var array */
 	protected $headerList = [];
+	/** @var string */
 	protected $respVersion = "0.9";
+	/** @var string */
 	protected $respStatus = "200 Ok";
 	/** @var string[][] */
 	protected $respHeaders = [];
@@ -87,22 +108,31 @@ abstract class MWHttpRequest implements LoggerAwareInterface {
 	 */
 	protected $logger;
 
+	private UrlUtils $urlUtils;
+
 	/**
 	 * @param string $url Url to use. If protocol-relative, will be expanded to an http:// URL
-	 * @param array $options (optional) extra params to pass (see HttpRequestFactory::create())
+	 * @param array $options extra params to pass (see HttpRequestFactory::create())
 	 * @phpcs:ignore Generic.Files.LineLength
 	 * @phan-param array{timeout?:int|string,connectTimeout?:int|string,postData?:array,proxy?:string,noProxy?:bool,sslVerifyHost?:bool,sslVerifyCert?:bool,caInfo?:string,maxRedirects?:int,followRedirects?:bool,userAgent?:string,logger?:LoggerInterface,username?:string,password?:string,originalRequest?:WebRequest|array{ip:string,userAgent:string},method?:string} $options
-	 * @param string $caller The method making this request, for profiling
+	 * @param string $caller The method making this request, for profiling @phan-mandatory-param
 	 * @param Profiler|null $profiler An instance of the profiler for profiling, or null
 	 * @throws Exception
 	 */
 	public function __construct(
-		$url, array $options = [], $caller = __METHOD__, Profiler $profiler = null
+		$url, array $options, $caller = __METHOD__, ?Profiler $profiler = null
 	) {
-		$this->url = wfExpandUrl( $url, PROTO_HTTP );
-		$this->parsedUrl = wfParseUrl( $this->url );
+		$this->urlUtils = MediaWikiServices::getInstance()->getUrlUtils();
+		if ( !array_key_exists( 'timeout', $options )
+			|| !array_key_exists( 'connectTimeout', $options ) ) {
+			throw new InvalidArgumentException( "timeout and connectionTimeout options are required" );
+		}
+		$this->url = $this->urlUtils->expand( $url, PROTO_HTTP ) ?? false;
+		$this->parsedUrl = $this->urlUtils->parse( (string)$this->url ) ?? false;
 
 		$this->logger = $options['logger'] ?? new NullLogger();
+		$this->timeout = $options['timeout'];
+		$this->connectTimeout = $options['connectTimeout'];
 
 		if ( !$this->parsedUrl || !self::isValidURI( $this->url ) ) {
 			$this->status = StatusValue::newFatal( 'http-invalid-url', $url );
@@ -110,26 +140,6 @@ abstract class MWHttpRequest implements LoggerAwareInterface {
 			$this->status = StatusValue::newGood( 100 ); // continue
 		}
 
-		if ( isset( $options['timeout'] ) && $options['timeout'] != 'default' ) {
-			$this->timeout = $options['timeout'];
-		} else {
-			// The timeout should always be set by HttpRequestFactory, so this
-			// should only happen if the class was directly constructed
-			wfDeprecated( __METHOD__ . ' without the timeout option', '1.35' );
-			$httpTimeout = MediaWikiServices::getInstance()->getMainConfig()->get(
-				MainConfigNames::HTTPTimeout );
-			$this->timeout = $httpTimeout;
-		}
-		if ( isset( $options['connectTimeout'] ) && $options['connectTimeout'] != 'default' ) {
-			$this->connectTimeout = $options['connectTimeout'];
-		} else {
-			// The timeout should always be set by HttpRequestFactory, so this
-			// should only happen if the class was directly constructed
-			wfDeprecated( __METHOD__ . ' without the connectTimeout option', '1.35' );
-			$httpConnectTimeout = MediaWikiServices::getInstance()->getMainConfig()->get(
-				MainConfigNames::HTTPConnectTimeout );
-			$this->connectTimeout = $httpConnectTimeout;
-		}
 		if ( isset( $options['userAgent'] ) ) {
 			$this->setUserAgent( $options['userAgent'] );
 		}
@@ -142,8 +152,6 @@ abstract class MWHttpRequest implements LoggerAwareInterface {
 		if ( isset( $options['originalRequest'] ) ) {
 			$this->setOriginalRequest( $options['originalRequest'] );
 		}
-
-		$this->setHeader( 'X-Request-Id', WebRequest::getRequestId() );
 
 		$members = [ "postData", "proxy", "noProxy", "sslVerifyHost", "caInfo",
 				"method", "followRedirects", "maxRedirects", "sslVerifyCert", "callback" ];
@@ -186,24 +194,6 @@ abstract class MWHttpRequest implements LoggerAwareInterface {
 	}
 
 	/**
-	 * Generate a new request object
-	 * @deprecated since 1.34, use HttpRequestFactory instead
-	 * @param string $url Url to use
-	 * @param array|null $options (optional) extra params to pass (see HttpRequestFactory::create())
-	 * @param string $caller The method making this request, for profiling
-	 * @throws DomainException
-	 * @return MWHttpRequest
-	 * @see MWHttpRequest::__construct
-	 */
-	public static function factory( $url, array $options = null, $caller = __METHOD__ ) {
-		if ( $options === null ) {
-			$options = [];
-		}
-		return MediaWikiServices::getInstance()->getHttpRequestFactory()
-			->create( $url, $options, $caller );
-	}
-
-	/**
 	 * Get the body, or content, of the response to the request
 	 *
 	 * @return string
@@ -220,6 +210,18 @@ abstract class MWHttpRequest implements LoggerAwareInterface {
 	 */
 	public function setData( array $args ) {
 		$this->postData = $args;
+	}
+
+	/**
+	 * Add Telemetry information to the request
+	 *
+	 * @param TelemetryHeadersInterface $telemetry
+	 * @return void
+	 */
+	public function addTelemetry( TelemetryHeadersInterface $telemetry ): void {
+		foreach ( $telemetry->getRequestHeaders() as $header => $value ) {
+			$this->setHeader( $header, $value );
+		}
 	}
 
 	/**
@@ -265,9 +267,9 @@ abstract class MWHttpRequest implements LoggerAwareInterface {
 	 * @param string $proxy URL of proxy
 	 */
 	protected function setReverseProxy( string $proxy ) {
-		$parsedProxy = wfParseUrl( $proxy );
-		if ( $parsedProxy === false ) {
-			throw new Exception( "Invalid reverseProxy configured: $proxy" );
+		$parsedProxy = $this->urlUtils->parse( $proxy );
+		if ( $parsedProxy === null ) {
+			throw new InvalidArgumentException( "Invalid reverseProxy configured: $proxy" );
 		}
 		// Set the current host in the Host header
 		$this->setHeader( 'Host', $this->parsedUrl['host'] );
@@ -279,7 +281,7 @@ abstract class MWHttpRequest implements LoggerAwareInterface {
 		} else {
 			unset( $this->parsedUrl['port'] );
 		}
-		$this->url = wfAssembleUrl( $this->parsedUrl );
+		$this->url = UrlUtils::assemble( $this->parsedUrl );
 		// Mark that we're already using a proxy
 		$this->noProxy = true;
 	}
@@ -291,12 +293,11 @@ abstract class MWHttpRequest implements LoggerAwareInterface {
 	 * @return bool
 	 */
 	private static function isLocalURL( $url ) {
-		$commandLineMode = MediaWikiServices::getInstance()->getMainConfig()->get( 'CommandLineMode' );
-		$localVirtualHosts = MediaWikiServices::getInstance()->getMainConfig()->get(
-			MainConfigNames::LocalVirtualHosts );
-		if ( $commandLineMode ) {
+		if ( MW_ENTRY_POINT === 'cli' ) {
 			return false;
 		}
+		$localVirtualHosts = MediaWikiServices::getInstance()->getMainConfig()->get(
+			MainConfigNames::LocalVirtualHosts );
 
 		// Extract host part
 		$matches = [];
@@ -491,7 +492,7 @@ abstract class MWHttpRequest implements LoggerAwareInterface {
 		if ( (int)$this->respStatus > 0 && (int)$this->respStatus < 400 ) {
 			$this->status->setResult( true, (int)$this->respStatus );
 		} else {
-			list( $code, $message ) = explode( " ", $this->respStatus, 2 );
+			[ $code, $message ] = explode( " ", $this->respStatus, 2 );
 			$this->status->setResult( false, (int)$this->respStatus );
 			$this->status->fatal( "http-bad-status", $code, $message );
 		}

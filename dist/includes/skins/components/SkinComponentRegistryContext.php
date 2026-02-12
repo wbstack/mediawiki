@@ -18,18 +18,22 @@
 
 namespace MediaWiki\Skin;
 
-use Config;
+use MediaWiki\Config\Config;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Language\Language;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use MessageLocalizer;
-use OutputPage;
 use Skin;
-use Title;
-use User;
+use WikiPage;
 
 /**
  * @internal for use inside Skin and SkinTemplate classes only
  * @unstable
  */
 class SkinComponentRegistryContext implements ComponentRegistryContext {
+
 	/** @var Skin */
 	private $skin;
 
@@ -41,6 +45,13 @@ class SkinComponentRegistryContext implements ComponentRegistryContext {
 	 */
 	public function __construct( Skin $skin ) {
 		$this->skin = $skin;
+	}
+
+	/**
+	 * @return IContextSource
+	 */
+	public function getContextSource(): IContextSource {
+		return $this->skin->getContext();
 	}
 
 	/**
@@ -79,10 +90,10 @@ class SkinComponentRegistryContext implements ComponentRegistryContext {
 	}
 
 	/**
-	 * @return string|null $language
+	 * @return Language $language
 	 */
 	public function getLanguage() {
-		return $this->skin->getLanguage()->getCode();
+		return $this->skin->getLanguage();
 	}
 
 	/**
@@ -97,5 +108,44 @@ class SkinComponentRegistryContext implements ComponentRegistryContext {
 		}
 
 		return $this->localizer;
+	}
+
+	/**
+	 * @return WikiPage
+	 */
+	public function getWikiPage() {
+		return $this->skin->getWikiPage();
+	}
+
+	/**
+	 * Temporarily allows access to Skin method.
+	 * It exists to support skins overriding the method in MediaWiki 1.40
+	 * (overriding the method is now deprecated)
+	 * It can be removed in 1.41
+	 *
+	 * @unstable
+	 * @internal
+	 * @return array
+	 */
+	public function getFooterIcons() {
+		return $this->skin->getFooterIcons();
+	}
+
+	/**
+	 * Renders a $wgFooterIcons icon according to the method's arguments
+	 * It exists to support skins overriding the method in MediaWiki 1.40
+	 * (overriding the method is now deprecated)
+	 * It can be removed in 1.41
+	 *
+	 * @unstable
+	 * @param array $icon The icon to build the html for, see $wgFooterIcons
+	 *   for the format of this array.
+	 * @param bool|string $withImage Whether to use the icon's image or output
+	 *   a text-only footericon.
+	 * @internal
+	 * @return string HTML
+	 */
+	public function makeFooterIcon( $icon, $withImage = 'withImage' ) {
+		return $this->skin->makeFooterIcon( $icon, $withImage );
 	}
 }

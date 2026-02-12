@@ -2,13 +2,18 @@
 
 namespace MediaWiki\Extension\RevisionSlider;
 
-use Config;
-use DifferenceEngine;
-use Html;
-use MediaWiki\MediaWikiServices;
-use Message;
+use Liuggio\StatsdClient\Factory\StatsdDataFactoryInterface;
+use MediaWiki\Config\Config;
+use MediaWiki\Config\ConfigFactory;
+use MediaWiki\Diff\Hook\DifferenceEngineViewHeaderHook;
+use MediaWiki\Html\Html;
+use MediaWiki\MainConfigNames;
+use MediaWiki\Message\Message;
+use MediaWiki\Preferences\Hook\GetPreferencesHook;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\User\Options\UserOptionsLookup;
+use MediaWiki\User\User;
 use OOUI\ButtonWidget;
-use User;
 
 /**
  * RevisionSlider extension hooks
@@ -17,44 +22,72 @@ use User;
  * @ingroup Extensions
  * @license GPL-2.0-or-later
  */
-class RevisionSliderHooks {
+class RevisionSliderHooks implements DifferenceEngineViewHeaderHook, GetPreferencesHook {
 
-	/**
-	 * @return Config The RevisionSlider extensions config
-	 */
-	private static function getConfig(): Config {
-		return MediaWikiServices::getInstance()->getConfigFactory()
-			->makeConfig( 'revisionslider' );
+	private Config $config;
+	private UserOptionsLookup $userOptionsLookup;
+	private StatsdDataFactoryInterface $statsdDataFactory;
+
+	public function __construct(
+		ConfigFactory $configFactory,
+		UserOptionsLookup $userOptionsLookup,
+		StatsdDataFactoryInterface $statsdDataFactory
+	) {
+		$this->config = $configFactory->makeConfig( 'revisionslider' );
+		$this->userOptionsLookup = $userOptionsLookup;
+		$this->statsdDataFactory = $statsdDataFactory;
 	}
 
 	/**
-	 * @param DifferenceEngine $diff
+	 * @inheritDoc
 	 */
-	public static function onDifferenceEngineViewHeader( DifferenceEngine $diff ) {
-		$oldRevRecord = $diff->getOldRevision();
-		$newRevRecord = $diff->getNewRevision();
-
-		// sometimes the old revision can be null (e.g. missing rev), and perhaps also the
-		// new one (T167359)
-		if ( $oldRevRecord === null || $newRevRecord === null ) {
-			return;
-		}
-
-		// do not show on MobileDiff page
-		// Note: Since T245172, DifferenceEngine::getTitle() is the title of the page being diffed.
-		if ( $diff->getOutput()->getTitle()->isSpecial( 'MobileDiff' ) ) {
-			return;
-		}
-
-		$services = MediaWikiServices::getInstance();
-		$userOptionsLookup = $services->getUserOptionsLookup();
+	public function onDifferenceEngineViewHeader( $differenceEngine ) {
+		$oldRevRecord = $differenceEngine->getOldRevision();
+		$newRevRecord = $differenceEngine->getNewRevision();
 
 		/**
 		 * If the user is logged in and has explictly requested to disable the extension don't load.
 		 */
-		$user = $diff->getUser();
-		if ( $user->isRegistered() && $userOptionsLookup->getBoolOption( $user, 'revisionslider-disable' ) ) {
+		$user = $differenceEngine->getUser();
+		if ( $this->isDisabled( $user ) || !$this->isSamePage( $oldRevRecord, $newRevRecord ) ) {
 			return;
+		}
+
+		$this->statsdDataFactory->increment( 'RevisionSlider.event.hookinit' );
+
+		$timeOffset = 0;
+		if ( $this->config->get( MainConfigNames::Localtimezone ) !== null ) {
+			$timeOffset = $this->config->get( MainConfigNames::LocalTZoffset ) ?? 0;
+		}
+
+		$autoExpand = $this->userOptionsLookup->getBoolOption( $user, 'userjs-revslider-autoexpand' );
+
+		$out = $differenceEngine->getOutput();
+		// Load styles on page load to avoid FOUC
+		$out->addModuleStyles( 'ext.RevisionSlider.lazyCss' );
+		if ( $autoExpand ) {
+			$out->addModules( 'ext.RevisionSlider.init' );
+			$this->statsdDataFactory->increment( 'RevisionSlider.event.load' );
+		} else {
+			$out->addModules( 'ext.RevisionSlider.lazyJs' );
+			$this->statsdDataFactory->increment( 'RevisionSlider.event.lazyload' );
+		}
+		$out->addJsConfigVars( 'extRevisionSliderTimeOffset', $timeOffset );
+		$out->enableOOUI();
+
+		$out->prependHTML( $this->getContainerHtml( $autoExpand ) );
+	}
+
+	public function isDisabled( User $user ): bool {
+		return $user->isNamed() &&
+			$this->userOptionsLookup->getBoolOption( $user, 'revisionslider-disable' );
+	}
+
+	private function isSamePage( ?RevisionRecord $oldRevRecord, ?RevisionRecord $newRevRecord ): bool {
+		// sometimes the old revision can be null (e.g. missing rev), and perhaps also the
+		// new one (T167359)
+		if ( !$oldRevRecord || !$newRevRecord ) {
+			return false;
 		}
 
 		/**
@@ -65,39 +98,11 @@ class RevisionSliderHooks {
 		 */
 		$oldTitle = $oldRevRecord->getPageAsLinkTarget();
 		$newTitle = $newRevRecord->getPageAsLinkTarget();
-		if ( $oldTitle->getNamespace() !== $newTitle->getNamespace() ||
-			$oldTitle->getDBKey() !== $newTitle->getDBKey()
-		) {
-			return;
-		}
+		return $oldTitle->getNamespace() === $newTitle->getNamespace() &&
+			$oldTitle->getDBKey() === $newTitle->getDBKey();
+	}
 
-		$stats = $services->getStatsdDataFactory();
-		$stats->increment( 'RevisionSlider.event.hookinit' );
-
-		$config = self::getConfig();
-		$timeOffset = $config->get( 'LocalTZoffset' );
-		if ( $config->get( 'Localtimezone' ) === null ) {
-			$timeOffset = 0;
-		} elseif ( $timeOffset === null ) {
-			$timeOffset = 0;
-		}
-
-		$autoExpand = $userOptionsLookup->getBoolOption( $user, 'userjs-revslider-autoexpand' );
-
-		$out = $diff->getOutput();
-		// Load styles on page load to avoid FOUC
-		$out->addModuleStyles( 'ext.RevisionSlider.lazyCss' );
-		if ( $autoExpand ) {
-			$out->addModules( 'ext.RevisionSlider.init' );
-			$stats->increment( 'RevisionSlider.event.load' );
-		} else {
-			$out->addModules( 'ext.RevisionSlider.lazyJs' );
-			$stats->increment( 'RevisionSlider.event.lazyload' );
-		}
-		$out->addModuleStyles( 'ext.RevisionSlider.noscript' );
-		$out->addJsConfigVars( 'extRevisionSliderTimeOffset', intval( $timeOffset ) );
-		$out->enableOOUI();
-
+	private function getContainerHtml( bool $autoExpand ): string {
 		$toggleButton = new ButtonWidget( [
 			'label' => ( new Message( 'revisionslider-toggle-label' ) )->text(),
 			'indicator' => 'down',
@@ -115,34 +120,26 @@ class RevisionSliderHooks {
 			)
 		);
 
-		$out->prependHTML(
-			Html::rawElement(
-				'div',
+		return Html::rawElement( 'div',
+			[ 'class' => 'mw-revslider-container' ],
+			$toggleButton .
+			Html::rawElement( 'div',
 				[
-					'class' => 'mw-revslider-container',
-					'aria-hidden' => 'true'
+					'class' => 'mw-revslider-slider-wrapper',
+					'style' => $autoExpand ? null : 'display: none;',
 				],
-				$toggleButton .
-				Html::rawElement(
-					'div',
-					[
-						'class' => 'mw-revslider-slider-wrapper',
-						'style' => ( !$autoExpand ? ' display: none;' : '' ),
-					],
-					Html::rawElement(
-						'div', [ 'class' => 'mw-revslider-placeholder' ],
-						$loadingSpinner
-					)
+				Html::rawElement( 'div',
+					[ 'class' => 'mw-revslider-placeholder' ],
+					$loadingSpinner
 				)
 			)
 		);
 	}
 
 	/**
-	 * @param User $user
-	 * @param array[] &$preferences
+	 * @inheritDoc
 	 */
-	public static function onGetPreferences( User $user, array &$preferences ) {
+	public function onGetPreferences( $user, &$preferences ) {
 		$preferences['revisionslider-disable'] = [
 			'type' => 'toggle',
 			'label-message' => 'revisionslider-preference-disable',

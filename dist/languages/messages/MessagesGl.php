@@ -1,8 +1,6 @@
 <?php
 /** Galician (galego)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -46,8 +44,8 @@ $defaultDateFormat = 'dmy';
 
 $dateFormats = [
 	'dmy time' => 'H:i',
-	'dmy date' => 'j \d\e F \d\e Y',
-	'dmy both' => 'j \d\e F \d\e Y "ás" H:i',
+	'dmy date' => 'j "de" F "de" Y',
+	'dmy both' => 'j "de" F "de" Y "ás" H:i',
 ];
 
 /** @phpcs-require-sorted-array */
@@ -123,6 +121,7 @@ $specialPageAliases = [
 	'Recentchanges'             => [ 'Cambios_recentes' ],
 	'Recentchangeslinked'       => [ 'Cambios_relacionados' ],
 	'Redirect'                  => [ 'Redirección' ],
+	'Renameuser'                => [ 'Renomear_o_usuario', 'Renomear_usuario', 'Renomear_a_usuaria', 'Renomear_usuaria' ],
 	'ResetTokens'               => [ 'Restablecer_os_pases' ],
 	'Revisiondelete'            => [ 'Revisións_borradas' ],
 	'Search'                    => [ 'Procurar', 'Buscar' ],
@@ -203,7 +202,7 @@ $magicWords = [
 	'img_top'                   => [ '1', 'arriba', 'acima', 'top' ],
 	'img_upright'               => [ '1', 'arribaádereita', 'arribaádereita=$1', 'arribaádereita_$1', 'superiordireito', 'superiordireito=$1', 'superiordireito_$1', 'superiordireito $1', 'upright', 'upright=$1', 'upright $1' ],
 	'index'                     => [ '1', '__INDEXAR__', '__INDEX__' ],
-	'language'                  => [ '0', '#LINGUA:', '#IDIOMA:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#LINGUA', '#IDIOMA', '#LANGUAGE' ],
 	'lc'                        => [ '0', 'MINÚSCULA:', 'MINUSCULA', 'MINÚSCULA', 'MINUSCULAS', 'MINÚSCULAS', 'LC:' ],
 	'lcfirst'                   => [ '0', 'PRIMEIRAMINÚSCULA:', 'PRIMEIRAMINUSCULA:', 'LCFIRST:' ],
 	'localday'                  => [ '1', 'DÍALOCAL', 'DIALOCAL', 'LOCALDAY' ],

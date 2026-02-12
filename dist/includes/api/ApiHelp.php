@@ -20,11 +20,28 @@
  * @file
  */
 
-use HtmlFormatter\HtmlFormatter;
-use MediaWiki\ExtensionInfo;
+namespace MediaWiki\Api;
+
+use MediaWiki\Context\DerivativeContext;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Html\Html;
+use MediaWiki\Html\HtmlHelper;
+use MediaWiki\Json\FormatJson;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Message\Message;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Parser\ParserOutputFlags;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Specials\SpecialVersion;
+use MediaWiki\Title\Title;
+use MediaWiki\Utils\ExtensionInfo;
+use SkinFactory;
 use Wikimedia\ParamValidator\ParamValidator;
+use Wikimedia\Parsoid\Core\TOCData;
+use Wikimedia\RemexHtml\Serializer\SerializerNode;
 
 /**
  * Class to output help for an API module
@@ -33,17 +50,11 @@ use Wikimedia\ParamValidator\ParamValidator;
  * @ingroup API
  */
 class ApiHelp extends ApiBase {
-	/** @var SkinFactory */
-	private $skinFactory;
+	private SkinFactory $skinFactory;
 
-	/**
-	 * @param ApiMain $main
-	 * @param string $action
-	 * @param SkinFactory $skinFactory
-	 */
 	public function __construct(
 		ApiMain $main,
-		$action,
+		string $action,
 		SkinFactory $skinFactory
 	) {
 		parent::__construct( $main, $action );
@@ -139,7 +150,7 @@ class ApiHelp extends ApiBase {
 			'mediawiki.hlist',
 			'mediawiki.apipretty',
 		] );
-		$out->setPageTitle( $context->msg( 'api-help-title' ) );
+		$out->setPageTitleMsg( $context->msg( 'api-help-title' ) );
 
 		$services = MediaWikiServices::getInstance();
 		$cache = $services->getMainWANObjectCache();
@@ -181,8 +192,11 @@ class ApiHelp extends ApiBase {
 		$haveModules = [];
 		$html = self::getHelpInternal( $context, $modules, $options, $haveModules );
 		if ( !empty( $options['toc'] ) && $haveModules ) {
-			// @phan-suppress-next-line SecurityCheck-DoubleEscaped Triggered by Linker?
-			$out->addHTML( Linker::generateTOC( $haveModules, $context->getLanguage() ) );
+			$pout = new ParserOutput;
+			$pout->setTOCData( TOCData::fromLegacy( array_values( $haveModules ) ) );
+			$pout->setOutputFlag( ParserOutputFlags::SHOW_TOC );
+			$pout->setText( Parser::TOC_PLACEHOLDER );
+			$out->addParserOutput( $pout );
 		}
 		$out->addHTML( $html );
 
@@ -206,35 +220,39 @@ class ApiHelp extends ApiBase {
 	 * @return string
 	 */
 	public static function fixHelpLinks( $html, $helptitle = null, $localModules = [] ) {
-		$formatter = new HtmlFormatter( $html );
-		$doc = $formatter->getDoc();
-		$xpath = new DOMXPath( $doc );
-		$nodes = $xpath->query( '//a[@href][not(contains(@class,\'apihelp-linktrail\'))]' );
-		/** @var DOMElement $node */
-		foreach ( $nodes as $node ) {
-			$href = $node->getAttribute( 'href' );
-			do {
-				$old = $href;
-				$href = rawurldecode( $href );
-			} while ( $old !== $href );
-			if ( preg_match( '!Special:ApiHelp/([^&/|#]+)((?:#.*)?)!', $href, $m ) ) {
-				if ( isset( $localModules[$m[1]] ) ) {
-					$href = $m[2] === '' ? '#' . $m[1] : $m[2];
-				} elseif ( $helptitle !== null ) {
-					$href = Title::newFromText( str_replace( '$1', $m[1], $helptitle ) . $m[2] )
-						->getFullURL();
-				} else {
-					$href = wfAppendQuery( wfScript( 'api' ), [
-						'action' => 'help',
-						'modules' => $m[1],
-					] ) . $m[2];
+		return HtmlHelper::modifyElements(
+			$html,
+			static function ( SerializerNode $node ): bool {
+				return $node->name === 'a'
+					&& isset( $node->attrs['href'] )
+					&& !str_contains( $node->attrs['class'] ?? '', 'apihelp-linktrail' );
+			},
+			static function ( SerializerNode $node ) use ( $helptitle, $localModules ): SerializerNode {
+				$href = $node->attrs['href'];
+				// FIXME This can't be right to do this in a loop
+				do {
+					$old = $href;
+					$href = rawurldecode( $href );
+				} while ( $old !== $href );
+				if ( preg_match( '!Special:ApiHelp/([^&/|#]+)((?:#.*)?)!', $href, $m ) ) {
+					if ( isset( $localModules[$m[1]] ) ) {
+						$href = $m[2] === '' ? '#' . $m[1] : $m[2];
+					} elseif ( $helptitle !== null ) {
+						$href = Title::newFromText( str_replace( '$1', $m[1], $helptitle ) . $m[2] )
+							->getFullURL();
+					} else {
+						$href = wfAppendQuery( wfScript( 'api' ), [
+							'action' => 'help',
+							'modules' => $m[1],
+						] ) . $m[2];
+					}
+					$node->attrs['href'] = $href;
+					unset( $node->attrs['title'] );
 				}
-				$node->setAttribute( 'href', $href );
-				$node->removeAttribute( 'title' );
-			}
-		}
 
-		return $formatter->getText();
+				return $node;
+			}
+		);
 	}
 
 	/**
@@ -320,13 +338,14 @@ class ApiHelp extends ApiBase {
 
 				$headerAttr['id'] = $anchor;
 
+				// T326687: Maybe transition to using a SectionMetadata object?
 				$haveModules[$anchor] = [
 					'toclevel' => count( $tocnumber ),
 					'level' => $level,
 					'anchor' => $anchor,
 					'line' => $headerContent,
 					'number' => implode( '.', $tocnumber ),
-					'index' => false,
+					'index' => '',
 				];
 				if ( empty( $options['noheader'] ) ) {
 					$help['header'] .= Html::rawElement(
@@ -470,6 +489,12 @@ class ApiHelp extends ApiBase {
 					$help['parameters'] .= self::wrap(
 						$msg->numParams( count( $params ) ), 'apihelp-block-head', 'div'
 					);
+					if ( !$module->isMain() ) {
+						// Add a note explaining that other parameters may exist.
+						$help['parameters'] .= self::wrap(
+							$context->msg( 'api-help-parameters-note' ), 'apihelp-block-header', 'div'
+						);
+					}
 				}
 				$help['parameters'] .= Html::openElement( 'dl' );
 
@@ -482,8 +507,13 @@ class ApiHelp extends ApiBase {
 						$groups[] = $name;
 					}
 
+					$encodedParamName = $module->encodeParamName( $name );
+					$paramNameAttribs = [ 'dir' => 'ltr', 'lang' => 'en' ];
+					if ( isset( $anchor ) ) {
+						$paramNameAttribs['id'] = "$anchor:$encodedParamName";
+					}
 					$help['parameters'] .= Html::rawElement( 'dt', [],
-						Html::element( 'span', [ 'dir' => 'ltr', 'lang' => 'en' ], $module->encodeParamName( $name ) )
+						Html::element( 'span', $paramNameAttribs, $encodedParamName )
 					);
 
 					// Add description
@@ -560,7 +590,7 @@ class ApiHelp extends ApiBase {
 					// Type documentation
 					foreach ( $paramHelp as $m ) {
 						$m->setContext( $context );
-						$info[] = $m;
+						$info[] = $m->parse();
 					}
 
 					foreach ( $info as $i ) {
@@ -569,11 +599,12 @@ class ApiHelp extends ApiBase {
 				}
 
 				if ( $dynamicParams !== null ) {
-					$dynamicParams = ApiBase::makeMessage( $dynamicParams, $context, [
+					$dynamicParams = $context->msg(
+						Message::newFromSpecifier( $dynamicParams ),
 						$module->getModulePrefix(),
 						$module->getModuleName(),
 						$module->getModulePath()
-					] );
+					);
 					$help['parameters'] .= Html::element( 'dt', [], '*' );
 					$help['parameters'] .= Html::rawElement( 'dd',
 						[ 'class' => 'description' ], $dynamicParams->parse() );
@@ -596,11 +627,12 @@ class ApiHelp extends ApiBase {
 
 				$help['examples'] .= Html::openElement( 'dl' );
 				foreach ( $examples as $qs => $msg ) {
-					$msg = ApiBase::makeMessage( $msg, $context, [
+					$msg = $context->msg(
+						Message::newFromSpecifier( $msg ),
 						$module->getModulePrefix(),
 						$module->getModuleName(),
 						$module->getModulePath()
-					] );
+					);
 
 					$link = wfAppendQuery( wfScript( 'api' ), $qs );
 					$sandbox = SpecialPage::getTitleFor( 'ApiSandbox' )->getLocalURL() . '#' . $qs;
@@ -713,3 +745,6 @@ class ApiHelp extends ApiBase {
 		];
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiHelp::class, 'ApiHelp' );

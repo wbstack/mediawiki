@@ -70,7 +70,6 @@ class EntityFullTextQueryBuilder implements FullTextQueryBuilder {
 	 * Create fulltext builder from global environment.
 	 * @param array $settings Configuration from config file
 	 * @return EntityFullTextQueryBuilder
-	 * @throws \MWException
 	 */
 	public static function newFromGlobals( array $settings ) {
 		$services = MediaWikiServices::getInstance();
@@ -89,7 +88,6 @@ class EntityFullTextQueryBuilder implements FullTextQueryBuilder {
 	 *
 	 * @param SearchContext $searchContext
 	 * @param string $term term to search
-	 * @throws \MWException
 	 */
 	public function build( SearchContext $searchContext, $term ) {
 		$this->buildEntitySearchQuery( $searchContext, $term );
@@ -143,17 +141,13 @@ class EntityFullTextQueryBuilder implements FullTextQueryBuilder {
 			[ "labels.{$this->userLanguage}.near_match_folded", $profile['lang-folded'] ],
 		];
 
-		if ( empty( $this->stemmingSettings[$this->userLanguage]['query'] ) ) {
-			$fieldsTokenized = [
-				[ "labels.{$this->userLanguage}.plain", $profile['lang-partial'] ],
-				[ "descriptions.{$this->userLanguage}.plain", $profile['lang-partial'] ],
-			];
-		} else {
-			$fieldsTokenized = [
-				[ "descriptions.{$this->userLanguage}", $profile['lang-partial'] ],
-				[ "labels.{$this->userLanguage}.plain", $profile['lang-partial'] ],
-				[ "descriptions.{$this->userLanguage}.plain", $profile['lang-partial'] ],
-			];
+		$fieldsTokenized = [
+			[ "labels.{$this->userLanguage}.plain", $profile['lang-partial'] ],
+			[ "descriptions.{$this->userLanguage}.plain", $profile['lang-partial'] ],
+		];
+		if ( !empty( $this->stemmingSettings[$this->userLanguage]['query'] ) ) {
+			$fieldsTokenized[] = [ "labels.{$this->userLanguage}", $profile['lang-partial'] ];
+			$fieldsTokenized[] = [ "descriptions.{$this->userLanguage}", $profile['lang-partial'] ];
 		}
 
 		$searchLanguageCodes = $this->languageFallbackChainFactory->newFromLanguageCode( $this->userLanguage )
@@ -167,6 +161,9 @@ class EntityFullTextQueryBuilder implements FullTextQueryBuilder {
 				$stemFilterFields[] = "descriptions.{$fallbackCode}.plain";
 			} else {
 				$stemFilterFields[] = "descriptions.{$fallbackCode}";
+				// only add the stemmed version in the filter
+				// labels should be copied to the text field and thus be captured by the filter on the all field
+				$stemFilterFields[] = "labels.{$fallbackCode}";
 			}
 
 			if ( $fallbackCode === $this->userLanguage ) {
@@ -181,11 +178,10 @@ class EntityFullTextQueryBuilder implements FullTextQueryBuilder {
 
 			$weight = $profile['fallback-partial'] * $discount;
 			$fieldsTokenized[] = [ "labels.{$fallbackCode}.plain", $weight ];
-			if ( empty( $this->stemmingSettings[$fallbackCode]['query'] ) ) {
-				$fieldsTokenized[] = [ "descriptions.{$fallbackCode}.plain", $weight ];
-			} else {
+			$fieldsTokenized[] = [ "descriptions.{$fallbackCode}.plain", $weight ];
+			if ( !empty( $this->stemmingSettings[$fallbackCode]['query'] ) ) {
 				$fieldsTokenized[] = [ "descriptions.{$fallbackCode}", $weight ];
-				$fieldsTokenized[] = [ "descriptions.{$fallbackCode}.plain", $weight ];
+				$fieldsTokenized[] = [ "labels.{$fallbackCode}", $weight ];
 			}
 
 			$discount *= $profile['fallback-discount'];
@@ -312,9 +308,7 @@ class EntityFullTextQueryBuilder implements FullTextQueryBuilder {
 			// fallback
 			new MatchNone(),
 			// field
-			null,
-			// analyzer
-			'text_search'
+			"text"
 		);
 		$tokCount->addCondition(
 			TokenCountRouter::GT,

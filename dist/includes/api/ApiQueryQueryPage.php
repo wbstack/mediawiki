@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2010 Roan Kattouw "<Firstname>.<Lastname>@gmail.com"
+ * Copyright © 2010 Roan Kattouw <roan.kattouw@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,12 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
 use MediaWiki\MainConfigNames;
+use MediaWiki\SpecialPage\QueryPage;
 use MediaWiki\SpecialPage\SpecialPageFactory;
+use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 
@@ -37,19 +41,11 @@ class ApiQueryQueryPage extends ApiQueryGeneratorBase {
 	 */
 	private $queryPages;
 
-	/**
-	 * @var SpecialPageFactory
-	 */
-	private $specialPageFactory;
+	private SpecialPageFactory $specialPageFactory;
 
-	/**
-	 * @param ApiQuery $query
-	 * @param string $moduleName
-	 * @param SpecialPageFactory $specialPageFactory
-	 */
 	public function __construct(
 		ApiQuery $query,
-		$moduleName,
+		string $moduleName,
 		SpecialPageFactory $specialPageFactory
 	) {
 		parent::__construct( $query, $moduleName, 'qp' );
@@ -91,7 +87,7 @@ class ApiQueryQueryPage extends ApiQueryGeneratorBase {
 	}
 
 	/**
-	 * @param ApiPageSet|null $resultPageSet
+	 * @param ApiPageSet|null $resultPageSet Set when used as a generator, null otherwise
 	 */
 	public function run( $resultPageSet = null ) {
 		$params = $this->extractRequestParams();
@@ -102,20 +98,22 @@ class ApiQueryQueryPage extends ApiQueryGeneratorBase {
 			$this->dieWithError( 'apierror-specialpage-cantexecute' );
 		}
 
-		$r = [ 'name' => $params['page'] ];
-		if ( $qp->isCached() ) {
-			if ( !$qp->isCacheable() ) {
-				$r['disabled'] = true;
-			} else {
-				$r['cached'] = true;
-				$ts = $qp->getCachedTimestamp();
-				if ( $ts ) {
-					$r['cachedtimestamp'] = wfTimestamp( TS_ISO_8601, $ts );
+		if ( $resultPageSet === null ) {
+			$r = [ 'name' => $params['page'] ];
+			if ( $qp->isCached() ) {
+				if ( !$qp->isCacheable() ) {
+					$r['disabled'] = true;
+				} else {
+					$r['cached'] = true;
+					$ts = $qp->getCachedTimestamp();
+					if ( $ts ) {
+						$r['cachedtimestamp'] = wfTimestamp( TS_ISO_8601, $ts );
+					}
+					$r['maxresults'] = $this->getConfig()->get( MainConfigNames::QueryCacheLimit );
 				}
-				$r['maxresults'] = $this->getConfig()->get( MainConfigNames::QueryCacheLimit );
 			}
+			$result->addValue( [ 'query' ], $this->getModuleName(), $r );
 		}
-		$result->addValue( [ 'query' ], $this->getModuleName(), $r );
 
 		if ( $qp->isCached() && !$qp->isCacheable() ) {
 			// Disabled query page, don't run the query
@@ -208,3 +206,6 @@ class ApiQueryQueryPage extends ApiQueryGeneratorBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Querypage';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryQueryPage::class, 'ApiQueryQueryPage' );

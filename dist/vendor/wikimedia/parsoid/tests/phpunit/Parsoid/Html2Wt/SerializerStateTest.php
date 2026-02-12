@@ -4,11 +4,12 @@ namespace Test\Parsoid\Html2Wt;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Wikimedia\Parsoid\Core\SelserData;
+use Wikimedia\Parsoid\Core\SelectiveUpdateData;
 use Wikimedia\Parsoid\DOM\Element;
 use Wikimedia\Parsoid\Html2Wt\SerializerState;
 use Wikimedia\Parsoid\Html2Wt\WikitextSerializer;
 use Wikimedia\Parsoid\Mocks\MockEnv;
+use Wikimedia\Parsoid\Tokens\SourceRange;
 use Wikimedia\Parsoid\Utils\DOMCompat;
 use Wikimedia\Zest\Zest;
 
@@ -33,13 +34,13 @@ class SerializerStateTest extends TestCase {
 	}
 
 	private function getState(
-		array $options = [], MockEnv $env = null, WikitextSerializer $serializer = null
+		array $options = [], ?MockEnv $env = null, ?WikitextSerializer $serializer = null
 	): SerializerState {
 		if ( !$env ) {
 			$env = new MockEnv( [] );
 		}
 		if ( !$serializer ) {
-			$serializer = new WikitextSerializer( [ 'env' => $env ] );
+			$serializer = new WikitextSerializer( $env, [] );
 		}
 		return new SerializerState( $serializer, $options );
 	}
@@ -98,12 +99,12 @@ class SerializerStateTest extends TestCase {
 	 */
 	public function testGetOrigSrc() {
 		$env = new MockEnv( [] );
-		$selserData = new SelserData( '0123456789' );
+		$selserData = new SelectiveUpdateData( '0123456789' );
 		$state = $this->getState( [
 			'selserData' => $selserData,
 		], $env );
 		$state->initMode( true );
-		$this->assertSame( '23', $state->getOrigSrc( 2, 4 ) );
+		$this->assertSame( '23', $state->getOrigSrc( new SourceRange( 2, 4 ) ) );
 	}
 
 	/**
@@ -149,14 +150,13 @@ class SerializerStateTest extends TestCase {
 		$state->serializeChildren( $node );
 
 		$node = $this->getNode( '<div id="main"><span></span><span></span></div>' );
+		$calledNode = [ $node->firstChild, $node->firstChild->nextSibling ];
 		$serializer = $this->getBaseSerializerMock( [ 'serializeNode' ] );
 		$serializer->expects( $this->exactly( 2 ) )
 			->method( 'serializeNode' )
-			->withConsecutive(
-				[ $node->firstChild ],
-				[ $node->firstChild->nextSibling ]
-			)
-			->willReturnCallback( static function ( Element $node ) {
+			->willReturnCallback( function ( Element $node ) use ( &$calledNode ) {
+				$nextNode = array_shift( $calledNode );
+				$this->assertSame( $nextNode, $node );
 				return $node->nextSibling;
 			} );
 		$state = $this->getState( [], null, $serializer );
@@ -174,9 +174,9 @@ class SerializerStateTest extends TestCase {
 				return $node->nextSibling;
 			} );
 		$state = $this->getState( [], null, $serializer );
-		$this->assertEmpty( $state->wteHandlerStack );
+		$this->assertSame( [], $state->wteHandlerStack );
 		$state->serializeChildren( $node, $callback );
-		$this->assertEmpty( $state->wteHandlerStack );
+		$this->assertSame( [], $state->wteHandlerStack );
 	}
 
 	/**

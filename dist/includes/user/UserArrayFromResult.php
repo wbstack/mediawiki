@@ -20,6 +20,10 @@
  * @file
  */
 
+namespace MediaWiki\User;
+
+use Countable;
+use stdClass;
 use Wikimedia\Rdbms\IResultWrapper;
 
 class UserArrayFromResult extends UserArray implements Countable {
@@ -42,7 +46,7 @@ class UserArrayFromResult extends UserArray implements Countable {
 	}
 
 	/**
-	 * @param bool|stdClass $row
+	 * @param stdClass|false $row
 	 * @return void
 	 */
 	protected function setCurrent( $row ) {
@@ -87,3 +91,6 @@ class UserArrayFromResult extends UserArray implements Countable {
 		return $this->current !== false;
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( UserArrayFromResult::class, 'UserArrayFromResult' );

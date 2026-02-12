@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace Wikibase\Client\Usage;
 
 use MediaWiki\Cache\LinkBatchFactory;
-use TitleFactory;
+use MediaWiki\Title\TitleFactory;
 use Traversable;
 use Wikibase\Client\Store\DescriptionLookup;
 use Wikibase\DataModel\Entity\EntityId;
@@ -33,7 +33,7 @@ use Wikibase\Lib\Store\SiteLinkLookup;
  * as part of the search result for the page (typically on mobile),
  * even if it is never used in the page itself.
  *
- * @see @ref md_docs_topics_usagetracking for virtual usage,
+ * @see @ref docs_topics_usagetracking for virtual usage,
  * a similar but separate concept.
  *
  * @license GPL-2.0-or-later
@@ -214,6 +214,7 @@ class ImplicitDescriptionUsageLookup implements UsageLookup {
 		$links = $this->siteLinkLookup->getLinks( $numericItemIds, [ $this->globalSiteId ] );
 		// preload the titles in bulk (page ID and language)
 		$titles = array_map( [ $this->titleFactory, 'newFromDBkey' ], array_column( $links, 1 ) );
+		$titles = array_values( array_filter( $titles ) ); // filter out null titles (if any)
 		$linkBatch = $this->linkBatchFactory->newLinkBatch( $titles );
 		$linkBatch->setCaller( __METHOD__ );
 		$linkBatch->execute();

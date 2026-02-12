@@ -1,23 +1,15 @@
-var
+const
 	mfExtend = require( './mfExtend' ),
 	util = require( './util' ),
 	View = require( './View' );
 
 /**
- * A wrapper for creating an icon.
- *
- * @class Icon
- * @extends View
- *
+ * @class module:mobile.startup/Icon
+ * @classdesc A wrapper for creating an icon.
+ * @extends module:mobile.startup/View
  * @param {Object} options Configuration options
  */
 function Icon( options ) {
-	if ( options.href ) {
-		options.tagName = 'a';
-	}
-	if ( options.tagName === 'button' ) {
-		options.isTypeButton = true;
-	}
 	View.call( this, options );
 }
 
@@ -27,8 +19,7 @@ mfExtend( Icon, View, {
 	 * @memberof Icon
 	 * @instance
 	 */
-	preRender: function () {
-		this.options._rotationClass = this.getRotationClass();
+	preRender() {
 		this.options._iconClasses = this.getIconClasses();
 	},
 	/**
@@ -39,19 +30,19 @@ mfExtend( Icon, View, {
 	 * @instance
 	 * @private
 	 */
-	getRotationClass: function () {
-		var rotationClass = '';
+	getRotationClass() {
+		let rotationClass = '';
 		if ( this.options.rotation ) {
 			switch ( this.options.rotation ) {
 				case -180:
 				case 180:
-					rotationClass = 'mf-mw-ui-icon-rotate-flip';
+					rotationClass = 'mf-icon-rotate-flip';
 					break;
 				case -90:
-					rotationClass = 'mf-mw-ui-icon-rotate-anti-clockwise';
+					rotationClass = 'mf-icon-rotate-anti-clockwise';
 					break;
 				case 90:
-					rotationClass = 'mf-mw-ui-icon-rotate-clockwise';
+					rotationClass = 'mf-icon-rotate-clockwise';
 					break;
 				case 0:
 					break;
@@ -68,24 +59,25 @@ mfExtend( Icon, View, {
 	 * @instance
 	 * @private
 	 */
-	getIconClasses: function () {
-		var base = this.options.base;
-		var name = this.options.name;
-		var type = this.options.type;
-		var additionalClassNames = this.options.additionalClassNames;
+	getIconClasses() {
+		const base = this.options.base;
+		const icon = this.options.icon;
+		const isSmall = this.options.isSmall;
+		const rotationClasses = this.getRotationClass();
+		const additionalClassNames = this.options.additionalClassNames;
 
-		var modifiers = '';
-		if ( type ) {
-			modifiers += base + '-' + type + ' ';
+		let classes = base + ' ';
+		if ( icon ) {
+			classes += this.getGlyphClassName() + ' ';
 		}
-		if ( name ) {
-			modifiers += this.getGlyphClassName();
+		if ( isSmall ) {
+			classes += 'mf-icon--small ';
 		}
-		if ( type === 'element' ) {
-			additionalClassNames += ' mw-ui-button mw-ui-quiet';
+		if ( additionalClassNames ) {
+			classes += additionalClassNames + ' ';
 		}
 
-		return base + ' ' + modifiers + ' ' + additionalClassNames;
+		return classes + rotationClasses;
 	},
 	/**
 	 * @inheritdoc
@@ -96,37 +88,25 @@ mfExtend( Icon, View, {
 	/**
 	 * @memberof Icon
 	 * @instance
-	 * @mixes View#defaults
-	 * @property {Object} defaults Default options hash.
-	 * @property {boolean} defaults.isSmall Whether the icon should be small.
-	 * @property {string} [defaults.href] value of href attribute,
-	 *  when set tagName will default to anchor tag
-	 * @property {string} defaults.tagName The name of the tag in which the icon is wrapped.
-	 *  Defaults to 'a' when href option present.
-	 * @property {string} defaults.base String used as a base for generating class names.
-	 * Defaults to 'mw-ui-icon'.
-	 * @property {string} defaults.name Name of the icon.
-	 * @property {string} defaults.type Icon type
-	 * Defaults to 'element'.
-	 * @property {string} defaults.title Tooltip text.
-	 * @property {string} defaults.additionalClassNames Additional classes to be added to the icon.
+	 * @mixes module:mobile.startup/View#defaults
+	 * @property {Object} defaults
+	 * @property {string} defaults.base Base icon class.
+	 * Defaults to 'mf-icon'.
+	 * @property {string} defaults.glyphPrefix Prefix for the icon class
+	 * Defaults to 'mf'.
+	 * @property {string} defaults.icon Name of the icon.
 	 * @property {boolean} defaults.rotation will rotate the icon by a certain number
-	 *  of degrees.
-	 *  Must be ±90, 0 or ±180 or will throw exception.
-	 * @property {boolean} defaults.disabled should only be used with tagName button
+	 *  of degrees. Must be ±90, 0 or ±180 or will throw exception.
+	 * @property {boolean} defaults.isSmall If icon is small.
+	 * @property {string} defaults.addtionalClassNames Additional classes to be added to the icon.
 	 */
 	defaults: {
+		base: 'mf-icon',
+		glyphPrefix: null,
+		icon: '',
 		rotation: 0,
-		href: undefined,
-		glyphPrefix: 'mf',
-		tagName: 'div',
-		disabled: false,
 		isSmall: false,
-		base: 'mw-ui-icon',
-		name: '',
-		type: 'element',
-		title: '',
-		additionalClassNames: ''
+		additionalClassNames: null
 	},
 	/**
 	 * Return the full class name that is required for the icon to render
@@ -135,7 +115,7 @@ mfExtend( Icon, View, {
 	 * @instance
 	 * @return {string}
 	 */
-	getClassName: function () {
+	getClassName() {
 		return this.$el.attr( 'class' );
 	},
 	/**
@@ -145,23 +125,15 @@ mfExtend( Icon, View, {
 	 * @instance
 	 * @return {string}
 	 */
-	getGlyphClassName: function () {
+	getGlyphClassName() {
 		if ( this.options.glyphPrefix ) {
-			return this.options.base + '-' + this.options.glyphPrefix + '-' + this.options.name;
+			return 'mf-icon-' + this.options.glyphPrefix + '-' + this.options.icon;
 		}
-		return this.options.base + '-' + this.options.name;
+		return 'mf-icon-' + this.options.icon;
 	},
+
 	template: util.template(
-		'<{{tagName}} ' +
-			'{{#isTypeButton}}type="button" {{#disabled}}disabled{{/disabled}}{{/isTypeButton}} ' +
-			'class="{{_iconClasses}} ' +
-				'{{#isSmall}}mw-ui-icon-small{{/isSmall}} ' +
-				'{{#_rotationClass}}{{_rotationClass}}{{/_rotationClass}}" ' +
-			'{{#id}}id="{{id}}"{{/id}} ' +
-			'{{#href}}href="{{href}}"{{/href}} ' +
-			'{{#title}}title="{{title}}"{{/title}}>' +
-				'{{label}}' +
-		'</{{tagName}}>'
+		'<span class="{{_iconClasses}}"> </span>'
 	)
 } );
 

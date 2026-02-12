@@ -1,9 +1,9 @@
-var DataManager = require( 'ext.kartographer.data' );
+const DataManager = require( 'ext.kartographer.data' );
 
 module.exports = function () {
 	return DataManager( {
 		createPromise: function ( callback ) {
-			var promise = $.Deferred();
+			const promise = $.Deferred();
 			try {
 				callback( promise.resolve.bind( promise ), promise.reject.bind( promise ) );
 			} catch ( err ) {
@@ -12,40 +12,31 @@ module.exports = function () {
 			return promise;
 		},
 		whenAllPromises: function ( promises ) {
-			return $.when.apply( $, promises );
+			return $.when.apply( $, promises ).then(
+				// Cast function parameters to an array of resolved values.
+				( ...args ) => args
+			);
 		},
-		isEmptyObject: function () {
-			return $.isEmptyObject.apply( $, arguments );
+		isEmptyObject: function ( ...args ) {
+			return $.isEmptyObject( ...args );
 		},
-		isPlainObject: function () {
-			return $.isPlainObject.apply( $, arguments );
+		isPlainObject: function ( ...args ) {
+			return $.isPlainObject( ...args );
 		},
-		extend: function () {
-			return $.extend.apply( $, arguments );
+		extend: function ( ...args ) {
+
+			return $.extend( ...args );
 		},
-		getJSON: function () {
-			return $.getJSON.apply( $, arguments );
+		getJSON: function ( ...args ) {
+			return $.getJSON( ...args );
 		},
-		debounce: function () {
-			return mw.util.debounce.apply( mw.util, arguments );
-		},
-		bind: function () {
-			return $.proxy.apply( $, arguments );
+		bind: function ( ...args ) {
+			// eslint-disable-next-line no-jquery/no-proxy
+			return $.proxy( ...args );
 		},
 		mwApi: function ( data ) {
 			return ( new mw.Api() ).get( data );
 		},
-		mwHtmlElement: function () {
-			return mw.html.element.apply( mw.html, arguments );
-		},
-		mwMsg: function () {
-			return mw.msg.apply( mw.msg, arguments );
-		},
-		mwUri: function ( data ) {
-			return new mw.Uri( data );
-		},
-		clientStore: mw.config.get( 'wgKartographerLiveData' ),
-		title: mw.config.get( 'wgPageName' ),
-		revid: mw.config.get( 'wgKartographerVersionedLiveMaps' ) && mw.config.get( 'wgRevisionId' )
+		clientStore: mw.config.get( 'wgKartographerLiveData' )
 	} );
 };

@@ -20,7 +20,10 @@
  * @file
  * @ingroup DifferenceEngine
  */
+use MediaWiki\Content\Content;
+use MediaWiki\Context\DerivativeContext;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Output\OutputPage;
 
 /**
  * B/C adapter for turning a DifferenceEngine into a SlotDiffRenderer.
@@ -52,9 +55,8 @@ class DifferenceEngineSlotDiffRenderer extends SlotDiffRenderer {
 	}
 
 	/** @inheritDoc */
-	public function getDiff( Content $oldContent = null, Content $newContent = null ) {
+	public function getDiff( ?Content $oldContent = null, ?Content $newContent = null ) {
 		$this->normalizeContents( $oldContent, $newContent );
-		// @phan-suppress-next-line PhanTypeMismatchArgumentNullable Null handled by normalizeContents
 		return $this->differenceEngine->generateContentDiffBody( $oldContent, $newContent );
 	}
 

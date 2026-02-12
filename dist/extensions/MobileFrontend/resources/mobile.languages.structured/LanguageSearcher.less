@@ -1,14 +1,17 @@
+@import 'mediawiki.skin.variables.less';
 @import '../../mobile.less/mobile.variables.less';
 
 .language-searcher {
 	.panel {
-		background-color: #fff;
+		background-color: @background-color-base;
 		padding: 0.5em;
 	}
 
 	.search-box {
 		// Always show the language search input
 		display: block;
+		// Make sure the absolutely positioned search icon overlaps the search input
+		position: relative;
 	}
 
 	.search {
@@ -29,16 +32,22 @@
 
 	.site-link-list {
 		li {
-			background-color: #fff;
+			background-color: @background-color-base;
 			padding: 0;
 		}
 
+		[ dir='ltr' ] {
+			/* @noflip */
+			text-align: left;
+		}
+
 		[ dir='rtl' ] {
+			/* @noflip */
 			text-align: right;
 		}
 
 		a {
-			border-top: solid 1px @colorGray14;
+			border-top: @border-width-base @border-style-base @border-color-muted;
 			cursor: pointer;
 			display: block;
 			padding: 0.75em 1em;
@@ -53,12 +62,13 @@
 			}
 
 			.autonym {
-				color: #000;
+				// FIXME: Does this really need to be emphasized?
+				color: @color-emphasized; // TODO
 				font-weight: bold;
 			}
 
 			.title {
-				color: @colorGray7;
+				color: @color-subtle;
 				padding-top: 0.5em;
 			}
 		}
@@ -73,7 +83,7 @@
 	}
 }
 
-@media all and ( min-width: @width-breakpoint-tablet ) {
+@media all and ( min-width: @min-width-breakpoint-tablet ) {
 	.language-searcher {
 		.site-link-list {
 			padding-left: 0;

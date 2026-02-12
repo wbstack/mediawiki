@@ -23,8 +23,11 @@
  * @since 1.22
  */
 
+use MediaWiki\Api\ApiResult;
 use MediaWiki\MainConfigNames;
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Message\Message;
+use MediaWiki\Title\Title;
+use MediaWiki\WikiMap\WikiMap;
 
 /**
  * This class formats rights log entries.
@@ -32,12 +35,12 @@ use MediaWiki\MediaWikiServices;
  * @since 1.21
  */
 class RightsLogFormatter extends LogFormatter {
-	protected function makePageLink( Title $title = null, $parameters = [], $html = null ) {
+	protected function makePageLink( ?Title $title = null, $parameters = [], $html = null ) {
 		$userrightsInterwikiDelimiter = $this->context->getConfig()
 			->get( MainConfigNames::UserrightsInterwikiDelimiter );
 
 		if ( !$this->plaintext ) {
-			$text = MediaWikiServices::getInstance()->getContentLanguage()->
+			$text = $this->getContentLanguage()->
 				ucfirst( $title->getDBkey() );
 			$parts = explode( $userrightsInterwikiDelimiter, $text, 2 );
 
@@ -108,7 +111,7 @@ class RightsLogFormatter extends LogFormatter {
 		}
 		if ( count( $newGroups ) ) {
 			// Array_values is used here because of T44211
-			// see use of array_unique in UserrightsPage::doSaveUserGroups on $newGroups.
+			// see use of array_unique in SpecialUserRights::doSaveUserGroups on $newGroups.
 			$params[4] = Message::rawParam( $this->formatRightsList( array_values( $newGroups ),
 				$allParams['newmetadata'] ?? [] ) );
 		} else {
@@ -144,7 +147,7 @@ class RightsLogFormatter extends LogFormatter {
 					$expiryFormatted, $expiryFormattedD, $expiryFormattedT )->parse();
 			} else {
 				// the right does not expire; just insert the group name
-				$permList[] = $group;
+				$permList[] = htmlspecialchars( $group );
 			}
 
 			next( $groups );

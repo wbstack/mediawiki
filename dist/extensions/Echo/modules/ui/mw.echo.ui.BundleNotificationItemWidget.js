@@ -11,7 +11,7 @@
 	 * @param {mw.echo.Controller} controller Echo notifications controller
 	 * @param {mw.echo.dm.BundleNotificationItem} model Notification group model
 	 * @param {Object} [config] Configuration object
-	 * @cfg {boolean} [animateSorting=false] Animate the sorting of items
+	 * @param {boolean} [config.animateSorting=false] Animate the sorting of items
 	 */
 	mw.echo.ui.BundleNotificationItemWidget = function MwEchoUiBundleNotificationItemWidget( controller, model, config ) {
 		config = config || {};
@@ -23,7 +23,7 @@
 
 		this.listWidget = new mw.echo.ui.SortedListWidget(
 			// Sorting callback
-			function ( a, b ) {
+			( ( a, b ) => {
 				// Reverse sorting
 				if ( b.getTimestamp() < a.getTimestamp() ) {
 					return -1;
@@ -33,7 +33,7 @@
 
 				// Fallback on IDs
 				return b.getId() - a.getId();
-			},
+			} ),
 			// Config
 			{
 				classes: [ 'mw-echo-ui-bundleNotificationItemWidget-group' ],
@@ -48,6 +48,13 @@
 			// otherwise the 'slideUp' and 'slideDown' jQuery effects don't
 			// work
 			.css( 'display', 'none' );
+
+		// Prevent clicks on the list padding area from activating the primary link
+		this.listWidget.$element.on( 'click', ( e ) => {
+			if ( e.target.closest( 'a' ) === this.$element[ 0 ] ) {
+				e.preventDefault();
+			}
+		} );
 
 		// Initialize closed
 		this.expanded = false;
@@ -98,23 +105,6 @@
 	/**
 	 * @inheritdoc
 	 */
-	mw.echo.ui.BundleNotificationItemWidget.prototype.onPrimaryLinkClick = function () {
-		// Log notification click
-
-		mw.echo.logger.logInteraction(
-			mw.echo.Logger.static.actions.notificationClick,
-			mw.echo.Logger.static.context.popup,
-			this.getModel().getId(),
-			this.getModel().getCategory(),
-			false,
-			// Source of this notification if it is cross-wiki
-			this.bundle ? this.getModel().getSource() : ''
-		);
-	};
-
-	/**
-	 * @inheritdoc
-	 */
 	mw.echo.ui.BundleNotificationItemWidget.prototype.markRead = function ( isRead ) {
 		this.controller.markEntireListModelRead( this.model.getModelName(), isRead );
 	};
@@ -124,21 +114,20 @@
 	 * in the model
 	 */
 	mw.echo.ui.BundleNotificationItemWidget.prototype.populateFromModel = function () {
-		var widget = this;
-		this.getList().addItems( this.model.getList().getItems().map( function ( singleNotifModel ) {
-			return new mw.echo.ui.SingleNotificationItemWidget(
-				widget.controller,
-				singleNotifModel,
-				{
-					$overlay: widget.$overlay,
-					bundle: true
-				}
-			);
-		} ) );
+		this.getList().addItems( this.model.getList().getItems().map( ( singleNotifModel ) => new mw.echo.ui.SingleNotificationItemWidget(
+			this.controller,
+			singleNotifModel,
+			{
+				$overlay: this.$overlay,
+				bundle: true
+			}
+		) ) );
 	};
 
 	/**
 	 * Update item state when the item model changes.
+	 *
+	 * @fires OO.EventEmitter#sortChange
 	 */
 	mw.echo.ui.BundleNotificationItemWidget.prototype.updateDataFromModel = function () {
 		this.toggleRead( this.model.isRead() );
@@ -160,8 +149,6 @@
 	 * Only fetch the first time we expand.
 	 */
 	mw.echo.ui.BundleNotificationItemWidget.prototype.expand = function () {
-		var widget = this;
-
 		this.toggleExpanded( !this.expanded );
 		this.updateExpandButton();
 
@@ -170,14 +157,6 @@
 		if ( !this.expanded ) {
 			return;
 		}
-
-		// Log the expand action
-		mw.echo.logger.logInteraction(
-			mw.echo.Logger.static.actions.notificationBundleExpand,
-			mw.echo.Logger.static.context.popup,
-			widget.getModel().getId(),
-			widget.getModel().getCategory()
-		);
 	};
 
 	/**

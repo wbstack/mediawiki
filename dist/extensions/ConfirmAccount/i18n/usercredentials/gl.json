@@ -7,7 +7,7 @@
 			"Xosé"
 		]
 	},
-	"usercredentials": "Credenciais do usuario",
+	"usercredentials": "Credenciais de usuario",
 	"usercredentials-leg": "Verificar as credenciais confirmadas dun usuario",
 	"usercredentials-user": "Nome de usuario:",
 	"usercredentials-text": "A continuación están as credenciais validadas das contas de usuario seleccionadas.",
@@ -26,5 +26,5 @@
 	"usercredentials-xff": "X-Forwarded-For orixinal:",
 	"usercredentials-agent": "Axente de usuario orixinal:",
 	"usercredentials-member": "Dereitos:",
-	"usercredentials-badid": "Non se atoparon credenciais para este usuario. Comprobe que o nome estea escrito correctamente."
+	"usercredentials-badid": "Non se atoparon credenciais para este usuario.\nComproba que o nome estea escrito correctamente."
 }

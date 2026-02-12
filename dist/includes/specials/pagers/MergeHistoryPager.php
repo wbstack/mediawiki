@@ -19,20 +19,29 @@
  * @ingroup Pager
  */
 
+namespace MediaWiki\Pager;
+
+use ChangeTags;
 use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\CommentFormatter\CommentFormatter;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Html\Html;
+use MediaWiki\Linker\Linker;
+use MediaWiki\Linker\LinkRenderer;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageIdentity;
+use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\RevisionStore;
-use Wikimedia\Rdbms\ILoadBalancer;
+use MediaWiki\Xml\Xml;
+use Wikimedia\Rdbms\IConnectionProvider;
 
 /**
  * @ingroup Pager
  */
 class MergeHistoryPager extends ReverseChronologicalPager {
 
+	/** @inheritDoc */
 	public $mGroupByDate = true;
-
-	/** @var SpecialMergeHistory */
-	public $mForm;
 
 	/** @var array */
 	public $mConds;
@@ -40,51 +49,71 @@ class MergeHistoryPager extends ReverseChronologicalPager {
 	/** @var int */
 	private $articleID;
 
-	/** @var int */
+	/** @var string */
 	private $maxTimestamp;
 
-	/** @var LinkBatchFactory */
-	private $linkBatchFactory;
+	/** @var string */
+	private $maxRevId;
 
-	/** @var RevisionStore */
-	private $revisionStore;
+	/** @var string */
+	private $mergePointTimestamp;
+
+	/** @var int[] */
+	public $prevId;
+
+	private LinkBatchFactory $linkBatchFactory;
+	private RevisionStore $revisionStore;
+	private CommentFormatter $commentFormatter;
 
 	/**
-	 * @param SpecialMergeHistory $form
+	 * @param IContextSource $context
+	 * @param LinkRenderer $linkRenderer
 	 * @param LinkBatchFactory $linkBatchFactory
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 * @param RevisionStore $revisionStore
+	 * @param CommentFormatter $commentFormatter
 	 * @param array $conds
 	 * @param PageIdentity $source
 	 * @param PageIdentity $dest
+	 * @param string $mergePointTimestamp
 	 */
 	public function __construct(
-		SpecialMergeHistory $form,
+		IContextSource $context,
+		LinkRenderer $linkRenderer,
 		LinkBatchFactory $linkBatchFactory,
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		RevisionStore $revisionStore,
+		CommentFormatter $commentFormatter,
 		$conds,
 		PageIdentity $source,
-		PageIdentity $dest
+		PageIdentity $dest,
+		$mergePointTimestamp
 	) {
-		$this->mForm = $form;
 		$this->mConds = $conds;
 		$this->articleID = $source->getId();
 
-		$dbr = $loadBalancer->getConnectionRef( ILoadBalancer::DB_REPLICA );
-		$maxtimestamp = $dbr->selectField(
-			'revision',
-			'MIN(rev_timestamp)',
-			[ 'rev_page' => $dest->getId() ],
-			__METHOD__
-		);
+		$dbr = $dbProvider->getReplicaDatabase();
+		$maxtimestamp = $dbr->newSelectQueryBuilder()
+			->select( 'MIN(rev_timestamp)' )
+			->from( 'revision' )
+			->where( [ 'rev_page' => $dest->getId() ] )
+			->caller( __METHOD__ )->fetchField();
+		$maxRevId = $dbr->newSelectQueryBuilder()
+			->select( "MIN(rev_id)" )
+			->from( 'revision' )
+			->where( [ 'rev_page' => $dest->getId() ] )
+			->where( [ 'rev_timestamp' => $maxtimestamp ] )
+			->caller( __METHOD__ )->fetchField();
 		$this->maxTimestamp = $maxtimestamp;
+		$this->maxRevId = $maxRevId;
+		$this->mergePointTimestamp = $mergePointTimestamp;
 
-		// Set database before parent constructor to avoid setting it there with wfGetDB
+		// Set database before parent constructor to avoid setting it there
 		$this->mDb = $dbr;
-		parent::__construct( $form->getContext() );
+		parent::__construct( $context, $linkRenderer );
 		$this->linkBatchFactory = $linkBatchFactory;
 		$this->revisionStore = $revisionStore;
+		$this->commentFormatter = $commentFormatter;
 	}
 
 	protected function doBatchLookups() {
@@ -92,7 +121,7 @@ class MergeHistoryPager extends ReverseChronologicalPager {
 		$this->mResult->seek( 0 );
 		$batch = $this->linkBatchFactory->newLinkBatch();
 		# Give some pointers to make (last) links
-		$this->mForm->prevId = [];
+		$this->prevId = [];
 		$rev_id = null;
 		foreach ( $this->mResult as $row ) {
 			$batch->add( NS_USER, $row->rev_user_text );
@@ -100,9 +129,9 @@ class MergeHistoryPager extends ReverseChronologicalPager {
 
 			if ( isset( $rev_id ) ) {
 				if ( $rev_id > $row->rev_id ) {
-					$this->mForm->prevId[$rev_id] = $row->rev_id;
+					$this->prevId[$rev_id] = $row->rev_id;
 				} elseif ( $rev_id < $row->rev_id ) {
-					$this->mForm->prevId[$row->rev_id] = $rev_id;
+					$this->prevId[$row->rev_id] = $rev_id;
 				}
 			}
 
@@ -128,36 +157,96 @@ class MergeHistoryPager extends ReverseChronologicalPager {
 	}
 
 	public function formatRow( $row ) {
-		return $this->mForm->formatRevisionRow( $row );
+		$revRecord = $this->revisionStore->newRevisionFromRow( $row );
+
+		$linkRenderer = $this->getLinkRenderer();
+
+		$stxt = '';
+		$last = $this->msg( 'last' )->escaped();
+
+		$ts = wfTimestamp( TS_MW, $row->rev_timestamp );
+		$tsWithId = $ts . "|" . $row->rev_id;
+		$checkBox = Xml::radio(
+			'mergepoint', $tsWithId,
+			$this->mergePointTimestamp === $ts || $this->mergePointTimestamp === $tsWithId
+		);
+
+		$user = $this->getUser();
+
+		$pageLink = $linkRenderer->makeKnownLink(
+			$revRecord->getPageAsLinkTarget(),
+			$this->getLanguage()->userTimeAndDate( $ts, $user ),
+			[],
+			[ 'oldid' => $revRecord->getId() ]
+		);
+		if ( $revRecord->isDeleted( RevisionRecord::DELETED_TEXT ) ) {
+			$class = Linker::getRevisionDeletedClass( $revRecord );
+			$pageLink = '<span class=" ' . $class . '">' . $pageLink . '</span>';
+		}
+
+		# Last link
+		if ( !$revRecord->userCan( RevisionRecord::DELETED_TEXT, $this->getAuthority() ) ) {
+			$last = $this->msg( 'last' )->escaped();
+		} elseif ( isset( $this->prevId[$row->rev_id] ) ) {
+			$last = $linkRenderer->makeKnownLink(
+				$revRecord->getPageAsLinkTarget(),
+				$this->msg( 'last' )->text(),
+				[],
+				[
+					'diff' => $row->rev_id,
+					'oldid' => $this->prevId[$row->rev_id]
+				]
+			);
+		}
+
+		$userLink = Linker::revUserTools( $revRecord );
+
+		$size = $row->rev_len;
+		if ( $size !== null ) {
+			$stxt = Linker::formatRevisionSize( $size );
+		}
+		$comment = $this->commentFormatter->formatRevision( $revRecord, $user );
+
+		// Tags, if any.
+		[ $tagSummary, $classes ] = ChangeTags::formatSummaryRow(
+			$row->ts_tags,
+			'mergehistory',
+			$this->getContext()
+		);
+
+		return Html::rawElement( 'li', $classes,
+			$this->msg( 'mergehistory-revisionrow' )
+				->rawParams( $checkBox, $last, $pageLink, $userLink, $stxt, $comment, $tagSummary )->escaped() );
 	}
 
 	public function getQueryInfo() {
 		$dbr = $this->getDatabase();
-		$conds = $this->mConds;
-		$conds['rev_page'] = $this->articleID;
-		$conds[] = "rev_timestamp < " . $dbr->addQuotes( $this->maxTimestamp );
+		$queryBuilder = $this->revisionStore->newSelectQueryBuilder( $dbr )
+			->joinComment()
+			->joinPage()
+			->joinUser()
+			->where( $this->mConds )
+			->andWhere( [
+				'rev_page' => $this->articleID,
+				$dbr->buildComparison( "<",
+					[
+						"rev_timestamp" => $this->maxTimestamp,
+						"rev_id" => $this->maxRevId
+					]
+				)
+			] );
+		MediaWikiServices::getInstance()->getChangeTagsStore()->modifyDisplayQueryBuilder( $queryBuilder, 'revision' );
 
-		$queryInfo = $this->revisionStore->getQueryInfo( [ 'page', 'user' ] );
-		$queryInfo['conds'] = $conds;
-		$queryInfo['options'] = [];
-
-		// rename the "joins" field to "join_conds" as expected by the base class.
-		$queryInfo['join_conds'] = $queryInfo['joins'];
-		unset( $queryInfo['joins'] );
-
-		ChangeTags::modifyDisplayQuery(
-			$queryInfo['tables'],
-			$queryInfo['fields'],
-			$queryInfo['conds'],
-			$queryInfo['join_conds'],
-			$queryInfo['options'],
-			''
-		);
-
-		return $queryInfo;
+		return $queryBuilder->getQueryInfo( 'join_conds' );
 	}
 
 	public function getIndexField() {
-		return 'rev_timestamp';
+		return [ [ 'rev_timestamp', 'rev_id' ] ];
 	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( MergeHistoryPager::class, 'MergeHistoryPager' );

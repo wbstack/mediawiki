@@ -68,10 +68,10 @@
 	"ext-uls-setlang-accept": "Прифати промена",
 	"ext-uls-setlang-loading": "Применувам...",
 	"ext-uls-setlang-cancel": "Не менувај",
-	"ext-uls-actions-menu-header": "Повеќе можности",
 	"ext-uls-actions-menu-language-settings-item-label": "Отвори јазични поставки",
 	"ext-uls-empty-state-header": "Сè уште нема јазици",
 	"ext-uls-empty-state-desc": "Засега нема достапни јазици",
 	"ext-uls-empty-state-header-actions-available": "Сè уште нема јазици. Сакате да додадете нов?",
-	"ext-uls-empty-state-desc-actions-available": "Направете ја содржината достапна на повеќе јазици."
+	"ext-uls-empty-state-desc-actions-available": "Направете ја содржината достапна на повеќе јазици.",
+	"ext-uls-add-languages-button-label": "Додај јазици"
 }

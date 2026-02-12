@@ -29,15 +29,11 @@ use Wikimedia\Rdbms\LBFactory;
  * @since 1.38
  */
 class BlockRestrictionStoreFactory {
-	/** @var LBFactory */
-	private $loadBalancerFactory;
+	private LBFactory $loadBalancerFactory;
 
 	/** @var BlockRestrictionStore[] */
-	private $storeCache = [];
+	private array $storeCache = [];
 
-	/**
-	 * @param LBFactory $loadBalancerFactory
-	 */
 	public function __construct( LBFactory $loadBalancerFactory ) {
 		$this->loadBalancerFactory = $loadBalancerFactory;
 	}
@@ -54,7 +50,7 @@ class BlockRestrictionStoreFactory {
 		$storeCacheKey = $wikiId === WikiAwareEntity::LOCAL ? 'LOCAL' : 'crosswikistore-' . $wikiId;
 		if ( !isset( $this->storeCache[$storeCacheKey] ) ) {
 			$this->storeCache[$storeCacheKey] = new BlockRestrictionStore(
-				$this->loadBalancerFactory->getMainLB( $wikiId ),
+				$this->loadBalancerFactory,
 				$wikiId
 			);
 		}

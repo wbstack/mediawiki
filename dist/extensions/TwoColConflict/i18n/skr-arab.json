@@ -5,12 +5,16 @@
 			"Saraiki"
 		]
 	},
+	"twocolconflict-special-not-saved": "شائع کائنی تھیا",
 	"twocolconflict-split-current-version-header": "حالیہ نسخہ بمطابق $1",
 	"twocolconflict-split-not-saved-at": "اڄݨ شائع کائنی تھیا",
+	"twocolconflict-split-your-version-chosen": "تہاݙا ورژن",
+	"twocolconflict-split-select-all": "سبھ چݨو",
 	"twocolconflict-split-tour-popup-btn-text": "ٹھیک ہے، گھن گھدے۔",
 	"twocolconflict-split-edit-tooltip": "عبارت وچ تبدیلی کرو",
 	"twocolconflict-split-reset-tooltip": "متن ولدا ٹھیک کرو",
 	"twocolconflict-split-reset-warning-cancel": "منسوخ",
 	"twocolconflict-split-reset-warning-accept": "مُکاؤ",
-	"twocolconflict-talk-your": "تہاݙا اندراج"
+	"twocolconflict-split-help-tooltip": "مدد ݙکھاؤ",
+	"twocolconflict-talk-your": "تہاݙا تبصرہ"
 }

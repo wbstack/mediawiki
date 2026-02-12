@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xhulianoo"
+		]
+	},
+	"twocolconflict": "Konflikt redaktimi të bazuar në paragraf",
+	"twocolconflict-desc": "Duke shfaqur një ekran bashkimi të redaktimeve krah për krah për zgjidhjen e konfliktit të redaktimeve",
+	"twocolconflictprovidesubmittedtext": "Konflikti i redaktimit:",
+	"twocolconflict-beta-feature-message": "Konflikt redaktimi të bazuar në paragraf",
+	"twocolconflict-copy-action": "kopjo tekstin e plotë",
+	"twocolconflict-copy-tab-action": "shih tekstin e plotë",
+	"twocolconflict-core-ui-hint-close": "Mos e shfaq më kurrë",
+	"twocolconflict-special-not-saved": "E papublikuar",
+	"twocolconflict-split-your-version-header": "Versioni yt",
+	"twocolconflict-split-choose-version": "Të lutem, zgjidh një version",
+	"twocolconflict-split-other-version-chosen": "Versioni tjetër",
+	"twocolconflict-split-your-version-chosen": "Versioni yt",
+	"twocolconflict-split-select-all": "Zgjidh të gjitha",
+	"twocolconflict-split-tour-dialog-btn-text": "Nis bashkimin",
+	"twocolconflict-split-tour-popup-btn-text": "Në rregull, e kuptova.",
+	"twocolconflict-split-tour-popup2-header": "Zgjidh cilat ndryshime dëshiron të mbash",
+	"twocolconflict-split-edit-tooltip": "Kliko për të redaktuar këtë tekst",
+	"twocolconflict-split-save-tooltip": "Zbato ndryshimet e tua ndaj këtij teksti",
+	"twocolconflict-split-reset-tooltip": "Hidh poshtë të gjitha ndryshimet e tua ndaj këtij teksti",
+	"twocolconflict-split-reset-warning": "Të hidhen poshtë ndryshimet? Teksti në këtë kuti do të rivendoset në çfarë ishte kur ndodhi konflikti i redaktimit.",
+	"twocolconflict-split-reset-warning-cancel": "Anulo",
+	"twocolconflict-split-reset-warning-accept": "Hidh poshtë",
+	"twocolconflict-split-select-all-other-tooltip": "Kliko për të zgjedhur të gjitha ndryshimet e versionit tjetër",
+	"twocolconflict-split-select-all-your-tooltip": "Kliko për të zgjedhur të gjitha ndryshimet e versionit tënd",
+	"twocolconflict-split-selected-all-other-tooltip": "Janë zgjedhur të gjitha ndryshimet e versionit tjetër",
+	"twocolconflict-split-selected-all-your-tooltip": "Janë zgjedhur të gjitha ndryshimet e versionit tënd",
+	"twocolconflict-split-select-other-tooltip": "Kliko për të zgjedhur versionin tjetër",
+	"twocolconflict-split-select-your-tooltip": "Kliko për të zgjedhur versionin tënd",
+	"twocolconflict-split-help-tooltip": "Shfaq ndihmën",
+	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Zgjidh problemin",
+	"twocolconflict-talk-your": "Komenti yt"
+}

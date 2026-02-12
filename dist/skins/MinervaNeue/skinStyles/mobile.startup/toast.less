@@ -5,8 +5,9 @@
 .toast {
 	font-size: @font-size-minerva-small;
 	padding: 0.9em 1em;
-	background-color: @toastNotificationColor;
-	color: #fff;
+	background-color: @background-color-toast-notification;
+	// the text should be white in both modes
+	color: @color-inverted-fixed;
 	margin: 0 10% 20px;
 	width: 80%;
 	text-align: center;
@@ -29,14 +30,19 @@
 		border: 0; // FIXME: this is needed because a global .error adds border
 	}
 
+	.oo-ui-iconElement-icon {
+		// Fix icon placement in post-edit notifications (T336001)
+		display: block;
+	}
+
 	a {
-		color: @color-base--inverted;
+		color: @color-inverted-fixed;
 		text-decoration: underline;
 	}
 }
 
 .mw-notification-area {
-	z-index: @z-indexOverOverlay;
+	z-index: @z-index-over-overlay;
 	position: fixed;
 	bottom: 0;
 	width: 100%;
@@ -54,7 +60,8 @@
 	opacity: 0;
 	transition: transform @transition-duration-medium, opacity @transition-duration-medium, visibility @transition-duration-medium;
 
-	&.visible, &.mw-notification-visible {
+	&.visible,
+	&.mw-notification-visible {
 		visibility: visible;
 		opacity: 1;
 		transform: translate( 0, 0 );

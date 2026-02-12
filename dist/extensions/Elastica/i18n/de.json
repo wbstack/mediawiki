@@ -1,9 +1,6 @@
 {
 	"@metadata": {
-		"authors": [
-			"Kghbln",
-			"Metalhead64"
-		]
+		"authors": []
 	},
-	"elastica-desc": "Stellt anderen Erweiterungen die Basisfunktionalität von [http://www.elasticsearch.org/ elasticsearch] mit Hilfe der [http://elastica.io/ Elastica-Bibliothek] bereit"
+	"elastica-desc": "Stellt anderen Erweiterungen die Basisfunktionalität von [https://www.elastic.co/ elasticsearch] mit Hilfe der [https://elastica.io/ Elastica-Bibliothek] bereit"
 }

@@ -4,12 +4,14 @@
 			"Andrew J.Kurbiko",
 			"DDPAT",
 			"Ice bulldog",
+			"Movses",
 			"Olghinabella",
 			"Piramidion",
 			"Vlad5250",
 			"Ата"
 		]
 	},
+	"datatypes-type-entity-schema": "Entity Schema",
 	"entityschema-desc": "Зберігання та обговорення схем для сутностей Вікібази",
 	"special-newschema": "Створити нову схему",
 	"entityschema-newschema-label": "Мітка:",
@@ -17,7 +19,6 @@
 	"entityschema-newschema-aliases": "Альтернативні назви, через вертикальну риску:",
 	"entityschema-newschema-schema-shexc": "Код Shape Expressions:",
 	"entityschema-newschema-submit": "Створити",
-	"entityschema-newschema-copyright": "Натиснувши «$1», Ви погоджуєтесь із [[$2|умовами використання]], і погоджуєтесь поширювати Ваше редагування на умовах $3.",
 	"entityschema-anonymouseditwarning": "Увага: Ви не увійшли до системи. Вашу IP-адресу буде записано у історії редагування цієї схеми.",
 	"entityschema-label-edit-placeholder": "введіть назву мовою $1",
 	"entityschema-description-edit-placeholder": "введіть опис мовою $1",
@@ -28,7 +29,6 @@
 	"entityschema-error-schemaupdate-failed": "Схема не може бути оновлена",
 	"entityschema-error-schematext-conflict": "Ця Schema змінилася. Будь ласка, поверніться на сторінку Schema і спробуйте відредагувати її ще раз.",
 	"entityschema-error-namebadge-conflict": "Ця Schema змінилася. Будь ласка, поверніться на сторінку Schema і спробуйте відредагувати назви, описи й альтернативні назви цією мовою знову.",
-	"entityschema-error-saving-failed": "Не вдалося зберегти схему, з таким повідомленням: $1",
 	"entityschema-error-not-post": "Цю дію потрібно виконати за допомогою POST-запиту.",
 	"entityschema-error-inconsistent-id": "Жодна із вказаних версій не належить даній назві.",
 	"entityschema-error-wrong-page-revisions": "Вказана версія не належить поточній сторінці.",
@@ -84,5 +84,8 @@
 	"entityschema-special-setlabeldescriptionaliases-info": "Ви задаєте назву, опис та альтернативні назви для схеми [[$3|$2]] мовою: '''$1'''.",
 	"entityschema-special-label": "Назва:",
 	"entityschema-special-description": "Опис:",
-	"entityschema-special-aliases": "Альтернативні назви (через вертикальну риску):"
+	"entityschema-special-aliases": "Альтернативні назви (через вертикальну риску):",
+	"wikibase-listdatatypes-entity-schema-head": "Entity Schema",
+	"wikibase-listdatatypes-entity-schema-body": "Посилання на Схеми сутностей (Entity Schemas) у відповідному просторі назв цієї вікі. Значення має бути без префіксу \"EntitySchema:\"",
+	"wikibase-validator-illegal-entity-schema-title": "Значення мусить починатися з <code>E</code>, а решта мають бути лише цифри."
 }

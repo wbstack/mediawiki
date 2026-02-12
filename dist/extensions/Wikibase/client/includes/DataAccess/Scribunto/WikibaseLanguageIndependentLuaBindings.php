@@ -1,21 +1,24 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Client\DataAccess\Scribunto;
 
 use InvalidArgumentException;
-use MalformedTitleException;
-use Title;
-use TitleFormatter;
-use TitleParser;
+use MediaWiki\Title\MalformedTitleException;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleFormatter;
+use MediaWiki\Title\TitleParser;
 use Wikibase\Client\Usage\UsageAccumulator;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
+use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Entity\PropertyId;
-use Wikibase\DataModel\Services\Lookup\MaxReferencedEntityVisitsExhaustedException;
-use Wikibase\DataModel\Services\Lookup\MaxReferenceDepthExhaustedException;
+use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\DataModel\Services\Lookup\ReferencedEntityIdLookup;
+use Wikibase\DataModel\Services\Lookup\ReferencedEntityIdLookupException;
 use Wikibase\DataModel\Services\Lookup\TermLookup;
 use Wikibase\DataModel\Services\Lookup\TermLookupException;
 use Wikibase\DataModel\SiteLink;
@@ -97,6 +100,8 @@ class WikibaseLanguageIndependentLuaBindings {
 	 */
 	private $redirectTargetLookup;
 
+	private EntityLookup $entityLookup;
+
 	public function __construct(
 		SiteLinkLookup $siteLinkLookup,
 		EntityIdLookup $entityIdLookup,
@@ -109,7 +114,8 @@ class WikibaseLanguageIndependentLuaBindings {
 		TitleFormatter $titleFormatter,
 		TitleParser $titleParser,
 		string $siteId,
-		RevisionBasedEntityRedirectTargetLookup $redirectTargetLookup
+		RevisionBasedEntityRedirectTargetLookup $redirectTargetLookup,
+		EntityLookup $entityLookup
 	) {
 		$this->siteLinkLookup = $siteLinkLookup;
 		$this->entityIdLookup = $entityIdLookup;
@@ -123,6 +129,7 @@ class WikibaseLanguageIndependentLuaBindings {
 		$this->titleParser = $titleParser;
 		$this->siteId = $siteId;
 		$this->redirectTargetLookup = $redirectTargetLookup;
+		$this->entityLookup = $entityLookup;
 	}
 
 	/**
@@ -202,9 +209,9 @@ class WikibaseLanguageIndependentLuaBindings {
 	 * @param string $prefixedEntityId
 	 * @param string $languageCode
 	 *
-	 * @return string|null Null if language code invalid or entity couldn't be found/ no label present.
+	 * @return ?string|null Null if language code invalid or entity couldn't be found/ no label present.
 	 */
-	public function getLabelByLanguage( $prefixedEntityId, $languageCode ) {
+	public function getLabelByLanguage( string $prefixedEntityId, string $languageCode ) {
 		if ( !$this->termsLanguages->hasLanguage( $languageCode ) ) {
 			// Directly abort: Only track label usages for valid languages
 			return null;
@@ -224,6 +231,35 @@ class WikibaseLanguageIndependentLuaBindings {
 		}
 
 		return $label;
+	}
+
+	/**
+	 * @param string $prefixedEntityId
+	 * @param string $languageCode
+	 *
+	 * @return ?string|null Null if language code invalid or entity couldn't be found/ no description present.
+	 */
+	public function getDescriptionByLanguage( string $prefixedEntityId, string $languageCode ) {
+		if ( !$this->termsLanguages->hasLanguage( $languageCode ) ) {
+			// Directly abort: Only track description usages for valid languages
+			return null;
+		}
+
+		try {
+			$entityId = $this->entityIdParser->parse( $prefixedEntityId );
+		} catch ( EntityIdParsingException $e ) {
+			return null;
+		}
+
+		$this->usageAccumulator->addDescriptionUsage( $entityId, $languageCode );
+
+		try {
+			$description = $this->termLookup->getDescription( $entityId, $languageCode );
+		} catch ( TermLookupException $ex ) {
+			return null;
+		}
+
+		return $description;
 	}
 
 	/**
@@ -272,18 +308,63 @@ class WikibaseLanguageIndependentLuaBindings {
 	}
 
 	/**
+	 * @param string $prefixedItemId
+	 * @param string|null $globalSiteId
+	 *
+	 * @return string[]
+	 */
+	public function getBadges( string $prefixedItemId, ?string $globalSiteId ): array {
+		$globalSiteId = $globalSiteId ?: $this->siteId;
+
+		try {
+			$itemId = new ItemId( $prefixedItemId );
+		} catch ( InvalidArgumentException $e ) {
+			return [];
+		}
+
+		$itemIdAfterRedirectResolution = $this->redirectTargetLookup->getRedirectForEntityId( $itemId ) ?? $itemId;
+
+		$this->usageAccumulator->addSiteLinksUsage( $itemIdAfterRedirectResolution );
+		if ( !$itemId->equals( $itemIdAfterRedirectResolution ) ) {
+			// it's a redirect. We want to know if anything happens to it.
+			$this->usageAccumulator->addAllUsage( $itemId );
+		}
+
+		/** @var Item|null */
+		$item = $this->entityLookup->getEntity( $itemIdAfterRedirectResolution );
+		'@phan-var Item|null $item';
+		if ( !$item || !$item->hasLinkToSite( $globalSiteId ) ) {
+			return [];
+		}
+		$siteLink = $item->getSiteLink( $globalSiteId );
+
+		$badges = array_map( static function ( ItemId $itemId ): string {
+			return $itemId->getSerialization();
+		}, $siteLink->getBadges() );
+
+		if ( !$badges ) {
+			return [];
+		}
+
+		// Lua tables start at 1
+		return array_combine(
+			range( 1, count( $badges ) ), $badges
+		);
+	}
+
+	/**
 	 * @param EntityId $fromId
 	 * @param PropertyId $propertyId
 	 * @param EntityId[] $toIds
 	 *
 	 * @return string|null|bool Serialization of the referenced entity id, if one could be found.
 	 *  Null if none of the given entities is referenced.
-	 *  False if the search for a referenced entity had to be aborted due to resource limits.
+	 *  False if the search for a referenced entity had to be aborted due to resource limits, or an error.
 	 */
 	public function getReferencedEntityId( EntityId $fromId, PropertyId $propertyId, array $toIds ) {
 		try {
 			$res = $this->referencedEntityIdLookup->getReferencedEntityId( $fromId, $propertyId, $toIds );
-		} catch ( MaxReferenceDepthExhaustedException | MaxReferencedEntityVisitsExhaustedException $e ) {
+		} catch ( ReferencedEntityIdLookupException $e ) {
 			return false;
 		}
 

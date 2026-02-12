@@ -3,12 +3,15 @@
 namespace CirrusSearch;
 
 use CirrusSearch\BuildDocument\BuildDocument;
+use CirrusSearch\BuildDocument\DocumentSizeLimiter;
+use CirrusSearch\Profile\SearchProfileService;
+use CirrusSearch\Search\CirrusIndexField;
+use MediaWiki\Content\TextContent;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\ProperPageIdentity;
-use TextContent;
-use Title;
-use WikiMap;
+use MediaWiki\Title\Title;
+use MediaWiki\WikiMap\WikiMap;
 use Wikimedia\Assert\Assert;
 use WikiPage;
 
@@ -32,7 +35,7 @@ use WikiPage;
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  * http://www.gnu.org/copyleft/gpl.html
  */
-class Updater extends ElasticsearchIntermediary {
+class Updater extends ElasticsearchIntermediary implements WeightedTagsUpdater {
 	/**
 	 * Full title text of pages updated in this process.  Used for deduplication
 	 * of updates.
@@ -69,28 +72,28 @@ class Updater extends ElasticsearchIntermediary {
 	/**
 	 * Update a single page.
 	 * @param Title $title
-	 * @return bool true if the page updated, false if it failed, null if it didn't need updating
+	 * @param string|null $updateKind kind of update to perform (used for monitoring)
+	 * @param int|null $rootEventTime the time of MW event that caused this update (used for monitoring)
 	 */
-	public function updateFromTitle( $title ) {
-		list( $page, $redirects ) = $this->traceRedirects( $title );
+	public function updateFromTitle( $title, ?string $updateKind, ?int $rootEventTime ): void {
+		[ $page, $redirects ] = $this->traceRedirects( $title );
 		if ( $page ) {
-			$updatedCount = $this->updatePages(
+			$this->updatePages(
 				[ $page ],
-				BuildDocument::INDEX_EVERYTHING
+				BuildDocument::INDEX_EVERYTHING,
+				$updateKind,
+				$rootEventTime
 			);
-			if ( $updatedCount < 0 ) {
-				return false;
-			}
 		}
 
 		if ( $redirects === [] ) {
-			return true;
+			return;
 		}
 		$redirectDocIds = [];
 		foreach ( $redirects as $redirect ) {
 			$redirectDocIds[] = $this->connection->getConfig()->makeId( $redirect->getId() );
 		}
-		return $this->deletePages( [], $redirectDocIds );
+		$this->deletePages( [], $redirectDocIds );
 	}
 
 	/**
@@ -177,9 +180,11 @@ class Updater extends ElasticsearchIntermediary {
 	 * @param WikiPage[] $pages pages to update
 	 * @param int $flags Bit field containing instructions about how the document should be built
 	 *   and sent to Elasticsearch.
-	 * @return int Number of documents updated of -1 if there was an error
+	 * @param string|null $updateKind kind of update to perform (used for monitoring)
+	 * @param int|null $rootEventTime the time of MW event that caused this update (used for monitoring)
+	 * @return int Number of documents updated
 	 */
-	public function updatePages( $pages, $flags ) {
+	public function updatePages( $pages, $flags, ?string $updateKind = null, ?int $rootEventTime = null ): int {
 		// Don't update the same page twice. We shouldn't, but meh
 		$pageIds = [];
 		$pages = array_filter( $pages, static function ( WikiPage $page ) use ( &$pageIds ) {
@@ -195,13 +200,16 @@ class Updater extends ElasticsearchIntermediary {
 
 		$allDocuments = array_fill_keys( $this->connection->getAllIndexSuffixes(), [] );
 		$services = MediaWikiServices::getInstance();
+		$docSizeLimiter = new DocumentSizeLimiter(
+			$this->connection->getConfig()->getProfileService()->loadProfile( SearchProfileService::DOCUMENT_SIZE_LIMITER ) );
 		$builder = new BuildDocument(
 			$this->connection,
-			$services->getDBLoadBalancer()->getConnection( DB_REPLICA ),
-			$services->getParserCache(),
+			$services->getConnectionProvider()->getReplicaDatabase(),
 			$services->getRevisionStore(),
-			new CirrusSearchHookRunner( $services->getHookContainer() ),
-			$services->getBacklinkCacheFactory()
+			$services->getBacklinkCacheFactory(),
+			$docSizeLimiter,
+			$services->getTitleFormatter(),
+			$services->getWikiPageFactory()
 		);
 		foreach ( $builder->initialize( $pages, $flags ) as $document ) {
 			// This isn't really a property of the connection, so it doesn't matter
@@ -212,13 +220,20 @@ class Updater extends ElasticsearchIntermediary {
 
 		$count = 0;
 		foreach ( $allDocuments as $indexSuffix => $documents ) {
-			$this->pushElasticaWriteJobs( $documents, static function ( array $chunk, ClusterSettings $cluster ) use ( $indexSuffix ) {
-				return Job\ElasticaWrite::build(
-					$cluster,
-					'sendData',
-					[ $indexSuffix, $chunk ]
-				);
-			} );
+			$this->pushElasticaWriteJobs(
+				UpdateGroup::PAGE,
+				$documents,
+				static function ( array $chunk, ClusterSettings $cluster ) use ( $indexSuffix, $updateKind, $rootEventTime ) {
+					return Job\ElasticaWrite::build(
+						$cluster,
+						UpdateGroup::PAGE,
+						'sendData',
+						[ $indexSuffix, $chunk ],
+						[],
+						$updateKind,
+						$rootEventTime
+					);
+				} );
 			$count += count( $documents );
 		}
 
@@ -226,48 +241,51 @@ class Updater extends ElasticsearchIntermediary {
 	}
 
 	/**
-	 * @param ProperPageIdentity $page
-	 * @param string $tagField
-	 * @param string $tagPrefix
-	 * @param string|string[]|null $tagNames
-	 * @param int|int[]|null $tagWeights
+	 * @inheritDoc
 	 */
 	public function updateWeightedTags(
-		ProperPageIdentity $page, string $tagField, string $tagPrefix, $tagNames = null, $tagWeights = null
-	) {
+		ProperPageIdentity $page,
+		string $tagPrefix,
+		?array $tagWeights = null,
+		?string $trigger = null
+	): void {
 		Assert::precondition( $page->exists(), "page must exist" );
 		$docId = $this->connection->getConfig()->makeId( $page->getId() );
 		$indexSuffix = $this->connection->getIndexSuffixForNamespace( $page->getNamespace() );
-		$this->pushElasticaWriteJobs( [ $docId ], static function ( array $docIds, ClusterSettings $cluster ) use (
-			$docId, $indexSuffix, $tagField, $tagPrefix, $tagNames, $tagWeights
-		) {
-			$tagWeights = ( $tagWeights === null ) ? null : [ $docId => $tagWeights ];
-			return Job\ElasticaWrite::build(
-				$cluster,
-				'sendUpdateWeightedTags',
-				[ $indexSuffix, $docIds, $tagField, $tagPrefix, $tagNames, $tagWeights ]
-			);
-		} );
+		$this->pushElasticaWriteJobs(
+			UpdateGroup::WEIGHTED_TAGS,
+			[ $docId ],
+			static function ( array $docIds, ClusterSettings $cluster ) use (
+				$docId,
+				$indexSuffix,
+				$tagPrefix,
+				$tagWeights
+			) {
+				return Job\ElasticaWrite::build(
+					$cluster,
+					UpdateGroup::WEIGHTED_TAGS,
+					'sendWeightedTagsUpdate',
+					[
+						$indexSuffix,
+						$tagPrefix,
+						[ $docId => $tagWeights ]
+					],
+				);
+			} );
 	}
 
 	/**
-	 * @param ProperPageIdentity $page
-	 * @param string $tagField
-	 * @param string $tagPrefix
+	 * @inheritDoc
 	 */
-	public function resetWeightedTags( ProperPageIdentity $page, string $tagField, string $tagPrefix ) {
-		Assert::precondition( $page->exists(), "page must exist" );
-		$docId = $this->connection->getConfig()->makeId( $page->getId() );
-		$indexSuffix = $this->connection->getIndexSuffixForNamespace( $page->getNamespace() );
-		$this->pushElasticaWriteJobs( [ $docId ], static function (
-			array $docIds, ClusterSettings $cluster
-		) use ( $indexSuffix, $tagField, $tagPrefix ) {
-			return Job\ElasticaWrite::build(
-				$cluster,
-				'sendResetWeightedTags',
-				[ $indexSuffix, $docIds, $tagField, $tagPrefix ]
+	public function resetWeightedTags( ProperPageIdentity $page, array $tagPrefixes, ?string $trigger = null ): void {
+		foreach ( $tagPrefixes as $tagPrefix ) {
+			$this->updateWeightedTags(
+				$page,
+				$tagPrefix,
+				[ CirrusIndexField::MULTILIST_DELETE_GROUPING => null ],
+				$trigger
 			);
-		} );
+		}
 	}
 
 	/**
@@ -279,19 +297,20 @@ class Updater extends ElasticsearchIntermediary {
 	 * @param int[]|string[] $docIds List of elasticsearch document ids to delete
 	 * @param string|null $indexSuffix index from which to delete.  null means all.
 	 * @param array $writeJobParams Parameters passed on to ElasticaWriteJob
-	 * @return bool Always returns true.
 	 */
-	public function deletePages( $titles, $docIds, $indexSuffix = null, array $writeJobParams = [] ) {
+	public function deletePages( $titles, $docIds, $indexSuffix = null, array $writeJobParams = [] ): void {
 		Job\OtherIndex::queueIfRequired( $this->connection->getConfig(), $titles, $this->writeToClusterName );
 
 		// Deletes are fairly cheap to send, they can be batched in larger
 		// chunks. Unlikely a batch this large ever comes through.
 		$batchSize = 50;
 		$this->pushElasticaWriteJobs(
+			UpdateGroup::PAGE,
 			$docIds,
 			static function ( array $chunk, ClusterSettings $cluster ) use ( $indexSuffix, $writeJobParams ) {
 				return Job\ElasticaWrite::build(
 					$cluster,
+					UpdateGroup::PAGE,
 					'sendDeletes',
 					[ $chunk, $indexSuffix ],
 					$writeJobParams
@@ -299,8 +318,6 @@ class Updater extends ElasticsearchIntermediary {
 			},
 			$batchSize
 		);
-
-		return true;
 	}
 
 	/**
@@ -314,14 +331,18 @@ class Updater extends ElasticsearchIntermediary {
 			return true;
 		}
 		$docs = $this->buildArchiveDocuments( $archived );
-		$this->pushElasticaWriteJobs( $docs, static function ( array $chunk, ClusterSettings $cluster ) {
-			return Job\ElasticaWrite::build(
-				$cluster,
-				'sendData',
-				[ Connection::ARCHIVE_INDEX_SUFFIX, $chunk ],
-				[ 'private_data' => true ]
-			);
-		} );
+		$this->pushElasticaWriteJobs(
+			UpdateGroup::ARCHIVE,
+			$docs,
+			static function ( array $chunk, ClusterSettings $cluster ) {
+				return Job\ElasticaWrite::build(
+					$cluster,
+					UpdateGroup::ARCHIVE,
+					'sendData',
+					[ Connection::ARCHIVE_INDEX_SUFFIX, $chunk ],
+					[ 'private_data' => true ],
+				);
+			} );
 
 		return true;
 	}
@@ -358,9 +379,8 @@ class Updater extends ElasticsearchIntermediary {
 	/**
 	 * Update the search index for newly linked or unlinked articles.
 	 * @param Title[] $titles titles to update
-	 * @return bool were all pages updated?
 	 */
-	public function updateLinkedArticles( $titles ) {
+	public function updateLinkedArticles( $titles ): void {
 		$pages = [];
 		$wikiPageFactory = MediaWikiServices::getInstance()->getWikiPageFactory();
 		foreach ( $titles as $title ) {
@@ -400,8 +420,7 @@ class Updater extends ElasticsearchIntermediary {
 			// a full update (just link counts).
 			$pages[] = $page;
 		}
-		$updatedCount = $this->updatePages( $pages, BuildDocument::SKIP_PARSE );
-		return $updatedCount >= 0;
+		$this->updatePages( $pages, BuildDocument::SKIP_PARSE );
 	}
 
 	/**
@@ -419,16 +438,17 @@ class Updater extends ElasticsearchIntermediary {
 	}
 
 	/**
+	 * @param string $updateGroup UpdateGroup::* constant
 	 * @param mixed[] $items
 	 * @param callable $factory
 	 * @param int $batchSize
 	 */
-	protected function pushElasticaWriteJobs( array $items, $factory, int $batchSize = 10 ): void {
+	protected function pushElasticaWriteJobs( string $updateGroup, array $items, $factory, int $batchSize = 10 ): void {
 		// Elasticsearch has a queue capacity of 50 so if $documents contains 50 pages it could bump up
 		// against the max.  So we chunk it and do them sequentially.
 		$jobs = [];
 		$config = $this->connection->getConfig();
-		$clusters = $this->elasticaWriteClusters();
+		$clusters = $this->elasticaWriteClusters( $updateGroup );
 
 		foreach ( array_chunk( $items, $batchSize ) as $chunked ) {
 			// Queueing one job per cluster ensures isolation. If one clusters falls
@@ -453,14 +473,14 @@ class Updater extends ElasticsearchIntermediary {
 		}
 	}
 
-	private function elasticaWriteClusters(): array {
+	private function elasticaWriteClusters( string $updateGroup ): array {
 		if ( $this->writeToClusterName !== null ) {
 			return [ $this->writeToClusterName ];
 		} else {
 			return $this->connection
 				->getConfig()
 				->getClusterAssignment()
-				->getWritableClusters();
+				->getWritableClusters( $updateGroup );
 		}
 	}
 

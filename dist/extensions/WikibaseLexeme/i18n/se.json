@@ -1,15 +1,19 @@
 {
 	"@metadata": {
 		"authors": [
-			"Yupik",
-			"Kimberli Mäkäräinen (WMNO)"
+			"Kimberli Mäkäräinen (WMNO)",
+			"Yupik"
 		]
 	},
 	"content-model-wikibase-lexeme": "Wikibase-leksema",
 	"datatypes-type-wikibase-lexeme": "Leksema",
 	"datatypes-type-wikibase-sense": "Mearkkašupmi",
+	"nstab-lexeme": "Leksema",
+	"tooltip-ca-nstab-lexeme": "Leksema meroštallan",
+	"wikibase-lexeme-lexicographical-data": "Leksikográfalaš dieđut",
 	"wikibase-lexeme-mergelexemes-error-failed-save": "Leksema vurken ii lihkostuvvan.",
 	"wikibase-lexeme-mergelexemes-error-lexeme-not-found": "Leksema '$1' ii gávdnon.",
+	"wikibase-lexeme-randomlexeme": "Summalis leksema",
 	"wikibase-lexeme-summary-wbeditentity-create-sense": "Ođđa mearkkašupmi lasihuvvon.",
 	"wikibase-listdatatypes-wikibase-lexeme-head": "Leksema",
 	"wikibase-listdatatypes-wikibase-sense-head": "Mearkkašupmi",
@@ -24,7 +28,7 @@
 	"wikibaselexeme-field-lexical-category-label": "Sátneluohkká",
 	"wikibaselexeme-gloss-field-language-label": "Giella",
 	"wikibaselexeme-header-senses": "Mearkkašumit",
-	"wikibaselexeme-newlexeme-info-panel-heading": "Lássedieđut leksemaid birra",
+	"wikibaselexeme-newlexeme-info-panel-heading": "Lassedieđut leksemaid birra",
 	"wikibaselexeme-newlexeme-language": "Leksema giella",
 	"wikibaselexeme-newlexeme-language-placeholder": "Leksema giella, ovdamearkka dihte \"davvisámegiella\"",
 	"wikibaselexeme-newlexeme-language-placeholder-with-example": "Leksema giella, ovdamearkka dihte \"$1\"",

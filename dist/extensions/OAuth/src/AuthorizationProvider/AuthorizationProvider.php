@@ -2,19 +2,19 @@
 
 namespace MediaWiki\Extension\OAuth\AuthorizationProvider;
 
-use Config;
 use DateInterval;
 use Exception;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Grant\GrantTypeInterface;
+use MediaWiki\Config\Config;
 use MediaWiki\Extension\OAuth\AuthorizationServerFactory;
 use MediaWiki\Extension\OAuth\Repository\AuthCodeRepository;
 use MediaWiki\Extension\OAuth\Repository\RefreshTokenRepository;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\User;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
-use User;
 
 abstract class AuthorizationProvider implements IAuthorizationProvider {
 	/**
@@ -132,10 +132,7 @@ abstract class AuthorizationProvider implements IAuthorizationProvider {
 	 * @throws Exception
 	 */
 	protected function getGrantExpirationInterval() {
-		$intervalSpec = 'PT1H';
-		if ( $this->config->has( 'OAuth2GrantExpirationInterval' ) ) {
-			$intervalSpec = $this->parseExpiration( $this->config->get( 'OAuth2GrantExpirationInterval' ) );
-		}
+		$intervalSpec = $this->parseExpiration( $this->config->get( 'OAuth2GrantExpirationInterval' ) );
 		return new DateInterval( $intervalSpec );
 	}
 
@@ -144,11 +141,7 @@ abstract class AuthorizationProvider implements IAuthorizationProvider {
 	 * @throws Exception
 	 */
 	protected function getRefreshTokenTTL() {
-		$intervalSpec = 'PT1M';
-		if ( $this->config->has( 'OAuth2RefreshTokenTTL' ) ) {
-			$intervalSpec = $this->parseExpiration( $this->config->get( 'OAuth2RefreshTokenTTL' ) );
-		}
-
+		$intervalSpec = $this->parseExpiration( $this->config->get( 'OAuth2RefreshTokenTTL' ) );
 		return new DateInterval( $intervalSpec );
 	}
 

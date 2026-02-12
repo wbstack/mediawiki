@@ -16,7 +16,9 @@
  * http://www.gnu.org/copyleft/gpl.html
  */
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Populate and improve accuracy of change_tag_def statistics.
@@ -24,9 +26,6 @@ require_once __DIR__ . '/Maintenance.php';
  * @ingroup Maintenance
  */
 class PopulateChangeTagDef extends LoggedUpdateMaintenance {
-	/** @var Wikimedia\Rdbms\ILBFactory */
-	protected $lbFactory;
-
 	public function __construct() {
 		parent::__construct();
 		$this->addDescription( 'Populate and improve accuracy of change_tag_def statistics' );
@@ -43,11 +42,10 @@ class PopulateChangeTagDef extends LoggedUpdateMaintenance {
 	}
 
 	protected function doDBUpdates() {
-		$this->lbFactory = MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 		$this->setBatchSize( $this->getOption( 'batch-size', $this->getBatchSize() ) );
 
-		$dbr = $this->lbFactory->getMainLB()->getConnectionRef( DB_REPLICA );
-		if ( $dbr->fieldExists(
+		$dbw = $this->getDB( DB_PRIMARY );
+		if ( $dbw->fieldExists(
 				'change_tag',
 				'ct_tag',
 				__METHOD__
@@ -73,19 +71,17 @@ class PopulateChangeTagDef extends LoggedUpdateMaintenance {
 	}
 
 	private function setUserDefinedTags() {
-		$dbr = $this->lbFactory->getMainLB()->getConnectionRef( DB_REPLICA );
+		$dbw = $this->getDB( DB_PRIMARY );
 
 		$userTags = null;
-		if ( $dbr->tableExists( 'valid_tag', __METHOD__ ) ) {
-			$userTags = $dbr->selectFieldValues(
-				'valid_tag',
-				'vt_tag',
-				[],
-				__METHOD__
-			);
+		if ( $dbw->tableExists( 'valid_tag', __METHOD__ ) ) {
+			$userTags = $dbw->newSelectQueryBuilder()
+				->select( 'vt_tag' )
+				->from( 'valid_tag' )
+				->caller( __METHOD__ )->fetchFieldValues();
 		}
 
-		if ( empty( $userTags ) ) {
+		if ( !$userTags ) {
 			$this->output( "No user defined tags to set, moving on...\n" );
 			return;
 		}
@@ -97,31 +93,27 @@ class PopulateChangeTagDef extends LoggedUpdateMaintenance {
 			return;
 		}
 
-		$dbw = $this->lbFactory->getMainLB()->getConnectionRef( DB_PRIMARY );
-
-		$dbw->update(
-			'change_tag_def',
-			[ 'ctd_user_defined' => 1 ],
-			[ 'ctd_name' => $userTags ],
-			__METHOD__
-		);
-		$this->lbFactory->waitForReplication();
+		$dbw->newUpdateQueryBuilder()
+			->update( 'change_tag_def' )
+			->set( [ 'ctd_user_defined' => 1 ] )
+			->where( [ 'ctd_name' => $userTags ] )
+			->caller( __METHOD__ )
+			->execute();
+		$this->waitForReplication();
 		$this->output( "Finished setting user defined tags in change_tag_def table\n" );
 	}
 
 	private function updateCountTagId() {
-		$dbr = $this->lbFactory->getMainLB()->getConnectionRef( DB_REPLICA );
+		$dbr = $this->getReplicaDB();
 
 		// This query can be pretty expensive, don't run it on master
-		$res = $dbr->select(
-			'change_tag',
-			[ 'ct_tag_id', 'hitcount' => 'count(*)' ],
-			[],
-			__METHOD__,
-			[ 'GROUP BY' => 'ct_tag_id' ]
-		);
+		$res = $dbr->newSelectQueryBuilder()
+			->select( [ 'ct_tag_id', 'hitcount' => 'count(*)' ] )
+			->from( 'change_tag' )
+			->groupBy( 'ct_tag_id' )
+			->caller( __METHOD__ )->fetchResultSet();
 
-		$dbw = $this->lbFactory->getMainLB()->getConnectionRef( DB_PRIMARY );
+		$dbw = $this->getPrimaryDB();
 
 		foreach ( $res as $row ) {
 			if ( !$row->ct_tag_id ) {
@@ -133,29 +125,27 @@ class PopulateChangeTagDef extends LoggedUpdateMaintenance {
 				continue;
 			}
 
-			$dbw->update(
-				'change_tag_def',
-				[ 'ctd_count' => $row->hitcount ],
-				[ 'ctd_id' => $row->ct_tag_id ],
-				__METHOD__
-			);
+			$dbw->newUpdateQueryBuilder()
+				->update( 'change_tag_def' )
+				->set( [ 'ctd_count' => $row->hitcount ] )
+				->where( [ 'ctd_id' => $row->ct_tag_id ] )
+				->caller( __METHOD__ )
+				->execute();
 		}
-		$this->lbFactory->waitForReplication();
+		$this->waitForReplication();
 	}
 
 	private function updateCountTag() {
-		$dbr = $this->lbFactory->getMainLB()->getConnectionRef( DB_REPLICA );
+		$dbr = $this->getReplicaDB();
 
 		// This query can be pretty expensive, don't run it on master
-		$res = $dbr->select(
-			'change_tag',
-			[ 'ct_tag', 'hitcount' => 'count(*)' ],
-			[],
-			__METHOD__,
-			[ 'GROUP BY' => 'ct_tag' ]
-		);
+		$res = $dbr->newSelectQueryBuilder()
+			->select( [ 'ct_tag', 'hitcount' => 'count(*)' ] )
+			->from( 'change_tag' )
+			->groupBy( 'ct_tag' )
+			->caller( __METHOD__ )->fetchResultSet();
 
-		$dbw = $this->lbFactory->getMainLB()->getConnectionRef( DB_PRIMARY );
+		$dbw = $this->getPrimaryDB();
 
 		foreach ( $res as $row ) {
 			// Hygiene check
@@ -167,31 +157,28 @@ class PopulateChangeTagDef extends LoggedUpdateMaintenance {
 				$this->output( 'This row will be updated: ' . $row->ct_tag . $row->hitcount . "\n" );
 				continue;
 			}
-
-			$dbw->upsert(
-				'change_tag_def',
-				[
+			$dbw->newInsertQueryBuilder()
+				->insertInto( 'change_tag_def' )
+				->row( [
 					'ctd_name' => $row->ct_tag,
 					'ctd_user_defined' => 0,
 					'ctd_count' => $row->hitcount
-				],
-				'ctd_name',
-				[ 'ctd_count' => $row->hitcount ],
-				__METHOD__
-			);
+				] )
+				->onDuplicateKeyUpdate()
+				->uniqueIndexFields( [ 'ctd_name' ] )
+				->set( [ 'ctd_count' => $row->hitcount ] )
+				->caller( __METHOD__ )->execute();
 		}
-		$this->lbFactory->waitForReplication();
+		$this->waitForReplication();
 	}
 
 	private function backpopulateChangeTagId() {
-		$dbr = $this->lbFactory->getMainLB()->getConnectionRef( DB_REPLICA );
-		$changeTagDefs = $dbr->select(
-			'change_tag_def',
-			[ 'ctd_name', 'ctd_id' ],
-			[],
-			__METHOD__,
-			[ 'ORDER BY' => 'ctd_id' ]
-		);
+		$dbr = $this->getReplicaDB();
+		$changeTagDefs = $dbr->newSelectQueryBuilder()
+			->select( [ 'ctd_name', 'ctd_id' ] )
+			->from( 'change_tag_def' )
+			->orderBy( 'ctd_id' )
+			->caller( __METHOD__ )->fetchResultSet();
 
 		foreach ( $changeTagDefs as $row ) {
 			$this->backpopulateChangeTagPerTag( $row->ctd_name, $row->ctd_id );
@@ -199,20 +186,20 @@ class PopulateChangeTagDef extends LoggedUpdateMaintenance {
 	}
 
 	private function backpopulateChangeTagPerTag( $tagName, $tagId ) {
-		$dbr = $this->lbFactory->getMainLB()->getConnectionRef( DB_REPLICA );
-		$dbw = $this->lbFactory->getMainLB()->getConnectionRef( DB_PRIMARY );
+		$dbr = $this->getReplicaDB();
+		$dbw = $this->getPrimaryDB();
 		$sleep = (int)$this->getOption( 'sleep', 0 );
 		$lastId = 0;
 		$this->output( "Starting to add ct_tag_id = {$tagId} for ct_tag = {$tagName}\n" );
 		while ( true ) {
 			// Given that indexes might not be there, it's better to use replica
-			$ids = $dbr->selectFieldValues(
-				'change_tag',
-				'ct_id',
-				[ 'ct_tag' => $tagName, 'ct_tag_id' => null, 'ct_id > ' . $lastId ],
-				__METHOD__,
-				[ 'LIMIT' => $this->getBatchSize(), 'ORDER BY' => 'ct_id' ]
-			);
+			$ids = $dbr->newSelectQueryBuilder()
+				->select( 'ct_id' )
+				->from( 'change_tag' )
+				->where( [ 'ct_tag' => $tagName, 'ct_tag_id' => null, $dbr->expr( 'ct_id', '>', $lastId ) ] )
+				->orderBy( 'ct_id' )
+				->limit( $this->getBatchSize() )
+				->caller( __METHOD__ )->fetchFieldValues();
 
 			if ( !$ids ) {
 				break;
@@ -228,14 +215,14 @@ class PopulateChangeTagDef extends LoggedUpdateMaintenance {
 				$this->output( "Updating ct_tag_id = {$tagId} up to row ct_id = {$lastId}\n" );
 			}
 
-			$dbw->update(
-				'change_tag',
-				[ 'ct_tag_id' => $tagId ],
-				[ 'ct_id' => $ids ],
-				__METHOD__
-			);
+			$dbw->newUpdateQueryBuilder()
+				->update( 'change_tag' )
+				->set( [ 'ct_tag_id' => $tagId ] )
+				->where( [ 'ct_id' => $ids ] )
+				->caller( __METHOD__ )
+				->execute();
 
-			$this->lbFactory->waitForReplication();
+			$this->waitForReplication();
 			if ( $sleep > 0 ) {
 				sleep( $sleep );
 			}
@@ -249,5 +236,7 @@ class PopulateChangeTagDef extends LoggedUpdateMaintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = PopulateChangeTagDef::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

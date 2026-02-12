@@ -1,32 +1,26 @@
 <?php
 
+namespace MediaWiki\Content;
+
 use HtmlFormatter\HtmlFormatter;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Parser\Sanitizer;
 
 /**
- * Class allowing to explore structure of parsed wikitext.
+ * Class allowing to explore the structure of parsed wikitext.
  */
 class WikiTextStructure {
-	/**
-	 * @var string
-	 */
-	private $openingText;
-	/**
-	 * @var string
-	 */
-	private $allText;
-	/**
-	 * @var string[]
-	 */
-	private $auxText = [];
-	/**
-	 * @var ParserOutput
-	 */
-	private $parserOutput;
+
+	private ?string $openingText = null;
+	private ?string $allText = null;
+	/** @var string[] */
+	private array $auxText = [];
+	private ParserOutput $parserOutput;
 
 	/**
-	 * @var string[] selectors to elements that are excluded entirely from search
+	 * Selectors to elements that are excluded entirely from search
 	 */
-	private $excludedElementSelectors = [
+	private const EXCLUDED_ELEMENT_SELECTORS = [
 		// "it looks like you don't have javascript enabled..." – do not need to index
 		'audio', 'video',
 		// CSS stylesheets aren't content
@@ -37,7 +31,7 @@ class WikiTextStructure {
 		'.mw-cite-backlink',
 		// Headings are already indexed in their own field.
 		'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-		// Collapsed fields are hidden by default so we don't want them showing up.
+		// Collapsed fields are hidden by default, so we don't want them showing up.
 		'.autocollapse',
 		// Content explicitly decided to be not searchable by editors such
 		// as custom navigation templates.
@@ -47,11 +41,12 @@ class WikiTextStructure {
 	];
 
 	/**
-	 * @var string[] selectors to elements that are considered auxiliary to article text for search
+	 * Selectors to elements that are considered auxiliary to the article text for search
 	 */
-	private $auxiliaryElementSelectors = [
+	private const AUXILIARY_ELEMENT_SELECTORS = [
 		// Thumbnail captions aren't really part of the text proper
 		'.thumbcaption',
+		'figcaption',
 		// Neither are tables
 		'table',
 		// Common style for "See also:".
@@ -70,30 +65,38 @@ class WikiTextStructure {
 	}
 
 	/**
-	 * Get headings on the page.
+	 * Gets headings from the page.
+	 *
 	 * @return string[]
 	 * First strip out things that look like references.  We can't use HTML filtering because
 	 * the references come back as <sup> tags without a class.  To keep from breaking stuff like
 	 *  ==Applicability of the strict mass–energy equivalence formula, ''E'' = ''mc''<sup>2</sup>==
-	 * we don't remove the whole <sup> tag.  We also don't want to strip the <sup> tag and remove
-	 * everything that looks like [2] because, I dunno, maybe there is a band named Word [2] Foo
-	 * or something.  Whatever.  So we only strip things that look like <sup> tags wrapping a
-	 * reference.  And since the data looks like:
+	 * we don't remove the whole <sup> tag.
+	 *
+	 * We also don't want to strip the <sup> tag and remove everything that looks like [2] because,
+	 * I don't know, maybe there is a band named Word [2] Foo r something. Whatever.
+	 *
+	 * So we only strip things that look like <sup> tags wrapping a reference. And since the data
+	 * looks like:
 	 *      Reference in heading <sup>&#91;1&#93;</sup><sup>&#91;2&#93;</sup>
 	 * we can not really use HtmlFormatter as we have no suitable selector.
 	 */
 	public function headings() {
 		$headings = [];
+		$tocData = $this->parserOutput->getTOCData();
+		if ( $tocData === null ) {
+			return $headings;
+		}
 		$ignoredHeadings = $this->getIgnoredHeadings();
-		foreach ( $this->parserOutput->getSections() as $heading ) {
-			$heading = $heading[ 'line' ];
+		foreach ( $tocData->getSections() as $heading ) {
+			$heading = $heading->line;
 
 			// Some wikis wrap the brackets in a span:
 			// https://en.wikipedia.org/wiki/MediaWiki:Cite_reference_link
 			$heading = preg_replace( '/<\/?span>/', '', $heading );
 			// Normalize [] so the following regexp would work.
 			$heading = preg_replace( [ '/&#91;/', '/&#93;/' ], [ '[', ']' ], $heading );
-			$heading = preg_replace( '/<sup>\s*\[\s*\d+\s*\]\s*<\/sup>/is', '', $heading );
+			$heading = preg_replace( '/<sup>\s*\[\s*\d+\s*\]\s*<\/sup>/i', '', $heading );
 
 			// Strip tags from the heading or else we'll display them (escaped) in search results
 			$heading = trim( Sanitizer::stripAllTags( $heading ) );
@@ -104,6 +107,7 @@ class WikiTextStructure {
 				$headings[] = $heading;
 			}
 		}
+
 		return $headings;
 	}
 
@@ -112,18 +116,23 @@ class WikiTextStructure {
 	 * parse settings stored as i18n messages (see search-ignored-headings).
 	 *
 	 * @param string $message
+	 *
 	 * @return string[]
 	 */
 	public static function parseSettingsInMessage( $message ) {
 		$lines = explode( "\n", $message );
-		$lines = preg_replace( '/#.*$/', '', $lines ); // Remove comments
-		$lines = array_map( 'trim', $lines );          // Remove extra spaces
-		$lines = array_filter( $lines );               // Remove empty lines
-		return $lines;
+		// Remove comments
+		$lines = preg_replace( '/#.*$/', '', $lines );
+		// Remove extra spaces
+		$lines = array_map( 'trim', $lines );
+
+		// Remove empty lines
+		return array_filter( $lines );
 	}
 
 	/**
-	 * Get list of heading to ignore.
+	 * Gets a list of heading to ignore.
+	 *
 	 * @return string[]
 	 */
 	private function getIgnoredHeadings() {
@@ -131,15 +140,13 @@ class WikiTextStructure {
 		if ( $ignoredHeadings === null ) {
 			$ignoredHeadings = [];
 			$source = wfMessage( 'search-ignored-headings' )->inContentLanguage();
-			if ( $source->isBlank() ) {
-				// Try old version too, just in case
-				$source = wfMessage( 'cirrussearch-ignored-headings' )->inContentLanguage();
-			}
 			if ( !$source->isDisabled() ) {
 				$lines = self::parseSettingsInMessage( $source->plain() );
-				$ignoredHeadings = $lines;               // Now we just have headings!
+				// Now we just have headings!
+				$ignoredHeadings = $lines;
 			}
 		}
+
 		return $ignoredHeadings;
 	}
 
@@ -150,28 +157,26 @@ class WikiTextStructure {
 		if ( $this->allText !== null ) {
 			return;
 		}
-		$text = $this->parserOutput->getText( [
-			'enableSectionEditTokens' => false,
-			'allowTOC' => false,
-		] );
+		$text = $this->parserOutput->getRawText();
 		if ( $text === '' ) {
 			$this->allText = "";
+
 			// empty text - nothing to seek here
 			return;
 		}
 
-		$this->openingText = $this->extractHeadingBeforeFirstHeading( $text );
+		$this->openingText = $this->extractTextBeforeFirstHeading( $text );
 
 		$formatter = new HtmlFormatter( $text );
 
 		// Strip elements from the page that we never want in the search text.
-		$formatter->remove( $this->excludedElementSelectors );
+		$formatter->remove( self::EXCLUDED_ELEMENT_SELECTORS );
 		$formatter->filterContent();
 
 		// Strip elements from the page that are auxiliary text.  These will still be
-		// searched but matches will be ranked lower and non-auxiliary matches will be
+		// searched, but matches will be ranked lower and non-auxiliary matches will be
 		// preferred in highlighting.
-		$formatter->remove( $this->auxiliaryElementSelectors );
+		$formatter->remove( self::AUXILIARY_ELEMENT_SELECTORS );
 		$auxiliaryElements = $formatter->filterContent();
 		$this->allText = trim( Sanitizer::stripAllTags( $formatter->getText() ) );
 		foreach ( $auxiliaryElements as $auxiliaryElement ) {
@@ -182,31 +187,33 @@ class WikiTextStructure {
 
 	/**
 	 * Get text before first heading.
+	 *
 	 * @param string $text
+	 *
 	 * @return string|null
 	 */
-	private function extractHeadingBeforeFirstHeading( $text ) {
+	private function extractTextBeforeFirstHeading( $text ) {
 		$matches = [];
-		if ( !preg_match( '/<h[123456]>/', $text, $matches, PREG_OFFSET_CAPTURE ) ) {
-			// There isn't a first heading so we interpret this as the article
+		if ( !preg_match( '/<h[123456]\b/', $text, $matches, PREG_OFFSET_CAPTURE ) ) {
+			// There isn't a first heading, so we interpret this as the article
 			// being entirely without heading.
 			return null;
 		}
 		$text = substr( $text, 0, $matches[ 0 ][ 1 ] );
 		if ( !$text ) {
-			// There isn't any text before the first heading so we declare there isn't
+			// There isn't any text before the first heading, so we declare there isn't
 			// a first heading.
 			return null;
 		}
 
 		$formatter = new HtmlFormatter( $text );
-		$formatter->remove( $this->excludedElementSelectors );
-		$formatter->remove( $this->auxiliaryElementSelectors );
+		$formatter->remove( self::EXCLUDED_ELEMENT_SELECTORS );
+		$formatter->remove( self::AUXILIARY_ELEMENT_SELECTORS );
 		$formatter->filterContent();
 		$text = trim( Sanitizer::stripAllTags( $formatter->getText() ) );
 
 		if ( !$text ) {
-			// There isn't any text after filtering before the first heading so we declare
+			// There isn't any text after filtering before the first heading, so we declare
 			// that there isn't a first heading.
 			return null;
 		}
@@ -215,10 +222,11 @@ class WikiTextStructure {
 	}
 
 	/**
-	 * @return string
+	 * @return string|null
 	 */
 	public function getOpeningText() {
 		$this->extractWikitextParts();
+
 		return $this->openingText;
 	}
 
@@ -227,6 +235,7 @@ class WikiTextStructure {
 	 */
 	public function getMainText() {
 		$this->extractWikitextParts();
+
 		return $this->allText;
 	}
 
@@ -235,14 +244,24 @@ class WikiTextStructure {
 	 */
 	public function getAuxiliaryText() {
 		$this->extractWikitextParts();
+
 		return $this->auxText;
 	}
 
 	/**
-	 * Get the defaultsort property
+	 * Get the "defaultsort" property
+	 *
 	 * @return string|null
 	 */
 	public function getDefaultSort() {
-		return $this->parserOutput->getPageProperty( 'defaultsort' );
+		$sort = $this->parserOutput->getPageProperty( 'defaultsort' );
+		if ( $sort === false ) {
+			return null;
+		}
+
+		return $sort;
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( WikiTextStructure::class, 'WikiTextStructure' );

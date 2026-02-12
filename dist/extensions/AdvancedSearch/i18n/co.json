@@ -4,9 +4,25 @@
 			"Jun Misugi"
 		]
 	},
+	"advancedsearch-options-pane-head": "Ricerca avanzata:",
+	"advancedsearch-optgroup-text": "Ricerca in u testu di a pàgina",
+	"advancedsearch-optgroup-structure": "Struttura",
+	"advancedsearch-optgroup-files": "Schedàrii é imàgine",
+	"advancedsearch-field-plain": "Queste parolle",
+	"advancedsearch-field-phrase": "Esattamente stu testu",
+	"advancedsearch-field-or": "Una di queste parolle",
+	"advancedsearch-field-not": "Micca ste parolle",
 	"advancedsearch-field-subpageof": "Sottupàghjine di sta pàghjina",
+	"advancedsearch-field-intitle": "Tìtulu di a pàgina cuntene",
 	"advancedsearch-field-deepcategory": "Pàghjine in iste catigurìe",
 	"advancedsearch-field-hastemplate": "Pàghjine incù sti mudelli",
 	"advancedsearch-field-inlanguage": "Pàghjine in ista lingua",
-	"advancedsearch-field-filetype": "Tipu di schedàriu"
+	"advancedsearch-field-filetype": "Tipu di schedàriu",
+	"advancedsearch-inlanguage-default": "Sceglie a lingua",
+	"advancedsearch-filetype-section-types": "Tipi generali di schedàrii",
+	"advancedsearch-filetype-section-image": "Furmati d'imàghjini",
+	"advancedsearch-filetype-section-other": "Altri furmati",
+	"advancedsearch-filetype-bitmap": "Imàgine",
+	"advancedsearch-sort-preview-create-timestamp-desc": "data di creazione",
+	"advancedsearch-namespaces-preset-all": "Tutti"
 }

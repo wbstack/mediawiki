@@ -21,9 +21,13 @@
  * @ingroup Maintenance
  */
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Installer\InstallDocFormatter;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Title\Title;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script that formats RELEASE-NOTE file to wiki text or HTML markup.
@@ -63,16 +67,23 @@ class FormatInstallDoc extends Maintenance {
 		$outText = InstallDocFormatter::format( $inText );
 
 		if ( $this->hasOption( 'html' ) ) {
-			$parser = MediaWikiServices::getInstance()->getParser();
+			$parser = $this->getServiceContainer()->getParser();
 			$opt = ParserOptions::newFromAnon();
 			$title = Title::newFromText( 'Text file' );
 			$out = $parser->parse( $outText, $title, $opt );
-			$outText = "<html><body>\n" . $out->getText() . "\n</body></html>\n";
+			$outText = "<html><body>\n" .
+				// TODO T371008 consider if using the Content framework makes sense instead of creating the pipeline
+				$this->getServiceContainer()->getDefaultOutputPipeline()
+					->run( $out, $opt, [] )
+					->getContentHolderText()
+				. "\n</body></html>\n";
 		}
 
 		fwrite( $outFile, $outText );
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = FormatInstallDoc::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

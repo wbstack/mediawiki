@@ -1,13 +1,20 @@
-@import 'mediawiki.ui/variables.less';
+@import 'mediawiki.skin.variables.less';
 @import '../../mobile.less/mobile.variables.less';
 
 // FIXME: Is `.error` used appropriately or could it be remove/moved to core classes?
 .error {
-	color: @colorError;
+	color: @color-error;
 }
 
-.mw-ui-button-group,
-.page-list {
+.mw-mf-icon {
+	.cdx-mixin-css-icon-background();
+	.cdx-mixin-css-icon-size();
+	.cdx-mixin-css-icon-alignment();
+	font-size: 14px;
+	display: inline-flex;
+}
+
+.mw-mf-page-list {
 	margin: 0;
 }
 
@@ -18,10 +25,10 @@
 
 	.content-header {
 		padding: 0 0 20px;
-		border-bottom: 1px solid @colorGray12;
+		border-bottom: @border-width-base @border-style-base @border-color-subtle;
 
 		ul {
-			&:after {
+			&::after {
 				content: ' ';
 				clear: both;
 				display: block;
@@ -42,7 +49,7 @@
 			text-align: center;
 			margin: 0.7em 0;
 			font-size: 1.1em;
-			color: @grayMedium;
+			color: @color-subtle;
 		}
 	}
 
@@ -53,3 +60,5 @@
 		}
 	}
 }
+
+@import 'editwatchlist.less';

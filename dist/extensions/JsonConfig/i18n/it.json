@@ -4,7 +4,8 @@
 			"Beta16",
 			"PeppeAeco",
 			"Vanzottico",
-			"Yurik"
+			"Yurik",
+			"Valepert"
 		]
 	},
 	"nstab-data": "Dati",
@@ -34,12 +35,13 @@
 	"jsonconfig-err-url": "Il parametro \"$1\" deve essere un URL valido",
 	"jsonconfig-move-aborted-model": "il modello di configurazione JSON \"$1\" di questa pagina non corrisponde al nuovo modello \"$2\"",
 	"jsonconfig-move-aborted-ns": "il nuovo titolo della pagina non è impostato per contenere la configurazione JSON",
-	"jsonconfig-optional-field": "(opzionale)",
+	"jsonconfig-optional-field": "(facoltativo)",
 	"jsonconfig-type-name-invalid": "non valido",
 	"jsonconfig-type-name-string": "stringa",
 	"jsonconfig-type-name-localized": "localizzato",
 	"jsonconfig-type-name-number": "numero",
 	"jsonconfig-type-name-boolean": "booleano",
+	"jsonconfig-use-category": "Pagine che utilizzano l'estensione JsonConfig",
 	"jsonconfig-license": "Dati disponibili in base alla licenza $1.",
 	"jsonconfig-license-not-set": "Quando modifichi questa pagina, acconsenti rilasciare i tuoi contributi in base alla licenza indicata nel campo <code>licence</code> .",
 	"jsonconfig-license-name-CC0-1.0": "Creative Commons Zero"

@@ -2,18 +2,23 @@
 
 namespace Wikibase\Lexeme;
 
-use IContextSource;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Hook\CanonicalNamespacesHook;
+use MediaWiki\Hook\InfoActionHook;
+use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
 use MediaWiki\MediaWikiServices;
 use Wikibase\Client\WikibaseClient;
+use Wikibase\Lexeme\Maintenance\FixPagePropsSortkey;
 use Wikibase\Lexeme\MediaWiki\Actions\InfoActionHookHandler;
 use Wikibase\Lexeme\MediaWiki\ParserOutput\LexemeParserOutputUpdater;
-use Wikibase\Lexeme\MediaWiki\Scribunto\Scribunto_LuaWikibaseLexemeEntityFormLibrary;
-use Wikibase\Lexeme\MediaWiki\Scribunto\Scribunto_LuaWikibaseLexemeEntityLexemeLibrary;
-use Wikibase\Lexeme\MediaWiki\Scribunto\Scribunto_LuaWikibaseLexemeEntitySenseLibrary;
-use Wikibase\Lexeme\MediaWiki\Scribunto\Scribunto_LuaWikibaseLexemeLibrary;
+use Wikibase\Lexeme\MediaWiki\Scribunto\WikibaseLexemeEntityFormLibrary;
+use Wikibase\Lexeme\MediaWiki\Scribunto\WikibaseLexemeEntityLexemeLibrary;
+use Wikibase\Lexeme\MediaWiki\Scribunto\WikibaseLexemeEntitySenseLibrary;
+use Wikibase\Lexeme\MediaWiki\Scribunto\WikibaseLexemeLibrary;
 use Wikibase\Lib\WikibaseSettings;
 use Wikibase\Repo\ParserOutput\CompositeStatementDataUpdater;
 use Wikibase\Repo\WikibaseRepo;
+use Wikimedia\Assert\Assert;
 
 /**
  * MediaWiki hook handlers for the Wikibase Lexeme extension.
@@ -21,7 +26,11 @@ use Wikibase\Repo\WikibaseRepo;
  * @license GPL-2.0-or-later
  * @author Amir Sarabadani <ladsgroup@gmail.com>
  */
-class WikibaseLexemeHooks {
+class WikibaseLexemeHooks implements
+	InfoActionHook,
+	CanonicalNamespacesHook,
+	LoadExtensionSchemaUpdatesHook
+{
 
 	/**
 	 * Hook to register the lexeme and other entity namespaces for EntityNamespaceLookup.
@@ -45,7 +54,7 @@ class WikibaseLexemeHooks {
 	 *
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/CanonicalNamespaces
 	 */
-	public static function onCanonicalNamespaces( array &$namespaces ) {
+	public function onCanonicalNamespaces( &$namespaces ) {
 		// XXX: ExtensionProcessor should define an extra config object for every extension.
 		$config = MediaWikiServices::getInstance()->getMainConfig();
 
@@ -56,18 +65,23 @@ class WikibaseLexemeHooks {
 
 		// Setting the namespace to false disabled automatic registration.
 		$lexemeNamespaceId = $config->get( 'LexemeNamespace' );
-		$lexemeNamespaceName = 'Lexeme';
 		if ( $lexemeNamespaceId !== false ) {
+			Assert::parameter(
+				is_int( $lexemeNamespaceId ) &&
+					$lexemeNamespaceId >= 100 &&
+					( $lexemeNamespaceId % 2 ) === 0,
+				'$wgLexemeNamespace',
+				'Namespace ID must be an even integer, at least 100'
+			);
+			$lexemeNamespaceName = 'Lexeme';
 			$namespaces = self::registerNamespace(
 				$namespaces,
 				$lexemeNamespaceId,
 				$lexemeNamespaceName
 			);
-		}
 
-		$talkNamespaceId = $config->get( 'LexemeTalkNamespace' );
-		$talkNamespaceName = $lexemeNamespaceName . '_talk';
-		if ( $talkNamespaceId !== false ) {
+			$talkNamespaceId = $lexemeNamespaceId + 1;
+			$talkNamespaceName = $lexemeNamespaceName . '_talk';
 			$namespaces = self::registerNamespace(
 				$namespaces,
 				$talkNamespaceId,
@@ -177,9 +191,7 @@ class WikibaseLexemeHooks {
 			);
 		}
 
-		if ( !isset( $namespaces[$namespaceId] ) && $namespaceId >= 100 ) {
-			$namespaces[$namespaceId] = $namespaceName;
-		}
+		$namespaces[$namespaceId] = $namespaceName;
 
 		return $namespaces;
 	}
@@ -196,7 +208,7 @@ class WikibaseLexemeHooks {
 	 * @param IContextSource $context
 	 * @param array[] &$pageInfo
 	 */
-	public static function onInfoAction( IContextSource $context, array &$pageInfo ) {
+	public function onInfoAction( $context, &$pageInfo ) {
 		$services = MediaWikiServices::getInstance();
 		$config = $services->getMainConfig();
 		if ( !$config->get( 'LexemeEnableRepo' ) ) {
@@ -226,17 +238,17 @@ class WikibaseLexemeHooks {
 
 		if ( $engine == 'lua' ) {
 			$extraLibraries['mw.wikibase.lexeme']
-				= Scribunto_LuaWikibaseLexemeLibrary::class;
+				= WikibaseLexemeLibrary::class;
 			$extraLibraries['mw.wikibase.lexeme.entity.lexeme'] = [
-				'class' => Scribunto_LuaWikibaseLexemeEntityLexemeLibrary::class,
+				'class' => WikibaseLexemeEntityLexemeLibrary::class,
 				'deferLoad' => true,
 			];
 			$extraLibraries['mw.wikibase.lexeme.entity.form'] = [
-				'class' => Scribunto_LuaWikibaseLexemeEntityFormLibrary::class,
+				'class' => WikibaseLexemeEntityFormLibrary::class,
 				'deferLoad' => true,
 			];
 			$extraLibraries['mw.wikibase.lexeme.entity.sense'] = [
-				'class' => Scribunto_LuaWikibaseLexemeEntitySenseLibrary::class,
+				'class' => WikibaseLexemeEntitySenseLibrary::class,
 				'deferLoad' => true,
 			];
 		}
@@ -247,6 +259,10 @@ class WikibaseLexemeHooks {
 			'lexemeTermLanguages' => MediaWikiServices::getInstance()
 				->getService( 'WikibaseLexemeTermLanguages' )->getLanguages(),
 		];
+	}
+
+	public function onLoadExtensionSchemaUpdates( $updater ) {
+		$updater->addPostDatabaseUpdateMaintenance( FixPagePropsSortkey::class );
 	}
 
 }

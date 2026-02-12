@@ -1,23 +1,21 @@
 /**
  * @constructor
  */
-var Settings = function () {};
+const Settings = function () {};
 
-$.extend( Settings.prototype, {
+Object.assign( Settings.prototype, {
 	/**
 	 * @param {string} name
 	 * @param {string} defaultValue
 	 * @return {string|boolean}
 	 */
 	loadSetting: function ( name, defaultValue ) {
-		var setting;
-		if ( !mw.user.isAnon() ) {
+		let setting;
+		if ( mw.user.isNamed() ) {
 			setting = mw.user.options.get( 'userjs-twocolconflict-' + name );
 		} else {
-			setting = mw.storage.get( 'mw-twocolconflict-' + name );
-			if ( !setting ) {
-				setting = mw.cookie.get( '-twocolconflict-' + name );
-			}
+			setting = mw.storage.get( 'mw-twocolconflict-' + name ) ||
+				mw.cookie.get( '-twocolconflict-' + name );
 		}
 
 		return setting !== null && setting !== false ? setting : defaultValue;
@@ -37,7 +35,7 @@ $.extend( Settings.prototype, {
 	 * @param {string} value
 	 */
 	saveSetting: function ( name, value ) {
-		if ( !mw.user.isAnon() ) {
+		if ( mw.user.isNamed() ) {
 			( new mw.Api() ).saveOption( 'userjs-twocolconflict-' + name, value );
 		} else {
 			if ( !mw.storage.set( 'mw-twocolconflict-' + name, value ) ) {

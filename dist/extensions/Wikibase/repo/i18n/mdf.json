@@ -2,9 +2,13 @@
 	"@metadata": {
 		"authors": [
 			"Kareyac",
-			"Numulunj pilgae"
+			"Numulunj pilgae",
+			"Валгриш"
 		]
 	},
-	"wikibase-edit": "Петнемс",
-	"wikibase-add": "поладомс"
+	"wikibase-edit": "петнемс",
+	"wikibase-add": "поладомс",
+	"wikibase-label-empty": "Лангакскац аш",
+	"wikibase-description-empty": "Сёрмадомась апак пяшкотть",
+	"wikibase-sitelinks-special": "Иля лопат"
 }

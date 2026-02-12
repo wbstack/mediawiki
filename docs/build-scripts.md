@@ -14,7 +14,7 @@ This script will resync the `dist` directory.
 This is made up of a series of steps:
 
 - Empty the `dist` directory entirely
-- `pacman`: Retrieive and build MediaWiki code, remove any bloat files that are not needed
+- `pacman`: Retrieve and build MediaWiki code, remove any bloat files that are not needed
 - `sync_dist-persist.sh`: Sync the `dist-persist` directory into `dist` (Custom & extra wbstack hooks, config, and files)
 - `04-docker-compose`: Perform a composer install
 - `05-docker-entrypoint-overrides`: Add the WBStack shims to MediaWiki entrypoints
@@ -24,10 +24,18 @@ Assuming neither `dist-persist` directory or `pacman.yaml` have changed then run
 There is a GitHub Action [Workflow](../.github/workflows/wbstack.sync.check.yml) running to attempt to ensure that `sync.sh` has been run on every commit so that the dist directory does not get out of sync from what it is built from.
 
 ### wikiman & pacman
+#### wikiman
+> usage: `./sync/wikiman/wikiman .`
 
 `wikiman` is a MediaWiki specific yaml generator for pacman.
 This needs to be run by developers when updating component versions in `wikiman.yaml`
 
+> [!NOTE]
+> In order to be able to run wikiman you need to create a GitHub token in a file called `/sync/.github`.
+> The token does not require any special permissions, and it does not matter if it's a `classic` or `fine-grained token (beta)` token.
+> You can generate a new token [here](https://github.com/settings/personal-access-tokens).
+
+#### pacman
 `pacman` is a generic tool using yaml to fetch a series of codebases and place them on disk.
 This is run as a step in `sync.sh`
 
@@ -41,4 +49,5 @@ Example:
   - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~833742/revisions/15/patch?download
 ```
 
-**please note**: currently these will get overridden if `wikiman` is used to generate the file!
+> [!WARNING]
+> Currently patches will get overridden if `wikiman` is used to generate the `pacman.yaml` file!

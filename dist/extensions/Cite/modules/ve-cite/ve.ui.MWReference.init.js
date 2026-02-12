@@ -1,3 +1,5 @@
+'use strict';
+
 /*!
  * VisualEditor MediaWiki Cite initialisation code.
  *
@@ -7,12 +9,11 @@
 
 ( function () {
 	function fixTarget( target ) {
-		var toolGroups = target.static.toolbarGroups;
+		const toolGroups = target.static.toolbarGroups;
 
-		var i, iLen;
 		if ( mw.config.get( 'wgCiteVisualEditorOtherGroup' ) ) {
-			for ( i = 0, iLen = toolGroups.length; i < iLen; i++ ) {
-				var toolGroup = toolGroups[ i ];
+			for ( let i = 0; i < toolGroups.length; i++ ) {
+				const toolGroup = toolGroups[ i ];
 				if ( toolGroup.name === 'insert' && ( !toolGroup.demote || toolGroup.demote.indexOf( 'reference' ) === -1 ) ) {
 					toolGroup.demote = toolGroup.demote || [];
 					toolGroup.demote.push( { group: 'cite' }, 'reference', 'reference/existing' );
@@ -20,9 +21,9 @@
 			}
 		} else {
 			// Find the reference placeholder group and replace it
-			for ( i = 0, iLen = toolGroups.length; i < iLen; i++ ) {
+			for ( let i = 0; i < toolGroups.length; i++ ) {
 				if ( toolGroups[ i ].name === 'reference' ) {
-					var group = {
+					const group = {
 						// Change the name so it isn't replaced twice
 						name: 'cite',
 						type: 'list',
@@ -30,7 +31,7 @@
 						include: [ { group: 'cite' }, 'reference', 'reference/existing' ],
 						demote: [ 'reference', 'reference/existing' ]
 					};
-					var label = OO.ui.deferMsg( 'cite-ve-toolbar-group-label' );
+					const label = OO.ui.deferMsg( 'cite-ve-toolbar-group-label' );
 					// Treat mobile targets differently
 					if ( target === ve.init.mw.MobileArticleTarget ) {
 						group.header = label;
@@ -46,32 +47,36 @@
 		}
 	}
 
-	for ( var n in ve.init.mw.targetFactory.registry ) {
+	for ( const n in ve.init.mw.targetFactory.registry ) {
 		fixTarget( ve.init.mw.targetFactory.lookup( n ) );
 	}
 
-	ve.init.mw.targetFactory.on( 'register', function ( name, target ) {
+	ve.init.mw.targetFactory.on( 'register', ( name, target ) => {
 		fixTarget( target );
 	} );
 
 	/**
 	 * Add reference insertion tools from on-wiki data.
 	 *
-	 * By adding a definition in JSON to MediaWiki:Visualeditor-cite-tool-definition, the cite menu can
-	 * be populated with tools that create refrences containing a specific templates. The content of the
-	 * definition should be an array containing a series of objects, one for each tool. Each object must
-	 * contain a `name`, `icon` and `template` property. An optional `title` property can also be used
-	 * to define the tool title in plain text. The `name` property is a unique identifier for the tool,
-	 * and also provides a fallback title for the tool by being transformed into a message key. The name
-	 * is prefixed with `visualeditor-cite-tool-name-`, and messages can be defined on Wiki. Some common
-	 * messages are pre-defined for tool names such as `web`, `book`, `news` and `journal`.
+	 * By adding a definition in JSON to
+	 * MediaWiki:Visualeditor-cite-tool-definition, the cite menu can be populated
+	 * with tools that create refrences containing a specific templates. The
+	 * content of the definition should be an array containing a series of
+	 * objects, one for each tool. Each object must contain a `name`, `icon` and
+	 * `template` property. An optional `title` property can also be used to
+	 * define the tool title in plain text. The `name` property is a unique
+	 * identifier for the tool, and also provides a fallback title for the tool by
+	 * being transformed into a message key. The name is prefixed with
+	 * `visualeditor-cite-tool-name-`, and messages can be defined on Wiki. Some
+	 * common messages are pre-defined for tool names such as `web`, `book`,
+	 * `news` and `journal`.
 	 *
 	 * Example:
 	 * [ { "name": "web", "icon": "browser", "template": "Cite web" }, ... ]
 	 *
 	 */
 	( function () {
-		var deprecatedIcons = {
+		const deprecatedIcons = {
 				'ref-cite-book': 'book',
 				'ref-cite-journal': 'journal',
 				'ref-cite-news': 'newspaper',
@@ -85,13 +90,13 @@
 				web: 'browser'
 			};
 
-		// This is assigned server-side by CiteVisualEditorModule.php, before this file runs.
+		// This is assigned server-side by CitationToolDefinition.php, before this file runs.
 		// Ensure it has a fallback, just in case.
 		ve.ui.mwCitationTools = ve.ui.mwCitationTools || [];
 
-		ve.ui.mwCitationTools.forEach( function ( item ) {
-			var hasOwn = Object.prototype.hasOwnProperty,
-				data = { template: item.template, title: item.title };
+		ve.ui.mwCitationTools.forEach( ( item ) => {
+			const hasOwn = Object.prototype.hasOwnProperty;
+			const data = { template: item.template, title: item.title };
 
 			if ( !item.icon && hasOwn.call( defaultIcons, item.name ) ) {
 				item.icon = defaultIcons[ item.name ];
@@ -102,9 +107,9 @@
 			}
 
 			// Generate citation tool
-			var name = 'cite-' + item.name;
+			const name = 'cite-' + item.name;
 			if ( !ve.ui.toolFactory.lookup( name ) ) {
-				var tool = function GeneratedMWCitationDialogTool() {
+				const tool = function GeneratedMWCitationDialogTool() {
 					ve.ui.MWCitationDialogTool.apply( this, arguments );
 				};
 				OO.inheritClass( tool, ve.ui.MWCitationDialogTool );
@@ -131,7 +136,7 @@
 
 			// Generate citation context item
 			if ( !ve.ui.contextItemFactory.lookup( name ) ) {
-				var contextItem = function GeneratedMWCitationContextItem() {
+				const contextItem = function GeneratedMWCitationContextItem() {
 					// Parent constructor
 					ve.ui.MWCitationContextItem.apply( this, arguments );
 				};
@@ -141,10 +146,11 @@
 				contextItem.static.label = item.title;
 				contextItem.static.commandName = name;
 				contextItem.static.template = item.template;
-				// If the grand-parent class (ve.ui.MWReferenceContextItem) is extended and re-registered
-				// (e.g. by Citoid), then the inheritance chain is broken, and the generic 'reference'
-				// context item would show. Instead manually specify that that context should never show
-				// when a more specific context item is shown.
+				// If the grand-parent class (ve.ui.MWReferenceContextItem) is extended
+				// and re-registered (e.g. by Citoid), then the inheritance chain is
+				// broken, and the generic 'reference' context item would show. Instead
+				// manually specify that that context should never show when a more
+				// specific context item is shown.
 				contextItem.static.suppresses = [ 'reference' ];
 				ve.ui.contextItemFactory.register( contextItem );
 			}

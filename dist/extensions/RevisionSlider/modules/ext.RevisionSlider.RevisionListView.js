@@ -1,15 +1,13 @@
 /**
  * @class RevisionListView
  * @param {RevisionList} revisionList
- * @param {string} [dir]
  * @constructor
  */
-function RevisionListView( revisionList, dir ) {
+function RevisionListView( revisionList ) {
 	this.revisionList = revisionList;
-	this.dir = dir;
 }
 
-$.extend( RevisionListView.prototype, {
+Object.assign( RevisionListView.prototype, {
 	/**
 	 * @type {RevisionList}
 	 */
@@ -38,12 +36,7 @@ $.extend( RevisionListView.prototype, {
 	/**
 	 * @type {boolean}
 	 */
-	allowHover: true,
-
-	/**
-	 * @type {string}
-	 */
-	dir: null,
+	allowRevisionPreviewHighlights: true,
 
 	/**
 	 * @type {string}
@@ -62,22 +55,22 @@ $.extend( RevisionListView.prototype, {
 
 	/**
 	 * @param {number} revisionTickWidth
-	 * @param {number} positionOffset
+	 * @param {number} [positionOffset=0]
 	 * @return {jQuery}
 	 */
 	render: function ( revisionTickWidth, positionOffset ) {
-		var revs = this.revisionList.getRevisions(),
-			maxChangeSizeLogged = Math.log( this.revisionList.getBiggestChangeSize() ),
-			self = this;
+		const revs = this.revisionList.getRevisions();
+		const maxChangeSize = this.revisionList.getBiggestChangeSize();
+		const self = this;
 
 		positionOffset = positionOffset || 0;
 		this.revisionWidth = revisionTickWidth;
 
 		this.$html = $( '<div>' ).addClass( 'mw-revslider-revisions' );
 
-		for ( var i = 0; i < revs.length; i++ ) {
-			var diffSize = revs[ i ].getRelativeSize();
-			var relativeChangeSize = this.calcRelativeChangeSize( diffSize, maxChangeSizeLogged );
+		for ( let i = 0; i < revs.length; i++ ) {
+			const diffSize = revs[ i ].getRelativeSize();
+			const relativeChangeSize = this.calcRelativeChangeSize( diffSize, maxChangeSize );
 
 			this.$html
 				.append( $( '<div>' )
@@ -113,46 +106,47 @@ $.extend( RevisionListView.prototype, {
 						)
 					)
 					.on( 'mouseenter', function ( event ) {
-						if ( self.allowHover ) {
-							self.setRevisionHovered( $( this ), event );
-						}
+						self.onRevisionHover( $( this ), event );
 					} )
-					.on( 'mouseleave', function () {
-						self.unsetRevisionHovered( $( this ) );
+					.on( 'mouseleave', () => {
+						self.removeAllRevisionPreviewHighlights();
+						self.removeCurrentRevisionFocusWithDelay();
 					} )
 				);
 		}
 
-		this.keepTooltipsOnHover();
 		this.closeTooltipsOnClick();
 
 		return this.$html;
 	},
 
-	enableHover: function () {
-		this.allowHover = true;
-	},
-
-	disableHover: function () {
-		this.allowHover = false;
-		this.unsetAllHovered();
+	/**
+	 * @param {boolean} [enabled=true]
+	 */
+	enableRevisionPreviewHighlights: function ( enabled ) {
+		this.allowRevisionPreviewHighlights = enabled !== false;
+		if ( !this.allowRevisionPreviewHighlights ) {
+			this.removeAllRevisionPreviewHighlights();
+		}
 	},
 
 	/**
 	 * @param {jQuery} $revisionWrapper
 	 * @param {MouseEvent} event
 	 */
-	setRevisionHovered: function ( $revisionWrapper, event ) {
-		if ( !$revisionWrapper.length ) {
+	onRevisionHover: function ( $revisionWrapper, event ) {
+		if ( !this.allowRevisionPreviewHighlights ||
+			$( event.target ).closest( '.mw-revslider-revision-tooltip' ).length
+		) {
 			return;
 		}
 
-		var hasMovedTop = event.pageY - $revisionWrapper.offset().top < $revisionWrapper.height() / 2,
-			isOlderTop = $revisionWrapper.hasClass( 'mw-revslider-revision-older' ) && hasMovedTop,
-			isNewerBottom = $revisionWrapper.hasClass( 'mw-revslider-revision-newer' ) && !hasMovedTop,
-			$neighborRevisionWrapper = $revisionWrapper;
+		this.setRevisionFocus( $revisionWrapper );
 
-		this.showTooltip( $revisionWrapper );
+		const hasMovedTop = event.pageY - $revisionWrapper.offset().top < $revisionWrapper.height() / 2,
+			isOlderTop = $revisionWrapper.hasClass( 'mw-revslider-revision-older' ) && hasMovedTop,
+			isNewerBottom = $revisionWrapper.hasClass( 'mw-revslider-revision-newer' ) && !hasMovedTop;
+		let $neighborRevisionWrapper = $revisionWrapper;
 
 		if ( isOlderTop ) {
 			$neighborRevisionWrapper = $revisionWrapper.prev();
@@ -165,53 +159,28 @@ $.extend( RevisionListView.prototype, {
 		}
 
 		if ( hasMovedTop ) {
-			this.setRevisionGhost( $revisionWrapper.find( '.mw-revslider-revision-wrapper-up' ) );
+			this.setRevisionPreviewHighlight( $revisionWrapper.find( '.mw-revslider-revision-wrapper-up' ) );
 			if ( isOlderTop ) {
-				this.setRevisionGhost( $neighborRevisionWrapper.find( '.mw-revslider-revision-wrapper-down' ) );
+				this.setRevisionPreviewHighlight( $neighborRevisionWrapper.find( '.mw-revslider-revision-wrapper-down' ) );
 			}
 		} else {
-			this.setRevisionGhost( $revisionWrapper.find( '.mw-revslider-revision-wrapper-down' ) );
+			this.setRevisionPreviewHighlight( $revisionWrapper.find( '.mw-revslider-revision-wrapper-down' ) );
 			if ( isNewerBottom ) {
-				this.setRevisionGhost( $neighborRevisionWrapper.find( '.mw-revslider-revision-wrapper-up' ) );
+				this.setRevisionPreviewHighlight( $neighborRevisionWrapper.find( '.mw-revslider-revision-wrapper-up' ) );
 			}
 		}
 	},
 
 	/**
-	 * @param {jQuery} $revisionWrapper
-	 * @return {number}
-	 */
-	getRevisionWrapperPos: function ( $revisionWrapper ) {
-		return +$revisionWrapper.find( '.mw-revslider-revision' ).attr( 'data-pos' );
-	},
-
-	/**
+	 * @private
 	 * @param {jQuery} $revisionWrapper
 	 */
-	setRevisionGhost: function ( $revisionWrapper ) {
+	setRevisionPreviewHighlight: function ( $revisionWrapper ) {
 		$revisionWrapper.addClass( 'mw-revslider-revision-hovered' );
 	},
 
-	/**
-	 * @param {jQuery} $revisionWrapper
-	 */
-	unsetRevisionHovered: function ( $revisionWrapper ) {
-		this.unsetRevisionGhosts( $revisionWrapper );
-		this.hideTooltip( $revisionWrapper );
-	},
-
-	unsetAllHovered: function () {
+	removeAllRevisionPreviewHighlights: function () {
 		$( '.mw-revslider-revision-wrapper-up, .mw-revslider-revision-wrapper-down' )
-			.removeClass( 'mw-revslider-revision-hovered' );
-	},
-
-	/**
-	 * @param {jQuery} $revisionWrapper
-	 */
-	unsetRevisionGhosts: function ( $revisionWrapper ) {
-		$revisionWrapper.children()
-			.add( $revisionWrapper.prev().children() )
-			.add( $revisionWrapper.next().children() )
 			.removeClass( 'mw-revslider-revision-hovered' );
 	},
 
@@ -219,12 +188,12 @@ $.extend( RevisionListView.prototype, {
 	 * @param {jQuery} $renderedList
 	 */
 	adjustRevisionSizes: function ( $renderedList ) {
-		var revs = this.revisionList.getRevisions(),
-			maxChangeSizeLogged = Math.log( this.revisionList.getBiggestChangeSize() );
+		const revs = this.revisionList.getRevisions();
+		const maxChangeSize = this.revisionList.getBiggestChangeSize();
 
-		for ( var i = 0; i < revs.length; i++ ) {
-			var diffSize = revs[ i ].getRelativeSize();
-			var relativeChangeSize = this.calcRelativeChangeSize( diffSize, maxChangeSizeLogged );
+		for ( let i = 0; i < revs.length; i++ ) {
+			const diffSize = revs[ i ].getRelativeSize();
+			const relativeChangeSize = this.calcRelativeChangeSize( diffSize, maxChangeSize );
 
 			$renderedList.find( '.mw-revslider-revision[data-pos="' + ( i + 1 ) + '"]' ).css( {
 				height: relativeChangeSize + 'px',
@@ -233,103 +202,127 @@ $.extend( RevisionListView.prototype, {
 		}
 	},
 
-	calcRelativeChangeSize: function ( diffSize, maxChangeSizeLogged ) {
-		if ( diffSize === 0 ) {
+	/**
+	 * @private
+	 * @param {number} diffSize
+	 * @param {number} maxChangeSize
+	 * @return {number}
+	 */
+	calcRelativeChangeSize: function ( diffSize, maxChangeSize ) {
+		if ( !diffSize ) {
 			return 0;
 		}
 		return Math.ceil(
 			( this.maxRevisionHeight - this.minRevisionHeight ) *
-				Math.log( Math.abs( diffSize ) ) / maxChangeSizeLogged ) +
+				Math.log( Math.abs( diffSize ) ) / Math.log( maxChangeSize ) ) +
 			this.minRevisionHeight;
 	},
 
 	/**
-	 * Hides the current tooltip immediately
+	 * Clears the current revision focus and removes highlights and tooltip
 	 */
-	hideCurrentTooltip: function () {
-		window.clearTimeout( this.tooltipTimeout );
-		$( '.mw-revslider-revision-wrapper-hovered' )
-			.removeClass( 'mw-revslider-revision-wrapper-hovered' );
+	removeCurrentRevisionFocus: function () {
+		this.clearRevisionFocusDelay();
+		this.removeCurrentRevisionFocusHighlight();
 		$( '.mw-revslider-revision-tooltip' ).remove();
 	},
 
 	/**
-	 * Hides the tooltip after 500ms
+	 * Removes the current revision focus after 750ms
 	 *
-	 * @param {jQuery} $revisionWrapper
+	 * @private
 	 */
-	hideTooltip: function ( $revisionWrapper ) {
-		this.tooltipTimeout = window.setTimeout( function () {
-			$revisionWrapper.removeClass( 'mw-revslider-revision-wrapper-hovered' );
-			$( '.mw-revslider-revision-tooltip' ).remove();
-		}, 500 );
+	removeCurrentRevisionFocusWithDelay: function () {
+		this.tooltipTimeout = window.setTimeout( this.removeCurrentRevisionFocus.bind( this ), 750 );
 	},
 
 	/**
-	 * Hides the previous tooltip and shows the new one
+	 * @private
+	 */
+	clearRevisionFocusDelay: function () {
+		window.clearTimeout( this.tooltipTimeout );
+	},
+
+	removeCurrentRevisionFocusHighlight: function () {
+		$( '.mw-revslider-revision-wrapper-hovered' )
+			.removeClass( 'mw-revslider-revision-wrapper-hovered' );
+	},
+
+	/**
+	 * Sets the revision focus adding highlights and tooltip
 	 *
 	 * @param {jQuery} $revisionWrapper
 	 */
-	showTooltip: function ( $revisionWrapper ) {
-		var pos = +$revisionWrapper.find( '.mw-revslider-revision' ).attr( 'data-pos' ),
-			revId = +$revisionWrapper.find( '.mw-revslider-revision' ).attr( 'data-revid' ),
-			revision = this.getRevisionWithId( revId );
-		if ( revision === null ) {
+	setRevisionFocus: function ( $revisionWrapper ) {
+		if ( $revisionWrapper.hasClass( 'mw-revslider-revision-wrapper-hovered' ) ) {
+			this.clearRevisionFocusDelay();
 			return;
 		}
+		this.removeCurrentRevisionFocus();
 
-		this.hideCurrentTooltip();
-
-		var tooltip = this.makeTooltip( revision, $revisionWrapper );
-		// eslint-disable-next-line mediawiki/class-doc
-		tooltip.$element.addClass( 'mw-revslider-revision-tooltip-' + pos );
-
-		$( 'body' ).append( tooltip.$element );
-		tooltip.toggle( true );
-
+		this.showTooltip( $revisionWrapper );
 		$revisionWrapper.addClass( 'mw-revslider-revision-wrapper-hovered' );
 	},
 
 	/**
-	 * @param {number} revId
-	 * @return {Revision|null}
+	 * Hides the current tooltip when the focus moves away and not to a pointer or tooltip
+	 *
+	 * @param {jQuery.Event} event
 	 */
-	getRevisionWithId: function ( revId ) {
-		var matchedRevision = null;
-		this.revisionList.revisions.forEach( function ( revision ) {
-			if ( revision.getId() === revId ) {
-				matchedRevision = revision;
-			}
-		} );
-		return matchedRevision;
+	onFocusBlur: function ( event ) {
+		const $outElement = $( event.relatedTarget );
+		if ( $outElement.hasClass( '.mw-revslider-pointer' ) || $outElement.closest( '.mw-revslider-revision-tooltip' ).length ) {
+			return;
+		}
+		this.removeCurrentRevisionFocus();
 	},
 
 	/**
-	 * Sets event handlers on tooltips so they do not disappear when hovering over them
+	 * Hides the previous tooltip and shows the new one. Also styles a revision as hovered.
+	 *
+	 * @param {jQuery} $revisionWrapper
 	 */
-	keepTooltipsOnHover: function () {
-		var self = this;
+	showTooltip: function ( $revisionWrapper ) {
+		const $revision = $revisionWrapper.find( '.mw-revslider-revision' );
+		const revId = +$revision.attr( 'data-revid' );
+		const pos = +$revision.attr( 'data-pos' );
 
-		$( document )
-			.on( 'mouseenter', '.mw-revslider-revision-tooltip', function () {
-				window.clearTimeout( self.tooltipTimeout );
-			} )
-			.on( 'mouseleave', '.mw-revslider-revision-tooltip', function () {
-				self.hideTooltip( $( '.mw-revslider-revision-wrapper-hovered' ) );
-			} );
+		const revision = this.revisionList.getRevisions().find( ( rev ) => rev.getId() === revId );
+		const tooltip = this.makeTooltip( revision, $revisionWrapper );
+
+		// eslint-disable-next-line mediawiki/class-doc
+		tooltip.$element
+			.addClass( 'mw-revslider-revision-tooltip-' + pos )
+			.on( 'focusout', this.onFocusBlur.bind( this ) )
+			// Set event handlers so that tooltips do not disappear immediately when hover is gone
+			.on( 'mouseleave', this.removeCurrentRevisionFocusWithDelay.bind( this ) )
+			.on( 'mouseenter', this.clearRevisionFocusDelay.bind( this ) );
+
+		const $focusedRevisionPointer = $( '.mw-revslider-pointer[data-pos="' + pos + '"]' );
+		if ( $focusedRevisionPointer.length ) {
+			// Make sure tooltips are added next to the pointer so they can be reached when tabbing
+			$focusedRevisionPointer.parent().append( tooltip.$element );
+		} else {
+			$( document.body ).append( tooltip.$element );
+		}
+
+		tooltip.toggle( true );
 	},
 
 	/**
 	 * Sets an event handler to close tooltips when clicking somewhere outside
+	 *
+	 * @private
 	 */
 	closeTooltipsOnClick: function () {
-		var self = this;
+		const self = this;
 
 		$( document )
-			.on( 'click', function ( event ) {
-				if ( $( event.target ).closest( '.mw-revslider-revision-tooltip' ).length === 0 &&
-					$( event.target ).closest( '.mw-revslider-revisions-container' ).length === 0 ) {
-					self.hideCurrentTooltip();
+			.on( 'click', ( event ) => {
+				const $inside = $( event.target )
+					.closest( '.mw-revslider-revision-tooltip, .mw-revslider-revisions-container' );
+				if ( !$inside.length ) {
+					self.removeCurrentRevisionFocus();
 				}
 			} );
 	},
@@ -337,12 +330,13 @@ $.extend( RevisionListView.prototype, {
 	/**
 	 * Generates the HTML for a tooltip that appears on hover above each revision on the slider
 	 *
+	 * @private
 	 * @param {Revision} revision
 	 * @param {jQuery} $revisionWrapper
 	 * @return {OO.ui.PopupWidget}
 	 */
 	makeTooltip: function ( revision, $revisionWrapper ) {
-		var $tooltip = $( '<div>' )
+		const $tooltip = $( '<div>' )
 			.append(
 				$( '<p>' ).append(
 					$( '<strong>' ).text( mw.msg( 'revisionslider-label-date' ) + mw.msg( 'colon-separator' ) ),
@@ -353,7 +347,7 @@ $.extend( RevisionListView.prototype, {
 				this.makeCommentLine( revision ),
 				this.makePageSizeLine( revision.getSize() ),
 				this.makeChangeSizeLine( revision.getRelativeSize() ),
-				revision.isMinor() ? $( '<p>' ).text( mw.message( 'revisionslider-minoredit' ).text() ) : '',
+				revision.isMinor() ? $( '<p>' ).text( mw.msg( 'revisionslider-minoredit' ) ) : '',
 				this.makeTagsLine( revision )
 			);
 		return new OO.ui.PopupWidget( {
@@ -367,22 +361,24 @@ $.extend( RevisionListView.prototype, {
 	/**
 	 * Generates a link to user page or to contributions page for IP addresses
 	 *
+	 * @private
 	 * @param {string} user
 	 * @return {string}
 	 */
 	getUserPage: function ( user ) {
-		return ( mw.util.isIPAddress( user, false ) ? 'Special:Contributions/' : 'User:' ) + this.stripInvalidCharacters( user );
+		return ( mw.util.isIPAddress( user ) ? 'Special:Contributions/' : 'User:' ) + this.stripInvalidCharacters( user );
 	},
 
 	/**
 	 * Generates the HTML for the user label
 	 *
+	 * @private
 	 * @param {string} userString
-	 * @param {string} userGender
+	 * @param {string} [userGender='unknown']
 	 * @return {string|jQuery}
 	 */
 	makeUserLine: function ( userString, userGender ) {
-		var self = this;
+		const self = this;
 
 		if ( !userString ) {
 			return '';
@@ -391,11 +387,11 @@ $.extend( RevisionListView.prototype, {
 			userGender = 'unknown';
 		}
 
-		var $userBubble = $( '<div>' ).addClass( 'mw-revslider-bubble' )
+		const $userBubble = $( '<div>' ).addClass( 'mw-revslider-bubble' )
 			.on( 'click mouseenter mouseleave', function ( event ) {
 				self.setUserFilterEvents( $( this ), userString, event );
 			} );
-		var $userLine = $( '<p>' ).addClass( 'mw-revslider-highlightable-row mw-revslider-username-row' ).append(
+		const $userLine = $( '<p>' ).addClass( 'mw-revslider-filter-highlightable-row mw-revslider-username-row' ).append(
 			$( '<strong>' ).text( mw.msg( 'revisionslider-label-username', userGender ) + mw.msg( 'colon-separator' ) ),
 			$( '<bdi>' ).append(
 				$( '<a>' ).addClass( 'mw-userlink' ).attr( 'href', mw.util.getUrl( this.getUserPage( userString ) ) ).text( this.stripInvalidCharacters( userString ) )
@@ -405,8 +401,8 @@ $.extend( RevisionListView.prototype, {
 
 		if ( self.selectedUser === userString ) {
 			self.selectedTag = '';
-			$userLine.addClass( 'mw-revslider-highlight' );
-			$userBubble.addClass( 'mw-revslider-highlite-bubble' );
+			$userLine.addClass( 'mw-revslider-filter-highlight' );
+			$userBubble.addClass( 'mw-revslider-filter-highlight-bubble' );
 		}
 
 		return $userLine;
@@ -415,39 +411,40 @@ $.extend( RevisionListView.prototype, {
 	/**
 	 * Set user filter events for revisions
 	 *
+	 * @private
 	 * @param {jQuery} $userBubble
 	 * @param {string} userName
 	 * @param {MouseEvent} event
 	 */
 	setUserFilterEvents: function ( $userBubble, userName, event ) {
-		var self = this,
-			$userLine = $userBubble.parent();
+		const $userLine = $userBubble.parent();
 
-		if ( self.selectedUser === userName && event.type !== 'click' ) {
+		if ( this.selectedUser === userName && event.type !== 'click' ) {
 			return;
 		}
 
-		self.removeRevisionHighlight();
+		this.removeRevisionFilterHighlighting();
 
+		let oldUser;
 		switch ( event.type ) {
 			case 'mouseenter':
-				$userLine.addClass( 'mw-revslider-highlight' );
-				$userBubble.addClass( 'mw-revslider-highlite-bubble' );
-				self.highlightSameUserRevisions( userName );
+				$userLine.addClass( 'mw-revslider-filter-highlight' );
+				$userBubble.addClass( 'mw-revslider-filter-highlight-bubble' );
+				this.filterHighlightSameUserRevisions( userName );
 				break;
 			case 'mouseleave':
-				self.reApplySavedHighlighting( $userLine, $userBubble );
+				this.reApplySavedFilterHighlighting( $userLine, $userBubble );
 				break;
 			case 'click':
-				var oldUser = self.selectedUser;
-				self.resetRevisionHighlighting();
+				oldUser = this.selectedUser;
+				this.resetRevisionFilterHighlighting();
 
-				$userLine.addClass( 'mw-revslider-highlight' );
-				$userBubble.addClass( 'mw-revslider-highlite-bubble' );
+				$userLine.addClass( 'mw-revslider-filter-highlight' );
+				$userBubble.addClass( 'mw-revslider-filter-highlight-bubble' );
 
 				if ( oldUser !== userName ) {
-					self.highlightSameUserRevisions( userName );
-					self.selectedUser = userName;
+					this.filterHighlightSameUserRevisions( userName );
+					this.selectedUser = userName;
 				}
 				break;
 		}
@@ -456,14 +453,16 @@ $.extend( RevisionListView.prototype, {
 	/**
 	 * Highlights revisions of the sameUser
 	 *
+	 * @private
 	 * @param {string} userString
 	 */
-	highlightSameUserRevisions: function ( userString ) {
+	filterHighlightSameUserRevisions: function ( userString ) {
 		$( '[data-user="' + userString + '"]' ).parent()
-			.toggleClass( 'mw-revslider-revision-highlight' );
+			.toggleClass( 'mw-revslider-revision-filter-highlight' );
 	},
 
 	/**
+	 * @private
 	 * @param {string} s
 	 * @return {string}
 	 */
@@ -474,20 +473,20 @@ $.extend( RevisionListView.prototype, {
 	/**
 	 * Generates the HTML for the comment label
 	 *
+	 * @private
 	 * @param {Revision} rev
 	 * @return {string|jQuery}
 	 */
 	makeCommentLine: function ( rev ) {
-		if ( rev.hasEmptyComment() ) {
+		const html = rev.getParsedComment();
+		if ( !html.trim().length ) {
 			return '';
 		}
 
 		return $( '<p>' ).append(
 			$( '<strong>' ).text( mw.msg( 'revisionslider-label-comment' ) + mw.msg( 'colon-separator' ) ),
 			$( '<em>' ).append(
-				$( '<bdi>' ).append(
-					rev.getParsedComment()
-				)
+				$( '<bdi>' ).append( html )
 			)
 		);
 	},
@@ -495,25 +494,26 @@ $.extend( RevisionListView.prototype, {
 	/**
 	 * Generates the HTML for the tags label
 	 *
+	 * @private
 	 * @param {Revision} rev
 	 * @return {string|jQuery}
 	 */
 	makeTagsLine: function ( rev ) {
-		var self = this;
+		const self = this;
 
-		if ( rev.hasNoTags() ) {
+		const tags = rev.getTags();
+		if ( !tags.length ) {
 			return '';
 		}
 
-		var tags = rev.getTags();
-		var $tagLines = $( '<div>' );
+		const $tagLines = $( '<div>' );
 
-		for ( var i = 0; i < tags.length; i++ ) {
-			var $tagBubble = $( '<div>' ).addClass( 'mw-revslider-bubble' )
+		for ( let i = 0; i < tags.length; i++ ) {
+			const $tagBubble = $( '<div>' ).addClass( 'mw-revslider-bubble' )
 				.on( 'click mouseenter mouseleave', function ( event ) {
 					self.setTagFilterEvents( $( this ), event );
 				} );
-			var $tagLine = $( '<div>' ).addClass( 'mw-revslider-highlightable-row mw-revslider-tag-row' ).append(
+			const $tagLine = $( '<div>' ).addClass( 'mw-revslider-filter-highlightable-row mw-revslider-tag-row' ).append(
 				tags[ i ],
 				$tagBubble,
 				'<br>'
@@ -521,8 +521,8 @@ $.extend( RevisionListView.prototype, {
 
 			if ( self.selectedTag === tags[ i ] ) {
 				self.selectedUser = '';
-				$tagLine.addClass( 'mw-revslider-highlight' );
-				$tagLine.find( $tagBubble ).addClass( 'mw-revslider-highlite-bubble' );
+				$tagLine.addClass( 'mw-revslider-filter-highlight' );
+				$tagLine.find( $tagBubble ).addClass( 'mw-revslider-filter-highlight-bubble' );
 			}
 
 			$tagLine.attr( 'data-tag-name', tags[ i ] );
@@ -535,93 +535,97 @@ $.extend( RevisionListView.prototype, {
 	/**
 	 * Set tag filter events for revisions
 	 *
+	 * @private
 	 * @param {jQuery} $tagBubble
 	 * @param {MouseEvent} event
 	 */
 	setTagFilterEvents: function ( $tagBubble, event ) {
-		var self = this,
-			$tagLine = $tagBubble.parent(),
-			tagName = $tagLine.data( 'tag-name' );
+		const $tagLine = $tagBubble.parent(),
+			tagName = $tagLine.attr( 'data-tag-name' );
 
-		if ( self.selectedTag === tagName && event.type !== 'click' ) {
+		if ( this.selectedTag === tagName && event.type !== 'click' ) {
 			return;
 		}
 
-		self.removeRevisionHighlight();
+		this.removeRevisionFilterHighlighting();
 
+		let oldTag;
 		switch ( event.type ) {
 			case 'mouseenter':
-				$tagLine.addClass( 'mw-revslider-highlight' );
-				$tagBubble.addClass( 'mw-revslider-highlite-bubble' );
-				self.highlightSameTagRevisions( tagName );
+				$tagLine.addClass( 'mw-revslider-filter-highlight' );
+				$tagBubble.addClass( 'mw-revslider-filter-highlight-bubble' );
+				this.filterHighlightSameTagRevisions( tagName );
 				break;
 			case 'mouseleave':
-				self.reApplySavedHighlighting( $tagLine, $tagBubble );
+				this.reApplySavedFilterHighlighting( $tagLine, $tagBubble );
 				break;
 			case 'click':
-				var oldTag = self.selectedTag;
-				self.resetRevisionHighlighting();
+				oldTag = this.selectedTag;
+				this.resetRevisionFilterHighlighting();
 
-				$tagLine.addClass( 'mw-revslider-highlight' );
-				$tagBubble.addClass( 'mw-revslider-highlite-bubble' );
+				$tagLine.addClass( 'mw-revslider-filter-highlight' );
+				$tagBubble.addClass( 'mw-revslider-filter-highlight-bubble' );
 
 				if ( oldTag !== tagName ) {
-					self.highlightSameTagRevisions( tagName );
-					self.selectedTag = tagName;
+					this.filterHighlightSameTagRevisions( tagName );
+					this.selectedTag = tagName;
 				}
 				break;
 		}
 	},
 
 	/**
-	 * Highlights same tag revisions
+	 * Highlight same tag revisions
 	 *
+	 * @private
 	 * @param {string} tagName
 	 */
-	highlightSameTagRevisions: function ( tagName ) {
-		var revs = this.revisionList.getRevisions();
+	filterHighlightSameTagRevisions: function ( tagName ) {
+		const revs = this.revisionList.getRevisions();
 
-		for ( var i = 0; i < revs.length; i++ ) {
-			var revTags = revs[ i ].getTags();
-			for ( var j = 0; j < revTags.length; j++ ) {
-				if ( tagName === revTags[ j ] ) {
-					$( '[data-revid="' + revs[ i ].id + '"]' ).parent()
-						.addClass( 'mw-revslider-revision-highlight' );
-				}
+		for ( let i = 0; i < revs.length; i++ ) {
+			if ( revs[ i ].getTags().indexOf( tagName ) !== -1 ) {
+				$( '[data-revid="' + revs[ i ].id + '"]' ).parent()
+					.addClass( 'mw-revslider-revision-filter-highlight' );
 			}
 		}
 	},
 
 	/**
-	 * Re-apply highlighting from saved state
+	 * Re-apply filter highlighting from saved state
 	 *
+	 * @private
 	 * @param {jQuery} $line
 	 * @param {jQuery} $bubble
 	 */
-	reApplySavedHighlighting: function ( $line, $bubble ) {
-		$line.removeClass( 'mw-revslider-highlight' );
-		$bubble.removeClass( 'mw-revslider-highlite-bubble' );
+	reApplySavedFilterHighlighting: function ( $line, $bubble ) {
+		$line.removeClass( 'mw-revslider-filter-highlight' );
+		$bubble.removeClass( 'mw-revslider-filter-highlight-bubble' );
 		if ( this.selectedTag ) {
-			this.highlightSameTagRevisions( this.selectedTag );
+			this.filterHighlightSameTagRevisions( this.selectedTag );
 		}
 		if ( this.selectedUser ) {
-			this.highlightSameUserRevisions( this.selectedUser );
+			this.filterHighlightSameUserRevisions( this.selectedUser );
 		}
 	},
 
 	/**
-	 * Removes the highlighting from the revisions
+	 * Removes the filter highlighting from the revisions
+	 *
+	 * @private
 	 */
-	removeRevisionHighlight: function () {
-		$( '.mw-revslider-revision-wrapper' ).removeClass( 'mw-revslider-revision-highlight' );
+	removeRevisionFilterHighlighting: function () {
+		$( '.mw-revslider-revision-wrapper' ).removeClass( 'mw-revslider-revision-filter-highlight' );
 	},
 
 	/**
-	 * Resets highlighting setting state
+	 * Resets filter highlighting from setting state
+	 *
+	 * @private
 	 */
-	resetRevisionHighlighting: function () {
-		$( '.mw-revslider-highlightable-row' ).removeClass( 'mw-revslider-highlight' );
-		$( '.mw-revslider-bubble' ).removeClass( 'mw-revslider-highlite-bubble' );
+	resetRevisionFilterHighlighting: function () {
+		$( '.mw-revslider-filter-highlightable-row' ).removeClass( 'mw-revslider-filter-highlight' );
+		$( '.mw-revslider-bubble' ).removeClass( 'mw-revslider-filter-highlight-bubble' );
 		this.selectedTag = '';
 		this.selectedUser = '';
 	},
@@ -629,24 +633,25 @@ $.extend( RevisionListView.prototype, {
 	/**
 	 * Generates the HTML for the page size label
 	 *
+	 * @private
 	 * @param {number} size
 	 * @return {jQuery}
 	 */
 	makePageSizeLine: function ( size ) {
-		return $( '<p>' ).append(
-			$( '<strong>' ).text( mw.msg( 'revisionslider-label-page-size' ) + mw.msg( 'colon-separator' ) ),
-			mw.msg( 'revisionslider-page-size', mw.language.convertNumber( size ), size )
-		);
+		return $( '<p>' )
+			.text( mw.msg( 'revisionslider-page-size', mw.language.convertNumber( size ), size ) )
+			.prepend( $( '<strong>' ).text( mw.msg( 'revisionslider-label-page-size' ) + mw.msg( 'colon-separator' ) ) );
 	},
 
 	/**
 	 * Generates the HTML for the change size label
 	 *
+	 * @private
 	 * @param {number} relativeSize
 	 * @return {jQuery}
 	 */
 	makeChangeSizeLine: function ( relativeSize ) {
-		var changeSizeClass = 'mw-revslider-change-none',
+		let changeSizeClass = 'mw-revslider-change-none',
 			leadingSign = '';
 
 		if ( relativeSize > 0 ) {
@@ -658,7 +663,7 @@ $.extend( RevisionListView.prototype, {
 
 		// Classes are documented above
 		// eslint-disable-next-line mediawiki/class-doc
-		var $changeNumber = $( '<span>' )
+		const $changeNumber = $( '<span>' )
 			.addClass( changeSizeClass )
 			.attr( {
 				dir: 'ltr' // Make sure that minus/plus is on the left
@@ -667,17 +672,8 @@ $.extend( RevisionListView.prototype, {
 
 		return $( '<p>' ).append(
 			$( '<strong>' ).text( mw.msg( 'revisionslider-label-change-size' ) + mw.msg( 'colon-separator' ) ),
-			mw.message( 'revisionslider-change-size', $changeNumber, relativeSize, Math.abs( relativeSize ) ).parse()
+			mw.message( 'revisionslider-change-size', $changeNumber, relativeSize, Math.abs( relativeSize ) ).parseDom()
 		);
-	},
-
-	/**
-	 * Set direction for the view
-	 *
-	 * @param {string} dir
-	 */
-	setDir: function ( dir ) {
-		this.dir = dir;
 	},
 
 	/**

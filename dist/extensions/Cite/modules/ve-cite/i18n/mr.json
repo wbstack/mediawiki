@@ -28,7 +28,6 @@
 	"cite-ve-dialog-reference-editing-reused": "हा संदर्भ या पानावर $1 {{PLURAL:$1|वेळा}} वापरल्या गेला.",
 	"cite-ve-dialog-reference-options-group-label": "हा संदर्भगट वापरा",
 	"cite-ve-dialog-reference-options-group-placeholder": "सामान्य संदर्भ",
-	"cite-ve-dialog-reference-options-name-label": "या नावाने पुन्हा-वापरा",
 	"cite-ve-dialog-reference-options-responsive-label": "प्रतिसाद देणारी सारणी वापरा",
 	"cite-ve-dialog-reference-options-section": "पर्याय",
 	"cite-ve-dialog-reference-placeholder": "येथे आपला संदर्भ लिहा किंवा चिटकवा, किंवा संदर्भ साचा चिटकवा",
@@ -49,7 +48,5 @@
 	"cite-ve-referenceslist-missingref": "हा संदर्भ सध्या केवळ स्रोत संपादन पद्धतीने संपादीत करता येतो कारण संबंधित संदर्भ साचातून किंवा इतर जनरेटेड ब्लॉक मधून डिफाईन केला गेला आहे.",
 	"cite-ve-referenceslist-missingreflist": "ही संदर्भयादी साचा वापरून तयार केली गेली आहे, आणि आता फ़क्त स्त्रोत मोडमध्ये जाऊनच बदलली जाऊ शकते",
 	"cite-ve-toolbar-group-label": "संदर्भ जोडा",
-	"cite-ve-othergroup-item": "$1 संदर्भ",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "संदर्भ",
-	"visualeditor-internal-list-diff-group-name-mwreference": "संदर्भगटाचे नाव: \"$1\""
+	"cite-ve-othergroup-item": "$1 संदर्भ"
 }

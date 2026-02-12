@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace Wikibase\Repo\Maintenance;
 
 use IJobSpecification;
-use Maintenance;
+use MediaWiki\Maintenance\Maintenance;
 use MediaWiki\MediaWikiServices;
 use Wikibase\Lib\Changes\EntityChange;
 use Wikibase\Lib\WikibaseSettings;
@@ -25,7 +25,7 @@ class ResubmitChanges extends Maintenance {
 
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Prune the Wikibase changes table to a maximum number of entries' );
+		$this->addDescription( 'Resubmit DispatchChanges jobs, based on entries in the wb_changes table.' );
 
 		$this->addOption( 'minimum-age', 'Only resubmit jobs older than this number of seconds', false, true );
 		$this->setBatchSize( 500 );
@@ -45,7 +45,7 @@ class ResubmitChanges extends Maintenance {
 
 		$offset = 0;
 		$changes = $entityChangeLookup->loadChangesBefore( $thisTimeOrOlder, $this->mBatchSize, $offset );
-		while ( !empty( $changes ) ) {
+		while ( $changes ) {
 			$numberOfChanges = count( $changes );
 			$stats->updateCount( 'wikibase.repo.ResubmitChanges.numberOfChanges', $numberOfChanges );
 			$this->log( 'Resubmitting ' . $numberOfChanges . ' changes older than ' . $minimumAge . ' seconds.' );

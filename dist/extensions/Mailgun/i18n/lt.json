@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nokeoo"
+		]
+	},
+	"mailgun-desc": "Siunčia el. laiškas per Mailgun API paslaugą iš MediaWiki"
+}

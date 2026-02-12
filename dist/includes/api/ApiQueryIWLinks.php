@@ -23,6 +23,10 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use MediaWiki\Title\Title;
+use MediaWiki\Utils\UrlUtils;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 
@@ -33,8 +37,12 @@ use Wikimedia\ParamValidator\TypeDef\IntegerDef;
  */
 class ApiQueryIWLinks extends ApiQueryBase {
 
-	public function __construct( ApiQuery $query, $moduleName ) {
+	private UrlUtils $urlUtils;
+
+	public function __construct( ApiQuery $query, string $moduleName, UrlUtils $urlUtils ) {
 		parent::__construct( $query, $moduleName, 'iw' );
+
+		$this->urlUtils = $urlUtils;
 	}
 
 	public function execute() {
@@ -73,20 +81,14 @@ class ApiQueryIWLinks extends ApiQueryBase {
 		$this->addWhereFld( 'iwl_from', array_keys( $pages ) );
 
 		if ( $params['continue'] !== null ) {
-			$cont = explode( '|', $params['continue'] );
-			$this->dieContinueUsageIf( count( $cont ) != 3 );
-			$op = $params['dir'] == 'descending' ? '<' : '>';
+			$cont = $this->parseContinueParamOrDie( $params['continue'], [ 'int', 'string', 'string' ] );
+			$op = $params['dir'] == 'descending' ? '<=' : '>=';
 			$db = $this->getDB();
-			$iwlfrom = (int)$cont[0];
-			$iwlprefix = $db->addQuotes( $cont[1] );
-			$iwltitle = $db->addQuotes( $cont[2] );
-			$this->addWhere(
-				"iwl_from $op $iwlfrom OR " .
-				"(iwl_from = $iwlfrom AND " .
-				"(iwl_prefix $op $iwlprefix OR " .
-				"(iwl_prefix = $iwlprefix AND " .
-				"iwl_title $op= $iwltitle)))"
-			);
+			$this->addWhere( $db->buildComparison( $op, [
+				'iwl_from' => $cont[0],
+				'iwl_prefix' => $cont[1],
+				'iwl_title' => $cont[2],
+			] ) );
 		}
 
 		$sort = ( $params['dir'] == 'descending' ? ' DESC' : '' );
@@ -133,7 +135,7 @@ class ApiQueryIWLinks extends ApiQueryBase {
 			if ( isset( $prop['url'] ) ) {
 				$title = Title::newFromText( "{$row->iwl_prefix}:{$row->iwl_title}" );
 				if ( $title ) {
-					$entry['url'] = wfExpandUrl( $title->getFullURL(), PROTO_CURRENT );
+					$entry['url'] = (string)$this->urlUtils->expand( $title->getFullURL(), PROTO_CURRENT );
 				}
 			}
 
@@ -189,8 +191,11 @@ class ApiQueryIWLinks extends ApiQueryBase {
 	}
 
 	protected function getExamplesMessages() {
+		$title = Title::newMainPage()->getPrefixedText();
+		$mp = rawurlencode( $title );
+
 		return [
-			'action=query&prop=iwlinks&titles=Main%20Page'
+			"action=query&prop=iwlinks&titles={$mp}"
 				=> 'apihelp-query+iwlinks-example-simple',
 		];
 	}
@@ -199,3 +204,6 @@ class ApiQueryIWLinks extends ApiQueryBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Iwlinks';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryIWLinks::class, 'ApiQueryIWLinks' );

@@ -2,20 +2,19 @@
 
 namespace MediaWiki\Extension\OAuth\Backend;
 
-use AutoCommitUpdate;
-use CentralIdLookup;
-use DeferredUpdates;
-use EchoEvent;
-use MediaWiki\Extension\OAuth\Lib\OAuthSignatureMethod_HMAC_SHA1;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Deferred\AutoCommitUpdate;
+use MediaWiki\Deferred\DeferredUpdates;
+use MediaWiki\Extension\Notifications\Model\Event;
+use MediaWiki\Extension\OAuth\Lib\OAuthSignatureMethodHmacSha1;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Title\Title;
+use MediaWiki\User\CentralId\CentralIdLookup;
+use MediaWiki\User\User;
+use MediaWiki\WikiMap\WikiMap;
 use MWException;
-use ObjectCache;
-use RequestContext;
-use Title;
-use User;
-use WebRequest;
-use WikiMap;
-use Wikimedia\Rdbms\DBConnRef;
+use Wikimedia\ObjectCache\BagOStuff;
 use Wikimedia\Rdbms\IDatabase;
 
 /**
@@ -45,11 +44,9 @@ class Utils {
 
 	/**
 	 * @param int $index DB_PRIMARY/DB_REPLICA
-	 * @return DBConnRef
+	 * @return IDatabase
 	 */
 	public static function getCentralDB( $index ) {
-		global $wgMWOAuthReadOnly;
-
 		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 
 		// T244415: Use the primary database if there were changes
@@ -61,46 +58,46 @@ class Utils {
 			$wikiId = false;
 		}
 
-		$db = $lbFactory->getMainLB( $wikiId )->getConnectionRef(
+		return $lbFactory->getMainLB( $wikiId )->getConnection(
 			$index, [], $wikiId );
-		$db->daoReadOnly = $wgMWOAuthReadOnly;
-		return $db;
 	}
 
 	/**
-	 * @return \BagOStuff
+	 * @return BagOStuff
 	 */
 	public static function getSessionCache() {
 		global $wgMWOAuthSessionCacheType;
 		global $wgSessionCacheType;
 
 		$sessionCacheType = $wgMWOAuthSessionCacheType ?? $wgSessionCacheType;
-		return ObjectCache::getInstance( $sessionCacheType );
+		return MediaWikiServices::getInstance()
+			->getObjectCacheFactory()->getInstance( $sessionCacheType );
 	}
 
 	/**
 	 * Get the cache type for OAuth 1.0 nonces
-	 * @return \BagOStuff
+	 * @return BagOStuff
 	 */
 	public static function getNonceCache() {
 		global $wgMWOAuthNonceCacheType, $wgMWOAuthSessionCacheType, $wgSessionCacheType;
 
 		$cacheType = $wgMWOAuthNonceCacheType
 			?? $wgMWOAuthSessionCacheType ?? $wgSessionCacheType;
-		return ObjectCache::getInstance( $cacheType );
+		return MediaWikiServices::getInstance()
+			->getObjectCacheFactory()->getInstance( $cacheType );
 	}
 
 	/**
-	 * @param DBConnRef $db
-	 * @return array
+	 * @param IDatabase $db
+	 * @return int[]
 	 */
-	public static function getConsumerStateCounts( DBConnRef $db ) {
-		$res = $db->select( 'oauth_registered_consumer',
-			[ 'oarc_stage', 'count' => 'COUNT(*)' ],
-			[],
-			__METHOD__,
-			[ 'GROUP BY' => 'oarc_stage' ]
-		);
+	public static function getConsumerStateCounts( IDatabase $db ) {
+		$res = $db->newSelectQueryBuilder()
+			->select( [ 'oarc_stage', 'count' => 'COUNT(*)' ] )
+			->from( 'oauth_registered_consumer' )
+			->groupBy( 'oarc_stage' )
+			->caller( __METHOD__ )
+			->fetchResultSet();
 		$table = [
 			Consumer::STAGE_APPROVED => 0,
 			Consumer::STAGE_DISABLED => 0,
@@ -162,10 +159,10 @@ class Utils {
 	}
 
 	/**
-	 * @param DBConnRef $dbw
+	 * @param IDatabase $dbw
 	 * @return void
 	 */
-	public static function runAutoMaintenance( DBConnRef $dbw ) {
+	public static function runAutoMaintenance( IDatabase $dbw ) {
 		global $wgMWOAuthRequestExpirationAge;
 
 		if ( $wgMWOAuthRequestExpirationAge <= 0 ) {
@@ -179,19 +176,18 @@ class Utils {
 				$dbw,
 				__METHOD__,
 				static function ( IDatabase $dbw ) use ( $cutoff, $fname ) {
-					$dbw->update(
-						'oauth_registered_consumer',
-						[
+					$dbw->newUpdateQueryBuilder()
+						->update( 'oauth_registered_consumer' )
+						->set( [
 							'oarc_stage' => Consumer::STAGE_EXPIRED,
 							'oarc_stage_timestamp' => $dbw->timestamp()
-						],
-						[
+						] )
+						->where( [
 							'oarc_stage' => Consumer::STAGE_PROPOSED,
-							'oarc_stage_timestamp < ' .
-								$dbw->addQuotes( $dbw->timestamp( $cutoff ) )
-						],
-						$fname
-					);
+							$dbw->expr( 'oarc_stage_timestamp', '<', $dbw->timestamp( $cutoff ) )
+						] )
+						->caller( $fname )
+						->execute();
 				}
 			)
 		);
@@ -220,7 +216,7 @@ class Utils {
 	/**
 	 * Get the pretty names of all local wikis
 	 *
-	 * @return array associative array of local wiki names indexed by wiki ID
+	 * @return string[] associative array of local wiki names indexed by wiki ID
 	 */
 	public static function getAllWikiNames() {
 		global $wgConf;
@@ -242,8 +238,8 @@ class Utils {
 	public static function newMWOAuthServer() {
 		$store = static::newMWOAuthDataStore();
 		$server = new MWOAuthServer( $store );
-		$server->add_signature_method( new OAuthSignatureMethod_HMAC_SHA1() );
-		$server->add_signature_method( new MWOAuthSignatureMethod_RSA_SHA1( $store ) );
+		$server->add_signature_method( new OAuthSignatureMethodHmacSha1() );
+		$server->add_signature_method( new MWOAuthSignatureMethodRsaSha1( $store ) );
 
 		return $server;
 	}
@@ -256,12 +252,12 @@ class Utils {
 	}
 
 	/**
-	 * Given a central wiki user ID, get a central user name
+	 * Given a central wiki user ID, get a central username
 	 *
 	 * @param int $userId
-	 * @param bool|\User|string $audience show hidden names based on this user, or false for public
-	 * @throws \MWException
-	 * @return string|bool User name, false if not found, empty string if name is hidden
+	 * @param bool|User|string $audience show hidden names based on this user, or false for public
+	 * @throws MWException
+	 * @return string|bool Username, false if not found, empty string if name is hidden
 	 */
 	public static function getCentralUserNameFromId( $userId, $audience = false ) {
 		global $wgMWOAuthSharedUserIDs, $wgMWOAuthSharedUserSource;
@@ -300,8 +296,7 @@ class Utils {
 	 * Given a central wiki user ID, get a local User object
 	 *
 	 * @param int $userId
-	 * @throws MWException
-	 * @return User|bool User or false if not found
+	 * @return User|false False if not found
 	 */
 	public static function getLocalUserFromCentralId( $userId ) {
 		global $wgMWOAuthSharedUserIDs, $wgMWOAuthSharedUserSource;
@@ -325,10 +320,9 @@ class Utils {
 	 * Given a local User object, get the user ID for that user on the central wiki
 	 *
 	 * @param User $user
-	 * @throws MWException
 	 * @return int|bool ID or false if not found
 	 */
-	public static function getCentralIdFromLocalUser( \User $user ) {
+	public static function getCentralIdFromLocalUser( User $user ) {
 		global $wgMWOAuthSharedUserIDs, $wgMWOAuthSharedUserSource;
 
 		// global ID required via hook
@@ -339,7 +333,6 @@ class Utils {
 			}
 
 			if ( isset( $user->oAuthUserData['centralId'] ) ) {
-				// @phan-suppress-next-line PhanTypeArraySuspiciousNullable
 				$id = $user->oAuthUserData['centralId'];
 			} else {
 				$lookup = MediaWikiServices::getInstance()
@@ -366,7 +359,6 @@ class Utils {
 	/**
 	 * Given a username, get the user ID for that user on the central wiki.
 	 * @param string $username
-	 * @throws MWException
 	 * @return int|bool ID or false if not found
 	 */
 	public static function getCentralIdFromUserName( $username ) {
@@ -406,11 +398,7 @@ class Utils {
 	public static function hmacDBSecret( $secret ) {
 		global $wgOAuthSecretKey, $wgSecretKey;
 
-		if ( empty( $wgOAuthSecretKey ) ) {
-			$secretKey = $wgSecretKey;
-		} else {
-			$secretKey = $wgOAuthSecretKey;
-		}
+		$secretKey = $wgOAuthSecretKey ?? $wgSecretKey;
 
 		return $secretKey ? hash_hmac( 'sha1', $secret, $secretKey ) : $secret;
 	}
@@ -450,10 +438,10 @@ class Utils {
 	/**
 	 * Given an OAuth consumer stage change event, find out who needs to be notified.
 	 * Will be used as an EchoAttributeManager::ATTR_LOCATORS callback.
-	 * @param EchoEvent $event
+	 * @param Event $event
 	 * @return User[]
 	 */
-	public static function locateUsersToNotify( EchoEvent $event ) {
+	public static function locateUsersToNotify( Event $event ) {
 		$agent = $event->getAgent();
 		$owner = self::getLocalUserFromCentralId( $event->getExtraParam( 'owner-id' ) );
 

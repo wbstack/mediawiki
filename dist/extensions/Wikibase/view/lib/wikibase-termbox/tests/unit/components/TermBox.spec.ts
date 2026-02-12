@@ -4,6 +4,7 @@ import TermBox from '@/components/TermBox.vue';
 import EditTools from '@/components/EditTools.vue';
 import MonolingualFingerprintView from '@/components/MonolingualFingerprintView.vue';
 import InMoreLanguagesExpandable from '@/components/InMoreLanguagesExpandable.vue';
+import EventEmittingButton from '@/components/EventEmittingButton.vue';
 import Modal from '@/components/Modal.vue';
 import Overlay from '@/components/Overlay.vue';
 import IndeterminateProgressBar from '@/components/IndeterminateProgressBar.vue';
@@ -20,6 +21,7 @@ import {
 } from '@/store/namespaces';
 import {
 	EDITABILITY_UPDATE,
+	ENTITY_REDIRECT_UPDATE,
 	ENTITY_UPDATE,
 } from '@/store/entity/mutationTypes';
 import { LINKS_UPDATE } from '@/store/links/mutationTypes';
@@ -47,13 +49,19 @@ import hotUpdateDeep from '@wmde/vuex-helpers/dist/hotUpdateDeep';
 import { UserPreference } from '@/common/UserPreference';
 import { USER_PREFERENCE_SET } from '@/store/user/actionTypes';
 import newConfigMixin, { ConfigOptions } from '@/components/mixins/newConfigMixin';
-import emptyServices from '../emptyServices';
+import mockTempUserConfigService from '../mockTempUserConfigService';
+import { appEvents } from '@/events';
+
+const mockEmitter = { emit: jest.fn() };
 
 function mountWithStore( store: Store<any> ) {
-	return mount( TermBox, { global: {
-		plugins: [ store ],
-		mixins: [ newConfigMixin( {} as ConfigOptions ) ],
-	} } );
+	return mount( TermBox, {
+		global: {
+			plugins: [ store ],
+			mixins: [ newConfigMixin( {} as ConfigOptions ) ],
+		},
+		props: { emitter: mockEmitter },
+	} );
 }
 
 function setStoreInEditMode( store: Store<any> ) {
@@ -62,7 +70,7 @@ function setStoreInEditMode( store: Store<any> ) {
 }
 
 function createStoreInEditMode() {
-	const store = createStore( emptyServices as any );
+	const store = createStore( mockTempUserConfigService as any );
 
 	setStoreInEditMode( store );
 
@@ -75,10 +83,13 @@ const flushPromises = () => new Promise( ( resolve ) => setTimeout( resolve ) );
 describe( 'TermBox.vue', () => {
 
 	it( 'contains a MonolingualFingerprintView of the user\'s primary language', () => {
-		const store = createStore( emptyServices as any );
+		const store = createStore( mockTempUserConfigService as any );
 		const userLanguage = 'en';
 		store.commit( mutation( NS_USER, LANGUAGE_INIT ), userLanguage );
-		const wrapper = shallowMount( TermBox, { global: { plugins: [ store ] } } );
+		const wrapper = shallowMount( TermBox, {
+			global: { plugins: [ store ] },
+			props: { emitter: mockEmitter },
+		} );
 
 		expect( wrapper.findComponent( MonolingualFingerprintView ).props() )
 			.toHaveProperty( 'languageCode', userLanguage );
@@ -89,29 +100,34 @@ describe( 'TermBox.vue', () => {
 	describe( 'EditTools', () => {
 		describe( 'given the entity is editable', () => {
 			it( 'are there', () => {
-				const store = createStore( emptyServices as any );
+				const store = createStore( mockTempUserConfigService as any );
 				store.commit( mutation( NS_ENTITY, EDITABILITY_UPDATE ), true );
-				const wrapper = shallowMount( TermBox, { global: { plugins: [ store ] } } );
+				const wrapper = shallowMount( TermBox, {
+					global: { plugins: [ store ] },
+					props: { emitter: mockEmitter },
+				} );
 
 				expect( wrapper.findComponent( EditTools ).exists() ).toBeTruthy();
 			} );
 
 			describe( 'EditPen', () => {
 				it( 'is there with correct link', () => {
-					const store = createStore( emptyServices as any );
+					const store = createStore( mockTempUserConfigService as any );
 					const editLinkUrl = '/edit/Q42';
 					store.commit( mutation( NS_ENTITY, EDITABILITY_UPDATE ), true );
 					store.commit( mutation( NS_LINKS, LINKS_UPDATE ), { editLinkUrl } );
 					const message = 'edit';
 					const wrapper = mount( TermBox, {
 						global: { plugins: [ store ] },
+						props: { emitter: mockEmitter },
 						mixins: [ mockMessageMixin( {
 							[ MessageKey.EDIT ]: message,
 						} ) ],
 					} );
 
 					const editPen = wrapper.findComponent( EditTools )
-						.findComponent( '.wb-ui-event-emitting-button--edit' );
+						.findComponent<
+						typeof EventEmittingButton>( '.wb-ui-event-emitting-button--edit' );
 
 					expect( editPen.exists() ).toBeTruthy();
 					expect( editPen.attributes() ).toHaveProperty( 'href', editLinkUrl );
@@ -120,32 +136,38 @@ describe( 'TermBox.vue', () => {
 
 				it( 'emitted edit event puts store into editMode', async () => {
 					const mockActivateEditMode = jest.fn().mockReturnValue( Promise.resolve() );
-					const store = hotUpdateDeep( createStore( emptyServices as any ), {
+					const store = hotUpdateDeep( createStore( mockTempUserConfigService as any ), {
 						actions: {
 							[ EDITMODE_ACTIVATE ]: mockActivateEditMode,
 						},
 					} );
 					store.commit( mutation( NS_ENTITY, EDITABILITY_UPDATE ), true );
 
-					const wrapper = mount( TermBox, { global: {
-						plugins: [ store ],
-					} } );
+					const wrapper = mount( TermBox, {
+						global: { plugins: [ store ] },
+						props: { emitter: mockEmitter },
+					} );
 
-					await wrapper.findComponent( '.wb-ui-event-emitting-button--edit' ).vm.$emit( 'click' );
+					await wrapper.findComponent<
+						typeof EventEmittingButton>( '.wb-ui-event-emitting-button--edit' ).vm.$emit( 'click' );
 
 					expect( mockActivateEditMode ).toHaveBeenCalled();
 				} );
 
 				describe( 'AnonEditWarning', () => {
 					it( 'is shown in a modal overlay for anonymous users', async () => {
-						const store = createStore( emptyServices as any );
+						const store = createStore( mockTempUserConfigService as any );
 						store.commit( mutation( NS_ENTITY, EDITABILITY_UPDATE ), true );
-						const wrapper = mount( TermBox, { global: {
-							plugins: [ store ],
-							mixins: [ newConfigMixin( {} as ConfigOptions ) ],
-						} } );
+						const wrapper = mount( TermBox, {
+							global: {
+								plugins: [ store ],
+								mixins: [ newConfigMixin( {} as ConfigOptions ) ],
+							},
+							props: { emitter: mockEmitter },
+						} );
 
-						await wrapper.findComponent( '.wb-ui-event-emitting-button--edit' ).vm.$emit( 'click' );
+						await wrapper.findComponent<
+						typeof EventEmittingButton>( '.wb-ui-event-emitting-button--edit' ).vm.$emit( 'click' );
 
 						expect(
 							wrapper.find( '.wb-ui-overlay .wb-ui-modal' ).findComponent( AnonEditWarning ).exists(),
@@ -153,32 +175,40 @@ describe( 'TermBox.vue', () => {
 					} );
 
 					it( 'is not shown for logged in users', async () => {
-						const store = createStore( emptyServices as any );
+						const store = createStore( mockTempUserConfigService as any );
 						store.commit( mutation( NS_ENTITY, EDITABILITY_UPDATE ), true );
 						store.commit( mutation( NS_USER, USER_SET_NAME ), 'Lord Voldemort' );
-						const wrapper = mount( TermBox, { global: {
-							plugins: [ store ],
-							mixins: [ newConfigMixin( {} as ConfigOptions ) ],
-						} } );
+						const wrapper = mount( TermBox, {
+							global: {
+								plugins: [ store ],
+								mixins: [ newConfigMixin( {} as ConfigOptions ) ],
+							},
+							props: { emitter: mockEmitter },
+						} );
 
-						await wrapper.findComponent( '.wb-ui-event-emitting-button--edit' ).vm.$emit( 'click' );
+						await wrapper.findComponent<
+						typeof EventEmittingButton>( '.wb-ui-event-emitting-button--edit' ).vm.$emit( 'click' );
 
 						expect( wrapper.findComponent( AnonEditWarning ).exists() ).toBeFalsy();
 					} );
 
 					it( `is not shown if ${UserPreference.HIDE_ANON_EDIT_WARNING} is set`, async () => {
-						const store = createStore( emptyServices as any );
+						const store = createStore( mockTempUserConfigService as any );
 						store.commit( mutation( NS_ENTITY, EDITABILITY_UPDATE ), true );
 						store.commit(
 							mutation( NS_USER, USER_SET_PREFERENCE ),
 							{ name: UserPreference.HIDE_ANON_EDIT_WARNING, value: true },
 						);
-						const wrapper = mount( TermBox, { global: {
-							plugins: [ store ],
-							mixins: [ newConfigMixin( {} as ConfigOptions ) ],
-						} } );
+						const wrapper = mount( TermBox, {
+							global: {
+								plugins: [ store ],
+								mixins: [ newConfigMixin( {} as ConfigOptions ) ],
+							},
+							props: { emitter: mockEmitter },
+						} );
 
-						await wrapper.findComponent( '.wb-ui-event-emitting-button--edit' ).vm.$emit( 'click' );
+						await wrapper.findComponent<
+						typeof EventEmittingButton>( '.wb-ui-event-emitting-button--edit' ).vm.$emit( 'click' );
 
 						expect( wrapper.findComponent( AnonEditWarning ).exists() ).toBeFalsy();
 					} );
@@ -186,9 +216,10 @@ describe( 'TermBox.vue', () => {
 					it( 'can be dismissed', async () => {
 						const wrapper = mount( TermBox, {
 							global: {
-								plugins: [ createStore( emptyServices as any ) ],
+								plugins: [ createStore( mockTempUserConfigService as any ) ],
 								mixins: [ newConfigMixin( {} as ConfigOptions ) ],
 							},
+							props: { emitter: mockEmitter },
 							data: () => ( { showEditWarning: true } ),
 						} );
 
@@ -201,7 +232,7 @@ describe( 'TermBox.vue', () => {
 
 			describe( 'Publish', () => {
 				it( 'is there in edit mode', () => {
-					const store = createStore( emptyServices as any );
+					const store = createStore( mockTempUserConfigService as any );
 					store.commit( mutation( NS_ENTITY, EDITABILITY_UPDATE ), true );
 					store.commit( mutation( EDITMODE_SET ), true );
 					const message = 'publish';
@@ -210,10 +241,12 @@ describe( 'TermBox.vue', () => {
 							plugins: [ store ],
 							mixins: [ newConfigMixin( {} as ConfigOptions ) ],
 						},
+						props: { emitter: mockEmitter },
 						mixins: [ mockMessageMixin( {
 							[ MessageKey.PUBLISH ]: message,
 						} ) ],
-					} ).findComponent( EditTools ).findComponent( '.wb-ui-event-emitting-button--publish' );
+					} ).findComponent( EditTools ).findComponent<
+						typeof EventEmittingButton>( '.wb-ui-event-emitting-button--publish' );
 
 					expect( publish.exists() ).toBeTruthy();
 					expect( publish.props( 'message' ) ).toBe( message );
@@ -233,7 +266,7 @@ describe( 'TermBox.vue', () => {
 					const entitySave = jest.fn().mockReturnValue( Promise.resolve() );
 					const deactivateEditMode = jest.fn();
 					const copyrightVersion = 'wikibase-1';
-					const store = hotUpdateDeep( createStore( emptyServices as any ), {
+					const store = hotUpdateDeep( createStore( mockTempUserConfigService as any ), {
 						actions: { [ EDITMODE_DEACTIVATE ]: deactivateEditMode },
 						modules: {
 							[ NS_ENTITY ]: {
@@ -246,10 +279,13 @@ describe( 'TermBox.vue', () => {
 						name: UserPreference.ACKNOWLEDGED_COPYRIGHT_VERSION,
 						value: copyrightVersion,
 					} );
-					const wrapper = mount( TermBox, { global: {
-						plugins: [ store ],
-						mixins: [ newConfigMixin( { copyrightVersion } as ConfigOptions ) ],
-					} } );
+					const wrapper = mount( TermBox, {
+						global: {
+							plugins: [ store ],
+							mixins: [ newConfigMixin( { copyrightVersion } as ConfigOptions ) ],
+						},
+						props: { emitter: mockEmitter },
+					} );
 
 					await wrapper.find( '.wb-ui-event-emitting-button--publish' ).trigger( 'click' );
 					expect( wrapper.findComponent( LicenseAgreement ).exists() ).toBeFalsy();
@@ -263,7 +299,7 @@ describe( 'TermBox.vue', () => {
 					const entitySave = jest.fn().mockReturnValue( Promise.reject() );
 					const deactivateEditMode = jest.fn();
 					const copyrightVersion = 'wikibase-1';
-					const store = hotUpdateDeep( createStore( emptyServices as any ), {
+					const store = hotUpdateDeep( createStore( mockTempUserConfigService as any ), {
 						actions: { [ EDITMODE_DEACTIVATE ]: deactivateEditMode },
 						modules: {
 							[ NS_ENTITY ]: {
@@ -286,6 +322,7 @@ describe( 'TermBox.vue', () => {
 								newConfigMixin( { copyrightVersion } as ConfigOptions ),
 							],
 						},
+						props: { emitter: mockEmitter },
 						mixins: [
 							mockMessageMixin( {
 								[ MessageKey.SAVE_ERROR_HEADING ]: errorHeading,
@@ -309,13 +346,55 @@ describe( 'TermBox.vue', () => {
 					expect( deactivateEditMode ).not.toHaveBeenCalled();
 				} );
 
+				it( 'redirects when tempuserredirect is updated', async () => {
+					const targetUrl = 'https://wiki.example';
+					let store = createStore( mockTempUserConfigService as any );
+					const entitySave = jest.fn().mockImplementation( function () {
+						store.commit(
+							mutation( NS_ENTITY, ENTITY_REDIRECT_UPDATE ), targetUrl,
+						);
+					} );
+					const deactivateEditMode = jest.fn();
+					const copyrightVersion = 'wikibase-1';
+					store = hotUpdateDeep( createStore( mockTempUserConfigService as any ), {
+						actions: { [ EDITMODE_DEACTIVATE ]: deactivateEditMode },
+						modules: {
+							[ NS_ENTITY ]: {
+								actions: { [ ENTITY_SAVE ]: entitySave },
+							},
+						},
+					} );
+
+					setStoreInEditMode( store );
+					store.commit( mutation( NS_USER, USER_SET_PREFERENCE ), {
+						name: UserPreference.ACKNOWLEDGED_COPYRIGHT_VERSION,
+						value: copyrightVersion,
+					} );
+					const wrapper = mount( TermBox, {
+						global: {
+							plugins: [ store ],
+							mixins: [ newConfigMixin( { copyrightVersion } as ConfigOptions ) ],
+						},
+						props: { emitter: mockEmitter },
+					} );
+
+					await wrapper.find( '.wb-ui-event-emitting-button--publish' ).trigger( 'click' );
+					expect( wrapper.findComponent( LicenseAgreement ).exists() ).toBeFalsy();
+					expect( entitySave ).toHaveBeenCalled();
+
+					await wrapper.vm.$nextTick();
+					expect( deactivateEditMode ).toHaveBeenCalled();
+					expect( mockEmitter.emit ).toHaveBeenCalledTimes( 1 );
+					expect( mockEmitter.emit ).toHaveBeenCalledWith( appEvents.redirect, targetUrl );
+				} );
+
 				it( 'removes the error if saving was successful at the second attempt', async () => {
 					const entitySave = jest.fn()
 						.mockReturnValueOnce( Promise.reject() )
 						.mockReturnValueOnce( Promise.resolve() );
 					const deactivateEditMode = jest.fn();
 					const copyrightVersion = 'wikibase-1';
-					const store = hotUpdateDeep( createStore( emptyServices as any ), {
+					const store = hotUpdateDeep( createStore( mockTempUserConfigService as any ), {
 						actions: { [ EDITMODE_DEACTIVATE ]: deactivateEditMode },
 						modules: {
 							[ NS_ENTITY ]: {
@@ -329,10 +408,13 @@ describe( 'TermBox.vue', () => {
 						value: copyrightVersion,
 					} );
 					window.scrollBy = jest.fn(); // used in MessageBanner
-					const wrapper = mount( TermBox, { global: {
-						plugins: [ store ],
-						mixins: [ newConfigMixin( { copyrightVersion } as ConfigOptions ) ],
-					} } );
+					const wrapper = mount( TermBox, {
+						global: {
+							plugins: [ store ],
+							mixins: [ newConfigMixin( { copyrightVersion } as ConfigOptions ) ],
+						},
+						props: { emitter: mockEmitter },
+					} );
 
 					wrapper.find( '.wb-ui-event-emitting-button--publish' ).trigger( 'click' );
 					await flushPromises();
@@ -350,7 +432,7 @@ describe( 'TermBox.vue', () => {
 
 			describe( 'Cancel', () => {
 				it( 'is there in edit mode', () => {
-					const store = createStore( emptyServices as any );
+					const store = createStore( mockTempUserConfigService as any );
 					store.commit( mutation( NS_ENTITY, EDITABILITY_UPDATE ), true );
 					store.commit( mutation( EDITMODE_SET ), true );
 					const message = 'cancel';
@@ -359,10 +441,12 @@ describe( 'TermBox.vue', () => {
 							plugins: [ store ],
 							mixins: [ newConfigMixin( {} as ConfigOptions ) ],
 						},
+						props: { emitter: mockEmitter },
 						mixins: [ mockMessageMixin( {
 							[ MessageKey.CANCEL ]: message,
 						} ) ],
-					} ).findComponent( EditTools ).findComponent( '.wb-ui-event-emitting-button--cancel' );
+					} ).findComponent( EditTools ).findComponent<
+						typeof EventEmittingButton>( '.wb-ui-event-emitting-button--cancel' );
 
 					expect( cancel.exists() ).toBeTruthy();
 					expect( cancel.props( 'message' ) ).toBe( message );
@@ -372,7 +456,7 @@ describe( 'TermBox.vue', () => {
 					const mockDeactivateEditMode = jest.fn().mockReturnValue( Promise.resolve() );
 					const entityRollbackPromise = Promise.resolve();
 					const mockEntityRollback = jest.fn().mockReturnValue( entityRollbackPromise );
-					const store = hotUpdateDeep( createStore( emptyServices as any ), {
+					const store = hotUpdateDeep( createStore( mockTempUserConfigService as any ), {
 						actions: {
 							[ EDITMODE_DEACTIVATE ]: mockDeactivateEditMode,
 						},
@@ -387,12 +471,16 @@ describe( 'TermBox.vue', () => {
 					store.commit( mutation( NS_ENTITY, EDITABILITY_UPDATE ), true );
 					store.commit( mutation( EDITMODE_SET ), true );
 
-					const wrapper = mount( TermBox, { global: {
-						plugins: [ store ],
-						mixins: [ newConfigMixin( {} as ConfigOptions ) ],
-					} } );
+					const wrapper = mount( TermBox, {
+						global: {
+							plugins: [ store ],
+							mixins: [ newConfigMixin( {} as ConfigOptions ) ],
+						},
+						props: { emitter: mockEmitter },
+					} );
 
-					await wrapper.findComponent( '.wb-ui-event-emitting-button--cancel' ).vm.$emit( 'click' );
+					await wrapper.findComponent<
+						typeof EventEmittingButton>( '.wb-ui-event-emitting-button--cancel' ).vm.$emit( 'click' );
 
 					expect( mockEntityRollback ).toHaveBeenCalled();
 					return entityRollbackPromise.then( () => {
@@ -401,7 +489,7 @@ describe( 'TermBox.vue', () => {
 				} );
 
 				it( 'resets the entity to its state before editing started', async () => {
-					const store = createStore( emptyServices as any );
+					const store = createStore( mockTempUserConfigService as any );
 
 					const originalLabel = 'Kartoffel';
 					const entity = newFingerprintable( {
@@ -425,10 +513,13 @@ describe( 'TermBox.vue', () => {
 					store.commit( mutation( NS_ENTITY, EDITABILITY_UPDATE ), true );
 					store.commit( mutation( NS_ENTITY, ENTITY_UPDATE ), entity );
 
-					const wrapper = mount( TermBox, { global: {
-						plugins: [ store ],
-						mixins: [ newConfigMixin( {} as ConfigOptions ) ],
-					} } );
+					const wrapper = mount( TermBox, {
+						global: {
+							plugins: [ store ],
+							mixins: [ newConfigMixin( {} as ConfigOptions ) ],
+						},
+						props: { emitter: mockEmitter },
+					} );
 
 					await wrapper.find( '.wb-ui-event-emitting-button--edit' ).trigger( 'click' );
 
@@ -451,7 +542,7 @@ describe( 'TermBox.vue', () => {
 				const entitySavePromise = Promise.resolve();
 				const mockEntitySave = jest.fn().mockReturnValue( entitySavePromise );
 				const mockDeactivateEditMode = jest.fn().mockReturnValue( Promise.resolve() );
-				const store = hotUpdateDeep( createStore( emptyServices as any ), {
+				const store = hotUpdateDeep( createStore( mockTempUserConfigService as any ), {
 					modules: {
 						[ NS_ENTITY ]: {
 							actions: {
@@ -492,37 +583,46 @@ describe( 'TermBox.vue', () => {
 		} );
 
 		it( 'renders publish and cancel in edit mode', () => {
-			const store = createStore( emptyServices as any );
+			const store = createStore( mockTempUserConfigService as any );
 			store.commit( mutation( NS_ENTITY, EDITABILITY_UPDATE ), true );
 			store.commit( mutation( EDITMODE_SET ), true );
 
-			const wrapper = mount( TermBox, { global: {
-				plugins: [ store ],
-				mixins: [ newConfigMixin( {} as ConfigOptions ) ],
-			} } );
+			const wrapper = mount( TermBox, {
+				global: {
+					plugins: [ store ],
+					mixins: [ newConfigMixin( {} as ConfigOptions ) ],
+				},
+				props: { emitter: mockEmitter },
+			} );
 
 			expect( wrapper.find( '.wb-ui-event-emitting-button--publish' ).exists() ).toBe( true );
 			expect( wrapper.find( '.wb-ui-event-emitting-button--cancel' ).exists() ).toBe( true );
 		} );
 
 		it( 'given the entity is not editable are not there', () => {
-			const store = createStore( emptyServices as any );
+			const store = createStore( mockTempUserConfigService as any );
 			store.commit( mutation( NS_ENTITY, EDITABILITY_UPDATE ), false );
-			const wrapper = shallowMount( TermBox, { global: {
-				plugins: [ store ],
-				mixins: [ newConfigMixin( {} as ConfigOptions ) ],
-			} } );
+			const wrapper = shallowMount( TermBox, {
+				global: {
+					plugins: [ store ],
+					mixins: [ newConfigMixin( {} as ConfigOptions ) ],
+				},
+				props: { emitter: mockEmitter },
+			} );
 
 			expect( wrapper.findComponent( EditTools ).exists() ).toBeFalsy();
 		} );
 	} );
 
 	it( 'shows a list of the user\'s top secondary languages', () => {
-		const store = createStore( emptyServices as any );
-		const wrapper = shallowMount( TermBox, { global: {
-			plugins: [ store ],
-			mixins: [ newConfigMixin( {} as ConfigOptions ) ],
-		} } );
+		const store = createStore( mockTempUserConfigService as any );
+		const wrapper = shallowMount( TermBox, {
+			global: {
+				plugins: [ store ],
+				mixins: [ newConfigMixin( {} as ConfigOptions ) ],
+			},
+			props: { emitter: mockEmitter },
+		} );
 
 		expect( wrapper.findComponent( InMoreLanguagesExpandable ).exists() ).toBeTruthy();
 	} );
@@ -530,7 +630,7 @@ describe( 'TermBox.vue', () => {
 	it( 'shows an overlay with indeterminate progress bar while saving', async () => {
 		const entitySave = jest.fn().mockReturnValue( Promise.resolve() );
 		const copyrightVersion = 'wikibase-1';
-		const store = hotUpdateDeep( createStore( emptyServices as any ), {
+		const store = hotUpdateDeep( createStore( mockTempUserConfigService as any ), {
 			modules: {
 				[ NS_ENTITY ]: {
 					actions: { [ ENTITY_SAVE ]: entitySave },
@@ -542,12 +642,16 @@ describe( 'TermBox.vue', () => {
 			name: UserPreference.ACKNOWLEDGED_COPYRIGHT_VERSION,
 			value: copyrightVersion,
 		} );
-		const wrapper = mount( TermBox, { global: {
-			plugins: [ store ],
-			mixins: [ newConfigMixin( { copyrightVersion } as ConfigOptions ) ],
-		} } );
+		const wrapper = mount( TermBox, {
+			global: {
+				plugins: [ store ],
+				mixins: [ newConfigMixin( { copyrightVersion } as ConfigOptions ) ],
+			},
+			props: { emitter: mockEmitter },
+		} );
 
-		await wrapper.findComponent( '.wb-ui-event-emitting-button--publish' ).trigger( 'click' );
+		await wrapper.findComponent<
+						typeof EventEmittingButton>( '.wb-ui-event-emitting-button--publish' ).trigger( 'click' );
 		expect( wrapper.findComponent( Overlay ).exists() ).toBeTruthy();
 		expect( wrapper.findComponent( IndeterminateProgressBar ).exists() ).toBeTruthy();
 

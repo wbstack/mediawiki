@@ -1,6 +1,0 @@
-{
-	"@metadata": {
-		"authors": []
-	},
-	"auth_remoteuser-desc": "Automatski prijavljuje korisnike koristeći <code>REMOTE_USER</code> promenjivu okruženja"
-}

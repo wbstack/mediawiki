@@ -2,11 +2,15 @@
  * @license GPL-2.0-or-later
  * @author H. Snater < mediawiki@snater.com >
  */
-( function () {
+( function ( wb ) {
 	'use strict';
 
 	var PARENT = $.ui.EditableTemplatedWidget,
 		datamodel = require( 'wikibase.datamodel' );
+	require( '../../wikibase/view/termFallbackResolver.js' );
+	require( '../../wikibase/view/languageFallbackIndicator.js' );
+
+	const TOGGLER_OPTION_KEY = 'wikibase-entitytermsview-showEntitytermslistview';
 
 	/**
 	 * Encapsulates a entitytermsforlanguagelistview widget.
@@ -108,22 +112,22 @@
 				function ( event, lang ) {
 					var firstLanguage = self.options.userLanguages[ 0 ];
 
-					if ( typeof lang === 'string' && lang !== firstLanguage ) {
-						return;
-					}
-
 					var fingerprint = self.value(),
-						description = fingerprint.getDescriptionFor( firstLanguage ),
+						description = wb.view.termFallbackResolver.getTerm( fingerprint.getDescriptions(), firstLanguage ),
 						aliases = fingerprint.getAliasesFor( firstLanguage ),
 						isDescriptionEmpty = !description || description.getText() === '',
 						isAliasesEmpty = !aliases || aliases.isEmpty();
 
-					self.$headingDescription
-						.toggleClass( 'wb-empty', isDescriptionEmpty )
-						.text( isDescriptionEmpty
-							? mw.msg( 'wikibase-description-empty' )
-							: description.getText()
-						);
+					if ( isDescriptionEmpty ) {
+						self.$headingDescription
+							.toggleClass( 'wb-empty', true )
+							.text( mw.msg( 'wikibase-description-empty' ) );
+					} else {
+						var indicator = wb.view.languageFallbackIndicator.getHtml( description, firstLanguage );
+						self.$headingDescription
+							.toggleClass( 'wb-empty', false )
+							.html( mw.html.escape( description.getText() ) + indicator );
+					}
 
 					var $ul = self.element.find( '.wikibase-entitytermsview-heading-aliases' )
 						.toggleClass( 'wb-empty', isAliasesEmpty )
@@ -232,47 +236,7 @@
 		 * @private
 		 */
 		_createEntitytermsforlanguagelistviewToggler: function () {
-			var self = this,
-				api = new mw.Api();
-
-			this.$entitytermsforlanguagelistviewToggler = $( '<div>' )
-				.addClass( 'wikibase-entitytermsview-entitytermsforlanguagelistview-toggler' )
-				.text( mw.msg( 'wikibase-entitytermsview-entitytermsforlanguagelistview-toggler' ) )
-				.toggler( {
-					$subject: this.$entitytermsforlanguagelistviewContainer,
-					duration: 'fast'
-				} )
-				.on( 'toggleranimation.' + this.widgetName, function ( event, params ) {
-					if ( mw.user.isAnon() ) {
-						mw.cookie.set(
-							'wikibase-entitytermsview-showEntitytermslistview',
-							params.visible,
-							{ expires: 365 * 24 * 60 * 60, path: '/' }
-						);
-					} else {
-						api.saveOption(
-							'wikibase-entitytermsview-showEntitytermslistview',
-							params.visible ? '1' : '0'
-						)
-						.done( function () {
-							mw.user.options.set(
-								'wikibase-entitytermsview-showEntitytermslistview',
-								params.visible ? '1' : '0'
-							);
-						} );
-					}
-
-					// Show "help" link only if the toggler content is visible (decided by Product
-					// Management):
-					if ( self.$entitytermsforlanguagelistviewHelp ) {
-						self.$entitytermsforlanguagelistviewHelp.toggleClass(
-							'wikibase-entitytermsview-entitytermsforlanguagelistview-configure-hidden',
-							!params.visible
-						);
-					}
-
-					self._trackToggling( params.visible );
-				} );
+			this._registerTogglerForLanguagelistviewDiv( TOGGLER_OPTION_KEY );
 
 			this.$entitytermsforlanguagelistviewContainer.before(
 				this.$entitytermsforlanguagelistviewToggler
@@ -316,6 +280,67 @@
 			}
 		},
 
+		_languageListViewInitialStateIsVisible: function ( optionKey ) {
+			if ( mw.cookie.get( optionKey ) === null &&
+				mw.user.options.get( optionKey ) === null ) {
+				return true;
+			}
+			if ( mw.user.options.get( optionKey ) !== null ) {
+				return mw.user.options.get( optionKey ) === '1';
+			}
+			return mw.cookie.get( optionKey ) === 'true';
+		},
+
+		/**
+		 * Registers the dedicated toggler itself on the element
+		 *
+		 * @see _createEntitytermsforlanguagelistviewToggler
+		 * @private
+		 */
+		_registerTogglerForLanguagelistviewDiv: function ( optionKey ) {
+			var self = this,
+				api = new mw.Api();
+			this.$entitytermsforlanguagelistviewToggler = $( '<div>' )
+				.addClass( 'wikibase-entitytermsview-entitytermsforlanguagelistview-toggler' )
+				.text( mw.msg( 'wikibase-entitytermsview-entitytermsforlanguagelistview-toggler' ) )
+				.toggler( {
+					$subject: this.$entitytermsforlanguagelistviewContainer,
+					duration: 'fast',
+					visible: this._languageListViewInitialStateIsVisible( optionKey )
+				} )
+				.on( 'toggleranimation.' + this.widgetName, function ( event, params ) {
+					if ( !mw.user.isNamed() ) {
+						mw.cookie.set(
+							optionKey,
+							params.visible,
+							{ expires: 365 * 24 * 60 * 60, path: '/' }
+						);
+					} else {
+						api.saveOption(
+							optionKey,
+							params.visible ? '1' : '0'
+						)
+						.done( function () {
+							mw.user.options.set(
+								optionKey,
+								params.visible ? '1' : '0'
+							);
+						} );
+					}
+
+					// Show "help" link only if the toggler content is visible (decided by Product
+					// Management):
+					if ( self.$entitytermsforlanguagelistviewHelp ) {
+						self.$entitytermsforlanguagelistviewHelp.toggleClass(
+							'wikibase-entitytermsview-entitytermsforlanguagelistview-configure-hidden',
+							!params.visible
+						);
+					}
+
+					self._trackToggling( params.visible );
+				} );
+		},
+
 		/**
 		 * @return {jQuery.wikibase.entitytermsforlanguagelistview}
 		 * @private
@@ -354,6 +379,9 @@
 				value: this.options.value,
 				userLanguages: this.options.userLanguages
 			} );
+			if ( !this._languageListViewInitialStateIsVisible( TOGGLER_OPTION_KEY ) ) {
+				this.$entitytermsforlanguagelistviewContainer.hide();
+			}
 		},
 
 		_startEditing: function () {
@@ -454,4 +482,4 @@
 		}
 	} );
 
-}() );
+}( wikibase ) ); // TODO should this really use wikibase?

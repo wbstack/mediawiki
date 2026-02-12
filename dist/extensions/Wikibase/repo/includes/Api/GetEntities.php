@@ -4,17 +4,15 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
-use ApiMain;
-use IBufferingStatsdDataFactory;
-use SiteLookup;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Site\SiteLookup;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Services\Entity\EntityPrefetcher;
 use Wikibase\Lib\LanguageFallbackChainFactory;
 use Wikibase\Lib\SettingsArray;
-use Wikibase\Lib\Store\DivergingEntityIdException;
 use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\RevisionedUnresolvedRedirectException;
@@ -23,6 +21,7 @@ use Wikibase\Repo\SiteLinkGlobalIdentifiersProvider;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\WikibaseRepo;
 use Wikimedia\ParamValidator\ParamValidator;
+use Wikimedia\Stats\IBufferingStatsdDataFactory;
 
 /**
  * API module to get the data for one or more Wikibase entities.
@@ -96,6 +95,7 @@ class GetEntities extends ApiBase {
 	 * @param ResultBuilder $resultBuilder
 	 * @param EntityRevisionLookup $entityRevisionLookup
 	 * @param EntityIdParser $idParser
+	 * @param SiteLookup $siteLookup
 	 * @param IBufferingStatsdDataFactory $stats
 	 * @param bool $federatedPropertiesEnabled
 	 *
@@ -248,7 +248,7 @@ class GetEntities extends ApiBase {
 		if ( !empty( $params['sites'] ) && !empty( $params['titles'] ) ) {
 			$entityByTitleHelper = $this->getItemByTitleHelper();
 
-			list( $ids, $missingItems ) = $entityByTitleHelper->getEntityIds(
+			[ $ids, $missingItems ] = $entityByTitleHelper->getEntityIds(
 				$params['sites'],
 				$params['titles'],
 				$params['normalize']
@@ -326,11 +326,6 @@ class GetEntities extends ApiBase {
 				$entityId = $ex->getRedirectTargetId();
 				$entityRevision = $this->getEntityRevision( $entityId, false );
 			}
-		} catch ( DivergingEntityIdException $ex ) {
-			// DivergingEntityIdException is thrown when the repository $entityId is from other
-			// repository than the entityRevisionLookup was configured to read from.
-			// Such cases are input errors (e.g. specifying non-existent repository prefix)
-			// and should be ignored and treated as non-existing entities.
 		}
 
 		return $entityRevision;
@@ -345,13 +340,13 @@ class GetEntities extends ApiBase {
 	 */
 	private function handleEntity(
 		?string $sourceEntityId,
-		EntityRevision $entityRevision = null,
-		array $params = []
+		?EntityRevision $entityRevision,
+		array $params
 	): void {
 		if ( $entityRevision === null ) {
 			$this->resultBuilder->addMissingEntity( $sourceEntityId, [ 'id' => $sourceEntityId ] );
 		} else {
-			list( $languageCodeFilter, $fallbackChains ) = $this->getLanguageCodesAndFallback( $params );
+			[ $languageCodeFilter, $fallbackChains ] = $this->getLanguageCodesAndFallback( $params );
 			$this->resultBuilder->addEntityRevision(
 				$sourceEntityId,
 				$entityRevision,
@@ -398,12 +393,12 @@ class GetEntities extends ApiBase {
 			'sites' => [
 				ParamValidator::PARAM_TYPE => $siteIds,
 				ParamValidator::PARAM_ISMULTI => true,
-				ParamValidator::PARAM_ALLOW_DUPLICATES => true
+				ParamValidator::PARAM_ALLOW_DUPLICATES => true,
 			],
 			'titles' => [
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_ISMULTI => true,
-				ParamValidator::PARAM_ALLOW_DUPLICATES => true
+				ParamValidator::PARAM_ALLOW_DUPLICATES => true,
 			],
 			'redirects' => [
 				ParamValidator::PARAM_TYPE => [ 'yes', 'no' ],
@@ -422,16 +417,16 @@ class GetEntities extends ApiBase {
 			],
 			'languagefallback' => [
 				ParamValidator::PARAM_TYPE => 'boolean',
-				ParamValidator::PARAM_DEFAULT => false
+				ParamValidator::PARAM_DEFAULT => false,
 			],
 			'normalize' => [
 				ParamValidator::PARAM_TYPE => 'boolean',
-				ParamValidator::PARAM_DEFAULT => false
+				ParamValidator::PARAM_DEFAULT => false,
 			],
 			'sitefilter' => [
 				ParamValidator::PARAM_TYPE => $siteIds,
 				ParamValidator::PARAM_ISMULTI => true,
-				ParamValidator::PARAM_ALLOW_DUPLICATES => true
+				ParamValidator::PARAM_ALLOW_DUPLICATES => true,
 			],
 		] );
 	}
@@ -466,7 +461,7 @@ class GetEntities extends ApiBase {
 			'action=wbgetentities&ids=Q42&props=sitelinks'
 			=> 'apihelp-wbgetentities-example-12',
 			'action=wbgetentities&ids=Q42&sitefilter=enwiki'
-			=> 'apihelp-wbgetentities-example-13'
+			=> 'apihelp-wbgetentities-example-13',
 		];
 	}
 

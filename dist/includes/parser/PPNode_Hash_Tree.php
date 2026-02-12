@@ -19,11 +19,17 @@
  * @ingroup Parser
  */
 
+namespace MediaWiki\Parser;
+
+use BadMethodCallException;
+use InvalidArgumentException;
+use Stringable;
+
 /**
  * @ingroup Parser
  */
 // phpcs:ignore Squiz.Classes.ValidClassName.NotCamelCaps
-class PPNode_Hash_Tree implements PPNode {
+class PPNode_Hash_Tree implements Stringable, PPNode {
 
 	/** @var string */
 	public $name;
@@ -70,7 +76,7 @@ class PPNode_Hash_Tree implements PPNode {
 	public function __construct( array $store, $index ) {
 		$this->store = $store;
 		$this->index = $index;
-		list( $this->name, $this->rawChildren ) = $this->store[$index];
+		[ $this->name, $this->rawChildren ] = $this->store[$index];
 	}
 
 	/**
@@ -80,7 +86,6 @@ class PPNode_Hash_Tree implements PPNode {
 	 * @param array $store
 	 * @param int $index
 	 * @return PPNode_Hash_Tree|PPNode_Hash_Attr|PPNode_Hash_Text|false
-	 * @throws MWException
 	 */
 	public static function factory( array $store, $index ) {
 		if ( !isset( $store[$index] ) ) {
@@ -97,7 +102,7 @@ class PPNode_Hash_Tree implements PPNode {
 				$class = self::class;
 			}
 		} else {
-			throw new MWException( __METHOD__ . ': invalid node descriptor' );
+			throw new InvalidArgumentException( __METHOD__ . ': invalid node descriptor' );
 		}
 		return new $class( $store, $index );
 	}
@@ -213,7 +218,6 @@ class PPNode_Hash_Tree implements PPNode {
 	 *  - index         String index
 	 *  - value         PPNode value
 	 *
-	 * @throws MWException
 	 * @return array
 	 */
 	public function splitArg() {
@@ -244,7 +248,7 @@ class PPNode_Hash_Tree implements PPNode {
 		}
 
 		if ( !isset( $bits['name'] ) ) {
-			throw new MWException( 'Invalid brace node passed to ' . __METHOD__ );
+			throw new InvalidArgumentException( 'Invalid brace node passed to ' . __METHOD__ );
 		}
 		if ( !isset( $bits['index'] ) ) {
 			$bits['index'] = '';
@@ -256,7 +260,6 @@ class PPNode_Hash_Tree implements PPNode {
 	 * Split an "<ext>" node into an associative array containing name, attr, inner and close
 	 * All values in the resulting array are PPNodes. Inner and close are optional.
 	 *
-	 * @throws MWException
 	 * @return array
 	 */
 	public function splitExt() {
@@ -290,7 +293,7 @@ class PPNode_Hash_Tree implements PPNode {
 			}
 		}
 		if ( !isset( $bits['name'] ) ) {
-			throw new MWException( 'Invalid ext node passed to ' . __METHOD__ );
+			throw new InvalidArgumentException( 'Invalid ext node passed to ' . __METHOD__ );
 		}
 		return $bits;
 	}
@@ -298,12 +301,11 @@ class PPNode_Hash_Tree implements PPNode {
 	/**
 	 * Split an "<h>" node
 	 *
-	 * @throws MWException
 	 * @return array
 	 */
 	public function splitHeading() {
 		if ( $this->name !== 'h' ) {
-			throw new MWException( 'Invalid h node passed to ' . __METHOD__ );
+			throw new BadMethodCallException( 'Invalid h node passed to ' . __METHOD__ );
 		}
 		return self::splitRawHeading( $this->rawChildren );
 	}
@@ -315,7 +317,7 @@ class PPNode_Hash_Tree implements PPNode {
 	 */
 	public static function splitRawHeading( array $children ) {
 		$bits = [];
-		foreach ( $children as $i => $child ) {
+		foreach ( $children as $child ) {
 			if ( !is_array( $child ) ) {
 				continue;
 			}
@@ -326,7 +328,7 @@ class PPNode_Hash_Tree implements PPNode {
 			}
 		}
 		if ( !isset( $bits['i'] ) ) {
-			throw new MWException( 'Invalid h node passed to ' . __METHOD__ );
+			throw new InvalidArgumentException( 'Invalid h node passed to ' . __METHOD__ );
 		}
 		return $bits;
 	}
@@ -334,7 +336,6 @@ class PPNode_Hash_Tree implements PPNode {
 	/**
 	 * Split a "<template>" or "<tplarg>" node
 	 *
-	 * @throws MWException
 	 * @return array
 	 */
 	public function splitTemplate() {
@@ -367,9 +368,12 @@ class PPNode_Hash_Tree implements PPNode {
 			}
 		}
 		if ( !isset( $bits['title'] ) ) {
-			throw new MWException( 'Invalid node passed to ' . __METHOD__ );
+			throw new InvalidArgumentException( 'Invalid node passed to ' . __METHOD__ );
 		}
 		$bits['parts'] = new PPNode_Hash_Array( $parts );
 		return $bits;
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( PPNode_Hash_Tree::class, 'PPNode_Hash_Tree' );

@@ -1,6 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
+			"Afalau",
+			"Ceirios",
 			"Divec",
 			"Lloffiwr",
 			"Nemo bis",
@@ -21,7 +23,7 @@
 	"ext-uls-display-settings-desc": "Gosod iaith y dewislenni, a ffont.",
 	"ext-uls-language-settings-title": "Gosodiadau iaith",
 	"ext-uls-language-settings-apply": "Rhodder y gosodiadau ar waith",
-	"ext-uls-language-settings-cancel": "Diddymer",
+	"ext-uls-language-settings-cancel": "Canslo",
 	"ext-uls-language-buttons-help": "Newid iaith y dewislenni. Ni fydd iaith y cynnwys yn newid.",
 	"ext-uls-display-settings-font-settings": "Gosodiadau ffont",
 	"ext-uls-display-settings-ui-language": "Iaith y rhyngwyneb",
@@ -29,7 +31,7 @@
 	"ext-uls-display-settings-anon-same-as-content": "$1 (yr un fath â'r cynnwys)",
 	"ext-uls-display-settings-anon-log-in-cta": "[[Special:UserLogin|Mewngofnodwch]] er mwyn dewis iaith arall i'r dewislenni.",
 	"ext-uls-webfonts-settings-title": "Llwytho ffontiau i lawr pan fo angen",
-	"ext-uls-webfonts-settings-info": "Lawrlwytho ffontiau sydd yn eisiau yn awtomatig, a galluogi dewis ffontiau.",
+	"ext-uls-webfonts-settings-info": "Lawrlwytho ffontiau sydd ar goll yn awtomatig, a galluogi dewis ffontiau.",
 	"ext-uls-webfonts-settings-info-link": "Rhagor o wybodaeth",
 	"ext-uls-webfonts-select-for": "Dewis ffont ar gyfer $1",
 	"ext-uls-webfonts-select-for-ui-info": "Ffont y rhyngwyneb",
@@ -57,5 +59,8 @@
 	"ext-uls-input-disable-notification-info-personal": "Gallwch alluogi'r offer mewnbynnu unrhyw bryd, drwy'r gosodiadau iaith.",
 	"ext-uls-input-disable-notification-info-interlanguage": "Gallwch alluogi'r offer mewnbynnu unrhyw bryd drwy'r gosodiadau iaith, wrth ymyl rhestr yr ieithoedd.",
 	"ext-uls-language-settings-applying": "Wrthi'n gosod...",
-	"ext-uls-compact-link-count": "{{PLURAL:$1|dim eraill|un arall|$1 eraill}}"
+	"ext-uls-compact-link-count": "{{PLURAL:$1|Un arall|$1 eraill}}",
+	"prefs-languages": "Ieithoedd",
+	"ext-uls-compact-language-links-preference": "Defnyddio [[$1|rhestr ieithoedd gryno]], ag ieithoedd sy'n berthnasol ichi.",
+	"ext-uls-add-languages-button-label": "Ychwanegu ieithoedd"
 }

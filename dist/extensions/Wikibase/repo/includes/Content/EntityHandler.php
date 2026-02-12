@@ -3,25 +3,27 @@
 namespace Wikibase\Repo\Content;
 
 use Article;
-use Content;
-use ContentHandler;
 use Diff\Patcher\PatcherException;
-use Html;
-use IContextSource;
 use InvalidArgumentException;
-use Language;
+use LogicException;
+use MediaWiki\Content\Content;
+use MediaWiki\Content\ContentHandler;
 use MediaWiki\Content\Renderer\ContentParseParams;
 use MediaWiki\Content\ValidationParams;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Html\Html;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\ParserCache;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Revision\SlotRecord;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
 use MWContentSerializationException;
-use MWException;
-use ParserCache;
-use ParserOptions;
-use ParserOutput;
-use RequestContext;
 use SearchEngine;
-use Status;
-use Title;
 use ValueValidators\Result;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
@@ -30,7 +32,9 @@ use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Entity\EntityRedirect;
 use Wikibase\Lib\Store\EntityContentDataCodec;
 use Wikibase\Lib\Store\EntityRevision;
+use Wikibase\Repo\Diff\DispatchingEntityDiffVisualizer;
 use Wikibase\Repo\Diff\EntityContentDiffView;
+use Wikibase\Repo\Diff\EntitySlotDiffRenderer;
 use Wikibase\Repo\Search\Fields\FieldDefinitions;
 use Wikibase\Repo\Validators\EntityConstraintProvider;
 use Wikibase\Repo\Validators\EntityValidator;
@@ -162,13 +166,15 @@ abstract class EntityHandler extends ContentHandler {
 			] ) . "\n$text\n</div>" );
 	}
 
-	/**
-	 * @see ContentHandler::getDiffEngineClass
-	 *
-	 * @return string
-	 */
+	/** @inheritDoc */
 	protected function getDiffEngineClass() {
 		return EntityContentDiffView::class;
+	}
+
+	protected function getSlotDiffRendererWithOptions( IContextSource $context, $options = [] ) {
+		$entityDiffVisualizerFactory = WikibaseRepo::getEntityDiffVisualizerFactory();
+		$diffVisualizer = new DispatchingEntityDiffVisualizer( $entityDiffVisualizerFactory, $context );
+		return new EntitySlotDiffRenderer( $diffVisualizer, $context->getLanguage()->getCode() );
 	}
 
 	/**
@@ -262,8 +268,8 @@ abstract class EntityHandler extends ContentHandler {
 	 * @return string Empty string
 	 */
 	public function getAutosummary(
-		Content $oldContent = null,
-		Content $newContent = null,
+		?Content $oldContent = null,
+		?Content $newContent = null,
 		$flags = 0
 	) {
 		return '';
@@ -272,7 +278,7 @@ abstract class EntityHandler extends ContentHandler {
 	/**
 	 * @see ContentHandler::makeRedirectContent
 	 *
-	 * @warning Always throws an MWException, since an EntityRedirects needs to know it's own
+	 * @warning This always throws an exception, since an EntityRedirects needs to know it's own
 	 * ID in addition to the target ID. We have no way to guess that in makeRedirectContent().
 	 * Use makeEntityRedirectContent() instead.
 	 *
@@ -281,11 +287,10 @@ abstract class EntityHandler extends ContentHandler {
 	 * @param Title $title
 	 * @param string $text
 	 *
-	 * @throws MWException Always.
-	 * @return EntityContent|null
+	 * @return never
 	 */
 	public function makeRedirectContent( Title $title, $text = '' ) {
-		throw new MWException( 'EntityContent does not support plain title based redirects.'
+		throw new LogicException( 'EntityContent does not support plain title based redirects.'
 			. ' Use makeEntityRedirectContent() instead.' );
 	}
 
@@ -328,7 +333,7 @@ abstract class EntityHandler extends ContentHandler {
 	 *
 	 * @return EntityContent
 	 */
-	abstract protected function newEntityContent( EntityHolder $entityHolder = null );
+	abstract protected function newEntityContent( ?EntityHolder $entityHolder );
 
 	/**
 	 * Parses the given ID string into an EntityId for the type of entity
@@ -530,7 +535,7 @@ abstract class EntityHandler extends ContentHandler {
 	 *
 	 * @return Language The page's language
 	 */
-	public function getPageViewLanguage( Title $title, Content $content = null ) {
+	public function getPageViewLanguage( Title $title, ?Content $content = null ) {
 		global $wgLang;
 
 		return $wgLang;
@@ -553,7 +558,7 @@ abstract class EntityHandler extends ContentHandler {
 	 *
 	 * @return Language The page's language
 	 */
-	public function getPageLanguage( Title $title, Content $content = null ) {
+	public function getPageLanguage( Title $title, ?Content $content = null ) {
 		return MediaWikiServices::getInstance()->getContentLanguage();
 	}
 
@@ -677,20 +682,31 @@ abstract class EntityHandler extends ContentHandler {
 	}
 
 	/**
-	 * @param WikiPage $page
-	 * @param ParserOutput $parserOutput
-	 * @param SearchEngine $engine
-	 *
-	 * @return array Wikibase fields data, map of name=>value for fields
+	 * @inheritDoc
 	 */
 	public function getDataForSearchIndex(
 		WikiPage $page,
 		ParserOutput $parserOutput,
-		SearchEngine $engine
+		SearchEngine $engine,
+		?RevisionRecord $revision = null
 	) {
-		$fieldsData = parent::getDataForSearchIndex( $page, $parserOutput, $engine );
+		$fieldsData = parent::getDataForSearchIndex( $page, $parserOutput, $engine, $revision );
 
-		$content = $page->getContent();
+		$content = $revision != null ? $revision->getContent( SlotRecord::MAIN ) : $page->getContent();
+		return $this->getContentDataForSearchIndex( $content ) + $fieldsData;
+	}
+
+	/**
+	 * Extract fields data for the search index but only the fields
+	 * related to the slot content.
+	 * Useful for EntityHandlers that may work on non-main slot contents.
+	 *
+	 * @stable to override
+	 * @param Content $content the Content to extract search data from
+	 * @return array fields to be indexed by the search engine
+	 */
+	public function getContentDataForSearchIndex( Content $content ): array {
+		$fieldsData = [];
 		if ( ( $content instanceof EntityContent ) && !$content->isRedirect() ) {
 			$entity = $content->getEntity();
 			$fields = $this->fieldDefinitions->getFields();
@@ -699,7 +715,6 @@ abstract class EntityHandler extends ContentHandler {
 				$fieldsData[$fieldName] = $field->getFieldData( $entity );
 			}
 		}
-
 		return $fieldsData;
 	}
 
@@ -707,18 +722,10 @@ abstract class EntityHandler extends ContentHandler {
 	 * Produce page output suitable for indexing.
 	 * Does not include HTML.
 	 *
-	 * @param WikiPage $page
-	 * @param ParserCache|null $cache
-	 * @return bool|ParserOutput|null
+	 * @inheritDoc
 	 */
-	public function getParserOutputForIndexing( WikiPage $page, ParserCache $cache = null ) {
+	public function getParserOutputForIndexing( WikiPage $page, ?ParserCache $cache = null, ?RevisionRecord $revision = null ) {
 		$parserOptions = $page->makeParserOptions( 'canonical' );
-		if ( $cache ) {
-			$parserOutput = $cache->get( $page, $parserOptions );
-			if ( $parserOutput ) {
-				return $parserOutput;
-			}
-		}
 
 		$renderer = MediaWikiServices::getInstance()->getRevisionRenderer();
 		$revisionRecord = $this->latestRevision( $page );
@@ -803,6 +810,8 @@ abstract class EntityHandler extends ContentHandler {
 	 */
 	protected function getParserOutputForRedirect( EntityContent $content, bool $generateHtml ) {
 		$parserOutput = new ParserOutput();
+		$parserOutput->resetParseStartTime();
+
 		$target = $content->getRedirectTarget();
 
 		// Make sure to include the redirect link in pagelinks
@@ -815,8 +824,12 @@ abstract class EntityHandler extends ContentHandler {
 		$parserOutput->recordOption( 'wb' );
 		if ( $generateHtml ) {
 			$language = $this->getPageViewLanguage( $target );
-			$html = Article::getRedirectHeaderHtml( $language, $target, false );
-			$parserOutput->setText( $html );
+			$services = MediaWikiServices::getInstance();
+			$html = $services->getLinkRenderer()->makeRedirectHeader(
+				$language, $target, false
+			);
+			$parserOutput->setRedirectHeader( $html );
+			$parserOutput->setText( '' );
 		}
 
 		return $parserOutput;
@@ -859,8 +872,9 @@ abstract class EntityHandler extends ContentHandler {
 	}
 
 	private function getValidUserLanguage( Language $language ) {
-		if ( !Language::isValidBuiltInCode( $language->getCode() ) ) {
-			return Language::factory( 'und' ); // T204791
+		$services = MediaWikiServices::getInstance();
+		if ( !$services->getLanguageNameUtils()->isValidBuiltInCode( $language->getCode() ) ) {
+			return $services->getLanguageFactory()->getLanguage( 'und' ); // T204791
 		}
 
 		return $language;
@@ -899,7 +913,13 @@ abstract class EntityHandler extends ContentHandler {
 
 		$properties = $content->getEntityPageProperties();
 		foreach ( $properties as $name => $value ) {
-			$parserOutput->setPageProperty( $name, $value );
+			if ( is_numeric( $value ) ) {
+				$parserOutput->setNumericPageProperty( $name, $value );
+			} elseif ( is_bool( $value ) ) {
+				$parserOutput->setNumericPageProperty( $name, (int)$value );
+			} else {
+				$parserOutput->setUnsortedPageProperty( $name, $value );
+			}
 		}
 	}
 

@@ -5,9 +5,9 @@ namespace Wikibase\Lib\Formatters;
 use DataValues\DecimalValue;
 use DataValues\QuantityValue;
 use DataValues\UnboundedQuantityValue;
-use Html;
 use InvalidArgumentException;
-use Message;
+use MediaWiki\Html\Html;
+use MediaWiki\Message\Message;
 use ValueFormatters\DecimalFormatter;
 use ValueFormatters\FormatterOptions;
 use ValueFormatters\NumberLocalizer;
@@ -43,15 +43,10 @@ class QuantityDetailsFormatter implements ValueFormatter {
 	 */
 	private $options;
 
-	/**
-	 * @param NumberLocalizer|null $numberLocalizer
-	 * @param ValueFormatter $vocabularyUriFormatter
-	 * @param FormatterOptions|null $options
-	 */
 	public function __construct(
 		?NumberLocalizer $numberLocalizer,
 		ValueFormatter $vocabularyUriFormatter,
-		FormatterOptions $options = null
+		?FormatterOptions $options = null
 	) {
 		$this->options = $options ?: new FormatterOptions();
 		$this->options->defaultOption( ValueFormatter::OPT_LANG, 'en' );

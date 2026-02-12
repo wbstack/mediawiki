@@ -7,11 +7,10 @@ use Diff\DiffOp\DiffOp;
 use Diff\DiffOp\DiffOpAdd;
 use Diff\DiffOp\DiffOpChange;
 use Diff\DiffOp\DiffOpRemove;
-use Language;
-use Message;
-use MWException;
-use SiteLookup;
-use Title;
+use MediaWiki\Language\Language;
+use MediaWiki\Message\Message;
+use MediaWiki\Site\SiteLookup;
+use MediaWiki\Title\Title;
 
 /**
  * Creates an array structure with comment information for storing
@@ -62,11 +61,11 @@ class SiteLinkCommentCreator {
 	 * @return string|null A human readable edit summary (limited wikitext),
 	 *         or null if no summary could be created for the sitelink change.
 	 */
-	public function getEditComment( ?Diff $siteLinkDiff, $action, Title $title = null ) {
+	public function getEditComment( ?Diff $siteLinkDiff, $action, ?Title $title ) {
 		if ( $siteLinkDiff !== null && !$siteLinkDiff->isEmpty() ) {
 			$siteLinkMessage = $this->getSiteLinkMessage( $action, $siteLinkDiff, $title );
 
-			if ( !empty( $siteLinkMessage ) ) {
+			if ( $siteLinkMessage ) {
 				return $this->generateComment( $siteLinkMessage );
 			}
 		}
@@ -127,7 +126,7 @@ class SiteLinkCommentCreator {
 	 *
 	 * @return array|null
 	 */
-	private function getSiteLinkMessage( $action, Diff $siteLinkDiff, Title $title = null ) {
+	private function getSiteLinkMessage( $action, Diff $siteLinkDiff, ?Title $title ) {
 		if ( $siteLinkDiff->isEmpty() ) {
 			return null;
 		}
@@ -184,7 +183,7 @@ class SiteLinkCommentCreator {
 			$diffOp = ( ( $diff instanceof Diff ) && $diff->offsetExists( 'name' ) ) ? $diff['name'] : $diff;
 			$args = $this->getChangeParamsForDiffOp( $diffOp, $siteId, $messagePrefix );
 
-			if ( empty( $args ) ) {
+			if ( !$args ) {
 				return null;
 			}
 
@@ -215,27 +214,27 @@ class SiteLinkCommentCreator {
 			$params['sitelink'] = [
 				'newlink' => [
 					'site' => $siteId,
-					'page' => $diffOp->getNewValue()
-				]
+					'page' => $diffOp->getNewValue(),
+				],
 			];
 		} elseif ( $diffOp instanceof DiffOpRemove ) {
 			$params['message'] = $messagePrefix . 'remove';
 			$params['sitelink'] = [
 				'oldlink' => [
 					'site' => $siteId,
-					'page' => $diffOp->getOldValue()
-				]
+					'page' => $diffOp->getOldValue(),
+				],
 			];
 		} elseif ( $diffOp instanceof DiffOpChange ) {
 			$params['sitelink'] = [
 				'oldlink' => [
 					'site' => $siteId,
-					'page' => $diffOp->getOldValue()
+					'page' => $diffOp->getOldValue(),
 				],
 				'newlink' => [
 					'site' => $siteId,
-					'page' => $diffOp->getNewValue()
-				]
+					'page' => $diffOp->getNewValue(),
+				],
 			];
 		} else {
 			// whatever
@@ -253,7 +252,7 @@ class SiteLinkCommentCreator {
 	 *
 	 * @return array|null
 	 */
-	private function getSiteLinkAddRemoveParams( DiffOp $diffOp, $action, $siteId, Title $title = null ) {
+	private function getSiteLinkAddRemoveParams( DiffOp $diffOp, $action, $siteId, ?Title $title ) {
 		$params = [];
 
 		if ( in_array( $action, [ 'remove', 'restore' ] ) ) {
@@ -274,12 +273,12 @@ class SiteLinkCommentCreator {
 				$params['sitelink'] = [
 					'oldlink' => [
 						'site' => $siteId,
-						'page' => $diffOp->getOldValue()
+						'page' => $diffOp->getOldValue(),
 					],
 					'newlink' => [
 						'site' => $siteId,
-						'page' => $diffOp->getNewValue()
-					]
+						'page' => $diffOp->getNewValue(),
+					],
 				];
 			}
 		} else {
@@ -319,7 +318,6 @@ class SiteLinkCommentCreator {
 	 * @param string $key
 	 *
 	 * @return Message
-	 * @throws MWException
 	 */
 	private function msg( $key, ...$params ) {
 		if ( isset( $params[0] ) && is_array( $params[0] ) ) {

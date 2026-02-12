@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:MediaStatistics
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,23 +16,34 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
- * @author Brian Wolff
  */
 
+namespace MediaWiki\Specials;
+
 use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\Html\Html;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\SpecialPage\QueryPage;
+use MediaWiki\SpecialPage\SpecialPage;
+use Skin;
+use Wikimedia\Mime\MimeAnalyzer;
+use Wikimedia\Rdbms\IConnectionProvider;
 use Wikimedia\Rdbms\IDatabase;
-use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\Rdbms\IReadableDatabase;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
+ * Implements Special:MediaStatistics
+ *
  * @ingroup SpecialPage
+ * @author Brian Wolff
  */
 class SpecialMediaStatistics extends QueryPage {
 
 	public const MAX_LIMIT = 5000;
 
-	protected $totalCount = 0, $totalBytes = 0;
+	protected int $totalCount = 0;
+	protected int $totalBytes = 0;
 
 	/**
 	 * @var int Combined file size of all files in a section
@@ -51,17 +60,16 @@ class SpecialMediaStatistics extends QueryPage {
 	 */
 	protected $totalSize = 0;
 
-	/** @var MimeAnalyzer */
-	private $mimeAnalyzer;
+	private MimeAnalyzer $mimeAnalyzer;
 
 	/**
 	 * @param MimeAnalyzer $mimeAnalyzer
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 * @param LinkBatchFactory $linkBatchFactory
 	 */
 	public function __construct(
 		MimeAnalyzer $mimeAnalyzer,
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		LinkBatchFactory $linkBatchFactory
 	) {
 		parent::__construct( 'MediaStatistics' );
@@ -70,7 +78,7 @@ class SpecialMediaStatistics extends QueryPage {
 		$this->limit = self::MAX_LIMIT;
 		$this->shownavigation = false;
 		$this->mimeAnalyzer = $mimeAnalyzer;
-		$this->setDBLoadBalancer( $loadBalancer );
+		$this->setDatabaseProvider( $dbProvider );
 		$this->setLinkBatchFactory( $linkBatchFactory );
 	}
 
@@ -93,7 +101,7 @@ class SpecialMediaStatistics extends QueryPage {
 	 * @return array
 	 */
 	public function getQueryInfo() {
-		$dbr = $this->getDBLoadBalancer()->getConnectionRef( ILoadBalancer::DB_REPLICA );
+		$dbr = $this->getDatabaseProvider()->getReplicaDatabase();
 		$fakeTitle = $dbr->buildConcat( [
 			'img_media_type',
 			$dbr->addQuotes( ';' ),
@@ -138,7 +146,7 @@ class SpecialMediaStatistics extends QueryPage {
 	 *
 	 * @param OutputPage $out
 	 * @param Skin $skin (deprecated presumably)
-	 * @param IDatabase $dbr
+	 * @param IReadableDatabase $dbr
 	 * @param IResultWrapper $res Results from query
 	 * @param int $num Number of results
 	 * @param int $offset Paging offset (Should always be 0 in our case)
@@ -150,7 +158,7 @@ class SpecialMediaStatistics extends QueryPage {
 			if ( count( $mediaStats ) < 4 ) {
 				continue;
 			}
-			list( $mediaType, $mime, $totalCount, $totalBytes ) = $mediaStats;
+			[ $mediaType, $mime, $totalCount, $totalBytes ] = $mediaStats;
 			if ( $prevMediaType !== $mediaType ) {
 				if ( $prevMediaType !== null ) {
 					// We're not at beginning, so we have to
@@ -373,18 +381,9 @@ class SpecialMediaStatistics extends QueryPage {
 		return 'media';
 	}
 
-	/**
-	 * This method isn't used, since we override outputResults, but
-	 * we need to implement since abstract in parent class.
-	 *
-	 * @param Skin $skin
-	 * @param stdClass $result Result row
-	 * @return bool|string|void
-	 * @throws MWException
-	 * @suppress PhanPluginNeverReturnMethod
-	 */
+	/** @inheritDoc */
 	public function formatResult( $skin, $result ) {
-		throw new MWException( "unimplemented" );
+		return false;
 	}
 
 	/**
@@ -404,3 +403,9 @@ class SpecialMediaStatistics extends QueryPage {
 		$res->seek( 0 );
 	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialMediaStatistics::class, 'SpecialMediaStatistics' );

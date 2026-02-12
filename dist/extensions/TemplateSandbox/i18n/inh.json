@@ -4,5 +4,8 @@
 			"Adam-Yourist"
 		]
 	},
-	"templatesandbox-submit": "Хьажар"
+	"templatesandbox-submit": "Хьажар",
+	"templatesandbox-editform-legend": "Ер ло чулоацача оагӀонга хьалххе хьажар хьагойта",
+	"templatesandbox-editform-page-label": "ОагӀон цӀи",
+	"templatesandbox-editform-view-label": "Хьалххе хьажар гойта"
 }

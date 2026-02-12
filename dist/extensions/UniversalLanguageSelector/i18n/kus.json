@@ -2,15 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Awinimi",
-			"Bugirbiig",
-			"Amire80"
+			"Bugirbiig"
 		]
 	},
 	"uls-desc": "Tisim onɛ tʋmili la suoya bɛdegʋ ka o gaŋ Pian'ad ka tɔlis pian'ad maalʋg nam.",
 	"uls-plang-title-languages": "Pian'ad nam",
 	"ext-uls-select-language-settings-icon-tooltip": "Pian'ad maalʋg",
 	"ext-uls-undo-language-tooltip-text": "Pian'ad n tiaki yi $1",
-	"ext-uls-undo-language-tooltip-text-local": "Pian'ad n tiaki n tis wiki nwa. Gɔsimi fʋ [[li kɔn':zig wusa|zig wusa]] n ti'ak pian'ad tis wiki bama wusa.",
+	"ext-uls-undo-language-tooltip-text-local": "Pian'ad n tiaki n tis wiki nwa. Gɔsimi fʋ [[Special:GlobalPreferences|global preferences]] n ti'ak pian'ad tis wiki bama wusa.",
 	"ext-uls-language-settings-preferences-link": "Pian'ad pamm maalʋg nam",
 	"uls-betafeature-label": "Pian'ad siakir tɔ'ɔmisa",
 	"uls-betafeature-desc": "Bigisim pian'ad la giŋ-giŋ yʋda, nɛ pian'ad nam banɛ mɔr sʋŋiri tisif",
@@ -27,7 +26,7 @@
 	"ext-uls-display-settings-ui-language": "Pian'ad isi bigis",
 	"ext-uls-display-settings-anon-label": "Pian'ad isi bigis",
 	"ext-uls-display-settings-anon-same-as-content": "$1 (yinne nɛ yɛlzug)",
-	"ext-uls-display-settings-anon-log-in-cta": "[[Li kɔn':tʋmim kpe'ebin|kpe'em]] n gaŋ pian'ad kanɛ bɛɛ li kɔn' tis zi'isa.",
+	"ext-uls-display-settings-anon-log-in-cta": "[[Special:UserLogin|Log in]] n gaŋ pian'ad kanɛ bɛɛ li kɔn' tis zi'isa.",
 	"ext-uls-webfonts-settings-title": "Vɛɛgim sɔb ziesa saŋkanɛ ka bɔɔdim bɛ",
 	"ext-uls-webfonts-settings-info": "Vɛɛgim sɔb wina banɛ kai li miŋ ka bas suori n tis sɔb wina ngan'sʋg",
 	"ext-uls-webfonts-settings-info-link": "Labaya pamm",
@@ -73,5 +72,6 @@
 	"ext-uls-empty-state-header": "Pian'ad nan kai",
 	"ext-uls-empty-state-desc": "Pian'ad nam kai nananna",
 	"ext-uls-empty-state-header-actions-available": "Pian'ad nan kai. Paasim bʋn paal",
-	"ext-uls-empty-state-desc-actions-available": "Maalim yɛzug la paalʋ pian'ad nam pamm ni"
+	"ext-uls-empty-state-desc-actions-available": "Maalim yɛzug la paalʋ pian'ad nam pamm ni",
+	"ext-uls-add-languages-button-label": "Paasim Pian'ad"
 }

@@ -15,13 +15,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  * http://www.gnu.org/copyleft/gpl.html
  *
- * @author Happy-melon
  * @file
  */
-use MediaWiki\MediaWikiServices;
+
+namespace MediaWiki\Context;
+
+use MediaWiki\Config\Config;
+use MediaWiki\Language\Language;
+use MediaWiki\Message\Message;
+use MediaWiki\Output\OutputPage;
 use MediaWiki\Permissions\Authority;
+use MediaWiki\Request\WebRequest;
 use MediaWiki\Session\CsrfTokenSet;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
+use Skin;
+use Timing;
+use Wikimedia\Bcp47Code\Bcp47Code;
+use Wikimedia\Message\MessageSpecifier;
 use Wikimedia\NonSerializable\NonSerializableTrait;
+use WikiPage;
 
 /**
  * The simplest way of implementing IContextSource is to hold a RequestContext as a
@@ -29,6 +42,7 @@ use Wikimedia\NonSerializable\NonSerializableTrait;
  *
  * @stable to extend
  * @since 1.18
+ * @author Happy-melon
  */
 abstract class ContextSource implements IContextSource {
 	use NonSerializableTrait;
@@ -166,6 +180,16 @@ abstract class ContextSource implements IContextSource {
 	}
 
 	/**
+	 * @since 1.42
+	 * @stable to override
+	 * @note When overriding, keep consistent with getLanguage()!
+	 * @return Bcp47Code
+	 */
+	public function getLanguageCode(): Bcp47Code {
+		return $this->getLanguage();
+	}
+
+	/**
 	 * @since 1.18
 	 * @stable to override
 	 * @return Skin
@@ -181,18 +205,6 @@ abstract class ContextSource implements IContextSource {
 	 */
 	public function getTiming() {
 		return $this->getContext()->getTiming();
-	}
-
-	/**
-	 * @deprecated since 1.27 use a StatsdDataFactory from MediaWikiServices (preferably injected).
-	 *  Hard deprecated since 1.39.
-	 *
-	 * @since 1.25
-	 * @return IBufferingStatsdDataFactory
-	 */
-	public function getStats() {
-		wfDeprecated( __METHOD__, '1.27' );
-		return MediaWikiServices::getInstance()->getStatsdDataFactory();
 	}
 
 	/**
@@ -232,3 +244,6 @@ abstract class ContextSource implements IContextSource {
 		return $this->getContext()->getCsrfTokenSet();
 	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( ContextSource::class, 'ContextSource' );

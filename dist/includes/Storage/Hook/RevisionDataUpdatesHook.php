@@ -2,9 +2,9 @@
 
 namespace MediaWiki\Storage\Hook;
 
-use DeferrableUpdate;
+use MediaWiki\Deferred\DeferrableUpdate;
 use MediaWiki\Revision\RenderedRevision;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * This is a hook handler interface, see docs/Hooks.md.

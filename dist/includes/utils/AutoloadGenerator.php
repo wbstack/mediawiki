@@ -18,6 +18,8 @@
  * @file
  */
 
+use MediaWiki\Json\FormatJson;
+
 /**
  * Accepts a list of files and directories to search for
  * php files and generates $wgAutoloadLocalClasses or $wgAutoloadClasses
@@ -109,6 +111,7 @@ class AutoloadGenerator {
 	 * autoloader entry when the namespace matches the path.
 	 *
 	 * @since 1.32
+	 * @deprecated since 1.40 - PSR-4 classes are now included in the generated classmap
 	 * @param string[] $namespaces Associative array mapping namespace to path
 	 */
 	public function setPsr4Namespaces( array $namespaces ) {
@@ -126,7 +129,7 @@ class AutoloadGenerator {
 	 */
 	private function shouldExclude( $path ) {
 		foreach ( $this->excludePaths as $dir ) {
-			if ( strpos( $path, $dir ) === 0 ) {
+			if ( str_starts_with( $path, $dir ) ) {
 				return true;
 			}
 		}
@@ -140,15 +143,15 @@ class AutoloadGenerator {
 	 *
 	 * @param string $fqcn FQCN to force the location of
 	 * @param string $inputPath Full path to the file containing the class
-	 * @throws Exception
+	 * @throws InvalidArgumentException
 	 */
 	public function forceClassPath( $fqcn, $inputPath ) {
 		$path = self::normalizePathSeparator( realpath( $inputPath ) );
 		if ( !$path ) {
-			throw new \Exception( "Invalid path: $inputPath" );
+			throw new InvalidArgumentException( "Invalid path: $inputPath" );
 		}
 		if ( !str_starts_with( $path, $this->basepath ) ) {
-			throw new \Exception( "Path is not within basepath: $inputPath" );
+			throw new InvalidArgumentException( "Path is not within basepath: $inputPath" );
 		}
 		$shortpath = substr( $path, strlen( $this->basepath ) );
 		$this->overrides[$fqcn] = $shortpath;
@@ -156,7 +159,7 @@ class AutoloadGenerator {
 
 	/**
 	 * @param string $inputPath Path to a php file to find classes within
-	 * @throws Exception
+	 * @throws InvalidArgumentException
 	 */
 	public function readFile( $inputPath ) {
 		// NOTE: do NOT expand $inputPath using realpath(). It is perfectly
@@ -165,7 +168,7 @@ class AutoloadGenerator {
 		$inputPath = self::normalizePathSeparator( $inputPath );
 		$len = strlen( $this->basepath );
 		if ( !str_starts_with( $inputPath, $this->basepath ) ) {
-			throw new \Exception( "Path is not within basepath: $inputPath" );
+			throw new InvalidArgumentException( "Path is not within basepath: $inputPath" );
 		}
 		if ( $this->shouldExclude( $inputPath ) ) {
 			return;
@@ -186,24 +189,6 @@ class AutoloadGenerator {
 		}
 
 		$result = $this->collector->getClasses( $fileContents );
-
-		// Filter out classes that will be found by PSR4
-		$result = array_filter( $result, function ( $class ) use ( $inputPath ) {
-			$parts = explode( '\\', $class );
-			for ( $i = count( $parts ) - 1; $i > 0; $i-- ) {
-				$ns = implode( '\\', array_slice( $parts, 0, $i ) ) . '\\';
-				if ( isset( $this->psr4Namespaces[$ns] ) ) {
-					$expectedPath = $this->psr4Namespaces[$ns] . '/'
-						. implode( '/', array_slice( $parts, $i ) )
-						. '.php';
-					if ( $inputPath === $expectedPath ) {
-						return false;
-					}
-				}
-			}
-
-			return true;
-		} );
 
 		if ( $result ) {
 			$shortpath = substr( $inputPath, $len );

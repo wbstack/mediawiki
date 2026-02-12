@@ -35,13 +35,13 @@ class EntityDeserializerTest extends \PHPUnit\Framework\TestCase {
 
 		$legacyDeserializer->expects( $this->any() )
 			->method( 'isDeserializerFor' )
-			->will( $this->returnCallback( static function( $serialization ) {
+			->willReturnCallback( static function( $serialization ) {
 				return array_key_exists( 'entity', $serialization );
-			} ) );
+			} );
 
 		$legacyDeserializer->expects( $this->any() )
 			->method( 'deserialize' )
-			->will( $this->returnValue( 'legacy' ) );
+			->willReturn( 'legacy' );
 
 		return $legacyDeserializer;
 	}
@@ -54,13 +54,13 @@ class EntityDeserializerTest extends \PHPUnit\Framework\TestCase {
 
 		$currentDeserializer->expects( $this->any() )
 			->method( 'isDeserializerFor' )
-			->will( $this->returnCallback( static function( $serialization ) {
+			->willReturnCallback( static function( $serialization ) {
 				return array_key_exists( 'id', $serialization );
-			} ) );
+			} );
 
 		$currentDeserializer->expects( $this->any() )
 			->method( 'deserialize' )
-			->will( $this->returnValue( 'current' ) );
+			->willReturn( 'current' );
 
 		return $currentDeserializer;
 	}
@@ -83,7 +83,7 @@ class EntityDeserializerTest extends \PHPUnit\Framework\TestCase {
 
 		$currentDeserializer->expects( $this->any() )
 			->method( 'deserialize' )
-			->will( $this->throwException( new DeserializationException() ) );
+			->willThrowException( new DeserializationException() );
 
 		return $currentDeserializer;
 	}
@@ -94,13 +94,13 @@ class EntityDeserializerTest extends \PHPUnit\Framework\TestCase {
 			$this->getThrowingDeserializer()
 		);
 
-		$this->expectException( 'Deserializers\Exceptions\DeserializationException' );
+		$this->expectException( DeserializationException::class );
 		$deserializer->deserialize( $this->getLegacyItemSerializationWithoutId() );
 	}
 
 	private function getLegacyItemSerializationWithoutId() {
 		return [ 'aliases' => [
-			'en' => [ 'foo', 'bar' ]
+			'en' => [ 'foo', 'bar' ],
 		] ];
 	}
 
@@ -110,7 +110,7 @@ class EntityDeserializerTest extends \PHPUnit\Framework\TestCase {
 			$this->getStubCurrentDeserializer()
 		);
 
-		$this->expectException( 'Deserializers\Exceptions\DeserializationException' );
+		$this->expectException( DeserializationException::class );
 		$deserializer->deserialize( $this->getCurrentItemSerializationWithoutId() );
 	}
 
@@ -125,7 +125,7 @@ class EntityDeserializerTest extends \PHPUnit\Framework\TestCase {
 					'language' => 'en',
 					'value' => 'bar',
 				],
-			]
+			],
 		] ];
 	}
 
@@ -142,7 +142,7 @@ class EntityDeserializerTest extends \PHPUnit\Framework\TestCase {
 		$deserializer->deserialize( $serialization );
 	}
 
-	public function invalidSerializationProvider() {
+	public static function invalidSerializationProvider() {
 		return [
 			[ null ],
 			[ 5 ],

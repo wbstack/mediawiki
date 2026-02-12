@@ -1,0 +1,29 @@
+@import 'mediawiki.skin.variables.less';
+
+.ve-mobile-fakeToolbar-container {
+	position: fixed;
+	z-index: 2;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 3em;
+	background: @background-color-base;
+	border-bottom: @border-width-base @border-style-base @border-color-subtle;
+	box-shadow: 0 1px 1px rgba( 0, 0, 0, 0.1 );
+}
+
+.ve-mobile-fakeToolbar-header {
+	height: 3em;
+}
+
+.ve-mobile-fakeToolbar {
+	height: 3em;
+	display: flex !important;
+	align-items: center;
+	width: 100% !important;
+	box-sizing: content-box;
+	border-color: @border-color-subtle;
+	border-style: @border-style-base;
+	border-width: 0 @border-width-base;
+	margin: 0 -1px;
+}

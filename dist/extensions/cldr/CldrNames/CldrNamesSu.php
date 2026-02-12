@@ -43,14 +43,8 @@ $currencyNames = [
 ];
 
 $currencySymbols = [
-	'BRL' => 'R$',
-	'CNY' => 'CN¥',
-	'EUR' => '€',
-	'GBP' => '£',
 	'IDR' => 'Rp',
-	'INR' => '₹',
 	'JPY' => '¥',
-	'RUB' => 'RUB',
 	'USD' => '$',
 ];
 
@@ -60,6 +54,7 @@ $countryNames = [
 	'DE' => 'Jérman',
 	'FR' => 'Prancis',
 	'GB' => 'Britania Raya',
+	'ID' => 'Indonesia',
 	'IN' => 'India',
 	'IT' => 'Italia',
 	'JP' => 'Jepang',

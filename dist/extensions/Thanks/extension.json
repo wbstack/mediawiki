@@ -11,7 +11,7 @@
 	"license-name": "MIT",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.39.0",
+		"MediaWiki": ">= 1.43",
 		"extensions": {
 			"Echo": "*"
 		}
@@ -29,7 +29,12 @@
 		}
 	},
 	"SpecialPages": {
-		"Thanks": "MediaWiki\\Extension\\Thanks\\SpecialThanks"
+		"Thanks": {
+			"class": "MediaWiki\\Extension\\Thanks\\SpecialThanks",
+			"services": [
+				"UserFactory"
+			]
+		}
 	},
 	"LogTypes": [
 		"thanks"
@@ -38,10 +43,23 @@
 		"thanks": true
 	},
 	"LogActionsHandlers": {
-		"thanks/*": "MediaWiki\\Extension\\Thanks\\ThanksLogFormatter"
+		"thanks/*": {
+			"class": "MediaWiki\\Extension\\Thanks\\ThanksLogFormatter",
+			"services": [
+				"NamespaceInfo"
+			]
+		}
 	},
 	"APIModules": {
-		"thank": "MediaWiki\\Extension\\Thanks\\ApiCoreThank"
+		"thank": {
+			"class": "MediaWiki\\Extension\\Thanks\\Api\\ApiCoreThank",
+			"services": [
+				"PermissionManager",
+				"RevisionStore",
+				"UserFactory",
+				"ThanksLogStore"
+			]
+		}
 	},
 	"MessagesDirs": {
 		"Thanks": [
@@ -56,19 +74,6 @@
 		"MediaWiki\\Extension\\Thanks\\": "includes/"
 	},
 	"ResourceModules": {
-		"ext.thanks.images": {
-			"class": "ResourceLoaderImageModule",
-			"selector": ".mw-ui-icon-thanks-{name}:before",
-			"defaultColor": "#fff",
-			"images": {
-				"userTalk": {
-					"file": {
-						"ltr": "userTalk-ltr.svg",
-						"rtl": "userTalk-rtl.svg"
-					}
-				}
-			}
-		},
 		"ext.thanks": {
 			"scripts": [
 				"ext.thanks.thank.js"
@@ -103,32 +108,6 @@
 				"ext.thanks"
 			]
 		},
-		"ext.thanks.mobilediff": {
-			"scripts": [
-				"ext.thanks.mobilediff.js"
-			],
-			"messages": [
-				"thanks-button-action-queued",
-				"thanks-button-action-cancel",
-				"thanks-button-action-completed",
-				"thanks-button-thank",
-				"thanks-button-thanked",
-				"thanks-error-invalidrevision",
-				"thanks-error-ratelimited",
-				"thanks-error-undefined",
-				"thanks-thanked-notice"
-			],
-			"dependencies": [
-				"mobile.startup",
-				"ext.thanks.images",
-				"mediawiki.api",
-				"mediawiki.jqueryMsg"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
-			]
-		},
 		"ext.thanks.flowthank": {
 			"scripts": [
 				"jquery.findWithParent.js",
@@ -156,30 +135,47 @@
 		"localBasePath": "tests/qunit",
 		"remoteExtPath": "Thanks/tests/qunit",
 		"scripts": [
-			"test_ext.thanks.thank.js",
-			"test_ext.thanks.mobilediff.js"
+			"test_ext.thanks.thank.js"
 		],
 		"dependencies": [
-			"ext.thanks",
-			"ext.thanks.mobilediff"
+			"ext.thanks"
 		]
 	},
 	"Hooks": {
-		"ApiMain::moduleManager": "MediaWiki\\Extension\\Thanks\\Hooks::onApiMainModuleManager",
-		"BeforeCreateEchoEvent": "MediaWiki\\Extension\\Thanks\\Hooks::onBeforeCreateEchoEvent",
-		"BeforePageDisplay": "MediaWiki\\Extension\\Thanks\\Hooks::onBeforePageDisplay",
-		"BeforeSpecialMobileDiffDisplay": "MediaWiki\\Extension\\Thanks\\Hooks::onBeforeSpecialMobileDiffDisplay",
-		"DiffTools": "MediaWiki\\Extension\\Thanks\\Hooks::onDiffTools",
-		"DifferenceEngineViewHeader": "MediaWiki\\Extension\\Thanks\\Hooks::onDifferenceEngineViewHeader",
-		"EchoGetBundleRules": "MediaWiki\\Extension\\Thanks\\Hooks::onEchoGetBundleRules",
-		"EchoGetDefaultNotifiedUsers": "MediaWiki\\Extension\\Thanks\\Hooks::onEchoGetDefaultNotifiedUsers",
-		"GetAllBlockActions": "MediaWiki\\Extension\\Thanks\\Hooks::onGetAllBlockActions",
-		"GetLogTypesOnUser": "MediaWiki\\Extension\\Thanks\\Hooks::onGetLogTypesOnUser",
-		"HistoryTools": "MediaWiki\\Extension\\Thanks\\Hooks::onHistoryTools",
-		"LocalUserCreated": "MediaWiki\\Extension\\Thanks\\Hooks::onAccountCreated",
-		"LogEventsListLineEnding": "MediaWiki\\Extension\\Thanks\\Hooks::onLogEventsListLineEnding",
-		"PageHistoryBeforeList": "MediaWiki\\Extension\\Thanks\\Hooks::onPageHistoryBeforeList"
+		"ApiMain::moduleManager": "main",
+		"BeforeCreateEchoEvent": "echo",
+		"BeforePageDisplay": "main",
+		"DiffTools": "main",
+		"DifferenceEngineViewHeader": "main",
+		"EchoGetBundleRules": "echo",
+		"GetAllBlockActions": "main",
+		"GetLogTypesOnUser": "main",
+		"HistoryTools": "main",
+		"LocalUserCreated": "main",
+		"LogEventsListLineEnding": "main",
+		"PageHistoryBeforeList": "main",
+		"PageHistoryPager::doBatchLookups": "main",
+		"ChangesListInitRows": "main"
 	},
+	"HookHandlers": {
+		"main": {
+			"class": "MediaWiki\\Extension\\Thanks\\Hooks",
+			"services": [
+				"MainConfig",
+				"GenderCache",
+				"PermissionManager",
+				"RevisionLookup",
+				"UserFactory",
+				"UserOptionsManager"
+			]
+		},
+		"echo": {
+			"class": "MediaWiki\\Extension\\Thanks\\EchoHooks"
+		}
+	},
+	"ServiceWiringFiles": [
+		"ServiceWiring.php"
+	],
 	"config": {
 		"ThanksSendToBots": {
 			"value": false

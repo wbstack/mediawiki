@@ -77,7 +77,7 @@ class PhpDateTimeParser extends StringValueParser {
 		$rawValue = $value;
 
 		try {
-			list( $sign, $value ) = $this->eraParser->parse( $value );
+			[ $sign, $value ] = $this->eraParser->parse( $value );
 
 			$value = trim( $value );
 			$value = $this->monthNameUnlocalizer->unlocalize( $value );
@@ -144,7 +144,9 @@ class PhpDateTimeParser extends StringValueParser {
 	 * @return string
 	 */
 	private function getValueWithFixedSeparators( $value, $year = null ) {
-		$isYmd = $year !== null && preg_match( '/^\D*' . $year . '\D+\d+\D+\d+\D*$/', $value );
+		// Since PHP 8.1.7 YYYY-DDD means the DDDth day of the year, thus only add dashes
+		// if we have up to two digits in the second field.
+		$isYmd = $year !== null && preg_match( '/^\D*' . $year . '\D+\d{1,2}\D+\d+\D*$/', $value );
 		$separator = $isYmd ? '-' : '.';
 		// Meant to match separator characters after day and month. \p{L} matches letters outside
 		// the ASCII range.
@@ -165,10 +167,10 @@ class PhpDateTimeParser extends StringValueParser {
 		// documentation of the extraction heuristics up to date!
 		$patterns = array(
 			// Check if the string contains a number longer than 2 digits or bigger than 59.
-			'/(?<!\d)('           // cannot be prepended by a digit
-				. '\d{3,}|'       // any number longer than 2 digits, or
-				. '[6-9]\d'       // any number bigger than 59
-				. ')(?!\d)/',     // cannot be followed by a digit
+			'/(?<!\d)('       // cannot be prepended by a digit
+				. '\d{3,}|'   // any number longer than 2 digits, or
+				. '[6-9]\d'   // any number bigger than 59
+				. ')(?!\d)/', // cannot be followed by a digit
 
 			// Check if the first number in the string is bigger than 31.
 			'/^\D*(3[2-9]|[4-9]\d)/',
@@ -176,8 +178,8 @@ class PhpDateTimeParser extends StringValueParser {
 			// Check if the string starts with three space-separated parts or three numbers.
 			'/^(?:'
 				. '\S+\s+\S+\s+|' // e.g. "July<SPACE>4th<SPACE>", or
-				. '\d+\D+\d+\D+'  // e.g. "4.7."
-				. ')(\d+)/',      // followed by a number
+				. '\d+\D+\d+\D+' // e.g. "4.7."
+				. ')(\d+)/', // followed by a number
 
 			// Check if the string ends with a number.
 			'/(\d+)\D*$/',

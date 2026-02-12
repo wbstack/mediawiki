@@ -1,8 +1,6 @@
 <?php
 /** Russian (русский)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -203,6 +201,7 @@ $specialPageAliases = [
 	'Randomredirect'            => [ 'Случайное_перенаправление' ],
 	'Recentchanges'             => [ 'Свежие_правки' ],
 	'Recentchangeslinked'       => [ 'Связанные_правки' ],
+	'Renameuser'                => [ 'Переименовать_участника' ],
 	'Revisiondelete'            => [ 'Удаление_правки' ],
 	'Search'                    => [ 'Поиск' ],
 	'Shortpages'                => [ 'Короткие_страницы' ],
@@ -294,7 +293,7 @@ $magicWords = [
 	'img_width'                 => [ '1', '$1пкс', '$1px' ],
 	'index'                     => [ '1', '__ИНДЕКС__', '__INDEX__' ],
 	'int'                       => [ '0', 'ВНУТР:', 'INT:' ],
-	'language'                  => [ '0', '#ЯЗЫК:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#ЯЗЫК', '#LANGUAGE' ],
 	'lc'                        => [ '0', 'МАЛЕНЬКИМИ_БУКВАМИ:', 'LC:' ],
 	'lcfirst'                   => [ '0', 'ПЕРВАЯ_БУКВА_МАЛЕНЬКАЯ:', 'LCFIRST:' ],
 	'localday'                  => [ '1', 'МЕСТНЫЙ_ДЕНЬ', 'LOCALDAY' ],
@@ -422,7 +421,7 @@ $separatorTransformTable = [
 	',' => "\u{00A0}", # nbsp
 	'.' => ','
 ];
-$minimumGroupingDigits = 2; // As per CLDR 31, this value is 1 (T262500)
+$minimumGroupingDigits = 2; // intentional deviation from CLDR (T262500)
 
 $fallback8bitEncoding = 'windows-1251';
 $linkPrefixExtension = false;

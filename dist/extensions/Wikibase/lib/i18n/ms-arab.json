@@ -28,11 +28,10 @@
 	"datatypes-type-time": "تيتيق دالم ماس",
 	"datatypes-type-wikibase-item": "بوتير",
 	"datatypes-type-wikibase-property": "صيفت",
-	"datatypes-type-commonsMedia": "فاءيل ميديا کومنس",
+	"datatypes-type-commonsMedia": "فاءيل ميديا کومن‌س",
 	"datatypes-type-geo-shape": "بنتوق ݢيوݢرافي",
 	"datatypes-type-tabular-data": "داتا جدوال",
 	"datatypes-type-external-id": "ڤڠنل ڤستي لوارن",
-	"datatypes-type-entity-schema": "سکيما اينتيتي",
 	"wikibase-time-precision-millennium": "$1. الاف",
 	"wikibase-time-precision-century": "$1. ابد",
 	"wikibase-time-precision-BCE": "$1 س. م."

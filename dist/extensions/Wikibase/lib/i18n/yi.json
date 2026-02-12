@@ -1,10 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
+			"Pacha Tchernof",
 			"Sol lemon",
 			"פוילישער",
-			"පසිඳු කාවින්ද",
-			"Pacha Tchernof"
+			"පසිඳු කාවින්ද"
 		]
 	},
 	"specialpages-group-wikibase": "וויקיבאזע",
@@ -24,7 +24,7 @@
 	"wikibase-quantitydetails-unit": "איינהייט",
 	"wikibase-timedetails-time": "צײַט",
 	"wikibase-timedetails-isotime": "צייטשטעמפל",
-	"wikibase-timedetails-timezone": "צײַט זאָנע",
+	"wikibase-timedetails-timezone": "צײט זאנע",
 	"wikibase-timedetails-calendar": "קאלאענדאר",
 	"wikibase-timedetails-precision": "גענויקייט",
 	"wikibase-timedetails-before": "פאר",
@@ -40,7 +40,6 @@
 	"datatypes-type-wikibase-item": "איינהייט",
 	"datatypes-type-wikibase-property": "אייגנשאפֿט",
 	"datatypes-type-commonsMedia": "קאמאנס מעדיע טעקע",
-	"version-wikibase": "Wikibase",
 	"wikibase-time-precision-century": "$1. יארהונדערט",
 	"wikibase-time-precision-10annum": "$1ער יארן",
 	"wikibase-entity-summary-wbsetitem": "געשאפֿן א נײַעם דאטנאביעקט",

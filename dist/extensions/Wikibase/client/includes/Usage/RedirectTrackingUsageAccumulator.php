@@ -24,7 +24,10 @@ class RedirectTrackingUsageAccumulator extends UsageAccumulator {
 
 	/**
 	 */
-	public function __construct( UsageAccumulator $innerUsageAccumulator, EntityRedirectTargetLookup $entityRedirectTargetLookup ) {
+	public function __construct(
+		UsageAccumulator $innerUsageAccumulator,
+		EntityRedirectTargetLookup $entityRedirectTargetLookup
+	) {
 		$this->innerUsageAccumulator = $innerUsageAccumulator;
 		$this->entityRedirectTargetLookup = $entityRedirectTargetLookup;
 	}
@@ -36,8 +39,7 @@ class RedirectTrackingUsageAccumulator extends UsageAccumulator {
 	 *
 	 * @return void
 	 */
-	public function addUsage( EntityUsage $usage ) {
-
+	public function addUsage( EntityUsage $usage ): void {
 		$redirectTarget = $this->entityRedirectTargetLookup->getRedirectForEntityId( $usage->getEntityId() );
 		if ( $redirectTarget !== null ) {
 			$this->addRedirectTargetUsage( $redirectTarget, $usage->getAspect(), $usage->getModifier() );
@@ -61,7 +63,7 @@ class RedirectTrackingUsageAccumulator extends UsageAccumulator {
 	 *
 	 * @return EntityUsage[]
 	 */
-	public function getUsages() {
+	public function getUsages(): array {
 		return $this->innerUsageAccumulator->getUsages();
 	}
 }

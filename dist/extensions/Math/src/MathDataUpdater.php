@@ -2,7 +2,7 @@
 
 namespace MediaWiki\Extension\Math;
 
-use ParserOutput;
+use MediaWiki\Parser\ParserOutput;
 use Wikibase\DataModel\Services\Entity\PropertyDataTypeMatcher;
 use Wikibase\DataModel\Statement\Statement;
 use Wikibase\Repo\ParserOutput\StatementDataUpdater;
@@ -53,7 +53,6 @@ class MathDataUpdater implements StatementDataUpdater {
 	 */
 	public function updateParserOutput( ParserOutput $parserOutput ) {
 		if ( $this->hasMath ) {
-			$parserOutput->addModules( [ 'ext.math.scripts' ] );
 			$parserOutput->addModuleStyles( [ 'ext.math.styles' ] );
 		}
 	}

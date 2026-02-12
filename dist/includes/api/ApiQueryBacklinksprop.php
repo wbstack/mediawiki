@@ -23,8 +23,11 @@
  * @since 1.24
  */
 
+namespace MediaWiki\Api;
+
 use MediaWiki\Linker\LinksMigration;
 use MediaWiki\MainConfigNames;
+use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 
@@ -79,17 +82,11 @@ class ApiQueryBacklinksprop extends ApiQueryGeneratorBase {
 		],
 	];
 
-	/** @var LinksMigration */
-	private $linksMigration;
+	private LinksMigration $linksMigration;
 
-	/**
-	 * @param ApiQuery $query
-	 * @param string $moduleName
-	 * @param LinksMigration $linksMigration
-	 */
 	public function __construct(
 		ApiQuery $query,
-		$moduleName,
+		string $moduleName,
 		LinksMigration $linksMigration
 	) {
 		parent::__construct( $query, $moduleName, self::$settings[$moduleName]['code'] );
@@ -107,13 +104,12 @@ class ApiQueryBacklinksprop extends ApiQueryGeneratorBase {
 	/**
 	 * @param ApiPageSet|null $resultPageSet
 	 */
-	private function run( ApiPageSet $resultPageSet = null ) {
+	private function run( ?ApiPageSet $resultPageSet = null ) {
 		$settings = self::$settings[$this->getModuleName()];
 
 		$db = $this->getDB();
 		$params = $this->extractRequestParams();
 		$prop = array_fill_keys( $params['prop'], true );
-		$emptyString = $db->addQuotes( '' );
 
 		$pageSet = $this->getPageSet();
 		$titles = $pageSet->getGoodAndMissingPages();
@@ -131,7 +127,7 @@ class ApiQueryBacklinksprop extends ApiQueryGeneratorBase {
 		$hasNS = !isset( $settings['to_namespace'] );
 		if ( $hasNS ) {
 			if ( isset( $this->linksMigration::$mapping[$settings['linktable']] ) ) {
-				list( $bl_namespace, $bl_title ) = $this->linksMigration->getTitleFields( $settings['linktable'] );
+				[ $bl_namespace, $bl_title ] = $this->linksMigration->getTitleFields( $settings['linktable'] );
 			} else {
 				$bl_namespace = "{$p}_namespace";
 				$bl_title = "{$p}_title";
@@ -160,17 +156,14 @@ class ApiQueryBacklinksprop extends ApiQueryGeneratorBase {
 		// when it's constant in WHERE, so we have to test that for each field.
 		$sortby = [];
 		if ( $hasNS && count( $map ) > 1 ) {
-			$sortby[$bl_namespace] = 'ns';
+			$sortby[$bl_namespace] = 'int';
 		}
 		$theTitle = null;
 		foreach ( $map as $nsTitles ) {
-			reset( $nsTitles );
-			$key = key( $nsTitles );
-			if ( $theTitle === null ) {
-				$theTitle = $key;
-			}
+			$key = array_key_first( $nsTitles );
+			$theTitle ??= $key;
 			if ( count( $nsTitles ) > 1 || $key !== $theTitle ) {
-				$sortby[$bl_title] = 'title';
+				$sortby[$bl_title] = 'string';
 				break;
 			}
 		}
@@ -194,37 +187,16 @@ class ApiQueryBacklinksprop extends ApiQueryGeneratorBase {
 		$sortby[$bl_from] = 'int';
 
 		// Now use the $sortby to figure out the continuation
+		$continueFields = array_keys( $sortby );
+		$continueTypes = array_values( $sortby );
 		if ( $params['continue'] !== null ) {
-			$cont = explode( '|', $params['continue'] );
-			$this->dieContinueUsageIf( count( $cont ) != count( $sortby ) );
-			$where = '';
-			$i = count( $sortby ) - 1;
-			foreach ( array_reverse( $sortby, true ) as $field => $type ) {
-				$v = $cont[$i];
-				switch ( $type ) {
-					case 'ns':
-					case 'int':
-						$v = (int)$v;
-						$this->dieContinueUsageIf( $v != $cont[$i] );
-						break;
-					default:
-						$v = $db->addQuotes( $v );
-						break;
-				}
-
-				if ( $where === '' ) {
-					$where = "$field >= $v";
-				} else {
-					$where = "$field > $v OR ($field = $v AND ($where))";
-				}
-
-				$i--;
-			}
-			$this->addWhere( $where );
+			$continueValues = $this->parseContinueParamOrDie( $params['continue'], $continueTypes );
+			$conds = array_combine( $continueFields, $continueValues );
+			$this->addWhere( $db->buildComparison( '>=', $conds ) );
 		}
 
 		// Populate the rest of the query
-		list( $idxNoFromNS, $idxWithFromNS ) = $settings['indexes'] ?? [ '', '' ];
+		[ $idxNoFromNS, $idxWithFromNS ] = $settings['indexes'] ?? [ '', '' ];
 		// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset False positive
 		if ( isset( $this->linksMigration::$mapping[$settings['linktable']] ) ) {
 			// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset False positive
@@ -242,7 +214,7 @@ class ApiQueryBacklinksprop extends ApiQueryGeneratorBase {
 		$this->addWhere( "$bl_from = page_id" );
 
 		if ( $this->getModuleName() === 'redirects' ) {
-			$this->addWhere( "rd_interwiki = $emptyString OR rd_interwiki IS NULL" );
+			$this->addWhereFld( 'rd_interwiki', '' );
 		}
 
 		$this->addFields( array_keys( $sortby ) );
@@ -265,7 +237,7 @@ class ApiQueryBacklinksprop extends ApiQueryGeneratorBase {
 
 		$this->addFieldsIf( 'page_namespace', $miser_ns !== null );
 
-		if ( $hasNS ) {
+		if ( $hasNS && $map ) {
 			// Can't use LinkBatch because it throws away Special titles.
 			// And we already have the needed data structure anyway.
 			$this->addWhere( $db->makeWhereFrom2d( $map, $bl_namespace, $bl_title ) );
@@ -273,25 +245,22 @@ class ApiQueryBacklinksprop extends ApiQueryGeneratorBase {
 			$where = [];
 			foreach ( $titles as $t ) {
 				if ( $t->getNamespace() == $bl_namespace ) {
-					$where[] = "$bl_title = " . $db->addQuotes( $t->getDBkey() );
+					$where[] = $db->expr( $bl_title, '=', $t->getDBkey() );
 				}
 			}
-			$this->addWhere( $db->makeList( $where, LIST_OR ) );
+			$this->addWhere( $db->orExpr( $where ) );
 		}
 
 		if ( $params['show'] !== null ) {
 			// prop=redirects only
 			$show = array_fill_keys( $params['show'], true );
-			if ( isset( $show['fragment'] ) && isset( $show['!fragment'] ) ||
-				isset( $show['redirect'] ) && isset( $show['!redirect'] )
+			if ( ( isset( $show['fragment'] ) && isset( $show['!fragment'] ) ) ||
+				( isset( $show['redirect'] ) && isset( $show['!redirect'] ) )
 			) {
 				$this->dieWithError( 'apierror-show' );
 			}
-			$this->addWhereIf( "rd_fragment != $emptyString", isset( $show['fragment'] ) );
-			$this->addWhereIf(
-				"rd_fragment = $emptyString OR rd_fragment IS NULL",
-				isset( $show['!fragment'] )
-			);
+			$this->addWhereIf( $db->expr( 'rd_fragment', '!=', '' ), isset( $show['fragment'] ) );
+			$this->addWhereIf( [ 'rd_fragment' => '' ], isset( $show['!fragment'] ) );
 			$this->addWhereIf( [ 'page_is_redirect' => 1 ], isset( $show['redirect'] ) );
 			$this->addWhereIf( [ 'page_is_redirect' => 0 ], isset( $show['!redirect'] ) );
 		}
@@ -303,7 +272,11 @@ class ApiQueryBacklinksprop extends ApiQueryGeneratorBase {
 		// (...)" and chooses the wrong index, so specify the correct index to
 		// use for the query. See T139056 for details.
 		if ( !empty( $settings['indexes'] ) ) {
-			if ( $params['namespace'] !== null && !empty( $settings['from_namespace'] ) ) {
+			if (
+				$params['namespace'] !== null &&
+				count( $params['namespace'] ) == 1 &&
+				!empty( $settings['from_namespace'] )
+			) {
 				// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset False positive
 				$this->addOption( 'USE INDEX', [ $settings['linktable'] => $idxWithFromNS ] );
 				// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset False positive
@@ -351,7 +324,7 @@ class ApiQueryBacklinksprop extends ApiQueryGeneratorBase {
 					);
 				}
 				// @phan-suppress-next-line PhanPossiblyUndeclaredVariable set when used
-				if ( $fld_fragment && $row->rd_fragment !== null && $row->rd_fragment !== '' ) {
+				if ( $fld_fragment && $row->rd_fragment !== '' ) {
 					$vals['fragment'] = $row->rd_fragment;
 				}
 				// @phan-suppress-next-line PhanPossiblyUndeclaredVariable set when used
@@ -457,6 +430,7 @@ class ApiQueryBacklinksprop extends ApiQueryGeneratorBase {
 			$ret['show'] = [
 				ParamValidator::PARAM_TYPE => $show,
 				ParamValidator::PARAM_ISMULTI => true,
+				ApiBase::PARAM_HELP_MSG_PER_VALUE => [],
 			];
 		} else {
 			unset( $ret['show'] );
@@ -469,7 +443,7 @@ class ApiQueryBacklinksprop extends ApiQueryGeneratorBase {
 		$settings = self::$settings[$this->getModuleName()];
 		$name = $this->getModuleName();
 		$path = $this->getModulePath();
-		$title = $settings['exampletitle'] ?? 'Main Page';
+		$title = $settings['exampletitle'] ?? Title::newMainPage()->getPrefixedText();
 		$etitle = rawurlencode( $title );
 
 		return [
@@ -485,3 +459,6 @@ class ApiQueryBacklinksprop extends ApiQueryGeneratorBase {
 		return "https://www.mediawiki.org/wiki/Special:MyLanguage/API:{$name}";
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryBacklinksprop::class, 'ApiQueryBacklinksprop' );

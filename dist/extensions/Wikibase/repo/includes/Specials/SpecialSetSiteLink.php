@@ -2,12 +2,12 @@
 
 namespace Wikibase\Repo\Specials;
 
-use Html;
-use HTMLForm;
 use InvalidArgumentException;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Site\Site;
+use MediaWiki\Status\Status;
 use OutOfBoundsException;
-use Site;
-use Status;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
@@ -15,11 +15,12 @@ use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
 use Wikibase\Lib\Summary;
+use Wikibase\Repo\AnonymousEditWarningBuilder;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
 use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\SiteLinkChangeOpFactory;
 use Wikibase\Repo\CopyrightMessageBuilder;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\SiteLinkPageNormalizer;
 use Wikibase\Repo\SiteLinkTargetProvider;
 use Wikibase\Repo\SummaryFormatter;
@@ -70,7 +71,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 	/**
 	 * The page of the site link.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	private $page;
 
@@ -86,7 +87,9 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 	 * @param SpecialPageCopyrightView $copyrightView
 	 * @param SummaryFormatter $summaryFormatter
 	 * @param EntityTitleLookup $entityTitleLookup
-	 * @param MediawikiEditEntityFactory $editEntityFactory
+	 * @param MediaWikiEditEntityFactory $editEntityFactory
+	 * @param AnonymousEditWarningBuilder $anonymousEditWarningBuilder
+	 * @param SiteLinkPageNormalizer $siteLinkPageNormalizer
 	 * @param SiteLinkTargetProvider $siteLinkTargetProvider
 	 * @param string[] $siteLinkGroups
 	 * @param string[] $badgeItems
@@ -98,7 +101,8 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 		SpecialPageCopyrightView $copyrightView,
 		SummaryFormatter $summaryFormatter,
 		EntityTitleLookup $entityTitleLookup,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
+		AnonymousEditWarningBuilder $anonymousEditWarningBuilder,
 		SiteLinkPageNormalizer $siteLinkPageNormalizer,
 		SiteLinkTargetProvider $siteLinkTargetProvider,
 		array $siteLinkGroups,
@@ -112,7 +116,8 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 			$copyrightView,
 			$summaryFormatter,
 			$entityTitleLookup,
-			$editEntityFactory
+			$editEntityFactory,
+			$anonymousEditWarningBuilder
 		);
 
 		$this->siteLinkPageNormalizer = $siteLinkPageNormalizer;
@@ -124,8 +129,9 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 	}
 
 	public static function factory(
+		AnonymousEditWarningBuilder $anonymousEditWarningBuilder,
 		ChangeOpFactoryProvider $changeOpFactoryProvider,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		EntityTitleLookup $entityTitleLookup,
 		FallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory,
 		SettingsArray $repoSettings,
@@ -147,6 +153,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 			$summaryFormatter,
 			$entityTitleLookup,
 			$editEntityFactory,
+			$anonymousEditWarningBuilder,
 			$siteLinkPageNormalizer,
 			$siteLinkTargetProvider,
 			$repoSettings->getSetting( 'siteLinkGroups' ),
@@ -169,8 +176,8 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 		parent::processArguments( $subPage );
 
 		$request = $this->getRequest();
-		// explode the sub page from the format Special:SetSitelink/q123/enwiki
-		$parts = ( $subPage === '' ) ? [] : explode( '/', $subPage, 2 );
+		// explode the subpage from the format Special:SetSitelink/q123/enwiki
+		$parts = $subPage ? explode( '/', $subPage, 2 ) : [];
 
 		$entityId = $this->getEntityId();
 
@@ -273,11 +280,11 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 	 *
 	 * @return HTMLForm
 	 */
-	protected function getForm( EntityDocument $entity = null ) {
+	protected function getForm( ?EntityDocument $entity ) {
 		if ( $this->page === null ) {
 			$this->page = $this->site === null ? '' : $this->getSiteLink( $entity, $this->site );
 		}
-		if ( empty( $this->badges ) ) {
+		if ( !$this->badges ) {
 			// @phan-suppress-next-line PhanImpossibleTypeComparison
 			$this->badges = $this->site === null ? [] : $this->getBadges( $entity, $this->site );
 		}
@@ -289,11 +296,11 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 				'default' => $this->getRequest()->getVal( 'page' ) ?: $this->page,
 				'nodata' => true,
 				'cssclass' => 'wb-input wb-input-text',
-				'id' => 'wb-setsitelink-page'
-			]
+				'id' => 'wb-setsitelink-page',
+			],
 		];
 
-		if ( !empty( $this->badgeItems ) ) {
+		if ( $this->badgeItems ) {
 			$pageinput['badges'] = $this->getMultiSelectForBadges();
 		}
 
@@ -313,28 +320,28 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 				'site' => [
 					'name' => 'site',
 					'type' => 'hidden',
-					'default' => $this->site
+					'default' => $this->site,
 				],
 				'id' => [
 					'name' => 'id',
 					'type' => 'hidden',
-					'default' => $this->getEntityId()->getSerialization()
+					'default' => $this->getEntityId()->getSerialization(),
 				],
 				'remove' => [
 					'name' => 'remove',
 					'type' => 'hidden',
-					'default' => 'remove'
+					'default' => 'remove',
 				],
 				'revid' => [
 					'name' => 'revid',
 					'type' => 'hidden',
 					'default' => $this->getBaseRevision()->getRevisionId(),
-				]
+				],
 			];
 		} else {
 			$intro = $this->msg( 'wikibase-setsitelink-intro' )->text();
 
-			if ( !empty( $this->badgeItems ) ) {
+			if ( $this->badgeItems ) {
 				$intro .= $this->msg( 'word-separator' )->text() . $this->msg( 'wikibase-setsitelink-intro-badges' )->text();
 			}
 
@@ -345,13 +352,13 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 				'type' => 'text',
 				'default' => $this->getRequest()->getVal( 'site' ) ?: $this->site,
 				'cssclass' => 'wb-input',
-				'id' => 'wb-setsitelink-site'
+				'id' => 'wb-setsitelink-site',
 			];
 		}
 		$formDescriptor = array_merge( $formDescriptor, $pageinput );
 
 		return HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )
-			->setHeaderText( Html::rawElement( 'p', [], $intro ) );
+			->setHeaderHtml( Html::rawElement( 'p', [], $intro ) );
 	}
 
 	/**
@@ -393,7 +400,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 			'type' => 'multiselect',
 			'label-message' => 'wikibase-setsitelink-badges',
 			'options' => $options,
-			'default' => $default
+			'default' => $default,
 		];
 	}
 
@@ -442,7 +449,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 	 * @param string[] $badges
 	 * @param Status $status
 	 *
-	 * @return ItemId[]|boolean
+	 * @return ItemId[]|false
 	 */
 	private function parseBadges( array $badges, Status $status ) {
 		$badgesObjects = [];
@@ -485,7 +492,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 	 * @throws InvalidArgumentException
 	 * @return Status
 	 */
-	private function setSiteLink( EntityDocument $item, $siteId, $pageName, array $badgeIds, Summary &$summary = null ) {
+	private function setSiteLink( EntityDocument $item, $siteId, $pageName, array $badgeIds, ?Summary &$summary ) {
 		if ( !( $item instanceof Item ) ) {
 			throw new InvalidArgumentException( '$entity must be an Item' );
 		}
@@ -502,18 +509,14 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 
 		// when $pageName is an empty string, we want to remove the site link
 		if ( $pageName === '' ) {
-			if ( !$item->hasLinkToSite( $siteId ) ) {
-				$status->fatal( 'wikibase-setsitelink-remove-failed' );
-				return $status;
-			}
-		} else {
-			$pageName = $this->siteLinkPageNormalizer->normalize(
-				$site, $pageName, $badgeIds );
+			return $this->removeSiteLink( $item, $siteId, $summary );
+		}
 
-			if ( $pageName === false ) {
-				$status->fatal( 'wikibase-error-ui-no-external-page', $siteId, $this->page );
-				return $status;
-			}
+		$pageName = $this->siteLinkPageNormalizer->normalize( $site, $pageName, $badgeIds );
+
+		if ( $pageName === false ) {
+			$status->fatal( 'wikibase-error-ui-no-external-page', $siteId, $this->page );
+			return $status;
 		}
 
 		$badges = $this->parseBadges( $badgeIds, $status );
@@ -526,6 +529,17 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 		$this->applyChangeOp( $changeOp, $item, $summary );
 
 		return $status;
+	}
+
+	private function removeSiteLink( Item $item, string $siteId, Summary $summary ): Status {
+		if ( !$item->hasLinkToSite( $siteId ) ) {
+			return Status::newFatal( 'wikibase-setsitelink-remove-failed' );
+		}
+
+		$changeOp = $this->siteLinkChangeOpFactory->newRemoveSiteLinkOp( $siteId );
+		$this->applyChangeOp( $changeOp, $item, $summary );
+
+		return Status::newGood();
 	}
 
 	private function getSiteLinkTargetSite( string $siteId ): ?Site {

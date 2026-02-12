@@ -1,9 +1,13 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lexeme\MediaWiki\Api;
 
-use ApiMain;
-use Status;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiCreateTempUserTrait;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Message\Message;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Serializers\SerializerFactory;
@@ -12,16 +16,17 @@ use Wikibase\Lexeme\MediaWiki\Api\Error\FormNotFound;
 use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\FormIdDeserializer;
 use Wikibase\Lexeme\Serialization\FormSerializer;
 use Wikibase\Lexeme\WikibaseLexemeServices;
-use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\EntityStore;
 use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Api\ApiErrorReporter;
 use Wikibase\Repo\Api\ApiHelperFactory;
+use Wikibase\Repo\Api\ResultBuilder;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
 use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\EditEntityStatus;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -29,51 +34,27 @@ use Wikimedia\ParamValidator\ParamValidator;
 /**
  * @license GPL-2.0-or-later
  */
-class EditFormElements extends \ApiBase {
+class EditFormElements extends ApiBase {
+
+	use ApiCreateTempUserTrait;
 
 	private const LATEST_REVISION = 0;
 
-	/**
-	 * @var EntityRevisionLookup
-	 */
-	private $entityRevisionLookup;
-
-	/**
-	 * @var MediawikiEditEntityFactory
-	 */
-	private $editEntityFactory;
-
-	/**
-	 * @var EditFormElementsRequestParser
-	 */
-	private $requestParser;
-
-	/**
-	 * @var SummaryFormatter
-	 */
-	private $summaryFormatter;
-
-	/**
-	 * @var FormSerializer
-	 */
-	private $formSerializer;
-
-	/**
-	 * @var ApiErrorReporter
-	 */
-	private $errorReporter;
-
-	/**
-	 * @var EntityStore
-	 */
-	private $entityStore;
+	private EntityRevisionLookup $entityRevisionLookup;
+	private MediaWikiEditEntityFactory $editEntityFactory;
+	private EditFormElementsRequestParser $requestParser;
+	private SummaryFormatter $summaryFormatter;
+	private FormSerializer $formSerializer;
+	private ResultBuilder $resultBuilder;
+	private ApiErrorReporter $errorReporter;
+	private EntityStore $entityStore;
 
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
 		ApiHelperFactory $apiHelperFactory,
 		SerializerFactory $baseDataModelSerializerFactory,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		EntityIdParser $entityIdParser,
 		EntityStore $entityStore,
 		Store $store,
@@ -95,22 +76,20 @@ class EditFormElements extends \ApiBase {
 			),
 			$summaryFormatter,
 			$formSerializer,
-			static function ( $module ) use ( $apiHelperFactory ) {
-				return $apiHelperFactory->getErrorReporter( $module );
-			},
+			$apiHelperFactory,
 			$entityStore
 		);
 	}
 
 	public function __construct(
 		ApiMain $mainModule,
-		$moduleName,
+		string $moduleName,
 		EntityRevisionLookup $entityRevisionLookup,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		EditFormElementsRequestParser $requestParser,
 		SummaryFormatter $summaryFormatter,
 		FormSerializer $formSerializer,
-		callable $errorReporterInstantiator,
+		ApiHelperFactory $apiHelperFactory,
 		EntityStore $entityStore
 	) {
 		parent::__construct( $mainModule, $moduleName );
@@ -120,7 +99,8 @@ class EditFormElements extends \ApiBase {
 		$this->requestParser = $requestParser;
 		$this->summaryFormatter = $summaryFormatter;
 		$this->formSerializer = $formSerializer;
-		$this->errorReporter = $errorReporterInstantiator( $this );
+		$this->resultBuilder = $apiHelperFactory->getResultBuilder( $this );
+		$this->errorReporter = $apiHelperFactory->getErrorReporter( $this );
 		$this->entityStore = $entityStore;
 	}
 
@@ -128,7 +108,7 @@ class EditFormElements extends \ApiBase {
 	 * @inheritDoc
 	 * @suppress PhanTypeMismatchArgument
 	 */
-	public function execute() {
+	public function execute(): void {
 		$params = $this->extractRequestParams();
 		$request = $this->requestParser->parse( $params );
 		if ( $request->getBaseRevId() ) {
@@ -172,7 +152,7 @@ class EditFormElements extends \ApiBase {
 		try {
 			$changeOp->apply( $form, $summary );
 		} catch ( ChangeOpException $exception ) {
-			$this->errorReporter->dieException( $exception,  'unprocessable-request' );
+			$this->errorReporter->dieException( $exception, 'unprocessable-request' );
 		}
 
 		$summaryString = $this->summaryFormatter->formatSummary( $summary );
@@ -183,22 +163,15 @@ class EditFormElements extends \ApiBase {
 			$this->dieStatus( $status );
 		}
 
-		$this->generateResponse( $form, $status );
+		$this->generateResponse( $form, $status, $params );
 	}
 
-	/**
-	 * @param Form $form
-	 * @param string $summary
-	 * @param int $baseRevisionId
-	 * @param array $params
-	 * @return \Status
-	 */
 	private function saveForm(
 		Form $form,
-		$summary,
-		$baseRevisionId,
+		string $summary,
+		int $baseRevisionId,
 		array $params
-	) {
+	): EditEntityStatus {
 		$editEntity = $this->editEntityFactory->newEditEntity(
 			$this->getContext(),
 			$form->getId(),
@@ -224,29 +197,18 @@ class EditFormElements extends \ApiBase {
 		);
 	}
 
-	/**
-	 * @param Form $form
-	 * @param Status $status
-	 */
-	private function generateResponse( Form $form, Status $status ) {
-		$apiResult = $this->getResult();
+	private function generateResponse( Form $form, EditEntityStatus $status, array $params ): void {
+		$this->resultBuilder->addRevisionIdFromStatusToResult( $status, null );
+		$this->resultBuilder->markSuccess();
 
 		$serializedForm = $this->formSerializer->serialize( $form );
+		$this->getResult()->addValue( null, 'form', $serializedForm );
 
-		/** @var EntityRevision $entityRevision */
-		$entityRevision = $status->getValue()['revision'];
-		$revisionId = $entityRevision->getRevisionId();
-
-		$apiResult->addValue( null, 'lastrevid', $revisionId );
-
-		// TODO: Do we really need `success` property in response?
-		$apiResult->addValue( null, 'success', 1 );
-		$apiResult->addValue( null, 'form', $serializedForm );
+		$this->resultBuilder->addTempUser( $status, fn ( $user ) => $this->getTempUserRedirectUrl( $params, $user ) );
 	}
 
-	/** @inheritDoc */
-	protected function getAllowedParams() {
-		return [
+	protected function getAllowedParams(): array {
+		return array_merge( [
 			EditFormElementsRequestParser::PARAM_FORM_ID => [
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => true,
@@ -265,12 +227,11 @@ class EditFormElements extends \ApiBase {
 			'bot' => [
 				ParamValidator::PARAM_TYPE => 'boolean',
 				ParamValidator::PARAM_DEFAULT => false,
-			]
-		];
+			],
+		], $this->getCreateTempUserParams() );
 	}
 
-	/** @inheritDoc */
-	public function isWriteMode() {
+	public function isWriteMode(): bool {
 		return true;
 	}
 
@@ -278,21 +239,19 @@ class EditFormElements extends \ApiBase {
 	 * As long as this codebase is in development and APIs might change any time without notice, we
 	 * mark all as internal. This adds an "unstable" notice, but does not hide them in any way.
 	 */
-	public function isInternal() {
+	public function isInternal(): bool {
 		return true;
 	}
 
-	/** @inheritDoc */
-	public function needsToken() {
+	public function needsToken(): string {
 		return 'csrf';
 	}
 
-	/** @inheritDoc */
-	public function mustBePosted() {
+	public function mustBePosted(): bool {
 		return true;
 	}
 
-	protected function getExamplesMessages() {
+	protected function getExamplesMessages(): array {
 		$formId = 'L12-F1';
 		$exampleData = [
 			'representations' => [
@@ -300,56 +259,47 @@ class EditFormElements extends \ApiBase {
 				'en-GB' => [ 'value' => 'colour', 'language' => 'en-GB' ],
 			],
 			'grammaticalFeatures' => [
-				'Q1', 'Q2'
-			]
+				'Q1', 'Q2',
+			],
 		];
 
 		$query = http_build_query( [
 			'action' => $this->getModuleName(),
 			EditFormElementsRequestParser::PARAM_FORM_ID => $formId,
-			EditFormElementsRequestParser::PARAM_DATA => json_encode( $exampleData )
+			EditFormElementsRequestParser::PARAM_DATA => json_encode( $exampleData ),
 		] );
 
-		$languages = array_map( static function ( $r ) {
-			return $r['language'];
-		}, $exampleData['representations'] );
-		$representations = array_map( static function ( $r ) {
-			return $r['value'];
-		}, $exampleData['representations'] );
+		$languages = array_column( $exampleData['representations'], 'language' );
+		$representations = array_column( $exampleData['representations'], 'value' );
 
 		$representationsText = $this->getLanguage()->commaList( $representations );
 		$languagesText = $this->getLanguage()->commaList( $languages );
 		$grammaticalFeaturesText = $this->getLanguage()->commaList( $exampleData['grammaticalFeatures'] );
 
-		$exampleMessage = new \Message(
+		$exampleMessage = new Message(
 			'apihelp-wbleditformelements-example-1',
 			[
 				$formId,
 				$representationsText,
 				$languagesText,
-				$grammaticalFeaturesText
+				$grammaticalFeaturesText,
 			]
 		);
 
 		return [
-			urldecode( $query ) => $exampleMessage
+			urldecode( $query ) => $exampleMessage,
 		];
 	}
 
 	/**
 	 * Returns $latestRevisionId if all of edits since $baseRevId are done
 	 * by the same user, otherwise returns $baseRevId.
-	 *
-	 * @param int $latestRevisionId
-	 * @param int $baseRevId
-	 * @param EntityId $entityId
-	 * @return int
 	 */
 	private function getRevIdForWhenUserWasLastToEdit(
-		$latestRevisionId,
-		$baseRevId,
+		int $latestRevisionId,
+		int $baseRevId,
 		EntityId $entityId
-	) {
+	): int {
 		if ( $baseRevId === self::LATEST_REVISION || $latestRevisionId === $baseRevId ) {
 			return $latestRevisionId;
 		}

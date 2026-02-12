@@ -3,7 +3,7 @@
 namespace Wikibase\Lexeme\MediaWiki\EntityLinkFormatters;
 
 use HtmlArmor;
-use Language;
+use MediaWiki\Language\Language;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\DataModel\Term\TermList;
@@ -50,7 +50,7 @@ class FormLinkFormatter implements EntityLinkFormatter {
 		$this->representationsFormatter = $representationsFormatter;
 	}
 
-	public function getHtml( EntityId $entityId, array $labelData = null ) {
+	public function getHtml( EntityId $entityId, ?array $labelData = null ) {
 		Assert::parameterType( FormId::class, $entityId, '$entityId' );
 		'@phan-var FormId $entityId';
 
@@ -85,8 +85,8 @@ class FormLinkFormatter implements EntityLinkFormatter {
 	 */
 	public function getTitleAttribute(
 		EntityId $entityId,
-		array $labelData = null,
-		array $descriptionData = null
+		?array $labelData = null,
+		?array $descriptionData = null
 	) {
 		return $entityId->getSerialization();
 	}

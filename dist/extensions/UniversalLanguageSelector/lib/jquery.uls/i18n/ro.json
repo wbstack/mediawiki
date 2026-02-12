@@ -4,6 +4,7 @@
 			"Amire80",
 			"Minisarm",
 			"NGC 54",
+			"Paloi Sciurala",
 			"Silviu200530"
 		]
 	},
@@ -20,5 +21,6 @@
 	"uls-common-languages": "Limbi sugerate",
 	"uls-no-results-suggestion-title": "Ați putea fi interesat de:",
 	"uls-search-help": "Puteți căuta după numele limbii, numele scrierii, codul ISO al limbii sau puteți răsfoi în funcție de regiune.",
-	"uls-search-placeholder": "Căutare după o limbă"
+	"uls-search-placeholder": "Căutare după o limbă",
+	"uls-search-placeholder-short": "Căutare"
 }

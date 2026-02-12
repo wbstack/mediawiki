@@ -1,0 +1,13 @@
+[ssr]
+<ssr-server-instance>
+
+[ssr:vars]
+WIKIBASE_REPO=https://wikidata.beta.wmflabs.org/w
+WIKIBASE_REPO_HOSTNAME_ALIAS=wikidata.beta.wmflabs.org
+SSR_PORT=3030
+PATH=/srv/termbox
+BRANCH=master
+# ServiceTimeout for Downloading the docker assets
+TIMEOUT=300
+LOGSTASH_HOST=deployment-logstash2.eqiad.wmflabs
+STATSD_HOST=cloudmetrics1002.eqiad.wmnet

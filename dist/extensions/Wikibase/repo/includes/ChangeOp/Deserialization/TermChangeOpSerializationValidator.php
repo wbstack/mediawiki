@@ -26,7 +26,7 @@ class TermChangeOpSerializationValidator {
 	 * @param int|string $languageCode Key from the term list array, related to $serialization.
 	 *                                 If a string its value must match $serialization['language'].
 	 *
-	 * @see @ref md_docs_topics_changeop-serializations for information on term serialization format
+	 * @see @ref docs_topics_changeop-serializations for information on term serialization format
 	 *
 	 * @throws ChangeOpDeserializationException
 	 */
@@ -53,13 +53,18 @@ class TermChangeOpSerializationValidator {
 			if ( $languageCode !== $serialization['language'] ) {
 				$this->throwException(
 					"inconsistent language in term serialization: $languageCode is not equal to {$serialization['language']}",
-					'inconsistent-language'
+					'inconsistent-language',
+					[ $serialization['language'], $languageCode ]
 				);
 			}
 		}
 
 		if ( !$this->termsLanguages->hasLanguage( $serialization['language'] ) ) {
-			$this->throwException( 'Unknown language: ' . $serialization['language'], 'not-recognized-language' );
+			$this->throwException(
+				'Unknown language: ' . $serialization['language'],
+				'not-recognized-language',
+				[ $serialization['language'] ]
+			);
 		}
 
 		if ( !array_key_exists( 'remove', $serialization ) ) {
@@ -74,11 +79,13 @@ class TermChangeOpSerializationValidator {
 	/**
 	 * @param string $message
 	 * @param string $errorCode
+	 * @param array $params
+	 * @return never
 	 *
 	 * @throws ChangeOpDeserializationException
 	 */
-	private function throwException( $message, $errorCode ) {
-		throw new ChangeOpDeserializationException( $message, $errorCode );
+	private function throwException( $message, $errorCode, array $params = [] ) {
+		throw new ChangeOpDeserializationException( $message, $errorCode, $params );
 	}
 
 	/**

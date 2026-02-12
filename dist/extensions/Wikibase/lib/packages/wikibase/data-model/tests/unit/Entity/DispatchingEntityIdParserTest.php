@@ -32,16 +32,12 @@ class DispatchingEntityIdParserTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals( $expected, $actual );
 	}
 
-	public function entityIdProvider() {
+	public static function entityIdProvider() {
 		return [
 			[ 'q42', new ItemId( 'q42' ) ],
 			[ 'Q1337', new ItemId( 'Q1337' ) ],
 			[ 'p1', new NumericPropertyId( 'p1' ) ],
 			[ 'P100000', new NumericPropertyId( 'P100000' ) ],
-			[ 'foo:Q1337', new ItemId( 'foo:Q1337' ) ],
-			[ 'foo:P123', new NumericPropertyId( 'foo:P123' ) ],
-			[ 'foo:bar:Q1337', new ItemId( 'foo:bar:Q1337' ) ],
-			[ ':Q1337', new ItemId( ':Q1337' ) ],
 		];
 	}
 
@@ -55,7 +51,7 @@ class DispatchingEntityIdParserTest extends \PHPUnit\Framework\TestCase {
 		$parser->parse( $invalidIdSerialization );
 	}
 
-	public function invalidIdSerializationProvider() {
+	public static function invalidIdSerializationProvider() {
 		return [
 			[ 'FOO' ],
 			[ null ],
@@ -64,8 +60,10 @@ class DispatchingEntityIdParserTest extends \PHPUnit\Framework\TestCase {
 			[ '' ],
 			[ 'q0' ],
 			[ '1p' ],
+			[ ':Q1337' ],
 			[ 'foo:' ],
 			[ 'foo:bar:' ],
+			[ ':Q1337' ],
 			[ '::Q1337' ],
 			[ ':' ],
 			[ 'q:0' ],

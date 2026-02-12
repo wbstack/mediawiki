@@ -22,8 +22,12 @@
  * @ingroup Media
  */
 
+use MediaWiki\HookContainer\HookRunner;
+use MediaWiki\Html\Html;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
+use MediaWiki\Xml\Xml;
 
 /**
  * Media transform output for images
@@ -44,8 +48,8 @@ class ThumbnailImage extends MediaTransformOutput {
 	 * @param array $parameters Associative array of parameters
 	 */
 	public function __construct( $file, $url, $path = false, $parameters = [] ) {
-		# Previous parameters:
-		#   $file, $url, $width, $height, $path = false, $page = false
+		// Previous parameters:
+		//   $file, $url, $width, $height, $path = false, $page = false
 
 		$defaults = [
 			'page' => false,
@@ -55,7 +59,7 @@ class ThumbnailImage extends MediaTransformOutput {
 		if ( is_array( $parameters ) ) {
 			$actualParams = $parameters + $defaults;
 		} else {
-			# Using old format, should convert. Later a warning could be added here.
+			// Using old format, should convert. Later a warning could be added here.
 			$numArgs = func_num_args();
 			$actualParams = [
 				'width' => $path,
@@ -69,9 +73,9 @@ class ThumbnailImage extends MediaTransformOutput {
 		$this->url = $url;
 		$this->path = $path;
 
-		# These should be integers when they get here.
-		# If not, there's a bug somewhere.  But let's at
-		# least produce valid HTML code regardless.
+		// These should be integers when they get here.
+		// If not, there's a bug somewhere.  But let's at
+		// least produce valid HTML code regardless.
 		// @phan-suppress-next-line PhanTypeMismatchArgumentInternal Confused by old signature
 		$this->width = (int)round( $actualParams['width'] );
 		$this->height = (int)round( $actualParams['height'] );
@@ -94,6 +98,7 @@ class ThumbnailImage extends MediaTransformOutput {
 	 *     file-link    Boolean, show a file download link
 	 *     valign       vertical-align property, if the output is an inline element
 	 *     img-class    Class applied to the \<img\> tag, if there is such a tag
+	 *     loading      Specify an explicit browser loading strategy for images and iframes.
 	 *     desc-query   String, description link query params
 	 *     override-width     Override width attribute. Should generally not set
 	 *     override-height    Override height attribute. Should generally not set
@@ -106,27 +111,45 @@ class ThumbnailImage extends MediaTransformOutput {
 	 *     parser-extlink-*   Attributes added by parser for external links:
 	 *          parser-extlink-rel: add rel="nofollow"
 	 *          parser-extlink-target: link target, but overridden by custom-target-link
+	 *     magnify-resource   To set the HTML resource attribute, when necessary
 	 *
 	 * For images, desc-link and file-link are implemented as a click-through. For
 	 * sounds and videos, they may be displayed in other ways.
 	 *
-	 * @throws MWException
 	 * @return string
 	 */
 	public function toHtml( $options = [] ) {
-		$mainConfig = MediaWikiServices::getInstance()->getMainConfig();
+		$services = MediaWikiServices::getInstance();
+		$mainConfig = $services->getMainConfig();
 		$nativeImageLazyLoading = $mainConfig->get( MainConfigNames::NativeImageLazyLoading );
 		$enableLegacyMediaDOM = $mainConfig->get( MainConfigNames::ParserEnableLegacyMediaDOM );
 
-		if ( func_num_args() == 2 ) {
-			throw new MWException( __METHOD__ . ' called in the old style' );
+		if ( func_num_args() === 2 ) {
+			throw new InvalidArgumentException( __METHOD__ . ' called in the old style' );
 		}
 
-		$alt = $options['alt'] ?? '';
 		$query = $options['desc-query'] ?? '';
 
-		$attribs = [
-			'alt' => $alt,
+		$attribs = [];
+
+		// An empty alt indicates an image is not a key part of the content and
+		// that non-visual browsers may omit it from rendering.  Only set the
+		// parameter if it's explicitly requested.
+		if ( isset( $options['alt'] ) ) {
+			$attribs['alt'] = $options['alt'];
+		}
+
+		// Description links get the mw-file-description class and link
+		// to the file description page, making the resource redundant
+		if (
+			!$enableLegacyMediaDOM &&
+			isset( $options['magnify-resource'] ) &&
+			!( $options['desc-link'] ?? false )
+		) {
+			$attribs['resource'] = $options['magnify-resource'];
+		}
+
+		$attribs += [
 			'src' => $this->url,
 			'decoding' => 'async',
 		];
@@ -193,11 +216,12 @@ class ThumbnailImage extends MediaTransformOutput {
 		// Additional densities for responsive images, if specified.
 		// If any of these urls is the same as src url, it'll be excluded.
 		$responsiveUrls = array_diff( $this->responsiveUrls, [ $this->url ] );
-		if ( !empty( $responsiveUrls ) ) {
+		if ( $responsiveUrls ) {
 			$attribs['srcset'] = Html::srcSet( $responsiveUrls );
 		}
 
-		Hooks::runner()->onThumbnailBeforeProduceHTML( $this, $attribs, $linkAttribs );
+		( new HookRunner( $services->getHookContainer() ) )
+			->onThumbnailBeforeProduceHTML( $this, $attribs, $linkAttribs );
 
 		return $this->linkWrap( $linkAttribs, Xml::element( 'img', $attribs ) );
 	}

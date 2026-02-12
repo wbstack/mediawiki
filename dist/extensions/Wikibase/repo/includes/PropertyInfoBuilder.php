@@ -43,7 +43,7 @@ class PropertyInfoBuilder {
 	 */
 	public function buildPropertyInfo( Property $property ) {
 		$info = [
-			PropertyInfoLookup::KEY_DATA_TYPE => $property->getDataTypeId()
+			PropertyInfoLookup::KEY_DATA_TYPE => $property->getDataTypeId(),
 		];
 
 		$formatterUrl = $this->getStringFromStatements(
@@ -69,7 +69,7 @@ class PropertyInfoBuilder {
 	 * @param string $propertyInfoKey
 	 * @param StatementList $statements
 	 *
-	 * @return string The string value of the property associated with the given
+	 * @return string|null The string value of the property associated with the given
 	 *         $propertyInfoKey via the array provided to the constructor.
 	 */
 	private function getStringFromStatements( $propertyInfoKey, StatementList $statements ) {

@@ -10,14 +10,19 @@ namespace MediaWiki\Widget;
  */
 class TitlesMultiselectWidget extends TagMultiselectWidget {
 
+	/** @var bool|null */
 	protected $showMissing = null;
+	/** @var bool|null */
 	protected $excludeDynamicNamespaces = null;
+	/** @var bool|null */
+	protected $allowEditTags = null;
 
 	/**
 	 * @param array $config Configuration options
 	 *   - bool $config['showMissing'] Show missing pages in the typeahead dropdown
 	 *     (ie. allow adding pages that don't exist)
 	 *   - bool $config['excludeDynamicNamespaces'] Exclude pages in negative namespaces
+	 *   - bool $config['allowEditTags'] Allow editing of the tags by clicking them
 	 */
 	public function __construct( array $config = [] ) {
 		parent::__construct( $config );
@@ -28,6 +33,9 @@ class TitlesMultiselectWidget extends TagMultiselectWidget {
 		}
 		if ( isset( $config['excludeDynamicNamespaces'] ) ) {
 			$this->excludeDynamicNamespaces = $config['excludeDynamicNamespaces'];
+		}
+		if ( isset( $config['allowEditTags'] ) ) {
+			$this->allowEditTags = $config['allowEditTags'];
 		}
 
 		$this->addClasses( [ 'mw-widgets-titlesMultiselectWidget' ] );
@@ -43,6 +51,9 @@ class TitlesMultiselectWidget extends TagMultiselectWidget {
 		}
 		if ( $this->excludeDynamicNamespaces !== null ) {
 			$config['excludeDynamicNamespaces'] = $this->excludeDynamicNamespaces;
+		}
+		if ( $this->allowEditTags !== null ) {
+			$config['allowEditTags'] = $this->allowEditTags;
 		}
 
 		return parent::getConfig( $config );

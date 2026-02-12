@@ -1,21 +1,21 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\MediaWiki\Content;
 
-use Content;
-use ContentHandler;
 use Diff\DiffOp\AtomicDiffOp;
 use Diff\DiffOp\Diff\Diff;
 use Diff\DiffOp\DiffOp;
 use Diff\DiffOp\DiffOpAdd;
 use Diff\DiffOp\DiffOpChange;
 use Diff\DiffOp\DiffOpRemove;
-use EntitySchema\Services\Diff\SchemaDiffer;
-use EntitySchema\Services\SchemaConverter\SchemaConverter;
-use Html;
-use IContextSource;
+use EntitySchema\Services\Converter\EntitySchemaConverter;
+use EntitySchema\Services\Diff\EntitySchemaDiffer;
+use MediaWiki\Content\Content;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Html\Html;
 use MessageLocalizer;
-use RequestContext;
 use SlotDiffRenderer;
 use TextSlotDiffRenderer;
 
@@ -24,36 +24,20 @@ use TextSlotDiffRenderer;
  */
 class EntitySchemaSlotDiffRenderer extends SlotDiffRenderer {
 
-	/** @var SchemaConverter */
-	private $schemaConverter;
+	private EntitySchemaConverter $schemaConverter;
 
-	/** @var SchemaDiffer */
-	private $schemaDiffer;
+	private EntitySchemaDiffer $schemaDiffer;
 
-	/** @var TextSlotDiffRenderer */
-	private $textSlotDiffRenderer;
+	private TextSlotDiffRenderer $textSlotDiffRenderer;
 
-	/** @var MessageLocalizer */
-	private $msgLocalizer;
+	private MessageLocalizer $msgLocalizer;
 
 	public function __construct(
-		IContextSource $context = null,
-		TextSlotDiffRenderer $textSlotDiffRenderer = null
+		IContextSource $context,
+		TextSlotDiffRenderer $textSlotDiffRenderer
 	) {
-		if ( $context === null ) {
-			$context = RequestContext::getMain();
-		}
-
-		if ( $textSlotDiffRenderer === null ) {
-			$textSlotDiffRenderer = ContentHandler::getForModelID( CONTENT_MODEL_TEXT )
-				->getSlotDiffRenderer( $context );
-			if ( !is_a( $textSlotDiffRenderer, TextSlotDiffRenderer::class ) ) {
-				$textSlotDiffRenderer = new TextSlotDiffRenderer();
-			}
-		}
-
-		$this->schemaDiffer = new SchemaDiffer();
-		$this->schemaConverter = new SchemaConverter();
+		$this->schemaDiffer = new EntitySchemaDiffer();
+		$this->schemaConverter = new EntitySchemaConverter();
 		$this->textSlotDiffRenderer = $textSlotDiffRenderer;
 		$this->msgLocalizer = $context;
 	}
@@ -65,7 +49,7 @@ class EntitySchemaSlotDiffRenderer extends SlotDiffRenderer {
 	 * @return string
 	 * @suppress PhanParamSignatureMismatch LSP violation
 	 */
-	public function getDiff( Content $oldContent = null, Content $newContent = null ) {
+	public function getDiff( ?Content $oldContent = null, ?Content $newContent = null ): string {
 		$this->normalizeContents( $oldContent, $newContent, EntitySchemaContent::class );
 
 		$diff = $this->schemaDiffer->diffSchemas(
@@ -76,7 +60,11 @@ class EntitySchemaSlotDiffRenderer extends SlotDiffRenderer {
 		return $this->renderSchemaDiffRows( $diff );
 	}
 
-	public function renderSchemaDiffRows( Diff $diff ) {
+	public function localizeDiff( string $diff, array $options = [] ) {
+		return $this->textSlotDiffRenderer->localizeDiff( $diff, $options );
+	}
+
+	public function renderSchemaDiffRows( Diff $diff ): string {
 		// split $diff into labels/descriptions/aliases (renderDiffOp())
 		// and schema (renderTextDiff())
 		$nameBadgeDiffOps = [];
@@ -109,7 +97,7 @@ class EntitySchemaSlotDiffRenderer extends SlotDiffRenderer {
 		return $nameBadgeDiff . $schemaDiff;
 	}
 
-	private function renderDiffOp( array $keys, DiffOp $diffOp ) {
+	private function renderDiffOp( array $keys, DiffOp $diffOp ): string {
 		if ( $diffOp instanceof Diff ) {
 			$output = '';
 			foreach ( $diffOp->getOperations() as $key => $op ) {
@@ -145,7 +133,7 @@ class EntitySchemaSlotDiffRenderer extends SlotDiffRenderer {
 	/**
 	 * @suppress PhanUndeclaredMethod
 	 */
-	private function renderTextDiff( $key, AtomicDiffOp $diffOp ) {
+	private function renderTextDiff( string $key, AtomicDiffOp $diffOp ): string {
 		if ( $diffOp instanceof DiffOpAdd || $diffOp instanceof DiffOpRemove ) {
 			return $this->renderDiffOp( [ $key ], $diffOp );
 		}
@@ -162,7 +150,7 @@ class EntitySchemaSlotDiffRenderer extends SlotDiffRenderer {
 		);
 	}
 
-	private function diffRow( $content ) {
+	private function diffRow( string $content ): string {
 		return Html::rawElement(
 			'tr',
 			[],
@@ -170,7 +158,7 @@ class EntitySchemaSlotDiffRenderer extends SlotDiffRenderer {
 		);
 	}
 
-	private function diffContext( $context ) {
+	private function diffContext( string $context ): string {
 		return Html::element(
 			'td',
 			[ 'colspan' => '2', 'class' => 'diff-lineno' ],
@@ -178,18 +166,18 @@ class EntitySchemaSlotDiffRenderer extends SlotDiffRenderer {
 		);
 	}
 
-	private function diffBlankLine() {
+	private function diffBlankLine(): string {
 		return Html::element( 'td', [ 'colspan' => '2' ] );
 	}
 
-	private function diffMarker( $marker ) {
+	private function diffMarker( string $marker ): string {
 		return Html::element(
 			'td',
 			[ 'class' => 'diff-marker', 'data-marker' => $marker ]
 		);
 	}
 
-	private function diffAddedLine( $line ) {
+	private function diffAddedLine( string $line ): string {
 		return $this->diffMarker( '+' ) . Html::element(
 			'td',
 			[ 'class' => 'diff-addedline' ],
@@ -197,7 +185,7 @@ class EntitySchemaSlotDiffRenderer extends SlotDiffRenderer {
 		);
 	}
 
-	private function diffRemovedLine( $line ) {
+	private function diffRemovedLine( string $line ): string {
 		return $this->diffMarker( '−' ) . Html::element(
 			'td',
 			[ 'class' => 'diff-deletedline' ],

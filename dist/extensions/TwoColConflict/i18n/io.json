@@ -5,6 +5,7 @@
 		]
 	},
 	"twocolconflict-beta-feature-message": "Redakturo-konflikti videbla en du kolumni",
+	"twocolconflict-beta-feature-description": "Montrar vidado pri redakto-konflikti, uzanta plu avancata vidado, bazata sur paragrafi.",
 	"twocolconflict-split-header-hint-beta": "Danko por uzar ca versiono ''beta''. Vu povas helpar plubonigor ol, se vu komentos pri ol [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface hike].",
 	"twocolconflict-split-your-version-header": "Vua modifikuro",
 	"twocolconflict-split-current-version-header": "Maxim recenta modifikuro $1",

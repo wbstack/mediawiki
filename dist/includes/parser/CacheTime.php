@@ -21,12 +21,14 @@
  * @ingroup Parser
  */
 
-use MediaWiki\Json\JsonUnserializable;
-use MediaWiki\Json\JsonUnserializableTrait;
-use MediaWiki\Json\JsonUnserializer;
+namespace MediaWiki\Parser;
+
+use MediaWiki\Json\JsonDeserializable;
+use MediaWiki\Json\JsonDeserializableTrait;
+use MediaWiki\Json\JsonDeserializer;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\Parser\ParserCacheMetadata;
+use MediaWiki\Utils\MWTimestamp;
 use Wikimedia\Reflection\GhostFieldAccessTrait;
 
 /**
@@ -34,9 +36,9 @@ use Wikimedia\Reflection\GhostFieldAccessTrait;
  *
  * @ingroup Parser
  */
-class CacheTime implements ParserCacheMetadata, JsonUnserializable {
+class CacheTime implements ParserCacheMetadata, JsonDeserializable {
 	use GhostFieldAccessTrait;
-	use JsonUnserializableTrait;
+	use JsonDeserializableTrait;
 
 	/**
 	 * @var true[] ParserOptions which have been taken into account
@@ -70,6 +72,13 @@ class CacheTime implements ParserCacheMetadata, JsonUnserializable {
 			$this->mCacheTime = MWTimestamp::now();
 		}
 		return $this->mCacheTime;
+	}
+
+	/**
+	 * @return bool true if a cache time has been set
+	 */
+	public function hasCacheTime(): bool {
+		return $this->mCacheTime !== '';
 	}
 
 	/**
@@ -150,19 +159,8 @@ class CacheTime implements ParserCacheMetadata, JsonUnserializable {
 			return 0;
 		}
 
-		$expire = $this->mCacheExpiry;
-
-		if ( $expire === null ) {
-			$expire = $parserCacheExpireTime;
-		} else {
-			$expire = min( $expire, $parserCacheExpireTime );
-		}
-
-		if ( $expire <= 0 ) {
-			return 0; // not cacheable
-		} else {
-			return $expire;
-		}
+		$expire = min( $this->mCacheExpiry ?? $parserCacheExpireTime, $parserCacheExpireTime );
+		return $expire > 0 ? $expire : 0;
 	}
 
 	/**
@@ -254,6 +252,9 @@ class CacheTime implements ParserCacheMetadata, JsonUnserializable {
 	 * @return array
 	 */
 	protected function toJsonArray(): array {
+		// WARNING: When changing how this class is serialized, follow the instructions
+		// at <https://www.mediawiki.org/wiki/Manual:Parser_cache/Serialization_compatibility>!
+
 		return [
 			'ParseUsedOptions' => $this->mParseUsedOptions,
 			'CacheExpiry' => $this->mCacheExpiry,
@@ -262,18 +263,21 @@ class CacheTime implements ParserCacheMetadata, JsonUnserializable {
 		];
 	}
 
-	public static function newFromJsonArray( JsonUnserializer $unserializer, array $json ) {
+	public static function newFromJsonArray( JsonDeserializer $deserializer, array $json ) {
 		$cacheTime = new CacheTime();
-		$cacheTime->initFromJson( $unserializer, $json );
+		$cacheTime->initFromJson( $deserializer, $json );
 		return $cacheTime;
 	}
 
 	/**
 	 * Initialize member fields from an array returned by jsonSerialize().
-	 * @param JsonUnserializer $unserializer
+	 * @param JsonDeserializer $deserializer Unused
 	 * @param array $jsonData
 	 */
-	protected function initFromJson( JsonUnserializer $unserializer, array $jsonData ) {
+	protected function initFromJson( JsonDeserializer $deserializer, array $jsonData ) {
+		// WARNING: When changing how this class is serialized, follow the instructions
+		// at <https://www.mediawiki.org/wiki/Manual:Parser_cache/Serialization_compatibility>!
+
 		if ( array_key_exists( 'AccessedOptions', $jsonData ) ) {
 			// Backwards compatibility for ParserOutput
 			$this->mParseUsedOptions = $jsonData['AccessedOptions'] ?: [];
@@ -323,3 +327,6 @@ class CacheTime implements ParserCacheMetadata, JsonUnserializable {
 		}
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( CacheTime::class, 'CacheTime' );

@@ -2,13 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Ahmed-Najib-Biabani-Ibrahimkhel",
-			"Macofe"
+			"Macofe",
+			"شاه زمان پټان"
 		]
 	},
-	"templatesandbox": "کينډۍ تمرين مخ",
-	"templatesandbox-legend": "کينډۍ تمرين مخ",
+	"templatesandbox": "کينډۍ ازمون‌مخ",
+	"templatesandbox-legend": "کينډۍ ازمون‌مخ",
 	"templatesandbox-submit": "کتل",
-	"templatesandbox-title-output": "کينډۍ تمرين مخ: $1",
+	"templatesandbox-title-output": "کينډۍ ازمون‌مخ: $1",
 	"templatesandbox-editform-legend": "په همدې کينډۍ سره د مخ مخليدنه",
 	"templatesandbox-editform-page-label": "مخ سرليک"
 }

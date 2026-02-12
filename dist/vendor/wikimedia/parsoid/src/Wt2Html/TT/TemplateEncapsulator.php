@@ -44,12 +44,6 @@ class TemplateEncapsulator {
 	/** @var string|null */
 	public $resolvedTemplateTarget;
 
-	/**
-	 * @param Env $env
-	 * @param Frame $frame
-	 * @param Token $token
-	 * @param string $wrapperType
-	 */
 	public function __construct(
 		Env $env, Frame $frame, Token $token, string $wrapperType
 	) {
@@ -77,7 +71,7 @@ class TemplateEncapsulator {
 			foreach ( $tplInfo->paramInfos as $paramInfo ) {
 				$paramTokens = null;
 				if ( $paramInfo->named ) {
-					$paramTokens = $this->token->getAttribute( $paramInfo->k );
+					$paramTokens = $this->token->getAttributeV( $paramInfo->k );
 				} else {
 					$paramTokens = $this->token->attribs[$paramInfo->k]->v;
 				}
@@ -106,7 +100,7 @@ class TemplateEncapsulator {
 			// Don't add the HTML template parameters, just use their wikitext
 		}
 
-		$toks[0]->dataAttribs->getTemp()->tplarginfo = $tplInfo;
+		$toks[0]->dataParsoid->getTemp()->tplarginfo = $tplInfo;
 
 		$this->env->log( 'debug', 'TemplateEncapsulator.encapTokens', $toks );
 		return $toks;
@@ -129,7 +123,7 @@ class TemplateEncapsulator {
 		// since the 'k' and 'v' values in params will be expanded tokens
 		//
 		// Ignore params[0] -- that is the template name
-		for ( $i = 1,  $n = count( $params );  $i < $n;  $i++ ) {
+		for ( $i = 1, $n = count( $params );  $i < $n;  $i++ ) {
 			$param = $params[$i];
 			$srcOffsets = $param->srcOffsets;
 			$kSrc = null;
@@ -238,10 +232,6 @@ class TemplateEncapsulator {
 		return $ret;
 	}
 
-	/**
-	 * @param ?array $chunk
-	 * @return array
-	 */
 	private function getEncapsulationInfo( ?array $chunk = null ): array {
 		// TODO
 		// * only add this information for top-level includes, but track parameter
@@ -254,19 +244,16 @@ class TemplateEncapsulator {
 			new KV( 'about', '#' . $this->wrappedObjectId )
 		];
 		$dp = new DataParsoid;
-		$dp->tsr = clone $this->token->dataAttribs->tsr;
-		$dp->src = $this->token->dataAttribs->src;
+		$dp->tsr = clone $this->token->dataParsoid->tsr;
+		$dp->src = $this->token->dataParsoid->src;
 
 		$meta = [ new SelfclosingTagTk( 'meta', $attrs, $dp ) ];
 		$chunk = $chunk ? array_merge( $meta, $chunk ) : $meta;
 		return $chunk;
 	}
 
-	/**
-	 * @return Token
-	 */
 	private function getEncapsulationInfoEndTag(): Token {
-		$tsr = $this->token->dataAttribs->tsr ?? null;
+		$tsr = $this->token->dataParsoid->tsr ?? null;
 		$dp = new DataParsoid;
 		$dp->tsr = new SourceRange( null, $tsr ? $tsr->end : null );
 		return new SelfclosingTagTk( 'meta',
@@ -313,7 +300,7 @@ class TemplateEncapsulator {
 			$this->env, $this->frame,
 			$paramInfo->valueWt,
 			[
-				'pipelineType' => 'text/x-mediawiki/full',
+				'pipelineType' => 'fullparse-wikitext-to-dom',
 				'pipelineOpts' => [
 					'isInclude' => false,
 					'expandTemplates' => true,

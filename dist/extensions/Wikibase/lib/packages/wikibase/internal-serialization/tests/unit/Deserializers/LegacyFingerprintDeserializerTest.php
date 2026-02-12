@@ -29,32 +29,12 @@ class LegacyFingerprintDeserializerTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @dataProvider TermListProvider
+	 * @dataProvider descriptionListProvider
 	 */
 	public function testGivenLabels_getLabelsReturnsThem( array $labelSerialization, $expected ) {
 		$fingerprint = $this->deserializer->deserialize( [ 'label' => $labelSerialization ] );
 
 		$this->assertEquals( $expected, $fingerprint->getLabels() );
-	}
-
-	public function TermListProvider() {
-		return [
-			[
-				[],
-				new TermList( [] )
-			],
-
-			[
-				[
-					'en' => 'foo',
-					'de' => 'bar',
-				],
-				new TermList( [
-					new Term( 'en', 'foo' ),
-					new Term( 'de', 'bar' ),
-				] )
-			],
-		];
 	}
 
 	public function testGivenNonArray_exceptionIsThrown() {
@@ -90,11 +70,11 @@ class LegacyFingerprintDeserializerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals( $expected, $fingerprint->getDescriptions() );
 	}
 
-	public function descriptionListProvider() {
+	public static function descriptionListProvider() {
 		return [
 			[
 				[],
-				new TermList( [] )
+				new TermList( [] ),
 			],
 
 			[
@@ -105,7 +85,7 @@ class LegacyFingerprintDeserializerTest extends \PHPUnit\Framework\TestCase {
 				new TermList( [
 					new Term( 'en', 'foo' ),
 					new Term( 'de', 'bar' ),
-				] )
+				] ),
 			],
 		];
 	}
@@ -127,11 +107,11 @@ class LegacyFingerprintDeserializerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals( $expected, $fingerprint->getAliasGroups() );
 	}
 
-	public function aliasesListProvider() {
+	public static function aliasesListProvider() {
 		return [
 			[
 				[],
-				new AliasGroupList( [] )
+				new AliasGroupList( [] ),
 			],
 
 			[
@@ -145,7 +125,7 @@ class LegacyFingerprintDeserializerTest extends \PHPUnit\Framework\TestCase {
 					new AliasGroup( 'en', [ 'foo', 'bar' ] ),
 					new AliasGroup( 'de', [ 'foo', 'bar', 'baz' ] ),
 					new AliasGroup( 'nl', [ 'bah' ] ),
-				] )
+				] ),
 			],
 		];
 	}

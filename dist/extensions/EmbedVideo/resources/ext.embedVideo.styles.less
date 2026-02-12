@@ -1,0 +1,143 @@
+.embedvideo {
+	margin: 0;
+	max-width: 100%; // no overflow
+	display: inline-block; // default to render inline, like default MW syntax
+
+	&-wrapper {
+		position: relative;
+		display: block;
+	}
+
+	// Let container control the dimension of the iframe
+	&-player {
+		width: 100%;
+		height: 100%;
+	}
+
+	// Act as placeholder styles
+	&-consent {
+		z-index: 1; // See #39
+		background-color: #eaecf0;
+	}
+
+	// Avoid weird overflow issues
+	&-player,
+	&-consent {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		overflow: hidden;
+	}
+
+	&-overlay {
+		// Hide until ready
+		display: none;
+	}
+
+	&--autoresize {
+		width: 100%;
+		aspect-ratio: 16 / 9;
+
+		.embedvideo-wrapper {
+			height: 100%;
+		}
+	}
+
+	&.frame {
+		border: 1pt solid #c8ccd1;
+		padding: 0.5em;
+  }
+
+	// Use the same syntax used by <img> element in gallerybox (#94)
+	.gallerybox & {
+		margin: 0 auto;
+		display: block;
+	}
+
+	// From core
+	// We can safely remove this when Parsoid becomes default
+	&.mw-halign-right {
+		/* @noflip */
+		margin: 0 0 0.5em 0.5em;
+		/* @noflip */
+		clear: right;
+		/* @noflip */
+		float: right;
+	}
+
+	&.mw-halign-left {
+		/* @noflip */
+		margin: 0 0.5em 0.5em 0;
+		/* @noflip */
+		clear: left;
+		/* @noflip */
+		float: left;
+	}
+
+	&.mw-halign-none {
+		clear: none;
+		float: none;
+	}
+
+	&.mw-halign-center {
+		/* Matches *.center * in element.css */
+		margin: 0 auto;
+		display: table;
+		border-collapse: collapse;
+		clear: none;
+		float: none;
+	}
+
+	// Any horizontal alignment will render block, same as default MW syntax
+	&.mw-halign {
+		&-right,
+		&-left,
+		&-none,
+		&-center {
+			display: block;
+		}
+	}
+
+	&.mw-valign {
+		&-middle {
+			vertical-align: middle;
+		}
+		&-baseline {
+			vertical-align: baseline;
+		}
+		&-sub {
+			vertical-align: sub;
+		}
+		&-super {
+			vertical-align: super;
+		}
+		&-top {
+			vertical-align: top;
+		}
+		&-text-top {
+			vertical-align: text-top;
+		}
+		&-bottom {
+			vertical-align: bottom;
+		}
+		&-text-bottom {
+			vertical-align: text-bottom;
+		}
+	}
+
+	figcaption {
+		// Same as skinning core
+		font-size: 88.4%;
+		padding: 3px 0;
+	}
+}
+
+video,
+audio {
+	&.thumbborder {
+		border: 1pt solid #c8ccd1;
+	}
+}
+

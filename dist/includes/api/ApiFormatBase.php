@@ -20,8 +20,16 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use HttpStatus;
+use MediaWiki\Context\DerivativeContext;
+use MediaWiki\Html\Html;
+use MediaWiki\Json\FormatJson;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\SpecialPage\SpecialPage;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -30,21 +38,27 @@ use Wikimedia\ParamValidator\ParamValidator;
  * @ingroup API
  */
 abstract class ApiFormatBase extends ApiBase {
-	private $mIsHtml, $mFormat;
-	private $mBuffer, $mDisabled = false;
+	private bool $mIsHtml;
+	private string $mFormat;
+	private string $mBuffer = '';
+	private bool $mDisabled = false;
+	/** @var bool */
 	private $mIsWrappedHtml = false;
+	/** @var int|false */
 	private $mHttpStatus = false;
+	/** @var bool */
 	protected $mForceDefaultParams = false;
 
 	/**
 	 * If $format ends with 'fm', pretty-print the output in HTML.
+	 *
 	 * @param ApiMain $main
 	 * @param string $format Format name
 	 */
-	public function __construct( ApiMain $main, $format ) {
+	public function __construct( ApiMain $main, string $format ) {
 		parent::__construct( $main, $format );
 
-		$this->mIsHtml = ( substr( $format, -2, 2 ) === 'fm' ); // ends with 'fm'
+		$this->mIsHtml = str_ends_with( $format, 'fm' );
 		if ( $this->mIsHtml ) {
 			$this->mFormat = substr( $format, 0, -2 ); // remove ending 'fm'
 			$this->mIsWrappedHtml = $this->getMain()->getCheck( 'wrappedhtml' );
@@ -58,7 +72,7 @@ abstract class ApiFormatBase extends ApiBase {
 	 * Overriding class returns the MIME type that should be sent to the client.
 	 *
 	 * When getIsHtml() returns true, the return value here is used for syntax
-	 * highlighting but the client sees text/html.
+	 * highlighting, but the client sees text/html.
 	 *
 	 * @return string|null
 	 */
@@ -66,26 +80,30 @@ abstract class ApiFormatBase extends ApiBase {
 
 	/**
 	 * Return a filename for this module's output.
+	 *
 	 * @note If $this->getIsWrappedHtml() || $this->getIsHtml(), you'll very
 	 *  likely want to fall back to this class's version.
 	 * @since 1.27
-	 * @return string Generally this should be "api-result.$ext"
+	 * @return string Generally, this should be "api-result.$ext"
 	 */
 	public function getFilename() {
 		if ( $this->getIsWrappedHtml() ) {
 			return 'api-result-wrapped.json';
-		} elseif ( $this->getIsHtml() ) {
-			return 'api-result.html';
-		} else {
-			$mimeAnalyzer = MediaWikiServices::getInstance()->getMimeAnalyzer();
-			$ext = $mimeAnalyzer->getExtensionFromMimeTypeOrNull( $this->getMimeType() )
-				?? strtolower( $this->mFormat );
-			return "api-result.$ext";
 		}
+
+		if ( $this->getIsHtml() ) {
+			return 'api-result.html';
+		}
+
+		$mimeAnalyzer = MediaWikiServices::getInstance()->getMimeAnalyzer();
+		$ext = $mimeAnalyzer->getExtensionFromMimeTypeOrNull( $this->getMimeType() )
+			?? strtolower( $this->mFormat );
+		return "api-result.$ext";
 	}
 
 	/**
 	 * Get the internal format name
+	 *
 	 * @return string
 	 */
 	public function getFormat() {
@@ -94,8 +112,8 @@ abstract class ApiFormatBase extends ApiBase {
 
 	/**
 	 * Returns true when the HTML pretty-printer should be used.
-	 * The default implementation assumes that formats ending with 'fm'
-	 * should be formatted in HTML.
+	 * The default implementation assumes that formats ending with 'fm' should be formatted in HTML.
+	 *
 	 * @return bool
 	 */
 	public function getIsHtml() {
@@ -103,7 +121,8 @@ abstract class ApiFormatBase extends ApiBase {
 	}
 
 	/**
-	 * Returns true when the special wrapped mode is enabled.
+	 * Returns true when the special-wrapped mode is enabled.
+	 *
 	 * @since 1.27
 	 * @return bool
 	 */
@@ -121,7 +140,8 @@ abstract class ApiFormatBase extends ApiBase {
 	}
 
 	/**
-	 * Whether the printer is disabled
+	 * Whether the printer is disabled.
+	 *
 	 * @return bool
 	 */
 	public function isDisabled() {
@@ -131,8 +151,7 @@ abstract class ApiFormatBase extends ApiBase {
 	/**
 	 * Whether this formatter can handle printing API errors.
 	 *
-	 * If this returns false, then on API errors the default printer will be
-	 * instantiated.
+	 * If this returns false, then when API errors occur, the default printer will be instantiated.
 	 * @since 1.23
 	 * @return bool
 	 */
@@ -144,6 +163,7 @@ abstract class ApiFormatBase extends ApiBase {
 	 * Ignore request parameters, force a default.
 	 *
 	 * Used as a fallback if errors are being thrown.
+	 *
 	 * @since 1.26
 	 */
 	public function forceDefaultParams() {
@@ -191,6 +211,11 @@ abstract class ApiFormatBase extends ApiBase {
 	public function initPrinter( $unused = false ) {
 		if ( $this->mDisabled ) {
 			return;
+		}
+
+		if ( $this->getIsHtml() && $this->getMain()->getCacheMode() === 'public' ) {
+			// The HTML may contain user secrets! T354045
+			$this->getMain()->setCacheMode( 'anon-public-user-private' );
 		}
 
 		$mime = $this->getIsWrappedHtml()
@@ -257,7 +282,7 @@ abstract class ApiFormatBase extends ApiBase {
 
 			$out->setRobotPolicy( 'noindex,nofollow' );
 			$out->addModuleStyles( 'mediawiki.apipretty' );
-			$out->setPageTitle( $context->msg( 'api-format-title' ) );
+			$out->setPageTitleMsg( $context->msg( 'api-format-title' ) );
 
 			if ( !$this->getIsWrappedHtml() ) {
 				// When the format without suffix 'fm' is defined, there is a non-html version
@@ -319,8 +344,8 @@ abstract class ApiFormatBase extends ApiBase {
 				);
 			} else {
 				// API handles its own clickjacking protection.
-				// Note, that $wgBreakFrames will still override $wgApiFrameOptions for format mode.
-				$out->setPreventClickjacking( false );
+				// Note: $wgBreakFrames will still override $wgApiFrameOptions for format mode.
+				$out->getMetadata()->setPreventClickjacking( false );
 				$out->output();
 			}
 		} else {
@@ -334,6 +359,7 @@ abstract class ApiFormatBase extends ApiBase {
 
 	/**
 	 * Append text to the output buffer.
+	 *
 	 * @param string $text
 	 */
 	public function printText( $text ) {
@@ -342,6 +368,7 @@ abstract class ApiFormatBase extends ApiBase {
 
 	/**
 	 * Get the contents of the buffer.
+	 *
 	 * @return string
 	 */
 	public function getBuffer() {
@@ -376,3 +403,6 @@ abstract class ApiFormatBase extends ApiBase {
  * For really cool vim folding this needs to be at the end:
  * vim: foldmarker=@{,@} foldmethod=marker
  */
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiFormatBase::class, 'ApiFormatBase' );

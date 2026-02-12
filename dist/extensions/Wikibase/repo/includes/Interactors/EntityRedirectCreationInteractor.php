@@ -1,8 +1,12 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Interactors;
 
-use IContextSource;
+use MediaWiki\Context\DerivativeContext;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\User\TempUser\TempUserCreator;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityRedirect;
@@ -29,40 +33,14 @@ use Wikibase\Repo\SummaryFormatter;
  */
 abstract class EntityRedirectCreationInteractor {
 
-	/**
-	 * @var EntityTitleStoreLookup
-	 */
-	private $entityTitleLookup;
-
-	/**
-	 * @var EntityRevisionLookup
-	 */
-	private $entityRevisionLookup;
-
-	/**
-	 * @var EntityStore
-	 */
-	private $entityStore;
-
-	/**
-	 * @var EntityPermissionChecker
-	 */
-	private $permissionChecker;
-
-	/**
-	 * @var SummaryFormatter
-	 */
-	private $summaryFormatter;
-
-	/**
-	 * @var EditFilterHookRunner
-	 */
-	private $editFilterHookRunner;
-
-	/**
-	 * @var EntityRedirectTargetLookup
-	 */
-	private $entityRedirectLookup;
+	private EntityTitleStoreLookup $entityTitleLookup;
+	private EntityRevisionLookup $entityRevisionLookup;
+	private EntityStore $entityStore;
+	private EntityPermissionChecker $permissionChecker;
+	private SummaryFormatter $summaryFormatter;
+	private EditFilterHookRunner $editFilterHookRunner;
+	private EntityRedirectTargetLookup $entityRedirectLookup;
+	private TempUserCreator $tempUserCreator;
 
 	public function __construct(
 		EntityRevisionLookup $entityRevisionLookup,
@@ -71,7 +49,8 @@ abstract class EntityRedirectCreationInteractor {
 		SummaryFormatter $summaryFormatter,
 		EditFilterHookRunner $editFilterHookRunner,
 		EntityRedirectTargetLookup $entityRedirectLookup,
-		EntityTitleStoreLookup $entityTitleLookup
+		EntityTitleStoreLookup $entityTitleLookup,
+		TempUserCreator $tempUserCreator
 	) {
 		$this->entityRevisionLookup = $entityRevisionLookup;
 		$this->entityStore = $entityStore;
@@ -80,6 +59,7 @@ abstract class EntityRedirectCreationInteractor {
 		$this->editFilterHookRunner = $editFilterHookRunner;
 		$this->entityRedirectLookup = $entityRedirectLookup;
 		$this->entityTitleLookup = $entityTitleLookup;
+		$this->tempUserCreator = $tempUserCreator;
 	}
 
 	/**
@@ -93,10 +73,13 @@ abstract class EntityRedirectCreationInteractor {
 	 * @param string[] $tags
 	 * @param IContextSource|null $context The context to pass to the edit filter hook and check permissions
 	 *
-	 * @return EntityRedirect
+	 * @return EntityRedirectCreationStatus Note that the status is only returned
+	 * to wrap the created redirect, context and saved temp user in a strongly typed container.
+	 * Errors are (currently) reported as exceptions, not as a failed status.
+	 * (It would be nice to fix this at some point and use status consistently.)
 	 * @throws RedirectCreationException If creating the redirect fails. Calling code may use
 	 * RedirectCreationException::getErrorCode() to get further information about the cause of
-	 * the failure. An explanation of the error codes can be obtained from getErrorCodeInfo().
+	 * the failure.
 	 * @suppress PhanTypeMismatchDeclaredParam
 	 */
 	public function createRedirect(
@@ -105,9 +88,10 @@ abstract class EntityRedirectCreationInteractor {
 		bool $bot,
 		array $tags,
 		IContextSource $context
-	): EntityRedirect {
+	): EntityRedirectCreationStatus {
 		$this->checkCompatible( $fromId, $toId );
 		$this->checkPermissions( $fromId, $context );
+		$this->checkRateLimits( $context );
 
 		$this->checkExistsNoRedirect( $toId );
 		$this->checkCanCreateRedirect( $fromId );
@@ -117,9 +101,7 @@ abstract class EntityRedirectCreationInteractor {
 		$summary->addAutoCommentArgs( $fromId->getSerialization(), $toId->getSerialization() );
 
 		$redirect = new EntityRedirect( $fromId, $toId );
-		$this->saveRedirect( $redirect, $summary, $context, $bot, $tags );
-
-		return $redirect;
+		return $this->saveRedirect( $redirect, $summary, $context, $bot, $tags );
 	}
 
 	/**
@@ -143,12 +125,20 @@ abstract class EntityRedirectCreationInteractor {
 		}
 	}
 
+	private function checkRateLimits( IContextSource $context ): void {
+		if ( $context->getUser()->pingLimiter( 'edit' ) ) {
+			// use generic 'failed-save' because RedirectCreationException prepends 'wikibase-redirect-' for the message key,
+			// so we can’t easily use the correct actionthrottledtext message (using Status would solve this)
+			throw new RedirectCreationException( 'rate limit hit', 'permissiondenied' );
+		}
+	}
+
 	/**
 	 * @param EntityId $entityId
 	 *
 	 * @throws RedirectCreationException
 	 */
-	private function checkCanCreateRedirect( EntityId $entityId ) {
+	private function checkCanCreateRedirect( EntityId $entityId ): void {
 		try {
 			$revision = $this->entityRevisionLookup->getEntityRevision(
 				$entityId,
@@ -162,7 +152,7 @@ abstract class EntityRedirectCreationInteractor {
 					throw new RedirectCreationException(
 						"Couldn't get Title for $entityId or Title is not deleted",
 						'no-such-entity',
-						[ $entityId->serialize() ]
+						[ $entityId->getSerialization() ]
 					);
 				}
 			} else {
@@ -181,7 +171,7 @@ abstract class EntityRedirectCreationInteractor {
 	 *
 	 * @throws RedirectCreationException
 	 */
-	private function checkExistsNoRedirect( EntityId $entityId ) {
+	private function checkExistsNoRedirect( EntityId $entityId ): void {
 		try {
 			$redirect = $this->entityRedirectLookup->getRedirectForEntityId(
 				$entityId,
@@ -191,7 +181,7 @@ abstract class EntityRedirectCreationInteractor {
 			throw new RedirectCreationException(
 				$ex->getMessage(),
 				'no-such-entity',
-				[ $entityId->serialize() ],
+				[ $entityId->getSerialization() ],
 				$ex
 			);
 		}
@@ -200,7 +190,7 @@ abstract class EntityRedirectCreationInteractor {
 			throw new RedirectCreationException(
 				"Entity $entityId is a redirect",
 				'target-is-redirect',
-				[ $entityId->serialize() ]
+				[ $entityId->getSerialization() ]
 			);
 		}
 	}
@@ -211,7 +201,7 @@ abstract class EntityRedirectCreationInteractor {
 	 *
 	 * @throws RedirectCreationException
 	 */
-	private function checkCompatible( EntityId $fromId, EntityId $toId ) {
+	private function checkCompatible( EntityId $fromId, EntityId $toId ): void {
 		if ( $fromId->getEntityType() !== $toId->getEntityType() ) {
 			throw new RedirectCreationException(
 				'Incompatible entity types',
@@ -220,7 +210,7 @@ abstract class EntityRedirectCreationInteractor {
 		}
 	}
 
-	private function checkSourceAndTargetNotTheSame( EntityId $fromId, EntityId $toId ) {
+	private function checkSourceAndTargetNotTheSame( EntityId $fromId, EntityId $toId ): void {
 		if ( $fromId->getSerialization() === $toId->getSerialization() ) {
 			throw new RedirectCreationException(
 				'Cannot redirect an entity to itself.',
@@ -238,7 +228,7 @@ abstract class EntityRedirectCreationInteractor {
 		IContextSource $context,
 		bool $bot,
 		array $tags
-	): void {
+	): EntityRedirectCreationStatus {
 		$summary = $this->summaryFormatter->formatSummary( $summary );
 		$flags = 0;
 		if ( $bot ) {
@@ -253,6 +243,22 @@ abstract class EntityRedirectCreationInteractor {
 			$flags |= EDIT_UPDATE;
 		}
 
+		$user = $context->getUser();
+		$savedTempUser = null;
+		if ( $this->tempUserCreator->shouldAutoCreate( $user, 'edit' ) ) {
+			$tempUserStatus = $this->tempUserCreator->create( null, $context->getRequest() );
+			if ( !$tempUserStatus->isOK() ) {
+				throw new RedirectCreationException(
+					'Unable to create temporary user',
+					'cant-create-temp-user'
+				);
+			}
+			$user = $tempUserStatus->getUser();
+			$context = new DerivativeContext( $context );
+			$context->setUser( $user );
+			$savedTempUser = $user;
+		}
+
 		$hookStatus = $this->editFilterHookRunner->run( $redirect, $context, $summary );
 		if ( !$hookStatus->isOK() ) {
 			throw new RedirectCreationException(
@@ -265,7 +271,7 @@ abstract class EntityRedirectCreationInteractor {
 			$this->entityStore->saveRedirect(
 				$redirect,
 				$summary,
-				$context->getUser(),
+				$user,
 				$flags,
 				false,
 				$tags
@@ -273,6 +279,8 @@ abstract class EntityRedirectCreationInteractor {
 		} catch ( StorageException $ex ) {
 			throw new RedirectCreationException( $ex->getMessage(), 'cant-redirect', [], $ex );
 		}
+
+		return EntityRedirectCreationStatus::newRedirect( $redirect, $savedTempUser, $context );
 	}
 
 	/**

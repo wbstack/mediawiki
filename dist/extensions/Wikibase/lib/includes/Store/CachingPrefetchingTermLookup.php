@@ -275,8 +275,12 @@ final class CachingPrefetchingTermLookup implements PrefetchingTermLookup {
 	 */
 	private function bufferAndCacheExistingTerm( EntityId $entityId, string $termType, string $languageCode, $freshTerm ): void {
 		$this->setPrefetchedTermBuffer( $entityId, $termType, $languageCode, $freshTerm );
+		$cacheKey = $this->getCacheKey( $entityId, $languageCode, $termType );
+		if ( $cacheKey === null ) {
+			return;
+		}
 		$this->cache->set(
-			$this->getCacheKey( $entityId, $languageCode, $termType ),
+			$cacheKey,
 			$freshTerm,
 			$this->cacheEntryTTL
 		);
@@ -378,7 +382,7 @@ final class CachingPrefetchingTermLookup implements PrefetchingTermLookup {
 
 		// languages without prefetched terms
 		$unbufferedLanguages = array_diff( $languages, array_keys( $terms ) );
-		if ( empty( $unbufferedLanguages ) ) {
+		if ( !$unbufferedLanguages ) {
 			return array_filter( $terms );
 		}
 
@@ -390,7 +394,7 @@ final class CachingPrefetchingTermLookup implements PrefetchingTermLookup {
 		$unCachedAndUnbufferedLanguages = array_values(
 			array_diff( $languages, array_keys( $terms ) )
 		);
-		if ( empty( $unCachedAndUnbufferedLanguages ) ) {
+		if ( !$unCachedAndUnbufferedLanguages ) {
 			return array_filter( $terms );
 		}
 

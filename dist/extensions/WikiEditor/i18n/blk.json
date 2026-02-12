@@ -6,7 +6,6 @@
 			"咽頭べさ"
 		]
 	},
-	"wikieditor-toolbar-tool-ilink-example": "ဆွိုက်ခါꩻဒါႏ ကတူႏစဲဥ်ႏ",
 	"wikieditor-toolbar-tool-link-title": "နျꩻထဲမ်သော့ꩻသွော့လိဉ့်သြ",
 	"wikieditor-toolbar-tool-link-int": "ဝီခီလိတ်မဲ့ငါတဗာႏကို",
 	"wikieditor-toolbar-tool-link-int-target": "အွဥ်ႏနယ် ရေႏဒါႏ လိတ်မဲ့ငါ တဝ်းလဲ့ URL:",
@@ -21,5 +20,6 @@
 	"wikieditor-toolbar-tool-heading-3": "အရန်း ၃",
 	"wikieditor-toolbar-tool-heading-4": "အရန်း ၄",
 	"wikieditor-toolbar-tool-heading-5": "အရန်း ၅",
-	"wikieditor-toolbar-section-characters": "အက္ခရာႏထူꩻဖုံႏ"
+	"wikieditor-toolbar-section-characters": "အက္ခရာႏထူꩻဖုံႏ",
+	"wikieditor-realtimepreview-preview": "ထွားကျိုႏအစမ်ꩻ"
 }

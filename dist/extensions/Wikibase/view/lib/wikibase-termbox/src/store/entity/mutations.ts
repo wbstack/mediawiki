@@ -8,7 +8,7 @@ import {
 	ENTITY_SET_DESCRIPTION,
 	ENTITY_REVISION_UPDATE,
 	ENTITY_REMOVE_ALIAS,
-	ENTITY_ROLLBACK,
+	ENTITY_ROLLBACK, ENTITY_REDIRECT_UPDATE,
 } from '@/store/entity/mutationTypes';
 import InvalidEntityException from '@/store/entity/exceptions/InvalidEntityException';
 import { Fingerprintable, Term } from '@wmde/wikibase-datamodel-types';
@@ -26,9 +26,18 @@ function clone( source: Fingerprintable ): Fingerprintable {
 	return JSON.parse( JSON.stringify( source ) );
 }
 
+function isValidFingerprintableEntity( entity: unknown ): entity is FingerprintableEntity {
+	return typeof entity === 'object'
+		&& entity !== null
+		&& 'id' in entity
+		&& 'labels' in entity
+		&& 'descriptions' in entity
+		&& 'aliases' in entity;
+}
+
 export const mutations: MutationTree<EntityState> = {
 	[ ENTITY_UPDATE ]( state: EntityState, entity: FingerprintableEntity ): void {
-		if ( !( entity instanceof FingerprintableEntity ) ) {
+		if ( !isValidFingerprintableEntity( entity ) ) {
 			throw new InvalidEntityException( JSON.stringify( entity ) );
 		}
 
@@ -73,6 +82,10 @@ export const mutations: MutationTree<EntityState> = {
 
 	[ ENTITY_REVISION_UPDATE ]( state: EntityState, revision: number ) {
 		state.baseRevision = revision;
+	},
+
+	[ ENTITY_REDIRECT_UPDATE ]( state: EntityState, tempUserRedirectUrl: URL ) {
+		state.tempUserRedirectUrl = tempUserRedirectUrl;
 	},
 
 };

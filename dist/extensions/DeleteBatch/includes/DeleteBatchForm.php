@@ -4,7 +4,21 @@ use MediaWiki\MediaWikiServices;
 
 /* the form for deleting pages */
 class DeleteBatchForm {
-	public $mPage, $mFile, $mFileTemp;
+
+	/** @var string|null */
+	private $mMode;
+
+	/** @var string|null */
+	public $mPage;
+
+	/** @var string|null */
+	private $mReason;
+
+	/** @var string|null */
+	public $mFile;
+
+	/** @var string|null */
+	public $mFileTemp;
 
 	/**
 	 * @var IContextSource
@@ -87,7 +101,7 @@ class DeleteBatchForm {
 		$form .= '<table>';
 
 		foreach ( $rows as $row ) {
-			list( $label, $input ) = $row;
+			[ $label, $input ] = $row;
 			$form .= "<tr><td class='mw-label'>$label</td>";
 			$form .= "<td class='mw-input'>$input</td></tr>";
 		}
@@ -133,7 +147,7 @@ class DeleteBatchForm {
 			'tabindex' => $tabindex,
 			'name' => $name,
 			'id' => $name,
-			'value' => $this->mFile
+			'value' => $this->mFile ?? '',
 		];
 
 		return Xml::element( 'input', $params );
@@ -184,7 +198,7 @@ class DeleteBatchForm {
 		}
 
 		/* @todo run tests - run many tests */
-		$dbw = wfGetDB( DB_PRIMARY );
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 		if ( $filename ) {
 			/* if from filename, delete from filename */
 			for ( $linenum = 1; !feof( $file ); $linenum++ ) {

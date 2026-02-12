@@ -3,8 +3,8 @@
 namespace Wikibase\Lib\Sites;
 
 use InvalidArgumentException;
-use MediaWikiSite;
-use Site;
+use MediaWiki\Site\MediaWikiSite;
+use MediaWiki\Site\Site;
 
 /**
  * Translates api sitematrix results json into an array of Site objects
@@ -38,7 +38,7 @@ class SiteMatrixParser {
 	 * @param string $scriptPath (e.g. '/w/$1')
 	 * @param string $articlePath (e.g. '/wiki/$1')
 	 * @param string|bool $protocol (true: default, false: strip, string: protocol to force)
-	 * @param boolean $expandGroup expands site matrix group codes from wiki to wikipedia
+	 * @param bool $expandGroup expands site matrix group codes from wiki to wikipedia
 	 */
 	public function __construct( $scriptPath, $articlePath, $protocol, $expandGroup = true ) {
 		$this->scriptPath = $scriptPath;
@@ -54,7 +54,7 @@ class SiteMatrixParser {
 	 * @return Site[]
 	 */
 	public function sitesFromJson( $json ) {
-		$specials = null;
+		$specials = [];
 
 		$data = json_decode( $json, true );
 

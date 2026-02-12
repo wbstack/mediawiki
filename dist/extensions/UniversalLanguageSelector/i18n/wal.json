@@ -55,7 +55,7 @@
 	"ext-uls-input-disable-notification-info-personal": "Gelissiyo buqurata doonaa giigissotuppe ayi wodiyaankka ootissana danddayaasa.",
 	"ext-uls-input-disable-notification-info-interlanguage": "Doonaa paatettata kaallada gelissiyo buqurata doonaa giigissotuppe ayi wodiyaankka ootissana danddayaasa.",
 	"ext-uls-language-settings-applying": "Shiishiiddi de'ees...",
-	"ext-uls-compact-link-count": "{{PLURAL:$1|issoy de'ees|$1 aaruwaan}}",
+	"ext-uls-compact-link-count": "{{PLURAL:$1|issoy de'ees|$1 daroy de'ees}}",
 	"ext-uls-compact-link-info": "Ubba doonata (neeninne haraati doordoogaappe koyro dooruwaa)",
 	"prefs-languages": "Doonata",
 	"ext-uls-compact-language-links-preference": "[[$1|shiiqida doonaa paatettaara]] nenaara gayttiya doonatussi go'etta.",
@@ -71,5 +71,6 @@
 	"ext-uls-empty-state-header": "Hanno gaakkanawu doonati baawa",
 	"ext-uls-empty-state-desc": "Ha'issi ayba doonatikka de'okkona",
 	"ext-uls-empty-state-header-actions-available": "Hanno gaakkanawu doonati baawa. Ooratta gujjutee?",
-	"ext-uls-empty-state-desc-actions-available": "Oyqettay cora doonatun de'ana mala ootta."
+	"ext-uls-empty-state-desc-actions-available": "Oyqettay cora doonatun de'ana mala ootta.",
+	"ext-uls-add-languages-button-label": "Doonata gujja"
 }

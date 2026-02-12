@@ -1,7 +1,10 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Tests\Wikibase\DataModel\Serializers;
 
+use Serializers\DispatchableSerializer;
 use Serializers\Serializer;
 use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Reference;
@@ -16,75 +19,75 @@ use Wikibase\DataModel\Snak\SnakList;
  * @license GPL-2.0-or-later
  * @author Thomas Pellissier Tanon
  */
-class ReferenceSerializerTest extends DispatchableSerializerTest {
+class ReferenceSerializerTest extends DispatchableSerializerTestCase {
 
-	protected function buildSerializer() {
+	protected function buildSerializer(): DispatchableSerializer {
 		$snakListSerializerMock = $this->createMock( Serializer::class );
 		$snakListSerializerMock->expects( $this->any() )
 			->method( 'serialize' )
-			->with( $this->equalTo( new SnakList( [] ) ) )
-			->will( $this->returnValue( [] ) );
+			->with( new SnakList( [] ) )
+			->willReturn( [] );
 
 		return new ReferenceSerializer( $snakListSerializerMock );
 	}
 
-	public function serializableProvider() {
+	public function serializableProvider(): array {
 		return [
 			[
-				new Reference()
+				new Reference(),
 			],
 			[
 				new Reference( new SnakList( [
-					new PropertyNoValueSnak( 42 )
-				] ) )
+					new PropertyNoValueSnak( 42 ),
+				] ) ),
 			],
 		];
 	}
 
-	public function nonSerializableProvider() {
+	public function nonSerializableProvider(): array {
 		return [
 			[
-				5
+				5,
 			],
 			[
-				[]
+				[],
 			],
 			[
-				new SnakList( [] )
+				new SnakList( [] ),
 			],
 		];
 	}
 
-	public function serializationProvider() {
+	public function serializationProvider(): array {
 		return [
 			[
 				[
 					'hash' => 'da39a3ee5e6b4b0d3255bfef95601890afd80709',
 					'snaks' => [],
-					'snaks-order' => []
+					'snaks-order' => [],
 				],
-				new Reference()
+				new Reference(),
 			],
 		];
 	}
 
-	public function testSnaksOrderSerialization() {
+	public function testSnaksOrderSerialization(): void {
 		$snakListSerializerMock = $this->createMock( Serializer::class );
 		$snakListSerializerMock->expects( $this->any() )
 			->method( 'serialize' )
-			->with( $this->equalTo( new SnakList( [
+			->with( new SnakList( [
 				new PropertyNoValueSnak( new NumericPropertyId( 'P42' ) ),
 				new PropertySomeValueSnak( new NumericPropertyId( 'P24' ) ),
-				new PropertyNoValueSnak( new NumericPropertyId( 'P24' ) )
-			] ) ) )
-			->will( $this->returnValue( [] ) );
+				new PropertyNoValueSnak( new NumericPropertyId( 'P24' ) ),
+			] ) )
+			->willReturn( [] );
 
 		$referenceSerializer = new ReferenceSerializer( $snakListSerializerMock );
 
 		$reference = new Reference( new SnakList( [
 			new PropertyNoValueSnak( new NumericPropertyId( 'P42' ) ),
 			new PropertySomeValueSnak( new NumericPropertyId( 'P24' ) ),
-			new PropertyNoValueSnak( new NumericPropertyId( 'P24' ) )
+			new PropertyNoValueSnak( new NumericPropertyId( 'P24' ) ),
 		] ) );
 
 		$this->assertEquals(
@@ -93,8 +96,8 @@ class ReferenceSerializerTest extends DispatchableSerializerTest {
 				'snaks' => [],
 				'snaks-order' => [
 					'P42',
-					'P24'
-				]
+					'P24',
+				],
 			],
 			$referenceSerializer->serialize( $reference )
 		);

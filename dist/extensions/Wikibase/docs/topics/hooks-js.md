@@ -1,6 +1,6 @@
 # Hooks JS
 
-This file describes JavaScript [hooks](https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.hook) defined by the Wikibase extensions.
+This file describes JavaScript [hooks] defined by the Wikibase extensions.
 
 [TOC]
 
@@ -11,7 +11,7 @@ This file describes JavaScript [hooks](https://doc.wikimedia.org/mediawiki-core/
 
 #### wikibase.entityPage.entityLoaded
   * Called as soon as the JSON representing the entity stored on the current entity page is loaded.
-  * Listener callbacks should expect the entity as a native JavaScript object (the [parsed JSON serialization](https://doc.wikimedia.org/Wikibase/master/php/md_docs_topics_json.html)) passed as the first argument.
+  * Listener callbacks should expect the entity as a native JavaScript object (the [parsed JSON serialization]) passed as the first argument.
 
 [View source][entityLoaded.js]
 
@@ -48,8 +48,10 @@ This file describes JavaScript [hooks](https://doc.wikimedia.org/mediawiki-core/
 
 [entityViewInit.js]: https://gerrit.wikimedia.org/g/mediawiki/extensions/Wikibase/+/master/repo/resources/wikibase.ui.entityViewInit.js
 [entityLoaded.js]: https://gerrit.wikimedia.org/g/mediawiki/extensions/Wikibase/+/master/repo/resources/wikibase.entityPage.entityLoaded.js
+[hooks]: https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.hook
 [StatementsChanger.js]: https://gerrit.wikimedia.org/g/mediawiki/extensions/Wikibase/+/refs/heads/master/view/resources/wikibase/entityChangers/StatementsChanger.js
 [jquery.wikibase.entityselector.js]: https://gerrit.wikimedia.org/g/mediawiki/extensions/Wikibase/+/refs/heads/master/view/resources/jquery/wikibase/jquery.wikibase.entityselector.js
 [jquery.wikibase.statementview.js]: https://gerrit.wikimedia.org/g/mediawiki/extensions/Wikibase/+/refs/heads/master/view/resources/jquery/wikibase/jquery.wikibase.statementview.js
 [Javascript Wikibase Datamodel]: https://phabricator.wikimedia.org/source/wikibase-data-model/
 [Statement]: https://phabricator.wikimedia.org/source/wikibase-data-model/browse/master/src/Statement.js
+[parsed JSON serialization]: @ref docs_topics_json

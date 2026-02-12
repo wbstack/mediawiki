@@ -2,12 +2,12 @@
 
 namespace Wikibase\Repo\LinkedData;
 
-use HtmlCacheUpdater;
 use HttpError;
-use OutputPage;
+use MediaWiki\Cache\HTMLCacheUpdater;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Request\WebResponse;
 use Psr\Log\LoggerInterface;
-use WebRequest;
-use WebResponse;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
@@ -75,7 +75,7 @@ class EntityDataRequestHandler {
 	private $entityDataFormatProvider;
 
 	/**
-	 * @var HtmlCacheUpdater
+	 * @var HTMLCacheUpdater
 	 */
 	private $htmlCacheUpdater;
 
@@ -116,7 +116,7 @@ class EntityDataRequestHandler {
 
 	/**
 	 * @param EntityDataUriManager $uriManager
-	 * @param HtmlCacheUpdater $htmlCacheUpdater
+	 * @param HTMLCacheUpdater $htmlCacheUpdater
 	 * @param EntityIdParser $entityIdParser
 	 * @param EntityRevisionLookup $entityRevisionLookup
 	 * @param EntityRedirectLookup $entityRedirectLookup
@@ -132,7 +132,7 @@ class EntityDataRequestHandler {
 	 */
 	public function __construct(
 		EntityDataUriManager $uriManager,
-		HtmlCacheUpdater $htmlCacheUpdater,
+		HTMLCacheUpdater $htmlCacheUpdater,
 		EntityIdParser $entityIdParser,
 		EntityRevisionLookup $entityRevisionLookup,
 		EntityRedirectLookup $entityRedirectLookup,
@@ -187,7 +187,7 @@ class EntityDataRequestHandler {
 	/**
 	 * Main method for handling requests.
 	 *
-	 * @param string $doc Document name, e.g. Q5 or Q5.json or Q5:33.xml
+	 * @param null|string $doc Document name, e.g. Q5 or Q5.json or Q5:33.xml
 	 * @param WebRequest $request The request parameters. Known parameters are:
 	 *        - id: the entity ID
 	 *        - format: the format
@@ -205,8 +205,12 @@ class EntityDataRequestHandler {
 		$output->getRequest()->response()->header( 'Access-Control-Allow-Origin: *' );
 
 		$revision = 0;
+		$id = '';
+		$format = '';
 
-		list( $id, $format ) = $this->uriManager->parseDocName( $doc );
+		if ( $doc !== null && $doc !== '' ) {
+			[ $id, $format ] = $this->uriManager->parseDocName( $doc );
+		}
 
 		// get entity id and format from request parameter
 		$format = $request->getText( 'format', $format );
@@ -334,7 +338,7 @@ class EntityDataRequestHandler {
 	 * @param WebRequest $request
 	 * @param OutputPage $output
 	 * @param EntityId $id The ID of the entity to show
-	 * @param int      $revision The desired revision
+	 * @param int $revision The desired revision
 	 *
 	 * @throws HttpError
 	 */
@@ -346,7 +350,7 @@ class EntityDataRequestHandler {
 		} else {
 			// anything goes
 			$accept = [
-				'*' => 0.1 // just to make extra sure
+				'*' => 0.1, // just to make extra sure
 			];
 
 			$defaultFormat = $this->entityDataFormatProvider->getFormatName( $this->defaultFormat );
@@ -419,7 +423,7 @@ class EntityDataRequestHandler {
 
 			if ( $revision === 0 || $allowRedirects ) {
 				// If no specific revision is requested or redirects are explicitly allowed, resolve the redirect.
-				list( $entityRevision, ) = $this->getEntityRevision( $ex->getRedirectTargetId(), 0 );
+				[ $entityRevision ] = $this->getEntityRevision( $ex->getRedirectTargetId(), 0 );
 			} else {
 				// The requested revision is a redirect
 				$this->logger->debug(
@@ -523,7 +527,7 @@ class EntityDataRequestHandler {
 		/** @var RedirectRevision $followedRedirectRevision */
 		// If flavor is "dump", we allow fetching redirects by revision, since we won't
 		// be dumping the content of the target revision.
-		list( $entityRevision, $followedRedirectRevision ) = $this->getEntityRevision( $id, $revision, $flavor === 'dump' );
+		[ $entityRevision, $followedRedirectRevision ] = $this->getEntityRevision( $id, $revision, $flavor === 'dump' );
 
 		// handle If-Modified-Since
 		$imsHeader = $request->getHeader( 'IF-MODIFIED-SINCE' );
@@ -547,7 +551,7 @@ class EntityDataRequestHandler {
 		}
 
 		try {
-			list( $data, $contentType ) = $this->serializationService->getSerializedData(
+			[ $data, $contentType ] = $this->serializationService->getSerializedData(
 				$format,
 				$entityRevision,
 				$followedRedirectRevision,
@@ -580,13 +584,13 @@ class EntityDataRequestHandler {
 	/**
 	 * Output the entity data and set the appropriate HTTP response headers.
 	 *
-	 * @param WebRequest  $request
-	 * @param EntityId    $requestId       the original entity ID of the request
-	 * @param int         $requestRevision the original revision ID of the request (0 for latest)
+	 * @param WebRequest $request
+	 * @param EntityId $requestId The original entity ID of the request
+	 * @param int $requestRevision The original revision ID of the request (0 for latest)
 	 * @param WebResponse $response
-	 * @param string      $data        the data to output
-	 * @param string      $contentType the data's mime type
-	 * @param string      $lastModified
+	 * @param string $data The data to output
+	 * @param string $contentType The data's mime type
+	 * @param string $lastModified
 	 */
 	public function outputData(
 		WebRequest $request,

@@ -1,4 +1,4 @@
-var SliderView = require( './ext.RevisionSlider.SliderView.js' );
+const SliderView = require( './ext.RevisionSlider.SliderView.js' );
 
 /**
  * Module handling the slider logic of the RevisionSlider
@@ -12,7 +12,7 @@ function Slider( revisions ) {
 	this.view = new SliderView( this );
 }
 
-$.extend( Slider.prototype, {
+Object.assign( Slider.prototype, {
 	/**
 	 * @type {RevisionList}
 	 */
@@ -53,7 +53,7 @@ $.extend( Slider.prototype, {
 	 * @param {number} n
 	 */
 	setRevisionsPerWindow: function ( n ) {
-		this.revisionsPerWindow = n;
+		this.revisionsPerWindow = Math.round( n );
 	},
 
 	/**
@@ -85,14 +85,16 @@ $.extend( Slider.prototype, {
 	 * @return {boolean}
 	 */
 	isAtStart: function () {
-		return this.getOldestVisibleRevisionIndex() === 0 || this.revisions.getLength() <= this.revisionsPerWindow;
+		return this.getOldestVisibleRevisionIndex() <= 0 ||
+			this.revisions.getLength() <= this.revisionsPerWindow;
 	},
 
 	/**
 	 * @return {boolean}
 	 */
 	isAtEnd: function () {
-		return this.getNewestVisibleRevisionIndex() === this.revisions.getLength() - 1 || this.revisions.getLength() <= this.revisionsPerWindow;
+		return this.getNewestVisibleRevisionIndex() >= this.revisions.getLength() - 1 ||
+			this.revisions.getLength() <= this.revisionsPerWindow;
 	},
 
 	/**
@@ -101,6 +103,8 @@ $.extend( Slider.prototype, {
 	 * @param {number} value
 	 */
 	setFirstVisibleRevisionIndex: function ( value ) {
+		const highestPossibleFirstRev = this.revisions.getLength() - this.revisionsPerWindow;
+		value = Math.min( Math.max( 0, value ), highestPossibleFirstRev );
 		this.oldestVisibleRevisionIndex = value;
 	},
 
@@ -110,11 +114,8 @@ $.extend( Slider.prototype, {
 	 * @param {number} direction - Either -1, 0 or 1
 	 */
 	slide: function ( direction ) {
-		var highestPossibleFirstRev = this.revisions.getLength() - this.revisionsPerWindow;
-
-		this.oldestVisibleRevisionIndex += direction * this.revisionsPerWindow;
-		this.oldestVisibleRevisionIndex = Math.min( this.oldestVisibleRevisionIndex, highestPossibleFirstRev );
-		this.oldestVisibleRevisionIndex = Math.max( 0, this.oldestVisibleRevisionIndex );
+		const value = this.oldestVisibleRevisionIndex + direction * this.revisionsPerWindow;
+		this.setFirstVisibleRevisionIndex( value );
 	}
 } );
 

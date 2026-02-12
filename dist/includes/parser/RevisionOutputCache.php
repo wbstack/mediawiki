@@ -23,16 +23,15 @@
 
 namespace MediaWiki\Parser;
 
-use CacheTime;
-use IBufferingStatsdDataFactory;
 use InvalidArgumentException;
+use JsonException;
 use MediaWiki\Json\JsonCodec;
 use MediaWiki\Revision\RevisionRecord;
-use MWTimestamp;
-use ParserOptions;
-use ParserOutput;
+use MediaWiki\Utils\MWTimestamp;
 use Psr\Log\LoggerInterface;
-use WANObjectCache;
+use Wikimedia\ObjectCache\WANObjectCache;
+use Wikimedia\Stats\StatsFactory;
+use Wikimedia\UUID\GlobalIdGenerator;
 
 /**
  * Cache for ParserOutput objects.
@@ -66,11 +65,13 @@ class RevisionOutputCache {
 	/** @var JsonCodec */
 	private $jsonCodec;
 
-	/** @var IBufferingStatsdDataFactory */
+	/** @var StatsFactory */
 	private $stats;
 
 	/** @var LoggerInterface */
 	private $logger;
+
+	private GlobalIdGenerator $globalIdGenerator;
 
 	/**
 	 * @param string $name
@@ -78,8 +79,9 @@ class RevisionOutputCache {
 	 * @param int $cacheExpiry Expiry for ParserOutput in $cache.
 	 * @param string $cacheEpoch Anything before this timestamp is invalidated
 	 * @param JsonCodec $jsonCodec
-	 * @param IBufferingStatsdDataFactory $stats
+	 * @param StatsFactory $stats
 	 * @param LoggerInterface $logger
+	 * @param GlobalIdGenerator $globalIdGenerator
 	 */
 	public function __construct(
 		string $name,
@@ -87,8 +89,9 @@ class RevisionOutputCache {
 		int $cacheExpiry,
 		string $cacheEpoch,
 		JsonCodec $jsonCodec,
-		IBufferingStatsdDataFactory $stats,
-		LoggerInterface $logger
+		StatsFactory $stats,
+		LoggerInterface $logger,
+		GlobalIdGenerator $globalIdGenerator
 	) {
 		$this->name = $name;
 		$this->cache = $cache;
@@ -97,15 +100,22 @@ class RevisionOutputCache {
 		$this->jsonCodec = $jsonCodec;
 		$this->stats = $stats;
 		$this->logger = $logger;
+		$this->globalIdGenerator = $globalIdGenerator;
 	}
 
 	/**
-	 * @param RevisionRecord $revision
-	 * @param string $metricSuffix
+	 * @param string $status e.g. hit, miss etc.
+	 * @param string|null $reason
 	 */
-	private function incrementStats( RevisionRecord $revision, string $metricSuffix ) {
-		$metricSuffix = str_replace( '.', '_', $metricSuffix );
-		$this->stats->increment( "RevisionOutputCache.{$this->name}.{$metricSuffix}" );
+	private function incrementStats( string $status, ?string $reason = null ) {
+		$metricSuffix = $reason ? "{$status}_{$reason}" : $status;
+
+		$this->stats->getCounter( 'RevisionOutputCache_operation_total' )
+			->setLabel( 'name', $this->name )
+			->setLabel( 'status', $status )
+			->setLabel( 'reason', $reason ?: 'n/a' )
+			->copyToStatsdAt( "RevisionOutputCache.{$this->name}.{$metricSuffix}" )
+			->increment();
 	}
 
 	/**
@@ -129,7 +139,7 @@ class RevisionOutputCache {
 	public function makeParserOutputKey(
 		RevisionRecord $revision,
 		ParserOptions $options,
-		array $usedOptions = null
+		?array $usedOptions = null
 	): string {
 		$usedOptions = ParserOptions::allCacheVaryingOptions();
 
@@ -162,7 +172,7 @@ class RevisionOutputCache {
 	public function makeParserOutputKeyOptionalRevId(
 		RevisionRecord $revision,
 		ParserOptions $options,
-		array $usedOptions = null
+		?array $usedOptions = null
 	): string {
 		$usedOptions = ParserOptions::allCacheVaryingOptions();
 
@@ -179,7 +189,7 @@ class RevisionOutputCache {
 	 * @param RevisionRecord $revision
 	 * @param ParserOptions $parserOptions
 	 *
-	 * @return ParserOutput|bool False on failure
+	 * @return ParserOutput|false False on failure
 	 */
 	public function get( RevisionRecord $revision, ParserOptions $parserOptions ) {
 		if ( $this->cacheExpiry <= 0 ) {
@@ -188,7 +198,7 @@ class RevisionOutputCache {
 		}
 
 		if ( !$parserOptions->isSafeToCache() ) {
-			$this->incrementStats( $revision, 'miss.unsafe' );
+			$this->incrementStats( 'miss', 'unsafe' );
 			return false;
 		}
 
@@ -196,13 +206,13 @@ class RevisionOutputCache {
 		$json = $this->cache->get( $cacheKey );
 
 		if ( $json === false ) {
-			$this->incrementStats( $revision, 'miss.absent' );
+			$this->incrementStats( 'miss', 'absent' );
 			return false;
 		}
 
 		$output = $this->restoreFromJson( $json, $cacheKey, ParserOutput::class );
 		if ( $output === null ) {
-			$this->incrementStats( $revision, 'miss.unserialize' );
+			$this->incrementStats( 'miss', 'unserialize' );
 			return false;
 		}
 
@@ -211,12 +221,12 @@ class RevisionOutputCache {
 		$expiryTime = max( $expiryTime, (int)MWTimestamp::now( TS_UNIX ) - $this->cacheExpiry );
 
 		if ( $cacheTime < $expiryTime ) {
-			$this->incrementStats( $revision, 'miss.expired' );
+			$this->incrementStats( 'miss', 'expired' );
 			return false;
 		}
 
 		$this->logger->debug( 'old-revision cache hit' );
-		$this->incrementStats( $revision, 'hit' );
+		$this->incrementStats( 'hit' );
 		return $output;
 	}
 
@@ -230,7 +240,7 @@ class RevisionOutputCache {
 		ParserOutput $output,
 		RevisionRecord $revision,
 		ParserOptions $parserOptions,
-		string $cacheTime = null
+		?string $cacheTime = null
 	) {
 		if ( !$output->hasText() ) {
 			throw new InvalidArgumentException( 'Attempt to cache a ParserOutput with no text set!' );
@@ -243,11 +253,24 @@ class RevisionOutputCache {
 
 		$cacheKey = $this->makeParserOutputKey( $revision, $parserOptions );
 
-		$output->setCacheTime( $cacheTime ?: wfTimestampNow() );
-		$output->setCacheRevisionId( $revision->getId() );
-
-		// Save the timestamp so that we don't have to load the revision row on view
-		$output->setTimestamp( $revision->getTimestamp() );
+		// Ensure cache properties are set in the ParserOutput
+		// T350538: These should be turned into assertions that the
+		// properties are already present (and the $cacheTime argument
+		// removed).
+		if ( $cacheTime ) {
+			$output->setCacheTime( $cacheTime );
+		} else {
+			$cacheTime = $output->getCacheTime();
+		}
+		if ( !$output->getCacheRevisionId() ) {
+			$output->setCacheRevisionId( $revision->getId() );
+		}
+		if ( !$output->getRenderId() ) {
+			$output->setRenderId( $this->globalIdGenerator->newUUIDv1() );
+		}
+		if ( !$output->getRevisionTimestamp() ) {
+			$output->setRevisionTimestamp( $revision->getTimestamp() );
+		}
 
 		$msg = "Saved in RevisionOutputCache with key $cacheKey" .
 			" and timestamp $cacheTime" .
@@ -260,23 +283,23 @@ class RevisionOutputCache {
 
 		$expiry = $output->getCacheExpiry();
 		if ( $expiry <= 0 ) {
-			$this->incrementStats( $revision, 'save.uncacheable' );
+			$this->incrementStats( 'save', 'uncacheable' );
 			return;
 		}
 
 		if ( !$parserOptions->isSafeToCache() ) {
-			$this->incrementStats( $revision, 'save.unsafe' );
+			$this->incrementStats( 'save', 'unsafe' );
 			return;
 		}
 
 		$json = $this->encodeAsJson( $output, $cacheKey );
 		if ( $json === null ) {
-			$this->incrementStats( $revision, 'save.nonserializable' );
+			$this->incrementStats( 'save', 'nonserializable' );
 			return;
 		}
 
 		$this->cache->set( $cacheKey, $json, $expiry );
-		$this->incrementStats( $revision, 'save.success' );
+		$this->incrementStats( 'save', 'success' );
 	}
 
 	/**
@@ -288,10 +311,10 @@ class RevisionOutputCache {
 	private function restoreFromJson( string $jsonData, string $key, string $expectedClass ) {
 		try {
 			/** @var CacheTime $obj */
-			$obj = $this->jsonCodec->unserialize( $jsonData, $expectedClass );
+			$obj = $this->jsonCodec->deserialize( $jsonData, $expectedClass );
 			return $obj;
-		} catch ( InvalidArgumentException $e ) {
-			$this->logger->error( 'Unable to unserialize JSON', [
+		} catch ( JsonException $e ) {
+			$this->logger->error( 'Unable to deserialize JSON', [
 				'name' => $this->name,
 				'cache_key' => $key,
 				'message' => $e->getMessage()
@@ -308,7 +331,7 @@ class RevisionOutputCache {
 	private function encodeAsJson( CacheTime $obj, string $key ) {
 		try {
 			return $this->jsonCodec->serialize( $obj );
-		} catch ( InvalidArgumentException $e ) {
+		} catch ( JsonException $e ) {
 			$this->logger->error( 'Unable to serialize JSON', [
 				'name' => $this->name,
 				'cache_key' => $key,

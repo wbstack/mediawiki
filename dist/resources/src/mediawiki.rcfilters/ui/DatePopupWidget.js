@@ -1,21 +1,20 @@
-var ValuePickerWidget = require( './ValuePickerWidget.js' ),
-	DatePopupWidget;
+const ValuePickerWidget = require( './ValuePickerWidget.js' );
 
 /**
- * Widget defining the popup to choose date for the results
+ * Widget defining the popup to choose date for the results.
  *
  * @class mw.rcfilters.ui.DatePopupWidget
+ * @ignore
  * @extends OO.ui.Widget
  *
- * @constructor
  * @param {mw.rcfilters.dm.FilterGroup} model Group model for 'days'
  * @param {Object} [config] Configuration object
  */
-DatePopupWidget = function MwRcfiltersUiDatePopupWidget( model, config ) {
+const DatePopupWidget = function MwRcfiltersUiDatePopupWidget( model, config ) {
 	config = config || {};
 
 	// Parent
-	DatePopupWidget.parent.call( this, config );
+	DatePopupWidget.super.call( this, config );
 	// Mixin constructors
 	OO.ui.mixin.LabelElement.call( this, config );
 
@@ -26,7 +25,9 @@ DatePopupWidget = function MwRcfiltersUiDatePopupWidget( model, config ) {
 		{
 			classes: [ 'mw-rcfilters-ui-datePopupWidget-hours' ],
 			label: mw.msg( 'rcfilters-hours-title' ),
-			itemFilter: function ( itemModel ) { return Number( itemModel.getParamName() ) < 1; }
+			itemFilter: function ( itemModel ) {
+				return Number( itemModel.getParamName() ) < 1;
+			}
 		}
 	);
 	this.hoursValuePicker.selectWidget.$element.attr( 'aria-label', mw.msg( 'rcfilters-hours-title' ) );
@@ -36,7 +37,9 @@ DatePopupWidget = function MwRcfiltersUiDatePopupWidget( model, config ) {
 		{
 			classes: [ 'mw-rcfilters-ui-datePopupWidget-days' ],
 			label: mw.msg( 'rcfilters-days-title' ),
-			itemFilter: function ( itemModel ) { return Number( itemModel.getParamName() ) >= 1; }
+			itemFilter: function ( itemModel ) {
+				return Number( itemModel.getParamName() ) >= 1;
+			}
 		}
 	);
 	this.daysValuePicker.selectWidget.$element.attr( 'aria-label', mw.msg( 'rcfilters-days-title' ) );
@@ -64,10 +67,11 @@ OO.mixinClass( DatePopupWidget, OO.ui.mixin.LabelElement );
 /* Events */
 
 /**
+ * A days item was chosen
+ *
  * @event days
  * @param {string} name Item name
- *
- * A days item was chosen
+ * @ignore
  */
 
 module.exports = DatePopupWidget;

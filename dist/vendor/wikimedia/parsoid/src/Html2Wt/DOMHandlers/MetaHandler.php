@@ -6,12 +6,13 @@ namespace Wikimedia\Parsoid\Html2Wt\DOMHandlers;
 use Wikimedia\Parsoid\DOM\Element;
 use Wikimedia\Parsoid\DOM\Node;
 use Wikimedia\Parsoid\DOM\Text;
+use Wikimedia\Parsoid\Html2Wt\DiffUtils;
 use Wikimedia\Parsoid\Html2Wt\SerializerState;
 use Wikimedia\Parsoid\Html2Wt\WTSUtils;
+use Wikimedia\Parsoid\Utils\DiffDOMUtils;
 use Wikimedia\Parsoid\Utils\DOMCompat;
 use Wikimedia\Parsoid\Utils\DOMDataUtils;
 use Wikimedia\Parsoid\Utils\DOMUtils;
-use Wikimedia\Parsoid\Utils\Utils;
 use Wikimedia\Parsoid\Utils\WTUtils;
 
 class MetaHandler extends DOMHandler {
@@ -24,7 +25,7 @@ class MetaHandler extends DOMHandler {
 	public function handle(
 		Element $node, SerializerState $state, bool $wrapperUnmodified = false
 	): ?Node {
-		$property = $node->getAttribute( 'property' ) ?? '';
+		$property = DOMCompat::getAttribute( $node, 'property' ) ?? '';
 		$dp = DOMDataUtils::getDataParsoid( $node );
 		$dmw = DOMDataUtils::getDataMw( $node );
 
@@ -43,7 +44,12 @@ class MetaHandler extends DOMHandler {
 			if ( $switchType ) {
 				$out = $switchType[1];
 				$cat = preg_match( '/^(?:category)?(.*)/', $out, $catMatch );
-				if ( $cat && isset( Utils::magicMasqs()[$catMatch[1]] ) ) {
+				if ( $cat && (
+					// Need this b/c support while RESTBase has Parsoid HTML
+					// in storage with meta tags for these.
+					// Can be removed as part of T335843
+					$catMatch[1] === 'defaultsort' || $catMatch[1] === 'displaytitle'
+				) ) {
 					$contentInfo = $state->serializer->serializedAttrVal( $node, 'content' );
 					if ( WTUtils::hasExpandedAttrsType( $node ) ) {
 						$out = '{{' . $contentInfo['value'] . '}}';
@@ -92,7 +98,7 @@ class MetaHandler extends DOMHandler {
 				$state->closeAnnotationRange( $annType );
 			}
 		} else {
-			switch ( $node->getAttribute( 'typeof' ) ?? '' ) {
+			switch ( DOMCompat::getAttribute( $node, 'typeof' ) ) {
 				case 'mw:Includes/IncludeOnly':
 					// Remove the dp.src when older revisions of HTML expire in RESTBase
 					$state->emitChunk( $dmw->src ?? $dp->src ?? '', $node );
@@ -154,7 +160,7 @@ class MetaHandler extends DOMHandler {
 				// deleted or modified, we emit _now_ so that we don't risk losing it. The range
 				// stays extended in the round-tripped version of the wikitext.
 				$nextdiffdata = DOMDataUtils::getDataParsoidDiff( $nextContentSibling );
-				if ( DOMUtils::isDiffMarker( $nextContentSibling ) ||
+				if ( DiffUtils::isDiffMarker( $nextContentSibling ) ||
 					( $nextdiffdata->diff ?? null ) ) {
 					return true;
 				}
@@ -186,8 +192,8 @@ class MetaHandler extends DOMHandler {
 				$prevdiffdata = DOMDataUtils::getDataParsoidDiff( $prevElementSibling );
 
 				if (
-					DOMUtils::isDiffMarker( $prevElementSibling ) ||
-					$prevdiffdata !== null && $prevdiffdata->diff !== null
+					DiffUtils::isDiffMarker( $prevElementSibling ) ||
+					( $prevdiffdata !== null && $prevdiffdata->diff !== null )
 				) {
 					return true;
 				}
@@ -211,10 +217,10 @@ class MetaHandler extends DOMHandler {
 	 */
 	private function needNewLineSepBeforeMeta( Node $meta, Node $otherNode ) {
 		return ( $otherNode !== $meta->parentNode
-			&& ( $otherNode instanceof Element &&
-				DOMUtils::isWikitextBlockNode( $otherNode ) ||
+			&& (
+				( $otherNode instanceof Element && DOMUtils::isWikitextBlockNode( $otherNode ) ) ||
 				( $otherNode instanceof Text &&
-					DOMUtils::isWikitextBlockNode( DOMUtils::nextNonSepSibling( $meta ) )
+					DOMUtils::isWikitextBlockNode( DiffDOMUtils::nextNonSepSibling( $meta ) )
 				)
 			) );
 	}
@@ -238,7 +244,8 @@ class MetaHandler extends DOMHandler {
 			}
 		}
 
-		$type = $node->getAttribute( 'typeof' ) ?: $node->getAttribute( 'property' ) ?:	null;
+		$type = DOMCompat::getAttribute( $node, 'typeof' ) ??
+			DOMCompat::getAttribute( $node, 'property' );
 		if ( $type && str_contains( $type, 'mw:PageProp/categorydefaultsort' ) ) {
 			if ( $otherNode instanceof Element
 				&& DOMCompat::nodeName( $otherNode ) === 'p'

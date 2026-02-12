@@ -8,8 +8,8 @@ use CirrusSearch\Query\Builder\QueryBuildingContext;
 use CirrusSearch\Search\SearchContext;
 use CirrusSearch\SearchConfig;
 use CirrusSearch\WarningCollector;
-use Config;
 use Elastica\Query\AbstractQuery;
+use MediaWiki\Config\Config;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageRecord;
 use MediaWiki\Page\PageStore;
@@ -45,7 +45,7 @@ class InCategoryFeature extends SimpleKeywordFeature implements FilterQueryFeatu
 	 * @param Config $config
 	 * @param PageStore|null $pageStore
 	 */
-	public function __construct( Config $config, PageStore $pageStore = null ) {
+	public function __construct( Config $config, ?PageStore $pageStore = null ) {
 		$this->maxConditions = $config->get( 'CirrusSearchMaxIncategoryOptions' );
 		$this->pageStore = $pageStore;
 	}
@@ -128,7 +128,7 @@ class InCategoryFeature extends SimpleKeywordFeature implements FilterQueryFeatu
 		$names = [];
 
 		foreach ( $categories as $category ) {
-			if ( substr( $category, 0, 3 ) === 'id:' ) {
+			if ( str_starts_with( $category, 'id:' ) ) {
 				$pageId = substr( $category, 3 );
 				if ( ctype_digit( $pageId ) ) {
 					$pageIds[] = $pageId;

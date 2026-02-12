@@ -1,9 +1,6 @@
-// eslint-disable-next-line no-restricted-properties
-var mobile = mw.mobileFrontend.require( 'mobile.startup' ),
-	drawers = require( './drawers.js' ),
-	CtaDrawer = mobile.CtaDrawer,
-	Button = mobile.Button,
-	Anchor = mobile.Anchor;
+const mobile = require( 'mobile.startup' );
+const drawers = require( './drawers.js' );
+const CtaDrawer = mobile.CtaDrawer;
 
 /**
  * Initialize red links call-to-action
@@ -21,22 +18,22 @@ var mobile = mw.mobileFrontend.require( 'mobile.startup' ),
  * will be red. In both cases, another user follows this link, not to edit create a page for
  * that user but to obtain information on them.
  *
- * @ignore
- * @param {jQuery.Object} $redLinks
+ * @private
+ * @param {jQuery} $redLinks
  */
 function initRedlinksCta( $redLinks ) {
 	$redLinks.on( 'click', function ( ev ) {
-		var drawerOptions = {
-				progressiveButton: new Button( {
+		const drawerOptions = {
+				progressiveButton: {
 					progressive: true,
 					label: mw.msg( 'mobile-frontend-editor-redlink-create' ),
 					href: $( this ).attr( 'href' )
-				} ).options,
-				actionAnchor: new Anchor( {
+				},
+				actionAnchor: {
 					progressive: true,
 					label: mw.msg( 'mobile-frontend-editor-redlink-leave' ),
 					additionalClassNames: 'cancel'
-				} ).options,
+				},
 				onBeforeHide: drawers.discardDrawer,
 				content: mw.msg( 'mobile-frontend-editor-redlink-explain' )
 			},
@@ -53,23 +50,24 @@ function initRedlinksCta( $redLinks ) {
 /**
  * A CtaDrawer should show for anonymous users.
  *
- * @param {jQuery.Object} $watchstar
+ * @param {jQuery} $watchstar
+ * @ignore
  */
 function initWatchstarCta( $watchstar ) {
-	var watchCtaDrawer;
+	let watchCtaDrawer;
 	// show a CTA for anonymous users
-	$watchstar.on( 'click', function ( ev ) {
+	$watchstar.on( 'click', ( ev ) => {
 		if ( !watchCtaDrawer ) {
 			watchCtaDrawer = CtaDrawer( {
 				content: mw.msg( 'minerva-watchlist-cta' ),
 				queryParams: {
-					warning: 'mobile-frontend-watchlist-purpose',
+					notice: 'mobile-frontend-watchlist-purpose',
 					campaign: 'mobile_watchPageActionCta',
 					returntoquery: 'article_action=watch'
 				},
 				onBeforeHide: drawers.discardDrawer,
 				signupQueryParams: {
-					warning: 'mobile-frontend-watchlist-signup-action'
+					notice: 'mobile-frontend-watchlist-signup-action'
 				}
 			} );
 		}

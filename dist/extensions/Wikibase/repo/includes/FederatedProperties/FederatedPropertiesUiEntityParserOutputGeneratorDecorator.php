@@ -3,11 +3,12 @@
 declare( strict_types = 1 );
 namespace Wikibase\Repo\FederatedProperties;
 
-use Language;
-use ParserOutput;
+use MediaWiki\Language\Language;
+use MediaWiki\Parser\ParserOutput;
 use Wikibase\DataModel\Term\LabelsProvider;
 use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Repo\ParserOutput\EntityParserOutputGenerator;
+use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Wraps an EntityParserOutputGenerator and adds Federated Properties UI modules and error handling.
@@ -49,10 +50,13 @@ class FederatedPropertiesUiEntityParserOutputGeneratorDecorator implements Entit
 		try {
 			$parserOutput = $this->inner->getParserOutput( $entityRevision, $generateHtml );
 			$parserOutput->setEnableOOUI( true );
-			$parserOutput->addModules( [
-				'wikibase.federatedPropertiesEditRequestFailureNotice',
-				'wikibase.federatedPropertiesLeavingSiteNotice',
-			] );
+			// T324991
+			if ( !WikibaseRepo::getMobileSite() ) {
+				$parserOutput->addModules( [
+					'wikibase.federatedPropertiesEditRequestFailureNotice',
+					'wikibase.federatedPropertiesLeavingSiteNotice',
+				] );
+			}
 
 		} catch ( FederatedPropertiesException $ex ) {
 			$entity = $entityRevision->getEntity();

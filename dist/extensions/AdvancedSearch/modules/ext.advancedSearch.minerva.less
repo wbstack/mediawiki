@@ -1,0 +1,24 @@
+@import 'mediawiki.skin.variables.less';
+
+.mw-advancedSearch-tooltip-body {
+	dl {
+		// Reset weird 1em margin from Minerva's lists.less
+		margin-left: 0;
+
+		dd {
+			// Half of the normal 1.6em (see MediaWiki's elements.less) is enough in a popup
+			margin-left: 0.8em;
+		}
+	}
+
+	li {
+		// Reset back to normal as in MediaWiki's elements.less
+		margin-bottom: 0.1em;
+	}
+
+	code {
+		// Reset back to normal as in MediaWiki's elements.less
+		border-radius: @border-radius-base;
+		padding: 1px 4px;
+	}
+}

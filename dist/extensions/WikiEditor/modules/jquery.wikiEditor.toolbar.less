@@ -1,4 +1,5 @@
 @import 'mediawiki.mixins';
+@import 'mediawiki.skin.variables.less';
 
 /**
  * CSS for WikiEditor Toolbar jQuery plugin
@@ -7,6 +8,7 @@
 .wikiEditor-ui-toolbar {
 	position: relative;
 	display: block;
+	z-index: 7;
 
 	.empty {
 		display: none;
@@ -21,7 +23,7 @@
 		.section {
 			float: left;
 			width: 100%;
-			border-top: 1px solid #c8ccd1;
+			border-top: @border-subtle;
 		}
 
 		.section-hidden {
@@ -46,14 +48,14 @@
 			line-height: 32px;
 
 			a {
-				color: #0645ad;
+				color: @color-progressive;
 				cursor: pointer;
 				display: block;
 				height: 32px;
 				padding-left: 18px;
 				padding-right: 12px;
 
-				&:before {
+				&::before {
 					content: '';
 					background: url( images/toolbar/arrow-down.svg ) center no-repeat;
 					display: block;
@@ -62,34 +64,34 @@
 					left: 0;
 					width: 16px;
 					height: 32px;
-					.transition( ~'transform 100ms' );
+					transition: transform 100ms;
 
 					body.ltr & {
-						.transform( rotate( -90deg ) );
+						transform: rotate( -90deg );
 					}
 
 					body.rtl & {
-						.transform( rotate( 90deg ) );
+						transform: rotate( 90deg );
 					}
 				}
 			}
 
 			a:visited {
-				color: #0645ad;
+				color: @color-progressive;
 			}
 
 			a.current,
 			a.current:visited {
-				color: #222;
+				color: @color-base;
 
 				&:hover {
 					text-decoration: none;
 				}
 
-				&:before {
+				&::before {
 					body.ltr &,
 					body.rtl & {
-						.transform( rotate( 0 ) );
+						transform: rotate( 0 );
 					}
 				}
 			}
@@ -111,17 +113,18 @@
 
 		.group {
 			padding-right: 0;
-			padding-left: 6px;
-			border-left: 1px solid #c8ccd1;
+			margin-left: 6px;
+			border-left: @border-subtle;
 		}
 	}
 
 	/* Groups */
 	.group {
 		float: left;
+		display: flex;
 		min-height: 26px;
 		padding-right: 6px;
-		border-right: 1px solid #c8ccd1;
+		border-right: @border-subtle;
 		margin: 3px;
 
 		/* Toolbar */
@@ -132,7 +135,7 @@
 			/* stylelint-disable-next-line declaration-property-unit-disallowed-list */
 			line-height: 22px;
 			margin: 2px 8px 2px 5px;
-			color: #54595d;
+			color: @color-subtle;
 			cursor: default;
 		}
 
@@ -150,9 +153,9 @@
 			margin: 2px 0 2px 2px;
 			height: 22px;
 			cursor: pointer;
-			border: 1px solid #c8ccd1;
+			border: @border-subtle;
 			padding: 0;
-			background-color: #fff;
+			background-color: @background-color-base;
 
 			.label {
 				position: relative;
@@ -160,9 +163,9 @@
 				margin: 0;
 				cursor: pointer;
 				text-decoration: none;
-				color: #222;
+				color: @color-base;
 
-				&:after {
+				&::after {
 					content: '';
 					background: url( images/toolbar/arrow-down.svg ) center no-repeat;
 					display: block;
@@ -174,8 +177,8 @@
 				}
 			}
 
-			&.options-shown .label:after {
-				.transform( rotate( 180deg ) );
+			&.options-shown .label::after {
+				transform: rotate( 180deg );
 			}
 
 			.options {
@@ -183,15 +186,15 @@
 				display: none;
 				margin-left: -1px;
 				margin-top: 22px;
-				border: 1px solid #c8ccd1;
-				background-color: #fff;
+				border: @border-subtle;
+				background-color: @background-color-base;
 				z-index: 1;
 
 				.option {
 					display: block;
 					padding: 0.5em;
 					text-decoration: none;
-					color: #000;
+					color: @color-base;
 					white-space: nowrap;
 
 					&:hover {
@@ -230,7 +233,7 @@
 	.group-search {
 		float: right;
 		border-right: 0;
-		border-left: 1px solid #c8ccd1;
+		border-left: @border-subtle;
 	}
 
 	/* Booklet */
@@ -240,7 +243,6 @@
 			width: 20%;
 			height: 125px;
 			overflow: auto;
-			/* stylelint-disable-next-line plugin/no-unsupported-browser-features */
 			resize: horizontal;
 
 			> div {
@@ -250,7 +252,7 @@
 
 			.wikiEditor-character-highlighted {
 				background-color: rgba( 41, 98, 204, 0.1 );
-				color: #000;
+				color: @color-base;
 			}
 		}
 
@@ -272,12 +274,12 @@
 		}
 
 		th {
-			color: #54595d;
+			color: @color-subtle;
 		}
 
 		td {
-			color: #000;
-			border-top: 1px solid #eaecf0;
+			color: @color-base;
+			border-top: @border-subtle;
 		}
 
 		th,
@@ -294,24 +296,36 @@
 				vertical-align: top;
 			}
 
-			td.cell-syntax {
+			.cell-syntax {
 				font-family: monospace, 'Courier';
 			}
 
-			td.cell-syntax,
-			td.cell-result {
+			.cell-syntax,
+			.cell-result {
 				width: 40%;
 			}
 
-			td.cell-description {
+			.cell-description {
 				width: 20%;
 			}
 
 			/* T33649 */
 			.table-link {
-				td.cell-syntax {
+				.cell-syntax,
+				span.pre-wrap {
 					white-space: pre;
 				}
+			}
+		}
+
+		.cell-result {
+			h2,
+			h3,
+			h4,
+			h5 {
+				margin-bottom: 0;
+				margin-top: 0;
+				padding-top: 0;
 			}
 		}
 	}
@@ -322,13 +336,13 @@
 
 		div {
 			span {
-				border: 1px solid #eaecf0;
+				border: @border-subtle;
 				padding: 5px 8px;
 				margin-left: 5px;
 				margin-top: 5px;
 				height: 1em;
 				display: inline-block;
-				color: #202122;
+				color: @color-base;
 				text-decoration: none;
 				cursor: pointer;
 				font-family: monospace, 'Courier';
@@ -336,15 +350,15 @@
 				line-height: 1;
 
 				&:hover {
-					background-color: #fff;
+					background-color: @background-color-base;
 					text-decoration: none;
-					border-color: #c8ccd1;
+					border-color: @border-color-interactive;
 				}
 			}
 
 			.wikiEditor-character-highlighted {
 				background-color: #7db1c5;
-				color: #000;
+				color: @color-base;
 			}
 		}
 
@@ -358,7 +372,6 @@
 .tool-button {
 	background-position: 50% 50%;
 	background-repeat: no-repeat;
-	display: inline-block;
 	vertical-align: middle;
 	width: 24px;
 	height: 24px;
@@ -375,7 +388,7 @@
 .ui-widget {
 	table {
 		td.wikieditor-toolbar-table-preview-wrapper {
-			background: #eaecf0;
+			background: @background-color-neutral;
 			padding: 10px;
 
 			span {
@@ -386,7 +399,7 @@
 
 		.wikieditor-toolbar-table-preview-frame {
 			width: 340px;
-			background: #fff;
+			background: @background-color-base;
 			padding: 10px;
 			overflow: hidden;
 			display: block;

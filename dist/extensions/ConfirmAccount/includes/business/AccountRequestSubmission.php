@@ -1,5 +1,8 @@
 <?php
 
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Extension\ConfirmEdit\CaptchaTriggers;
+use MediaWiki\Extension\ConfirmEdit\Hooks as CaptchaHooks;
 use MediaWiki\MediaWikiServices;
 
 class AccountRequestSubmission {
@@ -70,7 +73,6 @@ class AccountRequestSubmission {
 	 */
 	public function submit( IContextSource $context ) {
 		global $wgAccountRequestThrottle, $wgConfirmAccountRequestFormItems, $wgConfirmAccountCaptchas;
-		global $wgCaptchaClass, $wgCaptchaTriggers;
 
 		ConfirmAccount::runAutoMaintenance();
 
@@ -90,11 +92,16 @@ class AccountRequestSubmission {
 		}
 
 		# Check for captcha validity
-		if ( $wgConfirmAccountCaptchas && isset( $wgCaptchaClass )
-			&& $wgCaptchaTriggers['createaccount'] && !$reqUser->isAllowed( 'skipcaptcha' ) ) {
-			/** @var SimpleCaptcha $captcha */
-			$captcha = new $wgCaptchaClass;
-			if ( !$captcha->passCaptchaLimitedFromRequest( $context->getRequest(), $reqUser ) ) {
+		if (
+			$wgConfirmAccountCaptchas &&
+			ExtensionRegistry::getInstance()->isLoaded( 'ConfirmEdit' )
+		) {
+			$captcha = CaptchaHooks::getInstance( CaptchaTriggers::CREATE_ACCOUNT );
+			if (
+				!$captcha->canSkipCaptcha( $reqUser, RequestContext::getMain()->getConfig() ) &&
+				$captcha->triggersCaptcha( CaptchaTriggers::CREATE_ACCOUNT ) &&
+				!$captcha->passCaptchaLimitedFromRequest( $context->getRequest(), $reqUser )
+			) {
 				return [ 'accountreq_bad_captcha', $context->msg( 'captcha-createaccount-fail' )->escaped() ];
 			}
 		}
@@ -114,7 +121,7 @@ class AccountRequestSubmission {
 			if ( $value > $wgAccountRequestThrottle ) {
 				return [
 					'accountreq_throttled',
-					$context->msg( 'acct_request_throttle_hit', $wgAccountRequestThrottle )->text()
+					$context->msg( 'acct_request_throttle_hit', $wgAccountRequestThrottle )->escaped()
 				];
 			}
 		}
@@ -139,7 +146,7 @@ class AccountRequestSubmission {
 
 			return [
 				'acct_request_short_bio',
-				$context->msg( 'requestaccount-tooshort' )->numParams( $minWords )->text()
+				$context->msg( 'requestaccount-tooshort' )->numParams( $minWords )->escaped()
 			];
 		}
 		# Per security reasons, file dir cannot be pulled from client,

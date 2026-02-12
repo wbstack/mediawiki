@@ -2,12 +2,12 @@
 
 namespace Wikibase\Client\Hooks;
 
-use ExtensionRegistry;
 use File;
-use Html;
+use MediaWiki\Html\Html;
+use MediaWiki\Registration\ExtensionRegistry;
 use MediaWiki\Revision\RevisionLookup;
+use MediaWiki\Title\Title;
 use PageImages\PageImages;
-use Title;
 use Wikibase\Client\RepoLinker;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\Lookup\TermLookup;
@@ -63,22 +63,13 @@ class SkinAfterBottomScriptsHandler {
 		return $html;
 	}
 
-	/**
-	 * @param Title $title
-	 * @param string|null $revisionTimestamp
-	 * @param string $entityConceptUri
-	 * @param File|null $imageFile
-	 * @param string|null $description
-	 *
-	 * @return array
-	 */
 	public function createSchema(
 		Title $title,
-		$revisionTimestamp,
-		$entityConceptUri,
-		File $imageFile = null,
-		$description = null
-		) {
+		?string $revisionTimestamp,
+		string $entityConceptUri,
+		?File $imageFile,
+		?string $description
+	): array {
 		$revisionRecord = $this->revisionLookup->getFirstRevision( $title );
 		$schemaTimestamp = $revisionRecord ? $revisionRecord->getTimestamp() : null;
 		$schema = [
@@ -90,17 +81,17 @@ class SkinAfterBottomScriptsHandler {
 			'mainEntity' => $entityConceptUri,
 			'author' => [
 				'@type' => 'Organization',
-				'name' => wfMessage( 'wikibase-page-schema-author-name' )->text()
+				'name' => wfMessage( 'wikibase-page-schema-author-name' )->text(),
 			],
 			'publisher' => [
 				'@type' => 'Organization',
 				'name' => wfMessage( 'wikibase-page-schema-publisher-name' )->text(),
 				'logo' => [
 					'@type' => 'ImageObject',
-					'url' => wfMessage( 'wikibase-page-schema-publisher-logo-url' )->text()
-				]
+					'url' => wfMessage( 'wikibase-page-schema-publisher-logo-url' )->text(),
+				],
 			],
-			'datePublished' => wfTimestamp( TS_ISO_8601, $schemaTimestamp )
+			'datePublished' => wfTimestamp( TS_ISO_8601, $schemaTimestamp ),
 		];
 
 		if ( $revisionTimestamp ) {

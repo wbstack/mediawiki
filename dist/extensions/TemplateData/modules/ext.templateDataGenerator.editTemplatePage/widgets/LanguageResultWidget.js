@@ -10,11 +10,18 @@
  */
 function LanguageResultWidget( config ) {
 	// Parent constructor
-	LanguageResultWidget.parent.call( this, config );
+	LanguageResultWidget.super.call( this, config );
+
+	// Mixin constructors
+	OO.ui.mixin.TabIndexedElement.call( this );
+
+	// Events
+	this.$element.on( 'keydown', this.onKeyDown.bind( this ) );
 
 	// Initialization
 	this.$element.addClass( 'tdg-languageResultWidget' );
-	this.$name = $( '<div>' ).addClass( 'tdg-languageResultWidget-name' );
+	this.$name = $( '<div>' ).addClass( 'tdg-languageResultWidget-name' )
+		.attr( { lang: mw.language.bcp47( config.data.code ), dir: 'auto' } );
 	this.$otherMatch = $( '<div>' ).addClass( 'tdg-languageResultWidget-otherMatch' );
 	this.setLabel( this.$otherMatch.add( this.$name ) );
 }
@@ -22,8 +29,19 @@ function LanguageResultWidget( config ) {
 /* Inheritance */
 
 OO.inheritClass( LanguageResultWidget, OO.ui.OptionWidget );
+OO.mixinClass( LanguageResultWidget, OO.ui.mixin.TabIndexedElement );
 
 /* Methods */
+
+/**
+ * @param {jQuery.Event} e Key down event
+ * @fires choose
+ */
+LanguageResultWidget.prototype.onKeyDown = function ( e ) {
+	if ( e.which === OO.ui.Keys.ENTER ) {
+		this.emit( 'choose', this );
+	}
+};
 
 /**
  * Update labels based on query
@@ -34,7 +52,7 @@ OO.inheritClass( LanguageResultWidget, OO.ui.OptionWidget );
  * @chainable
  */
 LanguageResultWidget.prototype.updateLabel = function ( query, matchedProperty ) {
-	var data = this.getData();
+	const data = this.getData();
 
 	// Reset text
 	this.$name.text( data.name );
@@ -42,7 +60,7 @@ LanguageResultWidget.prototype.updateLabel = function ( query, matchedProperty )
 
 	// Highlight where applicable
 	if ( matchedProperty ) {
-		var $highlighted = this.constructor.static.highlightQuery( data[ matchedProperty ], query );
+		const $highlighted = this.constructor.static.highlightQuery( data[ matchedProperty ], query );
 		if ( matchedProperty === 'name' ) {
 			this.$name.empty().append( $highlighted );
 		} else {
@@ -63,7 +81,7 @@ LanguageResultWidget.prototype.updateLabel = function ( query, matchedProperty )
  * @return {jQuery} Text with query substring wrapped in highlighted span
  */
 LanguageResultWidget.static.highlightQuery = function ( text, query ) {
-	var $result = $( '<span>' ),
+	const $result = $( '<span>' ),
 		offset = text.toLowerCase().indexOf( query.toLowerCase() );
 
 	if ( !query.length || offset === -1 ) {

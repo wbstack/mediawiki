@@ -1,5 +1,11 @@
 <?php
 
+namespace MediaWiki\HTMLForm\Field;
+
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Widget\SizeFilterWidget;
+use MediaWiki\Xml\Xml;
+
 /**
  * A size filter field for use on query-type special pages. It looks a bit like:
  *
@@ -12,6 +18,9 @@
  *
  */
 class HTMLSizeFilterField extends HTMLIntField {
+
+	protected bool $mSelectMin = true;
+
 	public function getSize() {
 		return $this->mParams['size'] ?? 9;
 	}
@@ -27,7 +36,7 @@ class HTMLSizeFilterField extends HTMLIntField {
 			$this->mName . '-mode',
 			'min',
 			$this->mID . '-mode-min',
-			$value >= 0,
+			$this->mSelectMin,
 			$attribs
 		);
 		$html .= "\u{00A0}" . Xml::radioLabel(
@@ -35,7 +44,7 @@ class HTMLSizeFilterField extends HTMLIntField {
 			$this->mName . '-mode',
 			'max',
 			$this->mID . '-mode-max',
-			$value < 0,
+			!$this->mSelectMin,
 			$attribs
 		);
 		$html .= "\u{00A0}" . parent::getInputHTML( $value ? abs( $value ) : '' );
@@ -53,11 +62,10 @@ class HTMLSizeFilterField extends HTMLIntField {
 
 		// negative numbers represent "max", positive numbers represent "min"
 		$value = $params['value'];
-
 		$params['value'] = $value ? abs( $value ) : '';
 
-		return new MediaWiki\Widget\SizeFilterWidget( [
-			'selectMin' => $value >= 0,
+		return new SizeFilterWidget( [
+			'selectMin' => $this->mSelectMin,
 			'textinput' => $params,
 			'radioselectinput' => [
 				'name' => $this->mName . '-mode',
@@ -73,17 +81,14 @@ class HTMLSizeFilterField extends HTMLIntField {
 	/**
 	 * @param WebRequest $request
 	 *
-	 * @return string|int
+	 * @return int
 	 */
 	public function loadDataFromRequest( $request ) {
-		$size = $request->getInt( $this->mName );
-		if ( !$size ) {
-			return $this->getDefault();
-		}
-		$size = abs( $size );
+		$size = abs( $request->getInt( $this->mName, $this->getDefault() ) );
 
 		// negative numbers represent "max", positive numbers represent "min"
 		if ( $request->getVal( $this->mName . '-mode' ) === 'max' ) {
+			$this->mSelectMin = false;
 			return -$size;
 		} else {
 			return $size;
@@ -94,3 +99,6 @@ class HTMLSizeFilterField extends HTMLIntField {
 		return false;
 	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( HTMLSizeFilterField::class, 'HTMLSizeFilterField' );

@@ -14,7 +14,7 @@ use Wikimedia\Rdbms\IDatabase;
 /**
  * Base class for item/property TermStoreWriters.
  *
- * @see @ref md_docs_storage_terms
+ * @see @ref docs_storage_terms
  * @license GPL-2.0-or-later
  */
 abstract class DatabaseTermStoreWriterBase {
@@ -85,35 +85,37 @@ abstract class DatabaseTermStoreWriterBase {
 	 * and return term in lang IDs that are no longer referenced
 	 * and might now need to be cleaned up.
 	 *
+	 * Updating the current state is done on a best effort basis.
+	 * Because this method is called as a secondary data update, not in the primary transaction,
+	 * (nearly) simultaneous edits to the same entity can race on the term store update,
+	 * and the final state does not necessarily correspond to the terms of the latest revision.
+	 * (In theory, it may even be a mixture of the terms of several revisions, without exactly matching any of them.)
+	 * However, any future terms update should fix such a situation
+	 * (any out-of-sync state should not survive through later updates).
+	 * Additionally, all removed <prefix>_term_in_lang_ids will always be accurately reported:
+	 * we will never silently remove a reference to the wbt_term_in_lang table.
+	 *
 	 * @param Int32EntityId $entityId
 	 * @param Fingerprint $fingerprint
 	 *
-	 * @return int[] <prefix>_term_in_lang_ids to that are no longer used by $entityId
-	 * The returned term in lang IDs might still be used in wbt_<entity>_terms rows
-	 * for other entity IDs or elsewhere, and this should be checked just before cleanup.
-	 * However, that may happen in a different transaction than this call.
+	 * @return int[] <prefix>_term_in_lang_ids that we removed (references to the
+	 * wbt_term_in_lang table).
+	 * The returned term in lang IDs might still be used in other wbt_<entity>_terms rows,
+	 * in case of a race condition potentially even on the same entity. This should be checked
+	 * just before cleanup. However, that may happen in a different transaction than this call.
 	 */
 	private function acquireAndInsertTerms( Int32EntityId $entityId, Fingerprint $fingerprint ): array {
 		$entityNumericId = $entityId->getNumericId();
 
 		$dbw = $this->getDbw();
-		$selectArgs = [
-			$this->getMapping()->getTableName(),
-			$this->getMapping()->getTermInLangIdColumn(), // select term_in_lang_id
-			[ $this->getMapping()->getEntityIdColumn() => $entityNumericId ], // of this entity
-			__METHOD__,
-		];
+		$queryBuilder = $dbw->newSelectQueryBuilder()
+			->select( $this->getMapping()->getTermInLangIdColumn() ) // select term_in_lang_id
+			->from( $this->getMapping()->getTableName() )
+			->where( [ $this->getMapping()->getEntityIdColumn() => $entityNumericId ] ) // of this entity
+			->caller( __METHOD__ );
 
 		// Find term entries that already exist for the entity
-		$oldTermInLangIds = $dbw->selectFieldValues( ...$selectArgs );
-
-		// lock them with FOR UPDATE
-		if ( $oldTermInLangIds !== [] ) {
-			$selectArgs[] = [ 'FOR UPDATE' ];
-			$oldTermInLangIds = $dbw->selectFieldValues(
-				...$selectArgs
-			);
-		}
+		$oldTermInLangIds = ( clone $queryBuilder )->fetchFieldValues();
 
 		$termsArray = $this->termsArrayFromFingerprint( $fingerprint, $this->stringNormalizer );
 		$termInLangIdsToClean = [];
@@ -130,11 +132,13 @@ abstract class DatabaseTermStoreWriterBase {
 				$dbw,
 				$entityNumericId
 			) {
-
 				$termInLangIdsToInsert = array_diff( $newTermInLangIds, $oldTermInLangIds );
 				$termInLangIdsToClean = array_diff( $oldTermInLangIds, $newTermInLangIds );
-				$rowsToInsert = [];
+				if ( $termInLangIdsToInsert === [] ) {
+					return;
+				}
 
+				$rowsToInsert = [];
 				$entityIdColumnName = $this->getMapping()->getEntityIdColumn();
 				$termInLangColumnName = $this->getMapping()->getTermInLangIdColumn();
 				foreach ( $termInLangIdsToInsert as $termInLangIdToInsert ) {
@@ -145,12 +149,11 @@ abstract class DatabaseTermStoreWriterBase {
 				}
 
 				$dbw->onTransactionPreCommitOrIdle( function () use ( $dbw, $rowsToInsert, $fname ) {
-					$dbw->insert(
-						$this->getMapping()->getTableName(),
-						$rowsToInsert,
-						$fname,
-						[ 'IGNORE' ]
-					);
+					$dbw->newInsertQueryBuilder()
+						->insertInto( $this->getMapping()->getTableName() )
+						->ignore()
+						->rows( $rowsToInsert )
+						->caller( $fname )->execute();
 				}, $fname );
 			}
 		);
@@ -158,14 +161,13 @@ abstract class DatabaseTermStoreWriterBase {
 		if ( $termInLangIdsToClean !== [] ) {
 			// Delete entries in the table that are no longer needed
 			// Further cleanup should then done by the caller of this method
-			$dbw->delete(
-				$this->getMapping()->getTableName(),
-				[
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( $this->getMapping()->getTableName() )
+				->where( [
 					$this->getMapping()->getEntityIdColumn() => $entityNumericId,
 					$this->getMapping()->getTermInLangIdColumn() => $termInLangIdsToClean,
-				],
-				__METHOD__
-			);
+				] )
+				->caller( __METHOD__ )->execute();
 		}
 
 		return $termInLangIdsToClean;
@@ -185,16 +187,15 @@ abstract class DatabaseTermStoreWriterBase {
 	 */
 	private function deleteTermsWithoutClean( Int32EntityId $entityId ): array {
 		$dbw = $this->getDbw();
-		$res = $dbw->select(
-			$this->getMapping()->getTableName(),
-			[
+		$res = $dbw->newSelectQueryBuilder()
+			->select( [
 				'id' => $this->getMapping()->getRowIdColumn(),
-				'term_in_lang_id' => $this->getMapping()->getTermInLangIdColumn()
-			],
-			[ $this->getMapping()->getEntityIdColumn() => $entityId->getNumericId() ],
-			__METHOD__,
-			[ 'FOR UPDATE' ]
-		);
+				'term_in_lang_id' => $this->getMapping()->getTermInLangIdColumn(),
+			] )
+			->forUpdate()
+			->from( $this->getMapping()->getTableName() )
+			->where( [ $this->getMapping()->getEntityIdColumn() => $entityId->getNumericId() ] )
+			->caller( __METHOD__ )->fetchResultSet();
 
 		$rowIdsToDelete = [];
 		$termInLangIdsToCleanUp = [];
@@ -204,11 +205,10 @@ abstract class DatabaseTermStoreWriterBase {
 		}
 
 		if ( $rowIdsToDelete !== [] ) {
-			$dbw->delete(
-				$this->getMapping()->getTableName(),
-				[ $this->getMapping()->getRowIdColumn() => $rowIdsToDelete ],
-				__METHOD__
-			);
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( $this->getMapping()->getTableName() )
+				->where( [ $this->getMapping()->getRowIdColumn() => $rowIdsToDelete ] )
+				->caller( __METHOD__ )->execute();
 		}
 
 		return array_values( array_unique( $termInLangIdsToCleanUp ) );

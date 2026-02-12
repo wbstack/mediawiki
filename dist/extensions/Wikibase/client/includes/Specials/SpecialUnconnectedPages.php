@@ -2,15 +2,16 @@
 
 namespace Wikibase\Client\Specials;
 
-use Html;
-use NamespaceInfo;
-use QueryPage;
+use MediaWiki\Html\Html;
+use MediaWiki\SpecialPage\QueryPage;
+use MediaWiki\Title\NamespaceInfo;
+use MediaWiki\Title\TitleFactory;
 use Skin;
-use TitleFactory;
 use Wikibase\Client\NamespaceChecker;
 use Wikibase\Lib\Rdbms\ClientDomainDb;
 use Wikibase\Lib\Rdbms\ClientDomainDbFactory;
 use Wikimedia\Rdbms\FakeResultWrapper;
+use Wikimedia\Rdbms\IConnectionProvider;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
@@ -41,6 +42,7 @@ class SpecialUnconnectedPages extends QueryPage {
 	private $db;
 
 	public function __construct(
+		IConnectionProvider $dbProvider,
 		NamespaceInfo $namespaceInfo,
 		TitleFactory $titleFactory,
 		ClientDomainDbFactory $db,
@@ -51,7 +53,7 @@ class SpecialUnconnectedPages extends QueryPage {
 		$this->titleFactory = $titleFactory;
 		$this->namespaceChecker = $namespaceChecker;
 		$this->db = $db->newLocalDb();
-		$this->setDBLoadBalancer( $this->db->loadBalancer() );
+		$this->setDatabaseProvider( $dbProvider );
 	}
 
 	/**
@@ -100,26 +102,20 @@ class SpecialUnconnectedPages extends QueryPage {
 	 * @return array[]
 	 */
 	public function getQueryInfo() {
-		return [
-			'tables' => [
-				'page',
-				'page_props',
-			],
-			'fields' => [
+		return $this->db->connections()->getReadConnection()->newSelectQueryBuilder()
+			->select( [
 				'value' => 'page_id',
 				'namespace' => 'page_namespace',
 				'title' => 'page_title',
-			],
-			'conds' => $this->buildNamespaceConditionals(),
-			// Sorting is determined getOrderFields()
-			'options' => [],
-			'join_conds' => [
-				'page_props' => [
-					'INNER JOIN',
-					[ 'page_id = pp_page', 'pp_propname' => 'unexpectedUnconnectedPage' ]
-				],
-			],
-		];
+			] )
+			->from( 'page' )
+			->join( 'page_props', null, [
+				'page_id = pp_page',
+				'pp_propname' => 'unexpectedUnconnectedPage',
+			] )
+			->where( $this->buildNamespaceConditionals() )
+			// sorting is determined by getOrderFields()
+			->getQueryInfo();
 	}
 
 	/**
@@ -154,7 +150,7 @@ class SpecialUnconnectedPages extends QueryPage {
 	 * @see QueryPage::formatResult
 	 *
 	 * @param Skin $skin
-	 * @param object $result
+	 * @param \stdClass $result
 	 *
 	 * @return string|bool
 	 */
@@ -191,7 +187,7 @@ class SpecialUnconnectedPages extends QueryPage {
 		return Html::openElement(
 			'form',
 			[
-				'action' => $this->getPageTitle()->getLocalURL()
+				'action' => $this->getPageTitle()->getLocalURL(),
 			]
 		) .
 		$titleInputHtml .
@@ -200,7 +196,7 @@ class SpecialUnconnectedPages extends QueryPage {
 			'selected' => $ns === null ? '' : $ns,
 			'all' => '',
 			'exclude' => $excludeNamespaces,
-			'label' => $this->msg( 'namespace' )->text()
+			'label' => $this->msg( 'namespace' )->text(),
 		] ) . ' ' .
 		Html::submitButton(
 			$this->msg( 'wikibase-unconnectedpages-submit' )->text(),

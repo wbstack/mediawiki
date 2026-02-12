@@ -1,21 +1,20 @@
+'use strict';
+
 /**
+ * Dynamic highlighting while reading an article
+ *
  * @author Thiemo Kreuz
  */
 ( function () {
-	'use strict';
-
 	/**
-	 * Checks if the ID uses a composite format that does not only consist of a sequential number,
-	 * as specified in "cite_reference_link_key_with_num".
+	 * Checks if the ID uses a composite format that does not only consist of a sequential number.
 	 *
 	 * @param {string} id
 	 * @return {boolean}
 	 */
 	function isNamedReference( id ) {
-		var prefix = mw.msg( 'cite_reference_link_prefix' );
-
 		// Note: This assumes IDs start with the prefix; this is guaranteed by the parser function
-		return /\D/.test( id.slice( prefix.length ) );
+		return /^cite_ref-\D/.test( id );
 	}
 
 	/**
@@ -38,12 +37,12 @@
 	 * @return {jQuery}
 	 */
 	function makeUpArrowLink( $backlinkWrapper ) {
-		var textNode = $backlinkWrapper[ 0 ].firstChild,
-			accessibilityLabel = mw.msg( 'cite_references_link_accessibility_back_label' ),
-			$upArrowLink = $( '<a>' )
-				.addClass( 'mw-cite-up-arrow-backlink' )
-				.attr( 'aria-label', accessibilityLabel )
-				.attr( 'title', accessibilityLabel );
+		let textNode = $backlinkWrapper[ 0 ].firstChild;
+		const accessibilityLabel = mw.msg( 'cite_references_link_accessibility_back_label' );
+		const $upArrowLink = $( '<a>' )
+			.addClass( 'mw-cite-up-arrow-backlink' )
+			.attr( 'aria-label', accessibilityLabel )
+			.attr( 'title', accessibilityLabel );
 
 		if ( !textNode ) {
 			return $upArrowLink;
@@ -58,7 +57,7 @@
 			return $upArrowLink;
 		}
 
-		var upArrow = textNode.data.trim();
+		const upArrow = textNode.data.trim();
 		// The text node typically contains "↑ ", and we need to keep the space.
 		textNode.data = textNode.data.replace( upArrow, '' );
 
@@ -80,8 +79,8 @@
 	 */
 	function updateUpArrowLink( $backlink ) {
 		// It's convenient to stop at the class name, but it's not guaranteed to be there.
-		var $backlinkWrapper = $backlink.closest( '.mw-cite-backlink, li' ),
-			$upArrowLink = $backlinkWrapper.find( '.mw-cite-up-arrow-backlink' );
+		const $backlinkWrapper = $backlink.closest( '.mw-cite-backlink, li' );
+		let $upArrowLink = $backlinkWrapper.find( '.mw-cite-up-arrow-backlink' );
 
 		if ( !$upArrowLink.length && $backlinkWrapper.length ) {
 			$upArrowLink = makeUpArrowLink( $backlinkWrapper );
@@ -90,10 +89,10 @@
 		$upArrowLink.attr( 'href', $backlink.attr( 'href' ) );
 	}
 
-	mw.hook( 'wikipage.content' ).add( function ( $content ) {
+	mw.hook( 'wikipage.content' ).add( ( $content ) => {
 		// We are going to use the ID in the code below, so better be sure one is there.
 		$content.find( '.reference[id] > a' ).on( 'click', function () {
-			var id = $( this ).parent().attr( 'id' );
+			const id = $( this ).parent().attr( 'id' );
 
 			$content.find( '.mw-cite-targeted-backlink' ).removeClass( 'mw-cite-targeted-backlink' );
 
@@ -103,7 +102,7 @@
 			}
 
 			// The :not() skips the duplicate link created below. Relevant when double clicking.
-			var $backlink = $content.find( '.references a[href="#' + $.escapeSelector( id ) + '"]:not(.mw-cite-up-arrow-backlink)' )
+			const $backlink = $content.find( '.references a[href="#' + $.escapeSelector( id ) + '"]:not(.mw-cite-up-arrow-backlink)' )
 				.first()
 				.addClass( 'mw-cite-targeted-backlink' );
 

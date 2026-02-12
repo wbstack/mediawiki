@@ -20,10 +20,15 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use ChangeTags;
 use MediaWiki\Languages\LanguageNameUtils;
 use MediaWiki\MainConfigNames;
+use MediaWiki\Specials\SpecialPageLanguage;
+use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
-use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\Rdbms\IConnectionProvider;
 
 /**
  * API module that facilitates changing the language of a page.
@@ -34,26 +39,17 @@ use Wikimedia\Rdbms\ILoadBalancer;
  */
 class ApiSetPageLanguage extends ApiBase {
 
-	/** @var ILoadBalancer */
-	private $loadBalancer;
+	private IConnectionProvider $dbProvider;
+	private LanguageNameUtils $languageNameUtils;
 
-	/** @var LanguageNameUtils */
-	private $languageNameUtils;
-
-	/**
-	 * @param ApiMain $mainModule
-	 * @param string $moduleName
-	 * @param ILoadBalancer $loadBalancer
-	 * @param LanguageNameUtils $languageNameUtils
-	 */
 	public function __construct(
 		ApiMain $mainModule,
-		$moduleName,
-		ILoadBalancer $loadBalancer,
+		string $moduleName,
+		IConnectionProvider $dbProvider,
 		LanguageNameUtils $languageNameUtils
 	) {
 		parent::__construct( $mainModule, $moduleName );
-		$this->loadBalancer = $loadBalancer;
+		$this->dbProvider = $dbProvider;
 		$this->languageNameUtils = $languageNameUtils;
 	}
 
@@ -110,7 +106,7 @@ class ApiSetPageLanguage extends ApiBase {
 			$params['lang'],
 			$params['reason'] ?? '',
 			$params['tags'] ?: [],
-			$this->loadBalancer->getConnectionRef( ILoadBalancer::DB_PRIMARY )
+			$this->dbProvider->getPrimaryDatabase()
 		);
 
 		if ( !$status->isOK() ) {
@@ -163,8 +159,11 @@ class ApiSetPageLanguage extends ApiBase {
 	}
 
 	protected function getExamplesMessages() {
+		$title = Title::newMainPage()->getPrefixedText();
+		$mp = rawurlencode( $title );
+
 		return [
-			'action=setpagelanguage&title=Main%20Page&lang=eu&token=123ABC'
+			"action=setpagelanguage&title={$mp}&lang=eu&token=123ABC"
 				=> 'apihelp-setpagelanguage-example-language',
 			'action=setpagelanguage&pageid=123&lang=default&token=123ABC'
 				=> 'apihelp-setpagelanguage-example-default',
@@ -175,3 +174,6 @@ class ApiSetPageLanguage extends ApiBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:SetPageLanguage';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiSetPageLanguage::class, 'ApiSetPageLanguage' );

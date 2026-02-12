@@ -2,15 +2,13 @@
 
 namespace Wikibase\Repo\ParserOutput;
 
-use Language;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Services\Lookup\EntityRetrievingTermLookup;
 use Wikibase\DataModel\Services\Lookup\InMemoryEntityLookup;
-use Wikibase\Lib\LanguageNameLookup;
 use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookup;
 use Wikibase\Lib\TermLanguageFallbackChain;
-use Wikibase\Repo\MediaWikiLanguageDirectionalityLookup;
 use Wikibase\Repo\MediaWikiLocalizedTextProvider;
 use Wikibase\Repo\View\RepoSpecialPageLinker;
 use Wikibase\Repo\WikibaseRepo;
@@ -49,15 +47,17 @@ class EntityTermsViewFactory {
 		Language $language,
 		TermLanguageFallbackChain $termFallbackChain
 	) {
+		$services = MediaWikiServices::getInstance();
 		$textProvider = new MediaWikiLocalizedTextProvider( $language );
 		$templateFactory = TemplateFactory::getDefaultInstance();
-		$languageDirectionalityLookup = new MediaWikiLanguageDirectionalityLookup();
-		$languageNameLookup = new LanguageNameLookup( $language->getCode() );
+		$languageDirectionalityLookup = WikibaseRepo::getLanguageDirectionalityLookup( $services );
+		$languageNameLookup = WikibaseRepo::getLanguageNameLookupFactory()->getForLanguage( $language );
 		$entityLookup = new InMemoryEntityLookup();
 		if ( $entity->getId() !== null ) {
 			$entityLookup->addEntity( $entity );
 		}
 
+		$mulEnabled = WikibaseRepo::getSettings( $services )->getSetting( 'tmpEnableMulLanguageCode' );
 		return new PlaceholderEmittingEntityTermsView(
 			new FallbackHintHtmlTermRenderer(
 				$languageDirectionalityLookup,
@@ -78,9 +78,13 @@ class EntityTermsViewFactory {
 				$templateFactory,
 				$languageNameLookup,
 				$textProvider,
-				$languageDirectionalityLookup
+				$languageDirectionalityLookup,
+				WikibaseRepo::getLanguageFallbackChainFactory( $services ),
+				$mulEnabled
+
 			),
-			new TextInjector()
+			new TextInjector(),
+			$mulEnabled
 		);
 	}
 
@@ -90,7 +94,7 @@ class EntityTermsViewFactory {
 	 * This is because the objects created from this factory are assumed to
 	 * write into ParserOutput which should not include any user-specific markup.
 	 */
-	private function newTermboxView( Language $language ) {
+	private function newTermboxView( Language $language ): TermboxView {
 		$textProvider = new MediaWikiLocalizedTextProvider( $language );
 		$services = MediaWikiServices::getInstance();
 		$repoSettings = WikibaseRepo::getSettings( $services );

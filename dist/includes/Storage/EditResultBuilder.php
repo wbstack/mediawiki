@@ -1,7 +1,5 @@
 <?php
 /**
- * Builder class for the EditResult object.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,8 +16,6 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- *
- * @author Ostrzyciel
  */
 
 namespace MediaWiki\Storage;
@@ -35,6 +31,7 @@ use Wikimedia\Assert\Assert;
  *
  * @internal Only for use by PageUpdater
  * @since 1.35
+ * @author Ostrzyciel
  */
 class EditResultBuilder {
 
@@ -58,7 +55,7 @@ class EditResultBuilder {
 	/** @var bool */
 	private $isNew = false;
 
-	/** @var int|bool */
+	/** @var int|false */
 	private $originalRevisionId = false;
 
 	/** @var RevisionRecord|null */
@@ -88,7 +85,7 @@ class EditResultBuilder {
 	/**
 	 * @param RevisionStore $revisionStore
 	 * @param string[] $softwareTags Array of currently enabled software change tags. Can be
-	 *        obtained from ChangeTags::getSoftwareTags()
+	 *        obtained from ChangeTagsStore->getSoftwareTags()
 	 * @param ServiceOptions $options Options for this instance.
 	 */
 	public function __construct(
@@ -163,7 +160,7 @@ class EditResultBuilder {
 	public function markAsRevert(
 		int $revertMethod,
 		int $newestRevertedRevId,
-		int $revertAfterRevId = null
+		?int $revertAfterRevId = null
 	) {
 		Assert::parameter(
 			in_array(
@@ -194,7 +191,7 @@ class EditResultBuilder {
 	}
 
 	/**
-	 * @param RevisionRecord|int|bool|null $originalRevision
+	 * @param RevisionRecord|int|false|null $originalRevision
 	 *   RevisionRecord or revision ID for the original revision.
 	 *   False or null to unset.
 	 */

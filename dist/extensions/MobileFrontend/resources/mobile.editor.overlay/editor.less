@@ -1,4 +1,8 @@
+@import 'mediawiki.skin.variables.less';
 @import '../../mobile.less/mobile.variables.less';
+@import 'BlockMessageDetails.less';
+@import 'editor.ve.less';
+@import 'icons.less';
 
 .editor-overlay {
 	box-sizing: border-box;
@@ -24,24 +28,10 @@
 
 	.overlay-header {
 		// The border will only be visible on screens >1000px due to max-width set elsewhere.
-		outline: 1px solid #c8ccd1;
+		outline: @border-width-base @border-style-base @border-color-subtle;
 
 		.header-cancel {
 			padding: 0;
-		}
-
-		.mw-ui-button,
-		.mw-ui-icon {
-			border: 0;
-			border-radius: 0;
-		}
-
-		.mw-ui-icon {
-			padding: 0.875em;
-		}
-
-		.continue {
-			width: auto;
 		}
 
 		.oo-ui-toolbar-bar,
@@ -58,12 +48,20 @@
 	.anonwarning {
 		margin-top: 16px;
 
+		.cdx-message {
+			margin-bottom: 16px;
+		}
+
 		.anonmsg {
 			margin-bottom: 19px;
 		}
 
-		.mw-ui-button {
+		.cdx-button {
 			margin-bottom: 15px;
+		}
+
+		.actions {
+			text-align: center;
 		}
 
 		> p {
@@ -73,22 +71,47 @@
 		}
 	}
 
-	&-ve .anonwarning {
-		padding-top: 3em;
+	&-ve .overlay-footer-container + *:not( .ve-mobile-fakeToolbar-container ) {
+		// Any extra messages (e.g. .minerva-anon-talk-message or .anonwarning)
+		// should leave space for the toolbar above the first message.
+		margin-top: 4em;
+	}
+
+	&-editNotices {
+		// Edit notices are designed for desktop and can be quite long, so use the desktop font size
+		// oo-ui-messageDialog-message sets font size to 1.1em so undo that as well
+		font-size: ( 14em / 16 / 1.1 );
+		line-height: 1.6;
+
+		.mw-editnotice {
+			// Images in edit notices are usually supplementary, and cause layout issues on narrow screens
+			img,
+			figure {
+				display: none !important;
+			}
+
+			// Reset some specific styles on common block level containers
+			table,
+			td,
+			th,
+			div {
+				font-size: 100% !important;
+				background: none !important;
+				margin: 0 !important;
+				padding: 0 !important;
+				border: 0 !important;
+			}
+		}
+	}
+
+	&-editNotice:not( :first-child ) {
+		border-top: @border-width-base @border-style-base @border-color-subtle;
+		padding-top: 1em;
+		margin-top: 1em;
 	}
 
 	.preview {
 		display: none;
-
-		// Hide section heading toggling indicators as they are non-functional in the preview.
-		.section-heading .indicator {
-			display: none;
-		}
-
-		// Expand sections
-		.collapsible-block {
-			display: block;
-		}
 	}
 
 	.wikitext-editor {
@@ -106,15 +129,15 @@
 		font-size: 1.4em;
 		font-weight: bold;
 		margin: 0.5em 0;
-		color: @grayMediumDark;
+		color: @color-subtle;
 	}
 
 	.buttonBar {
 		.message {
-			color: @color-base--subtle;
+			color: @color-subtle;
 			margin: 0 0 0.7em;
 			padding: 0 0 0.3em;
-			border-bottom: 1px solid @colorGray12;
+			border-bottom: @border-width-base @border-style-base @border-color-subtle;
 
 			p {
 				display: inline-block;
@@ -133,7 +156,7 @@
 	}
 
 	.editor-switcher {
-		border-left: 1px solid @colorGray12;
+		border-left: @border-width-base @border-style-base @border-color-subtle;
 
 		.oo-ui-toolGroup:last-child {
 			border-right: 0;

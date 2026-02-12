@@ -1,8 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Mainframe98"
+			"Mainframe98",
+			"McDutchie"
 		]
 	},
-	"templatesandbox-apihelp-contentmodel": "Inhoudsmodel van<var>$1templatesandboxtext</var>."
+	"templatesandbox-apihelp-prefix": "Voorvoegsel voor de sjabloonzandbak, zoals bij [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Verwerkt de pagina met behulp van <var>$1templatesandboxtext</var> in plaats van de inhoud van de hier genoemde pagina.",
+	"templatesandbox-apihelp-text": "Verwerkt de pagina met behulp van deze pagina-inhoud in plaats van de door <var>$1templatesandboxtitle</var> genoemde pagina.",
+	"templatesandbox-apihelp-contentmodel": "Inhoudsmodel van<var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Inhoudsindeling van <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "De parameters <var>$1templatesandboxtitle</var> en <var>$1templatesandboxtext</var> moeten beide worden opgegeven of beide worden weggelaten."
 }

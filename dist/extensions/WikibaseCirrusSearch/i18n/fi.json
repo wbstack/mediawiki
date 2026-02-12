@@ -1,17 +1,26 @@
 {
 	"@metadata": {
 		"authors": [
+			"Samoasambia",
 			"Stryn",
 			"Valtlait"
 		]
 	},
-	"special-entitieswithoutdescription": "Aiheet ilman kuvausta",
-	"wikibasecirrus-entitieswithoutdescription-legend": "Hae luettelo aiheista, joissa ei ole kuvausta",
-	"special-entitieswithoutlabel": "Aiheet ilman nimeä",
-	"wikibasecirrus-entitieswithoutlabel-legend": "Hae luettelo aiheista ilman nimeä",
+	"wikibasecirrus-desc": "Wikibase-laajennus CirrusSeach-toiminnon käyttämiseen",
+	"wikibasecirrus-keywordfeature-unknown-language-code": "Avainsana $1 sisältää tuntemattoman kielikoodin: $2",
+	"wikibasecirrus-keywordfeature-too-many-language-codes": "Avainsana $1 sisältää liian monta kielikoodia. Haetaan {{GRAMMAR:adessive|$2}} {{PLURAL:$3|annetusta $3 kielestä|annetuista $3 kielestä}}",
+	"wikibasecirrus-inlabel-no-query-provided": "inlabel-avainsanalle annettiin tyhjä hakumerkkijono",
+	"wikibasecirrus-search-bad-entity-type": "Virheellinen entiteettityyppi: $1",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "haswbstatement-avainsana ei sisällä kelvollisia lauseita",
+	"wikibasecirrus-haslicense-feature-no-valid-arguments": "haslicense-avainsana ei sisällä kelvollisia argumentteja",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "wbstatementquantity-avainsana ei sisällä kelvollisia lauseita",
+	"special-entitieswithoutdescription": "Entiteetit ilman kuvausta",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Hae luettelo entiteeteistä, joissa ei ole kuvausta",
+	"special-entitieswithoutlabel": "Entiteetit ilman nimeä",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Hae luettelo entiteeteistä, joissa ei ole nimeä",
 	"wikibasecirrus-entitieswithoutlabel-label-language": "Kielikoodi:",
-	"wikibasecirrus-entitieswithoutlabel-label-type": "Tyyppi",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Tyyppi:",
 	"wikibasecirrus-entitieswithoutlabel-submit": "Etsi",
 	"wikibasecirrus-entitieswithoutlabel-invalid-language": "”$1” ei ole kelvollinen kielikoodi.",
-	"wikibasecirrus-entitieswithoutlabel-invalid-type": "”$1” ei ole kelvollinen aiheen tyyppi."
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "”$1” ei ole kelvollinen entiteettityyppi."
 }

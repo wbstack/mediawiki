@@ -1,9 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Waldir",
-			"Waldyrious"
+			"O andras"
 		]
 	},
-	"elastica-desc": "Fornece funcionalidade básica de [http://www.elasticsearch.org/ Elasticsearch] para outras extensões, através da biblioteca [http://elastica.io/ Elastica]"
+	"elastica-desc": "Fornece funcionalidade básica de [https://www.elastic.co/ Elasticsearch] para outras extensões, através da biblioteca [https://elastica.io/ Elastica]"
 }

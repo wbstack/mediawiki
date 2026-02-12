@@ -1,4 +1,4 @@
-var
+const
 	View = require( './View' ),
 	header = require( './headers' ).header,
 	Anchor = require( './Anchor' ),
@@ -7,10 +7,9 @@ var
 	mfExtend = require( './mfExtend' );
 
 /**
- * Mobile modal window
- *
- * @class Overlay
- * @extends View
+ * @class module:mobile.startup/Overlay
+ * @classdesc Mobile modal window
+ * @extends module:mobile.startup/View
  * @uses Icon
  * @uses Button
  * @fires Overlay#hide
@@ -50,9 +49,7 @@ function Overlay( props ) {
 					{
 						// FIXME: Remove .initial-header selector
 						'click .cancel, .confirm, .initial-header .back': 'onExitClick',
-						click: ( ev ) => {
-							ev.stopPropagation();
-						}
+						click: ( ev ) => ev.stopPropagation()
 					},
 					props.events
 				)
@@ -79,31 +76,31 @@ mfExtend( Overlay, View, {
 	/**
 	 * Shows the spinner right to the input field.
 	 *
-	 * @memberof Overlay
+	 * @memberof module:mobile.startup/Overlay
 	 * @instance
 	 * @method
 	 */
-	showSpinner: function () {
+	showSpinner() {
 		this.$el.find( '.spinner' ).removeClass( 'hidden' );
 	},
 
 	/**
 	 * Hide the spinner near to the input field.
 	 *
-	 * @memberof Overlay
+	 * @memberof module:mobile.startup/Overlay
 	 * @instance
 	 * @method
 	 */
-	hideSpinner: function () {
+	hideSpinner() {
 		this.$el.find( '.spinner' ).addClass( 'hidden' );
 	},
 
 	/**
 	 * @inheritdoc
-	 * @memberof Overlay
+	 * @memberof module:mobile.startup/Overlay
 	 * @instance
 	 */
-	postRender: function () {
+	postRender() {
 		const footerAnchor = this.options.footerAnchor;
 		this.$overlayContent = this.$el.find( '.overlay-content' );
 		if ( this.isIos ) {
@@ -124,18 +121,19 @@ mfExtend( Overlay, View, {
 	/**
 	 * ClickBack event handler
 	 *
-	 * @memberof Overlay
+	 * @memberof module:mobile.startup/Overlay
 	 * @instance
 	 * @param {Object} ev event object
 	 */
-	onExitClick: function ( ev ) {
+	onExitClick( ev ) {
 		const exit = function () {
 			this.hide();
 		}.bind( this );
 		ev.preventDefault();
 		ev.stopPropagation();
 		if ( this.options.onBeforeExit ) {
-			this.options.onBeforeExit( exit, function () {} );
+			this.options.onBeforeExit( exit, () => {
+			} );
 		} else {
 			exit();
 		}
@@ -144,11 +142,11 @@ mfExtend( Overlay, View, {
 	/**
 	 * Attach overlay to current view and show it.
 	 *
-	 * @memberof Overlay
+	 * @memberof module:mobile.startup/Overlay
 	 * @instance
 	 */
-	show: function () {
-		var $html = util.getDocument();
+	show() {
+		const $html = util.getDocument();
 
 		this.scrollTop = window.pageYOffset;
 
@@ -169,12 +167,12 @@ mfExtend( Overlay, View, {
 	 * Detach the overlay from the current view
 	 * Should not be overriden as soon to be deprecated.
 	 *
-	 * @memberof Overlay
+	 * @memberof module:mobile.startup/Overlay
 	 * @instance
 	 * @final
 	 * @return {boolean} Whether the overlay was successfully hidden or not
 	 */
-	hide: function () {
+	hide() {
 		util.getDocument().removeClass( 'overlay-enabled' );
 		// return to last known scroll position
 		window.scrollTo( window.pageXOffset, this.scrollTop );
@@ -182,10 +180,10 @@ mfExtend( Overlay, View, {
 		// Since the hash change event caused by emitting hide will be detected later
 		// and to avoid the article being shown during a transition from one overlay to
 		// another, we regretfully detach the element asynchronously.
-		this.hideTimeout = setTimeout( function () {
+		this.hideTimeout = setTimeout( () => {
 			this.$el.detach();
 			this.hideTimeout = null;
-		}.bind( this ), 0 );
+		}, 0 );
 
 		/**
 		 * Fired when the overlay is closed.
@@ -203,12 +201,12 @@ mfExtend( Overlay, View, {
 	 * Can't use jQuery's hide() and show() because show() sets display: block.
 	 * And we want display: table for headers.
 	 *
-	 * @memberof Overlay
+	 * @memberof module:mobile.startup/Overlay
 	 * @instance
 	 * @protected
 	 * @param {string} className CSS selector to show
 	 */
-	showHidden: function ( className ) {
+	showHidden( className ) {
 		this.$el.find( '.hideable' ).addClass( 'hidden' );
 		this.$el.find( className ).removeClass( 'hidden' );
 	}
@@ -217,15 +215,15 @@ mfExtend( Overlay, View, {
 /**
  * Factory method for an overlay with a single child
  *
- * @memberof Overlay
+ * @memberof module:mobile.startup/Overlay
  * @instance
  * @protected
  * @param {Object} options
- * @param {View} view
- * @return {Overlay}
+ * @param {module:mobile.startup/View} view
+ * @return {module:mobile.startup/Overlay}
  */
 Overlay.make = function ( options, view ) {
-	var overlay = new Overlay( options );
+	const overlay = new Overlay( options );
 	overlay.$el.find( '.overlay-content' ).append( view.$el );
 	return overlay;
 };

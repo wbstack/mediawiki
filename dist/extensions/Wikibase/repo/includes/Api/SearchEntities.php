@@ -4,9 +4,12 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
-use ApiMain;
-use ApiResult;
+use InvalidArgumentException;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiResult;
+use MediaWiki\Api\ApiUsageException;
+use MediaWiki\Cache\LinkBatchFactory;
 use Wikibase\DataAccess\EntitySourceLookup;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Term\Term;
@@ -15,12 +18,14 @@ use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\Interactors\TermSearchResult;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityArticleIdLookup;
+use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Store\EntityTitleTextLookup;
 use Wikibase\Lib\Store\EntityUrlLookup;
 use Wikibase\Repo\FederatedProperties\FederatedPropertiesException;
 use Wikibase\Repo\WikibaseRepo;
 use Wikimedia\Assert\InvariantException;
 use Wikimedia\ParamValidator\ParamValidator;
+use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 
 /**
  * API module to search for Wikibase entities.
@@ -30,47 +35,43 @@ use Wikimedia\ParamValidator\ParamValidator;
 class SearchEntities extends ApiBase {
 
 	/**
-	 * @var EntitySearchHelper
+	 * "Soft" limit on the "continue" parameter.
+	 * Past this point, we won't add it to the response,
+	 * though users can still ask for higher continuation offsets manually.
 	 */
-	private $entitySearchHelper;
+	private const CONTINUE_SOFT_LIMIT = self::LIMIT_SML1;
 
 	/**
-	 * @var ContentLanguages
+	 * "Hard" limit on the "continue" parameter.
+	 * Past this point, continuation is not allowed (T355251).
+	 * The value is mostly arbitrary (could be somewhat higher or lower),
+	 * but chosen to coincide with CirrusSearch's Searcher::MAX_OFFSET_LIMIT:
+	 * when using CirrusSearch, it's not possible to get more than 10000 search results anyway.
 	 */
-	private $termsLanguages;
+	private const CONTINUE_HARD_LIMIT = 10000;
 
-	/**
-	 * @var EntitySourceLookup
-	 */
-	private $entitySourceLookup;
+	private LinkBatchFactory $linkBatchFactory;
 
-	/**
-	 * @var EntityTitleTextLookup
-	 */
-	private $entityTitleTextLookup;
+	private EntitySearchHelper $entitySearchHelper;
 
-	/**
-	 * @var EntityUrlLookup
-	 */
-	private $entityUrlLookup;
+	private ContentLanguages $termsLanguages;
 
-	/**
-	 * @var EntityArticleIdLookup
-	 */
-	private $entityArticleIdLookup;
+	private EntitySourceLookup $entitySourceLookup;
 
-	/**
-	 * @var ApiErrorReporter
-	 */
-	private $errorReporter;
+	private EntityTitleLookup $entityTitleLookup;
 
-	/**
-	 * @var array
-	 */
-	private $enabledEntityTypes;
+	private EntityTitleTextLookup $entityTitleTextLookup;
+
+	private EntityUrlLookup $entityUrlLookup;
+
+	private EntityArticleIdLookup $entityArticleIdLookup;
+
+	private ApiErrorReporter $errorReporter;
+
+	private array $enabledEntityTypes;
 
 	/** @var (string|null)[] */
-	private $searchProfiles;
+	private array $searchProfiles;
 
 	/**
 	 * @see ApiBase::__construct
@@ -78,9 +79,11 @@ class SearchEntities extends ApiBase {
 	public function __construct(
 		ApiMain $mainModule,
 		string $moduleName,
+		LinkBatchFactory $linkBatchFactory,
 		EntitySearchHelper $entitySearchHelper,
 		ContentLanguages $termLanguages,
 		EntitySourceLookup $entitySourceLookup,
+		EntityTitleLookup $entityTitleLookup,
 		EntityTitleTextLookup $entityTitleTextLookup,
 		EntityUrlLookup $entityUrlLookup,
 		EntityArticleIdLookup $entityArticleIdLookup,
@@ -93,8 +96,10 @@ class SearchEntities extends ApiBase {
 		// Always try to add a conceptUri to results if not already set
 		$this->entitySearchHelper = new ConceptUriSearchHelper( $entitySearchHelper, $entitySourceLookup );
 
+		$this->linkBatchFactory = $linkBatchFactory;
 		$this->termsLanguages = $termLanguages;
 		$this->entitySourceLookup = $entitySourceLookup;
+		$this->entityTitleLookup = $entityTitleLookup;
 		$this->entityTitleTextLookup = $entityTitleTextLookup;
 		$this->entityUrlLookup = $entityUrlLookup;
 		$this->entityArticleIdLookup = $entityArticleIdLookup;
@@ -106,11 +111,13 @@ class SearchEntities extends ApiBase {
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
+		LinkBatchFactory $linkBatchFactory,
 		ApiHelperFactory $apiHelperFactory,
 		array $enabledEntityTypes,
 		EntityArticleIdLookup $entityArticleIdLookup,
 		EntitySearchHelper $entitySearchHelper,
 		EntitySourceLookup $entitySourceLookup,
+		EntityTitleLookup $entityTitleLookup,
 		EntityTitleTextLookup $entityTitleTextLookup,
 		EntityUrlLookup $entityUrlLookup,
 		SettingsArray $repoSettings,
@@ -120,9 +127,11 @@ class SearchEntities extends ApiBase {
 		return new self(
 			$mainModule,
 			$moduleName,
+			$linkBatchFactory,
 			$entitySearchHelper,
 			$termsLanguages,
 			$entitySourceLookup,
+			$entityTitleLookup,
 			$entityTitleTextLookup,
 			$entityUrlLookup,
 			$entityArticleIdLookup,
@@ -140,12 +149,12 @@ class SearchEntities extends ApiBase {
 	 *
 	 * @param array $params
 	 *
-	 * @return array[]
-	 * @throws \ApiUsageException
+	 * @return TermSearchResult[]
+	 * @throws ApiUsageException
 	 */
-	private function getSearchEntries( array $params ): array {
+	private function getSearchResults( array $params ): array {
 		try {
-			$searchResults = $this->entitySearchHelper->getRankedSearchResults(
+			return $this->entitySearchHelper->getRankedSearchResults(
 				$params['search'],
 				$params['language'],
 				$params['type'],
@@ -155,15 +164,10 @@ class SearchEntities extends ApiBase {
 			);
 		} catch ( EntitySearchException $ese ) {
 			$this->dieStatus( $ese->getStatus() );
+
+			// @phan-suppress-next-line PhanPluginUnreachableCode Wanted
 			throw new InvariantException( "dieStatus() must throw an exception" );
 		}
-
-		$entries = [];
-		foreach ( $searchResults as $match ) {
-			$entries[] = $this->buildTermSearchMatchEntry( $match, $params['props'] );
-		}
-
-		return $entries;
 	}
 
 	/**
@@ -173,32 +177,69 @@ class SearchEntities extends ApiBase {
 	 * @return array
 	 */
 	private function buildTermSearchMatchEntry( TermSearchResult $match, ?array $props ): array {
+		$entry = $this->buildTermSearchMatchPageEntry( $match, $props );
+		$entry = $this->buildTermSearchMatchDisplayEntry( $match, $entry );
+		return $entry;
+	}
+
+	/**
+	 * @param TermSearchResult $match
+	 * @param string[]|null $props
+	 */
+	private function buildTermSearchMatchPageEntry( TermSearchResult $match, ?array $props ): array {
 		$entityId = $match->getEntityId();
-
-		$entry = [
-			'id' => $entityId->getSerialization(),
-			'title' => $this->entityTitleTextLookup->getPrefixedText( $entityId ),
-			'pageid' => $this->entityArticleIdLookup->getArticleId( $entityId ),
-			'display' => [], // filled below
-		];
-		ApiResult::setArrayType( $entry['display'], 'assoc' );
-
-		/**
-		 * The repository key should be deprecated and removed, for now avoid adding it when using federatedProperties to avoid confusion
-		 * in the new feature and avoid the need to "fix" it..
-		 * This is deliberately not tested and thus not injected as for federated properties we "don't care much" and for default Wikibase
-		 * this is already covered by the SearchEntitiesTest.
-		 */
-		if ( !WikibaseRepo::getSettings()->getSetting( 'federatedPropertiesEnabled' ) ) {
-			$entry['repository'] = $this->getRepositoryOrEntitySourceName( $entityId );
+		if ( $entityId !== null ) {
+			$entry = [
+				'id' => $entityId->getSerialization(),
+				'title' => $this->entityTitleTextLookup->getPrefixedText( $entityId ),
+				'pageid' => $this->entityArticleIdLookup->getArticleId( $entityId ),
+			];
+		} else {
+			$entry = [
+				// id, title, pageid added via metadata (see below)
+			];
 		}
 
-		if ( $props !== null && in_array( 'url', $props ) ) {
-			$entry['url'] = $this->entityUrlLookup->getFullUrl( $entityId );
-		}
-		foreach ( $match->getMetaData() as $metaKey => $metaValue ) {
+		$metaData = $match->getMetaData();
+		foreach ( $metaData as $metaKey => $metaValue ) {
 			$entry[$metaKey] = $metaValue;
 		}
+
+		if ( $entityId !== null ) {
+			/**
+			 * The repository key should be deprecated and removed, for now avoid adding it when using federatedProperties
+			 * to avoid confusion in the new feature and avoid the need to "fix" it..
+			 * This is deliberately not tested and thus not injected as for federated properties we "don't care much"
+			 * and for default Wikibase this is already covered by the SearchEntitiesTest.
+			 */
+			if ( !WikibaseRepo::getSettings()->getSetting( 'federatedPropertiesEnabled' ) ) {
+				$entry['repository'] = $this->getRepositoryOrEntitySourceName( $entityId );
+			}
+
+			if ( $props !== null && in_array( 'url', $props ) ) {
+				$entry['url'] = $this->entityUrlLookup->getFullUrl( $entityId );
+			}
+		} else {
+			foreach ( [ 'id', 'title', 'pageid', 'url' ] as $key ) {
+				if ( !array_key_exists( $key, $metaData ) ) {
+					throw new InvalidArgumentException(
+						'Invalid TermSearchResult: ' .
+						"if id is null, then $key must be set in the metadata!"
+					);
+				}
+			}
+
+			if ( $props === null || !in_array( 'url', $props ) ) {
+				unset( $entry['url'] );
+			}
+		}
+
+		return $entry;
+	}
+
+	private function buildTermSearchMatchDisplayEntry( TermSearchResult $match, array $entry ): array {
+		$entry['display'] = [];
+		ApiResult::setArrayType( $entry['display'], 'assoc' );
 
 		$displayLabel = $match->getDisplayLabel();
 
@@ -267,7 +308,7 @@ class SearchEntities extends ApiBase {
 	}
 
 	/**
-	 * @throws \ApiUsageException
+	 * @throws ApiUsageException
 	 * @throws EntitySearchException
 	 */
 	public function executeInternal(): void {
@@ -275,13 +316,13 @@ class SearchEntities extends ApiBase {
 
 		$params = $this->extractRequestParams();
 
-		$entries = $this->getSearchEntries( $params );
+		$results = $this->getSearchResults( $params );
 
 		$this->getResult()->addValue(
 			null,
 			'searchinfo',
 			[
-				'search' => $params['search']
+				'search' => $params['search'],
 			]
 		);
 
@@ -291,18 +332,33 @@ class SearchEntities extends ApiBase {
 			[]
 		);
 
-		// getSearchEntities returns one more item than requested in order to determine if there
+		// getSearchResults returns one more item than requested in order to determine if there
 		// would be any more results coming up.
-		$hits = count( $entries );
+		$hits = count( $results );
+
+		// slice off the extra results at the beginning that $params['continue'] "skips" over
+		$returnedResults = array_slice( $results, $params['continue'], $params['limit'] );
+
+		// prefetch page IDs
+		$this->linkBatchFactory->newLinkBatch( array_map(
+			fn ( TermSearchResult $match ) => $this->entityTitleLookup->getTitleForId( $match->getEntityId() ),
+			array_filter(
+				$returnedResults,
+				fn ( TermSearchResult $match ) => $match->getEntityId() !== null
+			)
+		) )->execute();
 
 		// Actual result set.
-		$entries = array_slice( $entries, $params['continue'], $params['limit'] );
+		$entries = [];
+		foreach ( $returnedResults as $match ) {
+			$entries[] = $this->buildTermSearchMatchEntry( $match, $params['props'] );
+		}
 
 		$nextContinuation = $params['continue'] + $params['limit'];
 
 		// Only pass search-continue param if there are more results and the maximum continuation
 		// limit is not exceeded.
-		if ( $hits > $nextContinuation && $nextContinuation <= self::LIMIT_SML1 ) {
+		if ( $hits > $nextContinuation && $nextContinuation <= self::CONTINUE_SOFT_LIMIT ) {
 			$this->getResult()->addValue(
 				null,
 				'search-continue',
@@ -341,7 +397,7 @@ class SearchEntities extends ApiBase {
 			],
 			'strictlanguage' => [
 				ParamValidator::PARAM_TYPE => 'boolean',
-				ParamValidator::PARAM_DEFAULT => false
+				ParamValidator::PARAM_DEFAULT => false,
 			],
 			'type' => [
 				ParamValidator::PARAM_TYPE => $this->enabledEntityTypes,
@@ -350,14 +406,16 @@ class SearchEntities extends ApiBase {
 			'limit' => [
 				ParamValidator::PARAM_TYPE => 'limit',
 				ParamValidator::PARAM_DEFAULT => 7,
-				self::PARAM_MAX => self::LIMIT_SML1,
-				self::PARAM_MAX2 => self::LIMIT_SML2,
-				self::PARAM_MIN => 0,
+				IntegerDef::PARAM_MAX => self::LIMIT_SML1,
+				IntegerDef::PARAM_MAX2 => self::LIMIT_SML2,
+				IntegerDef::PARAM_MIN => 0,
 			],
 			'continue' => [
 				ParamValidator::PARAM_TYPE => 'integer',
 				ParamValidator::PARAM_REQUIRED => false,
-				ParamValidator::PARAM_DEFAULT => 0
+				ParamValidator::PARAM_DEFAULT => 0,
+				IntegerDef::PARAM_MAX => self::CONTINUE_HARD_LIMIT,
+				IntegerDef::PARAM_MIN => 0,
 			],
 			'props' => [
 				ParamValidator::PARAM_TYPE => [ 'url' ],

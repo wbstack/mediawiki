@@ -4,11 +4,11 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\UpdateRepo;
 
-use DerivativeContext;
 use Job;
+use MediaWiki\Context\DerivativeContext;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\User\User;
 use Psr\Log\LoggerInterface;
-use RequestContext;
-use User;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
@@ -16,7 +16,7 @@ use Wikibase\DataModel\Services\Lookup\EntityLookupException;
 use Wikibase\Lib\FormatableSummary;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityStore;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\SummaryFormatter;
 
 /**
@@ -48,7 +48,7 @@ abstract class UpdateRepoJob extends Job {
 	protected $logger;
 
 	/**
-	 * @var MediawikiEditEntityFactory
+	 * @var MediaWikiEditEntityFactory
 	 */
 	private $editEntityFactory;
 
@@ -60,7 +60,7 @@ abstract class UpdateRepoJob extends Job {
 		EntityStore $entityStore,
 		SummaryFormatter $summaryFormatter,
 		LoggerInterface $logger,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		SettingsArray $settings
 	): void {
 		$this->entityLookup = $entityLookup;

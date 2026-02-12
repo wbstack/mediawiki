@@ -1,45 +1,46 @@
 <?php
-
 /**
- * Unit
- *
- * @package Less
- * @subpackage tree
+ * @private
+ * @see less-2.5.3.js#Unit.prototype
  */
 class Less_Tree_Unit extends Less_Tree {
 
-	var $numerator = array();
-	var $denominator = array();
+	public $numerator = [];
+	public $denominator = [];
 	public $backupUnit;
-	public $type = 'Unit';
 
-	public function __construct( $numerator = array(), $denominator = array(), $backupUnit = null ) {
+	public function __construct( $numerator = [], $denominator = [], $backupUnit = null ) {
 		$this->numerator = $numerator;
 		$this->denominator = $denominator;
-		$this->backupUnit = $backupUnit;
+		sort( $this->numerator );
+		sort( $this->denominator );
+		$this->backupUnit = $backupUnit ?? $numerator[0] ?? null;
 	}
 
-	public function __clone() {
+	public function clone() {
+		// we are recreating a new object to trigger logic from constructor
+		return new Less_Tree_Unit( $this->numerator, $this->denominator, $this->backupUnit );
 	}
 
 	/**
 	 * @see Less_Tree::genCSS
 	 */
 	public function genCSS( $output ) {
-		if ( $this->numerator ) {
-			$output->add( $this->numerator[0] );
-		} elseif ( $this->denominator ) {
-			$output->add( $this->denominator[0] );
-		} elseif ( !Less_Parser::$options['strictUnits'] && $this->backupUnit ) {
+		$strictUnits = Less_Parser::$options['strictUnits'];
+
+		if ( count( $this->numerator ) === 1 ) {
+			$output->add( $this->numerator[0] ); // the ideal situation
+		} elseif ( !$strictUnits && $this->backupUnit ) {
 			$output->add( $this->backupUnit );
-			return;
+		} elseif ( !$strictUnits && $this->denominator ) {
+			$output->add( $this->denominator[0] );
 		}
 	}
 
 	public function toString() {
 		$returnStr = implode( '*', $this->numerator );
 		foreach ( $this->denominator as $d ) {
-			$returnStr .= '/'.$d;
+			$returnStr .= '/' . $d;
 		}
 		return $returnStr;
 	}
@@ -49,21 +50,22 @@ class Less_Tree_Unit extends Less_Tree {
 	}
 
 	/**
-	 * @param Less_Tree_Unit $other
+	 * @param self $other
 	 */
 	public function compare( $other ) {
 		return $this->is( $other->toString() ) ? 0 : -1;
 	}
 
 	public function is( $unitString ) {
-		return $this->toString() === $unitString;
+		return strtoupper( $this->toString() ) === strtoupper( $unitString );
 	}
 
 	public function isLength() {
 		$css = $this->toCSS();
-		return !!preg_match( '/px|em|%|in|cm|mm|pc|pt|ex/', $css );
+		return (bool)preg_match( '/px|em|%|in|cm|mm|pc|pt|ex/', $css );
 	}
 
+	// TODO: Remove unused method
 	public function isAngle() {
 		return isset( Less_Tree_UnitConversions::$angle[$this->toCSS()] );
 	}
@@ -77,7 +79,7 @@ class Less_Tree_Unit extends Less_Tree {
 	}
 
 	public function usedUnits() {
-		$result = array();
+		$result = [];
 
 		foreach ( Less_Tree_UnitConversions::$groups as $groupName ) {
 			$group = Less_Tree_UnitConversions::${$groupName};
@@ -98,26 +100,22 @@ class Less_Tree_Unit extends Less_Tree {
 		return $result;
 	}
 
+	/**
+	 * @see less-2.5.3.js#Unit.prototype.cancel
+	 */
 	public function cancel() {
-		$counter = array();
-		$backup = null;
+		$counter = [];
 
 		foreach ( $this->numerator as $atomicUnit ) {
-			if ( !$backup ) {
-				$backup = $atomicUnit;
-			}
-			$counter[$atomicUnit] = ( isset( $counter[$atomicUnit] ) ? $counter[$atomicUnit] : 0 ) + 1;
+			$counter[$atomicUnit] = ( $counter[$atomicUnit] ?? 0 ) + 1;
 		}
 
 		foreach ( $this->denominator as $atomicUnit ) {
-			if ( !$backup ) {
-				$backup = $atomicUnit;
-			}
-			$counter[$atomicUnit] = ( isset( $counter[$atomicUnit] ) ? $counter[$atomicUnit] : 0 ) - 1;
+			$counter[$atomicUnit] = ( $counter[$atomicUnit] ?? 0 ) - 1;
 		}
 
-		$this->numerator = array();
-		$this->denominator = array();
+		$this->numerator = [];
+		$this->denominator = [];
 
 		foreach ( $counter as $atomicUnit => $count ) {
 			if ( $count > 0 ) {
@@ -129,10 +127,6 @@ class Less_Tree_Unit extends Less_Tree {
 					$this->denominator[] = $atomicUnit;
 				}
 			}
-		}
-
-		if ( !$this->numerator && !$this->denominator && $backup ) {
-			$this->backupUnit = $backup;
 		}
 
 		sort( $this->numerator );

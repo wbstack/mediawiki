@@ -17,23 +17,11 @@ Lower level documentation can be found on doc.wikimedia.org [here](https://doc.w
 
 Wikibase depends on various [composer](http://getcomposer.org/) libraries.
 
-Once you have Wikibase in your MediaWiki extensions directory, add the `composer.json` of Wikibase to `composer.local.json` at the root of your MediaWiki folder, as documented in [MediaWiki's Composer documentation](https://www.mediawiki.org/wiki/Composer#Using_composer-merge-plugin).
+Once you have Wikibase in your MediaWiki extensions directory, go to the root of your MediaWiki folder,
+and if `composer.local.json` does not yet exist there, copy `composer.local.json-sample` to `composer.local.json`
+(see [MediaWiki's Composer documentation](https://www.mediawiki.org/wiki/Composer#Using_composer-merge-plugin)).
 
-It should now look similar to:
-```
-{
-  "extra": {
-    "merge-plugin": {
-       "include": [
-         "extensions/Wikibase/composer.json"
-       ]
-    }
-  }
-}
-```
-
-
-Then, in the root of your MediaWiki folder, run:
+Then run:
 ```bash
 composer install
 ```
@@ -59,7 +47,7 @@ git submodule update --init
 
 ### Development
 
-Wikibase uses tools to ensure the quality of software developed. To invoke these tools, inside the Wikibase folder, run
+Wikibase uses tools to ensure the quality of software developed. To invoke these tools, inside the Wikibase folder, run:
 
 ```bash
 composer install
@@ -81,6 +69,8 @@ Some notable (not a comprehensive list) mentions are
 * use of the [Javascript interfaces exposed by MediaWiki](https://www.mediawiki.org/wiki/Manual:Interface/JavaScript); e.g. `mw.hook` in [EntityInitializer](./repo/resources/wikibase.EntityInitializer.js)
 * frontend components making heavy use of jQuery; e.g. for so called [experts](repo/resources/experts/Entity.js)
 * the use of qunit to test this code; e.g. in `repo/tests/qunit`, available [via a special page](https://www.mediawiki.org/wiki/Manual:JavaScript_unit_testing)
-* [vue.js](https://vuejs.org/v2/guide/) as a frontend framework; e.g. in [data-bridge](./client/data-bridge), the [Lexeme](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/WikibaseLexeme/) extension, and [termbox](https://gerrit.wikimedia.org/g/wikibase/termbox)
+* [vue.js](https://vuejs.org/guide/introduction.html) as a frontend framework; e.g. in [data-bridge](./client/data-bridge), the [Lexeme](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/WikibaseLexeme/) extension, and [termbox](https://gerrit.wikimedia.org/g/wikibase/termbox)
 
+#### Adding language code support in Wikibase
 
+To add support for a new language code (for labels or monolingual text) please refer to the [detailed documentation](https://www.mediawiki.org/wiki/Manual:Adding_and_removing_languages#Wikibase).

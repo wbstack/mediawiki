@@ -1,14 +1,14 @@
 ( function () {
 
-	var config = require( './config.json' );
+	const config = require( './config.json' );
 
 	/**
-	 * Used to represent an upload in progress on the frontend.
+	 * @classdesc Upload to another MediaWiki site.
 	 *
 	 * Subclassed to upload to a foreign API, with no other goodies. Use
 	 * this for a generic foreign image repository on your wiki farm.
 	 *
-	 * Note you can provide the {@link #target target} or not - if the first argument is
+	 * Note you can provide the `target` or not - if the first argument is
 	 * an object, we assume you want the default, and treat it as apiconfig
 	 * instead.
 	 *
@@ -16,15 +16,15 @@
 	 * @extends mw.Upload
 	 *
 	 * @constructor
+	 * @description Used to represent an upload in progress on the frontend.
 	 * @param {string} [target] Used to set up the target
 	 *     wiki. If not remote, this class behaves identically to mw.Upload (unless further subclassed)
 	 *     Use the same names as set in $wgForeignFileRepos for this. Also,
 	 *     make sure there is an entry in the $wgForeignUploadTargets array for this name.
-	 * @param {Object} [apiconfig] Passed to the constructor of mw.ForeignApi or mw.Api, as needed.
+	 * @param {Object} [apiconfig] Passed to the constructor of {@link mw.ForeignApi} or {@link mw.Api}, as needed.
 	 */
 	function ForeignUpload( target, apiconfig ) {
-		var api,
-			validTargets = config.ForeignUploadTargets,
+		const validTargets = config.ForeignUploadTargets,
 			upload = this;
 
 		if ( typeof target === 'object' ) {
@@ -58,19 +58,18 @@
 				this.apiPromise = $.Deferred().resolve( new mw.Api( apiconfig ) );
 			}
 		} else {
-			api = new mw.Api();
+			const api = new mw.Api();
 			this.apiPromise = api.get( {
 				action: 'query',
 				meta: 'filerepoinfo',
 				friprop: [ 'name', 'scriptDirUrl', 'canUpload' ]
-			} ).then( function ( data ) {
-				var i, repo,
-					repos = data.query.repos;
+			} ).then( ( data ) => {
+				const repos = data.query.repos;
 
 				// First pass - try to find the passed-in target and check
 				// that it's configured for uploads.
-				for ( i in repos ) {
-					repo = repos[ i ];
+				for ( const i in repos ) {
+					const repo = repos[ i ];
 
 					// Skip repos that are not our target, or if they
 					// are the target, cannot be uploaded to.
@@ -95,7 +94,6 @@
 	OO.inheritClass( ForeignUpload, mw.Upload );
 
 	/**
-	 * @property {string} target
 	 * Used to specify the target repository of the upload.
 	 *
 	 * If you set this to something that isn't 'local', you must be sure to
@@ -107,6 +105,9 @@
 	 *
 	 * Defaults to the first available foreign upload target,
 	 * or to local uploads if no foreign target is configured.
+	 *
+	 * @name mw.ForeignUpload.target
+	 * @type {string}
 	 */
 
 	/**
@@ -122,8 +123,8 @@
 	 * @inheritdoc
 	 */
 	ForeignUpload.prototype.upload = function () {
-		var upload = this;
-		return this.apiPromise.then( function ( api ) {
+		const upload = this;
+		return this.apiPromise.then( ( api ) => {
 			upload.api = api;
 			return mw.Upload.prototype.upload.call( upload );
 		} );
@@ -135,8 +136,8 @@
 	 * @inheritdoc
 	 */
 	ForeignUpload.prototype.uploadToStash = function () {
-		var upload = this;
-		return this.apiPromise.then( function ( api ) {
+		const upload = this;
+		return this.apiPromise.then( ( api ) => {
 			upload.api = api;
 			return mw.Upload.prototype.uploadToStash.call( upload );
 		} );

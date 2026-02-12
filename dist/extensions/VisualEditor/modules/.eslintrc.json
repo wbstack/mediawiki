@@ -1,0 +1,12 @@
+{
+	"root": true,
+	"extends": [
+		"wikimedia/client",
+		"wikimedia/jquery",
+		"wikimedia/mediawiki",
+		"./eslint-shared.json"
+	],
+	"rules": {
+		"no-jquery/no-append-html": "warn"
+	}
+}

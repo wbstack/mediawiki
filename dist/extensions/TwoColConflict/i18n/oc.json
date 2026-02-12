@@ -2,9 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"BrennodAloisi",
-			"Quentí"
+			"Quentí",
+			"Lhanars"
 		]
 	},
+	"twocolconflict": "Conflicte d'edicion basat en paragrafs",
+	"twocolconflict-beta-feature-message": "Conflicte d'edicion de paragrafs",
+	"twocolconflict-beta-feature-description": "Mostrar lo conflicte d'edicion amb una version mai avançada de l'afichatge basat suls paragrafs.",
+	"twocolconflict-core-ui-hint-close": "Escondre",
 	"twocolconflict-split-other-version-chosen": "Autras versions",
 	"twocolconflict-split-help-tooltip": "Mostrar l’ajuda"
 }

@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cabal",
+			"Kuldeepburjbhalaike"
+		]
+	},
+	"templatesandbox": "ਫਰਮਾ ਕੱਚਾ ਖ਼ਾਕਾ",
+	"templatesandbox-suffix": "ਕੱਚਾ ਖ਼ਾਕਾ",
+	"templatesandbox-legend": "ਫਰਮਾ ਕੱਚਾ ਖ਼ਾਕਾ",
+	"templatesandbox-prefix-label": "ਕੱਚਾ ਖ਼ਾਕਾ ਅਗੇਤਰ:",
+	"templatesandbox-submit": "ਵੇਖੋ",
+	"templatesandbox-title-output": "ਫਰਮਾ ਕੱਚਾ ਖ਼ਾਕਾ: $1",
+	"templatesandbox-editform-legend": "ਇਸ ਫਰਮੇ ਨਾਲ ਸਫ਼ੇ ਦੀ ਝਲਕ ਵੇਖੋ",
+	"templatesandbox-editform-page-label": "ਸਫ਼ੇ ਦਾ ਸਿਰਲੇਖ",
+	"templatesandbox-editform-view-label": "ਝਲਕ ਵਿਖਾਓ",
+	"templatesandbox-preview": "$2 ਦੀ ਝਲਕ",
+	"templatesandbox-previewnote": "'''ਯਾਦ ਰੱਖੋ ਕਿ ਇਹ [[:$1]] ਦੀ ਸਿਰਫ਼ ਇੱਕ ਝਲਕ ਹੈ।'''\nਤੁਹਾਡੀਆਂ ਤਬਦੀਲੀਆਂ ਅਜੇ ਤੱਕ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ!",
+	"templatesandbox-invalid-title": "ਤੁਹਾਡੇ ਵੱਲੋਂ ਦਿੱਤਾ ਗਿਆ ਸਿਰਲੇਖ ਅਵੈਧ ਹੈ।",
+	"templatesandbox-title-not-exists": "ਤੁਹਾਡੇ ਵੱਲੋਂ ਦਿੱਤਾ ਗਿਆ ਸਿਰਲੇਖ ਮੌਜੂਦ ਨਹੀਂ ਹੈ।",
+	"templatesandbox-invalid-prefix": "ਤੁਹਾਡੇ ਵੱਲੋਂ ਨਿਰਧਾਰਤ ਕੱਚਾ ਖ਼ਾਕਾ ਅਗੇਤਰ ਗਲਤ ਹੈ।",
+	"templatesandbox-prefix-not-local": "ਤੁਹਾਡੇ ਵੱਲੋਂ ਨਿਰਧਾਰਿਤ ਕੱਚਾ ਖ਼ਾਕਾ ਅਗੇਤਰ ਸਥਾਨਕ ਨਹੀਂ ਹੈ।"
+}

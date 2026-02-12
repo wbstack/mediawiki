@@ -2,7 +2,7 @@
 
 namespace Wikibase\Repo\Parsers;
 
-use Language;
+use MediaWiki\MediaWikiServices;
 use ValueParsers\CalendarModelParser;
 use ValueParsers\DispatchingValueParser;
 use ValueParsers\IsoTimestampParser;
@@ -42,8 +42,8 @@ class TimeParserFactory {
 	 * @param MonthNameProvider|null $monthNameProvider
 	 */
 	public function __construct(
-		ParserOptions $options = null,
-		MonthNameProvider $monthNameProvider = null
+		?ParserOptions $options = null,
+		?MonthNameProvider $monthNameProvider = null
 	) {
 		$this->options = $options ?: new ParserOptions();
 		$this->monthNameProvider = $monthNameProvider ?: new MediaWikiMonthNameProvider();
@@ -90,13 +90,13 @@ class TimeParserFactory {
 			$this->options->getOption( ValueParser::OPT_LANG ),
 			$dateFormatPreference,
 			'date',
-			$this->options
+			clone $this->options
 		);
 		$parsers[] = $mwDateFormatParserFactory->getMwDateFormatParser(
 			$this->options->getOption( ValueParser::OPT_LANG ),
 			$dateFormatPreference,
 			'monthonly',
-			$this->options
+			clone $this->options
 		);
 
 		$parsers[] = new PhpDateTimeParser(
@@ -141,7 +141,7 @@ class TimeParserFactory {
 	 */
 	private function getDigitGroupSeparator() {
 		$languageCode = $this->options->getOption( ValueParser::OPT_LANG );
-		$language = Language::factory( $languageCode );
+		$language = MediaWikiServices::getInstance()->getLanguageFactory()->getLanguage( $languageCode );
 		$separatorMap = $language->separatorTransformTable();
 		$canonical = YearTimeParser::CANONICAL_DIGIT_GROUP_SEPARATOR;
 

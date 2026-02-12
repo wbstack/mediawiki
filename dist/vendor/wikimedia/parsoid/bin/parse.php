@@ -7,34 +7,41 @@
 
 require_once __DIR__ . '/../tools/Maintenance.php';
 
-use Composer\Factory;
-use Composer\IO\NullIO;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\MutableRevisionRecord;
+use MediaWiki\Revision\SlotRecord;
 use Wikimedia\Parsoid\Config\Api\ApiHelper;
 use Wikimedia\Parsoid\Config\Api\DataAccess;
 use Wikimedia\Parsoid\Config\Api\PageConfig;
 use Wikimedia\Parsoid\Config\Api\SiteConfig;
+use Wikimedia\Parsoid\Config\SiteConfig as ISiteConfig;
 use Wikimedia\Parsoid\Config\StubMetadataCollector;
 use Wikimedia\Parsoid\Core\ClientError;
 use Wikimedia\Parsoid\Core\ContentMetadataCollector;
 use Wikimedia\Parsoid\Core\PageBundle;
-use Wikimedia\Parsoid\Core\SelserData;
+use Wikimedia\Parsoid\Core\SelectiveUpdateData;
 use Wikimedia\Parsoid\Mocks\MockDataAccess;
+use Wikimedia\Parsoid\Mocks\MockMetrics;
 use Wikimedia\Parsoid\Mocks\MockPageConfig;
 use Wikimedia\Parsoid\Mocks\MockPageContent;
 use Wikimedia\Parsoid\Mocks\MockSiteConfig;
+use Wikimedia\Parsoid\ParserTests\DummyAnnotation;
 use Wikimedia\Parsoid\ParserTests\TestUtils;
 use Wikimedia\Parsoid\Parsoid;
 use Wikimedia\Parsoid\Tools\ExtendedOptsProcessor;
-use Wikimedia\Parsoid\Tools\ScriptUtils;
 use Wikimedia\Parsoid\Utils\ContentUtils;
 use Wikimedia\Parsoid\Utils\DOMDataUtils;
 use Wikimedia\Parsoid\Utils\DOMUtils;
 use Wikimedia\Parsoid\Utils\PHPUtils;
+use Wikimedia\Parsoid\Utils\ScriptUtils;
+use Wikimedia\Parsoid\Utils\Title;
 
 // phpcs:ignore MediaWiki.Files.ClassMatchesFilename.WrongCase
 class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 	use ExtendedOptsProcessor;
+
+	/** @var ISiteConfig */
+	private $siteConfig;
 
 	/** @var PageConfig */
 	private $pageConfig;
@@ -55,6 +62,7 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 			. "If no options are provided, --wt2html is enabled by default.\n"
 			. "See --help for detailed usage help." );
 		$this->addOption( 'wt2html', 'Wikitext -> HTML' );
+		$this->addOption( 'wt2lint', 'Wikitext -> Lint.  Enables --linting' );
 		$this->addOption( 'html2wt', 'HTML -> Wikitext' );
 		$this->addOption( 'wt2wt', 'Wikitext -> Wikitext' );
 		$this->addOption( 'html2html', 'HTML -> HTML' );
@@ -78,18 +86,18 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 
 		$this->addOption( 'selser',
 						 'Use the selective serializer to go from HTML to Wikitext.' );
-		$this->addOption(
-			'oldtext',
-			'The old page text for a selective-serialization (see --selser)',
-			false,
-			true
-		);
-		$this->addOption( 'oldtextfile',
-						 'File containing the old page text for a selective-serialization (see --selser)',
+		$this->addOption( 'selpar',
+						 'In the wt->html direction, update HTML selectively' );
+		$this->addOption( 'revtextfile',
+						 'File containing revision wikitext for selective html/wikitext updates',
 						 false, true );
-		$this->addOption( 'oldhtmlfile',
-						 'File containing the old HTML for a selective-serialization (see --selser)',
+		$this->addOption( 'revhtmlfile',
+						 'File containing revision HTML for selective html/wikitext updates',
 						 false, true );
+		$this->addOption( 'editedtemplatetitle',
+						 'Title of the edited template (for --selpar)',
+						 false, true );
+
 		$this->addOption( 'inputfile', 'File containing input as an alternative to stdin', false, true );
 		$this->addOption( 'logFile', 'File to log trace/dumps to', false, true );
 		$this->addOption(
@@ -138,6 +146,11 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 		$this->addOption(
 			'linting',
 			'Parse with linter enabled.'
+		);
+		$this->addOption(
+			'logLinterData',
+			'Log the linter data.  Enables --linting.  With --integrated, ' .
+				'it attempts to queue up a job to add to the linter table.'
 		);
 		$this->addOption(
 			'addHTMLTemplateParameters',
@@ -201,12 +214,8 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 			true
 		);
 		$this->addOption(
-			'mock',
-			'Use mock environment instead of api or standalone'
-		);
-		$this->addOption(
-			'oldid',
-			'Oldid of the given page.',
+			'revid',
+			'revid of the given page.',
 			false,
 			true
 		);
@@ -245,13 +254,14 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 			false,
 			true
 		);
+		$this->addOption(
+			'metrics',
+			'Dump a log of the metrics methods that were called from a MockMetrics.'
+		);
 		$this->setAllowUnregisteredOptions( false );
 	}
 
-	/**
-	 * @param array $configOpts
-	 */
-	private function setupMwConfig( array $configOpts ) {
+	private function setupMwConfig( array $configOpts ): void {
 		$services = MediaWikiServices::getInstance();
 		$siteConfig = $services->getParsoidSiteConfig();
 		// Overwriting logger so that it logs to console/file
@@ -267,23 +277,43 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 		$dataAccess = $services->getParsoidDataAccess();
 		$pcFactory = $services->getParsoidPageConfigFactory();
 		// XXX we're ignoring 'pageLanguage' & 'pageLanguageDir' in $configOpts
-		$title = \Title::newFromText(
-			$configOpts['title'] ?? $siteConfig->mainpage()
-		);
+		$title = isset( $configOpts['title'] )
+			? \Title::newFromText( $configOpts['title'] )
+			: $siteConfig->mainPageLinkTarget();
+
+		$wikitextOverride = $configOpts['pageContent'] ?? null;
+		$revision = $configOpts['revid'] ?? null;
+		if ( $wikitextOverride === null ) {
+			$revisionRecord = null;
+		} else {
+			// Create a mutable revision record point to the same revision
+			// and set to the desired wikitext.
+			$revisionRecord = new MutableRevisionRecord( $title );
+			if ( $revision !== null ) {
+				$revisionRecord->setId( $revision );
+			}
+			$revisionRecord->setSlot(
+				SlotRecord::newUnsaved(
+					SlotRecord::MAIN,
+					new WikitextContent( $wikitextOverride )
+				)
+			);
+		}
+
+		$this->siteConfig = $siteConfig;
 		$this->pageConfig = $pcFactory->create(
 			$title,
 			null, // UserIdentity
-			$configOpts['revid'] ?? null,
-			$configOpts['pageContent'] ?? null
+			$revisionRecord ?? $revision,
+			null,
+			null,
+			$configOpts['ensureAccessibleContent']
 		);
 		$this->metadata = new \ParserOutput();
 		$this->parsoid = new Parsoid( $siteConfig, $dataAccess );
 	}
 
-	/**
-	 * @param array $configOpts
-	 */
-	private function setupApiConfig( array $configOpts ) {
+	private function setupApiConfig( array $configOpts ): void {
 		$api = new ApiHelper( $configOpts );
 
 		$siteConfig = new SiteConfig( $api, $configOpts );
@@ -292,24 +322,36 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 			$siteConfig->setLogger( SiteConfig::createLogger( $this->getOption( 'logFile' ) ) );
 		}
 		$dataAccess = new DataAccess( $api, $siteConfig, $configOpts );
-		$this->pageConfig = new PageConfig( $api, $configOpts + [
-			'title' => $siteConfig->mainpage(),
-			'loadData' => true,
+		$this->siteConfig = $siteConfig;
+		$configOpts['title'] = isset( $configOpts['title'] )
+			? Title::newFromText( $configOpts['title'], $siteConfig )
+			: $siteConfig->mainPageLinkTarget();
+
+		$this->pageConfig = new PageConfig( $api, $siteConfig, $configOpts + [
+			'loadData' => true
 		] );
-		$this->metadata = new StubMetadataCollector();
+
+		if ( $configOpts['ensureAccessibleContent'] ) {
+			try {
+				$this->pageConfig->getPageMainContent();
+			} catch ( \Error $e ) {
+				throw new \RuntimeException( 'The specified revision does not exist.' );
+			}
+		}
+
+		$this->metadata = new StubMetadataCollector( $siteConfig );
 		$this->parsoid = new Parsoid( $siteConfig, $dataAccess );
 	}
 
-	/**
-	 * @param array $configOpts
-	 */
-	private function setupMockConfig( array $configOpts ) {
+	private function setupMockConfig( array $configOpts ): void {
 		$siteConfig = new MockSiteConfig( $configOpts );
-		$dataAccess = new MockDataAccess( $configOpts );
+		$siteConfig->registerExtensionModule( DummyAnnotation::class );
+		$dataAccess = new MockDataAccess( $siteConfig, $configOpts );
 		$pageContent = new MockPageContent( [ 'main' =>
 			$configOpts['pageContent'] ?? '' ] );
-		$this->pageConfig = new MockPageConfig( $configOpts, $pageContent );
-		$this->metadata = new StubMetadataCollector();
+		$this->siteConfig = $siteConfig;
+		$this->pageConfig = new MockPageConfig( $siteConfig, $configOpts, $pageContent );
+		$this->metadata = new StubMetadataCollector( $siteConfig );
 		$this->parsoid = new Parsoid( $siteConfig, $dataAccess );
 	}
 
@@ -332,20 +374,21 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 	 * @param array $configOpts
 	 * @param array $parsoidOpts
 	 * @param ?string $wt
+	 * @param ?SelectiveUpdateData $selparData
 	 * @return string|PageBundle
 	 */
 	public function wt2Html(
-		array $configOpts, array $parsoidOpts, ?string $wt
+		array $configOpts, array $parsoidOpts, ?string $wt,
+		?SelectiveUpdateData $selparData = null
 	) {
 		if ( $wt !== null ) {
 			$configOpts["pageContent"] = $wt;
 		}
-
 		$this->setupConfig( $configOpts );
 
 		try {
 			return $this->parsoid->wikitext2html(
-				$this->pageConfig, $parsoidOpts, $headers, $this->metadata
+				$this->pageConfig, $parsoidOpts, $headers, $this->metadata, $selparData
 			);
 		} catch ( ClientError $e ) {
 			$this->error( $e->getMessage() );
@@ -356,15 +399,37 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 	/**
 	 * @param array $configOpts
 	 * @param array $parsoidOpts
-	 * @param string $html
-	 * @param ?SelserData $selserData
+	 * @param ?string $wt
 	 * @return string
 	 */
+	public function wt2lint(
+		array $configOpts, array $parsoidOpts, ?string $wt
+	) {
+		if ( $wt !== null ) {
+			$configOpts["pageContent"] = $wt;
+		}
+		$this->setupConfig( $configOpts );
+
+		try {
+			$lints = $this->parsoid->wikitext2lint(
+				$this->pageConfig, $parsoidOpts
+			);
+			$lintStr = '';
+			foreach ( $lints as $l ) {
+				$lintStr .= PHPUtils::jsonEncode( $l ) . "\n";
+			}
+			return $lintStr;
+		} catch ( ClientError $e ) {
+			$this->error( $e->getMessage() );
+			die( 1 );
+		}
+	}
+
 	public function html2Wt(
 		array $configOpts, array $parsoidOpts, string $html,
-		?SelserData $selserData = null
+		?SelectiveUpdateData $selserData = null
 	): string {
-		$configOpts["pageContent"] = ''; // FIXME: T234549
+		$configOpts["pageContent"] = $selserData->revText ?? ''; // FIXME: T234549
 		$this->setupConfig( $configOpts );
 
 		try {
@@ -377,10 +442,6 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 		}
 	}
 
-	/**
-	 * @param string $html
-	 * @return string
-	 */
 	private function maybeNormalize( string $html ): string {
 		if ( $this->hasOption( 'normalize' ) ) {
 			$html = TestUtils::normalizeOut(
@@ -394,12 +455,7 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 
 	private function maybeVersion() {
 		if ( $this->hasOption( 'version' ) ) {
-			# XXX: This doesn't work on production machines or in integrated
-			# mode, since Composer\Factory isn't in the production `vendor`
-			# deploy.
-			$composer = Factory::create( new NullIO(), './composer.json', false );
-			$root = $composer->getPackage();
-			$this->output( $root->getFullPrettyVersion() . "\n" );
+			$this->output( Parsoid::version() . "\n" );
 			die( 0 );
 		}
 	}
@@ -464,7 +520,7 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 			$this->getOption( 'domain', $matches[1] );
 			$this->getOption( 'pageName', urldecode( $matches[2] ) );
 			if ( isset( $matches[3] ) ) {
-				$this->getOption( 'oldid', $matches[3] );
+				$this->getOption( 'revid', $matches[3] );
 			}
 		}
 		$apiURL = "https://en.wikipedia.org/w/api.php";
@@ -478,14 +534,16 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 			"standalone" => !$this->hasOption( 'integrated' ),
 			"apiEndpoint" => $apiURL,
 			"addHTMLTemplateParameters" => $this->hasOption( 'addHTMLTemplateParameters' ),
-			"linting" => $this->hasOption( 'linting' ),
+			"linting" => $this->hasOption( 'linting' ) ||
+				$this->hasOption( 'logLinterData' ) ||
+				$this->hasOption( 'wt2lint' ),
 			"mock" => $this->hasOption( 'mock' )
 		];
 		if ( $this->hasOption( 'pageName' ) ) {
 			$configOpts['title'] = $this->getOption( 'pageName' );
 		}
-		if ( $this->hasOption( 'oldid' ) ) {
-			$configOpts['revid'] = (int)$this->getOption( 'oldid' );
+		if ( $this->hasOption( 'revid' ) ) {
+			$configOpts['revid'] = (int)$this->getOption( 'revid' );
 		}
 		if ( $this->hasOption( 'maxdepth' ) ) {
 			$configOpts['maxDepth'] = (int)$this->getOption( 'maxdepth' );
@@ -494,8 +552,7 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 		$parsoidOpts += [
 			"body_only" => ScriptUtils::booleanOption( $this->getOption( 'body_only' ) ),
 			"wrapSections" => $this->hasOption( 'wrapSections' ),
-			// This ensures we can run --linting and get lint output.
-			"logLinterData" => true,
+			"logLinterData" => $this->hasOption( 'logLinterData' ),
 			"pageBundle" =>
 			$this->hasOption( 'pageBundle' ) || $this->hasOption( 'pboutfile' ),
 		];
@@ -513,9 +570,7 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 		}
 
 		if ( $this->hasOption( 'profile' ) ) {
-			if ( !isset( $parsoidOpts['traceFlags'] ) ) {
-				$parsoidOpts['traceFlags'] = [];
-			}
+			$parsoidOpts['traceFlags'] ??= [];
 			$parsoidOpts['traceFlags']['time'] = true;
 		}
 
@@ -523,10 +578,22 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 			$this->hasOption( 'html2html' ) ||
 			$this->hasOption( 'selser' );
 
+		$configOpts['ensureAccessibleContent'] = !$startsAtHtml ||
+			isset( $configOpts['revid'] );
+
 		if ( $startsAtHtml ) {
 			$this->transformFromHtml( $configOpts, $parsoidOpts, $input );
 		} else {
 			$this->transformFromWt( $configOpts, $parsoidOpts, $input );
+		}
+
+		if ( $this->hasOption( 'metrics' ) ) {
+			// FIXME: We're just using whatever siteConfig we ended up with,
+			// even though setupConfig may be called multiple times
+			$metrics = $this->siteConfig->metrics();
+			if ( $metrics instanceof MockMetrics ) {
+				$this->error( print_r( $metrics->log, true ) );
+			}
 		}
 	}
 
@@ -535,19 +602,13 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 	 */
 	private function startFlameGraphProfiler() {
 		$profiler = new ExcimerProfiler;
-		$profiler->setPeriod( 0.01 );
-		$profiler->setEventType( EXCIMER_CPU );
+		$profiler->setPeriod( 0.00001 );
+		$profiler->setEventType( EXCIMER_REAL );
 		$profiler->start();
 		register_shutdown_function( static function () use ( $profiler ) {
 			$profiler->stop();
-			$fgPath = getenv( 'FLAMEGRAPH_PATH' );
-			if ( empty( $fgPath ) ) {
-				$fgPath = "/usr/local/bin/flamegraph.pl";
-			}
-			$fgOutDir = getenv( 'FLAMEGRAPH_OUTDIR' );
-			if ( empty( $fgOutDir ) ) {
-				$fgOutDir = "/tmp";
-			}
+			$fgPath = getenv( 'FLAMEGRAPH_PATH' ) ?: '/usr/local/bin/flamegraph.pl';
+			$fgOutDir = getenv( 'FLAMEGRAPH_OUTDIR' ) ?: '/tmp';
 			// phpcs:disable MediaWiki.Usage.ForbiddenFunctions.popen
 			$pipe = popen( "$fgPath > $fgOutDir/profile.svg", "w" );
 			fwrite( $pipe, $profiler->getLog()->formatCollapsed() );
@@ -594,6 +655,45 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 		}
 	}
 
+	private function setupSelectiveUpdateData( ?string $mode = null ): ?SelectiveUpdateData {
+		if ( $this->hasOption( 'revtextfile' ) ) {
+			$revText = file_get_contents( $this->getOption( 'revtextfile' ) );
+			if ( $revText === false ) {
+				return null;
+			}
+		} else {
+			$this->error(
+				'Please provide original wikitext via --revtextfile. ' .
+				'Selective Serialization needs it.'
+			);
+			$this->maybeHelp();
+			return null;
+		}
+		$revHTML = null;
+		if ( $this->hasOption( 'revhtmlfile' ) ) {
+			$revHTML = file_get_contents( $this->getOption( 'revhtmlfile' ) );
+			if ( $revHTML === false ) {
+				return null;
+			}
+			$revHTML = $this->getPageBundleXML( $revHTML ) ?? $revHTML;
+		}
+		if ( $this->hasOption( 'selser' ) ) {
+			return new SelectiveUpdateData( $revText, $revHTML );
+		} elseif ( $this->hasOption( 'selpar' ) ) {
+			$revData = new SelectiveUpdateData( $revText, $revHTML, $mode );
+			$revData->templateTitle = $this->getOption( 'editedtemplatetitle' );
+			if ( !$revData->templateTitle ) {
+				$this->error(
+					'Please provide title of the edited template. ' .
+					'Selective Parsing (which right now defaults to template edits only) needs it.'
+				);
+				$this->maybeHelp();
+				return null;
+			}
+			return $revData;
+		}
+	}
+
 	/**
 	 * Do html2wt or html2html and output the result
 	 *
@@ -605,34 +705,10 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 		$input = $this->getPageBundleXML( $input ) ?? $input;
 
 		if ( $this->hasOption( 'selser' ) ) {
-			if ( $this->hasOption( 'oldtext' ) ) {
-				$oldText = $this->getOption( 'oldtext' );
-			} elseif ( $this->hasOption( 'oldtextfile' ) ) {
-				$oldText = file_get_contents( $this->getOption( 'oldtextfile' ) );
-				if ( $oldText === false ) {
-					return;
-				}
-			} else {
-				$this->error(
-					'Please provide original wikitext ' .
-					'(--oldtext or --oldtextfile). Selser requires that.'
-				);
-				$this->maybeHelp();
+			$selserData = $this->setupSelectiveUpdateData();
+			if ( $selserData === null ) {
 				return;
 			}
-			$oldHTML = null;
-			if ( $this->hasOption( 'oldhtmlfile' ) ) {
-				$oldHTML = file_get_contents( $this->getOption( 'oldhtmlfile' ) );
-				if ( $oldHTML === false ) {
-					return;
-				}
-				if ( isset( $pb ) ) {
-					$oldDoc = DOMUtils::parseHTML( $oldHTML );
-					PageBundle::apply( $oldDoc, $pb );
-					$oldHTML = ContentUtils::toXML( $oldDoc );
-				}
-			}
-			$selserData = new SelserData( $oldText, $oldHTML );
 		} else {
 			$selserData = null;
 		}
@@ -689,11 +765,21 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 	 * @param string $input
 	 */
 	private function transformFromWt( $configOpts, $parsoidOpts, $input ) {
-		if ( $this->hasOption( 'wt2wt' ) ) {
+		if ( $this->hasOption( 'selpar' ) ) {
+			$selparData = $this->setupSelectiveUpdateData( 'template' );
+			if ( $selparData === null ) {
+				return;
+			}
+			$this->benchmark( function () use ( $configOpts, $parsoidOpts, $input, $selparData ) {
+				return $this->wt2Html( $configOpts, $parsoidOpts, $input, $selparData );
+			} );
+		} elseif ( $this->hasOption( 'wt2wt' ) ) {
 			$this->benchmark( function () use ( $configOpts, $parsoidOpts, $input ) {
 				$html = $this->wt2Html( $configOpts, $parsoidOpts, $input );
 				return $this->html2Wt( $configOpts, $parsoidOpts, $html );
 			} );
+		} elseif ( $this->hasOption( 'wt2lint' ) ) {
+			$this->output( $this->wt2Lint( $configOpts, $parsoidOpts, $input ) );
 		} elseif ( $parsoidOpts['pageBundle'] ?? false ) {
 			if ( $this->hasOption( 'pboutfile' ) ) {
 				$html = $this->wt2Html( $configOpts, $parsoidOpts, $input );
@@ -711,10 +797,8 @@ class Parse extends \Wikimedia\Parsoid\Tools\Maintenance {
 				$doc = DOMUtils::parseHTML( $html->html );
 				DOMDataUtils::injectPageBundle(
 					$doc,
-					PHPUtils::arrayToObject( [
-						'parsoid' => $html->parsoid,
-						'mw' => $html->mw,
-					] ) );
+					new PageBundle( '', $html->parsoid, $html->mw )
+				);
 				$html = ContentUtils::toXML( $doc );
 			}
 			$this->output( $this->maybeNormalize( $html ) );

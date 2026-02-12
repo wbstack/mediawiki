@@ -2,9 +2,9 @@
 
 namespace CirrusSearch\Profile;
 
-use BagOStuff;
 use CirrusSearch\Util;
-use Config;
+use MediaWiki\Config\Config;
+use Wikimedia\ObjectCache\BagOStuff;
 
 /**
  * Wrapper to augment the phrase suggester profile settings
@@ -36,7 +36,7 @@ class PhraseSuggesterProfileRepoWrapper implements SearchProfileRepository {
 	 * @param SearchProfileRepository $wrapped
 	 * @param BagOStuff $bagOStuff
 	 */
-	private function __construct( SearchProfileRepository $wrapped, BagOStuff $bagOStuff ) {
+	public function __construct( SearchProfileRepository $wrapped, BagOStuff $bagOStuff ) {
 		$this->wrapped = $wrapped;
 		$this->bagOStuff = $bagOStuff;
 	}
@@ -95,7 +95,7 @@ class PhraseSuggesterProfileRepoWrapper implements SearchProfileRepository {
 			600,
 			static function () {
 				$source = wfMessage( 'cirrussearch-didyoumean-settings' )->inContentLanguage();
-				if ( !$source || $source->isDisabled() ) {
+				if ( $source->isDisabled() ) {
 					return [];
 				}
 				return Util::parseSettingsInMessage( $source->plain() );
@@ -110,7 +110,7 @@ class PhraseSuggesterProfileRepoWrapper implements SearchProfileRepository {
 				// Skip improperly formatted lines without a key:value
 				continue;
 			}
-			list( $k, $v ) = $linePieces;
+			[ $k, $v ] = $linePieces;
 
 			switch ( $k ) {
 				case 'max_errors':

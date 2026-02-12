@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Store\Sql\Terms;
 
 use InvalidArgumentException;
@@ -13,7 +15,6 @@ use Wikibase\DataModel\Term\TermList;
 use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Lib\Store\Sql\Terms\TypeIdsLookup;
 use Wikibase\Repo\Store\TermsCollisionDetector;
-use Wikimedia\Rdbms\IDatabase;
 
 /**
  * Queries db term store for collisions on terms
@@ -22,17 +23,11 @@ use Wikimedia\Rdbms\IDatabase;
  */
 class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 
-	/** @var string */
-	private $entityType;
+	private string $entityType;
 
-	/** @var RepoDomainDb */
-	private $db;
+	private RepoDomainDb $db;
 
-	/** @var TypeIdsLookup */
-	private $typeIdsLookup;
-
-	/** @var DatabaseEntityTermsTableProvider */
-	private $databaseEntityTermsTableProvider;
+	private TypeIdsLookup $typeIdsLookup;
 
 	/**
 	 * @param string $entityType one of the two supported types: Item::ENTITY_TYPE or Property::ENTITY_TYPE
@@ -52,7 +47,6 @@ class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 			);
 		}
 
-		$this->databaseEntityTermsTableProvider = new DatabaseEntityTermsTableProvider( $entityType );
 		$this->entityType = $entityType;
 		$this->db = $db;
 		$this->typeIdsLookup = $typeIdsLookup;
@@ -60,9 +54,6 @@ class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 
 	/**
 	 * Returns an entity id that collides with given label in given language, if any
-	 * @param string $lang
-	 * @param string $label
-	 * @return EntityId|null
 	 */
 	public function detectLabelCollision(
 		string $lang,
@@ -76,15 +67,11 @@ class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 
 		$entityId = $this->findEntityIdsWithTermInLang( $lang, $label, $labelTypeId, true )[0] ?? null;
 
-		return $entityId !== null ? $this->makeEntityId( $entityId ) : null;
+		return $this->makeEntityId( $entityId );
 	}
 
 	/**
 	 * Returns an entity id that collides with given label and description in given languages, if any
-	 * @param string $lang
-	 * @param string $label
-	 * @param string $description
-	 * @return EntityId|null numeric entity id of colliding entity, if any
 	 */
 	public function detectLabelAndDescriptionCollision(
 		string $lang,
@@ -100,7 +87,7 @@ class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 
 		$entityIdsWithLabel = $this->findEntityIdsWithTermInLang( $lang, $label, $labelTypeId );
 
-		if ( empty( $entityIdsWithLabel ) ) {
+		if ( !$entityIdsWithLabel ) {
 			return null;
 		}
 
@@ -112,7 +99,7 @@ class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 			$entityIdsWithLabel
 		)[0] ?? null;
 
-		return $entityId !== null ? $this->makeEntityId( $entityId ) : null;
+		return $this->makeEntityId( $entityId );
 	}
 
 	public function detectLabelsCollision( TermList $termList ): array {
@@ -163,44 +150,21 @@ class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 		bool $firstMatchOnly = false,
 		array $filterOnEntityIds = []
 	): array {
+		$queryBuilder = $this->newSelectQueryBuilder();
+		$queryBuilder->whereTerm( $termTypeId, $lang, $text );
 
-		list(
-			$table,
-			$joinConditions,
-			$conditions,
-			$entityIdColumn
-		) = $this->getTermQueryParams( $termTypeId, $lang, $text );
-
-		if ( !empty( $filterOnEntityIds ) ) {
-			$conditions[ $entityIdColumn ] = $filterOnEntityIds;
+		if ( $filterOnEntityIds ) {
+			$queryBuilder->andWhere( [
+				$queryBuilder->getEntityIdColumn() => $filterOnEntityIds,
+			] );
 		}
+		$queryBuilder->caller( __METHOD__ );
 
-		$dbr = $this->getDbr();
-
-		if ( $firstMatchOnly === true ) {
-
-			$match = $dbr->selectField(
-				$table,
-				$entityIdColumn,
-				$conditions,
-				__METHOD__,
-				[],
-				$joinConditions
-			);
-
+		if ( $firstMatchOnly ) {
+			$match = $queryBuilder->fetchField();
 			return $match === false ? [] : [ $match ];
-
 		} else {
-
-			return $dbr->selectFieldValues(
-				$table,
-				$entityIdColumn,
-				$conditions,
-				__METHOD__,
-				[],
-				$joinConditions
-			);
-
+			return $queryBuilder->fetchFieldValues();
 		}
 	}
 
@@ -209,42 +173,15 @@ class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 		array $text,
 		int $termTypeId
 	): array {
-
-		$dbr = $this->getDbr();
-		$options = [];
-
-		list(
-			$table,
-			$joinConditions,
-			$conditions,
-			$entityIdColumn
-		) = $this->getMultiTermQueryParams( $termTypeId, $lang, $text );
-
-		$labelStatements = [];
-		foreach ( $conditions as $condition ) {
-			$labelStatements[] = $dbr->makeList( $condition, $dbr::LIST_AND );
-		}
-
-		$conditions = $dbr->makeList( $labelStatements, $dbr::LIST_OR );
-		$options[] = 'DISTINCT';
-
-		$res = $dbr->select(
-			$table,
-			[ $entityIdColumn, 'wbx_text', 'wbxl_language' ],
-			$conditions,
-			__METHOD__,
-			$options,
-			$joinConditions
-		);
-
-		if ( $res === false ) {
-			// Log warning?
-			return [];
-		}
+		$queryBuilder = $this->newSelectQueryBuilder()
+			->select( [ 'wbx_text', 'wbxl_language' ] )
+			->distinct()
+			->whereMultiTerm( $termTypeId, $lang, $text );
+		$res = $queryBuilder->caller( __METHOD__ )->fetchResultSet();
 
 		$values = [];
 		foreach ( $res as $row ) {
-			$dbEntityId = $row->{$entityIdColumn};
+			$dbEntityId = $row->{$queryBuilder->getEntityIdColumn()};
 			$entityId = $this->makeEntityId( $dbEntityId );
 
 			if ( !$entityId ) {
@@ -257,62 +194,11 @@ class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 		return $values;
 	}
 
-	/**
-	 * @param string $typeId
-	 * @param string $lang
-	 * @param string $text
-	 * @return array
-	 */
-	private function getTermQueryParams( $typeId, $lang, $text ) {
-		list(
-			$table,
-			$joinConditions,
-			$entityIdColumn
-		) = $this->databaseEntityTermsTableProvider->getEntityTermsTableAndJoinConditions();
-
-		return [
-			$table,
-			$joinConditions,
-			$this->getTermInLanguageCondition( $typeId, $lang, $text ),
-			$entityIdColumn
-		];
-	}
-
-	/**
-	 * @param string $typeId
-	 * @param array $languages
-	 * @param array $texts
-	 * @return array
-	 */
-	private function getMultiTermQueryParams( $typeId, $languages, $texts ) {
-		list(
-			$table,
-			$joinConditions,
-			$entityIdColumn
-		) = $this->databaseEntityTermsTableProvider->getEntityTermsTableAndJoinConditions();
-
-		$conditions = [];
-
-		for ( $i = 0; $i < count( $languages ); $i++ ) {
-			$language = $languages[$i];
-			$text = $texts[$i];
-
-			$conditions[] = $this->getTermInLanguageCondition( $typeId, $language, $text );
-		}
-
-		return [ $table, $joinConditions, $conditions, $entityIdColumn ];
-	}
-
-	private function getTermInLanguageCondition( string $typeId, string $language, string $text ): array {
-		return [
-			"wbtl_type_id" => $typeId,
-			"wbxl_language" => $language,
-			"wbx_text" => $text
-		];
-	}
-
-	private function getDbr(): IDatabase {
-		return $this->db->connections()->getReadConnectionRef();
+	private function newSelectQueryBuilder(): EntityTermsSelectQueryBuilder {
+		return new EntityTermsSelectQueryBuilder(
+			$this->db->connections()->getReadConnection(),
+			$this->entityType
+		);
 	}
 
 }

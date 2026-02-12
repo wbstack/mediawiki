@@ -2,17 +2,17 @@
 
 namespace Wikibase\Lib;
 
-use Babel;
-use ExtensionRegistry;
-use IContextSource;
-use Language;
-use LanguageConverter;
+use InvalidArgumentException;
+use MediaWiki\Babel\Babel;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Language\Language;
+use MediaWiki\Language\LanguageConverter;
 use MediaWiki\Languages\LanguageConverterFactory;
 use MediaWiki\Languages\LanguageFactory;
 use MediaWiki\Languages\LanguageFallback;
 use MediaWiki\MediaWikiServices;
-use MWException;
-use User;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\User\User;
 
 /**
  * Object creating TermLanguageFallbackChain objects in Wikibase.
@@ -225,18 +225,6 @@ class LanguageFallbackChainFactory {
 	}
 
 	/**
-	 * Construct the fallback chain based on a context, but ignore the language info in it and use a specified one instead.
-	 *
-	 * @param IContextSource $context
-	 * @param string $languageCode
-	 *
-	 * @return TermLanguageFallbackChain
-	 */
-	public function newFromContextAndLanguageCode( IContextSource $context, $languageCode ) {
-		return $this->newFromUserAndLanguageCode( $context->getUser(), $languageCode );
-	}
-
-	/**
 	 * Construct the fallback chain based on a user and a language, currently from data provided by Extension:Babel.
 	 *
 	 * @param User $user
@@ -326,7 +314,7 @@ class LanguageFallbackChainFactory {
 			foreach ( $languageCodes as $languageCode ) {
 				try {
 					$validCodes[] = LanguageWithConversion::validateLanguageCode( $languageCode );
-				} catch ( MWException $e ) {
+				} catch ( InvalidArgumentException $e ) {
 					continue;
 				}
 			}

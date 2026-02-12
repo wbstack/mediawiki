@@ -3,11 +3,13 @@
 		"authors": [
 			"1917 Ekim Devrimi",
 			"Mirzali",
-			"Orbot707"
+			"Orbot707",
+			"GolyatGeri"
 		]
 	},
 	"advancedsearch-desc": "Pela [[Special:Search|Xısusi:Cıgeyrayış]]i sero cıgeyrayışê ravêrşıyayışan rê rehat cırestışi",
 	"advancedsearch-options-pane-head": "Cıgeyrayışo hera:",
+	"advancedsearch-options-pane-preview-list": "Enewke definaye ternê cıgeyrayışi",
 	"advancedsearch-optgroup-text": "Pela nuşteyi de cıgeyrên",
 	"advancedsearch-optgroup-structure": "Awaniye",
 	"advancedsearch-optgroup-files": "Dosyeyi u resımi",
@@ -26,6 +28,7 @@
 	"advancedsearch-field-fileh": "Pikseli heta gırdiya dosya",
 	"advancedsearch-field-sort": "Nizamê rêzkerdışi",
 	"advancedsearch-field-preview-sort": "Babeta rêze $1",
+	"advancedsearch-help-general-instruction": "Serva $1 direktifi",
 	"advancedsearch-placeholder-exact-text": "\"pısing, bıze sinena\"",
 	"advancedsearch-inlanguage-default": "Zıwan weçine",
 	"advancedsearch-filetype-section-types": "Tewrê dosyaya umumiye",

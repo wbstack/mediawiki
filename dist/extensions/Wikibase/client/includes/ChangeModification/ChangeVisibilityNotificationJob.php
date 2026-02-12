@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace Wikibase\Client\ChangeModification;
 
 use MediaWiki\MediaWikiServices;
-use Title;
+use MediaWiki\Title\Title;
 use Wikibase\Client\WikibaseClient;
 use Wikibase\Lib\Rdbms\ClientDomainDb;
 use Wikimedia\Assert\Assert;
@@ -60,12 +60,11 @@ class ChangeVisibilityNotificationJob extends ChangeModificationNotificationJob 
 		$dbw = $this->clientDb->connections()->getWriteConnection();
 
 		foreach ( array_chunk( $relevantChanges, $this->batchSize ) as $rcIdBatch ) {
-			$dbw->update(
-				'recentchanges',
-				[ 'rc_deleted' => $visibilityBitFlag ],
-				[ 'rc_id' => $rcIdBatch ],
-				__METHOD__
-			);
+			$dbw->newUpdateQueryBuilder()
+				->update( 'recentchanges' )
+				->set( [ 'rc_deleted' => $visibilityBitFlag ] )
+				->where( [ 'rc_id' => $rcIdBatch ] )
+				->caller( __METHOD__ )->execute();
 
 			$this->clientDb->replication()->waitForAllAffectedClusters();
 		}

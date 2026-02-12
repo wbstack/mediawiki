@@ -1,8 +1,6 @@
 <?php
 /** Cape Verdean Creole (kabuverdianu)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -44,8 +42,8 @@ $namespaceGenderAliases = [
 
 $dateFormats = [
 	'dmy time' => 'H:i',
-	'dmy date' => 'j \d\i F \d\i Y',
-	'dmy both' => 'H:i, j \d\i F \d\i Y',
+	'dmy date' => 'j "di" F "di" Y',
+	'dmy both' => 'H:i, j "di" F "di" Y',
 ];
 
 $linkTrail = '/^([áàâãç̈éèêíóòôõúa-z]+)(.*)$/sDu';

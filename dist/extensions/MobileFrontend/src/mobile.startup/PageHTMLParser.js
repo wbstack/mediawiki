@@ -1,10 +1,17 @@
 const
 	Thumbnail = require( './Thumbnail' ),
 	HEADING_SELECTOR = mw.config.get( 'wgMFMobileFormatterHeadings', [ 'h1', 'h2', 'h3', 'h4', 'h5' ] ).join( ',' ),
-	EXCLUDE_THUMBNAIL_CLASS_SELECTORS = [ 'noviewer', 'metadata' ];
+	EXCLUDE_THUMBNAIL_CLASS_SELECTORS = [ 'noviewer', 'metadata' ],
+	NOT_SELECTORS = EXCLUDE_THUMBNAIL_CLASS_SELECTORS.map( ( excludeSelector ) => `:not(.${ excludeSelector })` ).join( '' ),
+	THUMB_SELECTOR = [ 'a.image', 'a.thumbimage, a.mw-file-description' ].map(
+		( selector ) => `${ selector }${ NOT_SELECTORS }`
+	).join( ',' );
 
 class PageHTMLParser {
 	/**
+	 * @constructor
+	 * @class module:mobile.startup/PageHTMLParser
+     * @classdesc Parses an article and converts it into a queriable object.
 	 * @param {jQuery.Object} $container Used when parsing to find children within
 	 * this container
 	 */
@@ -21,6 +28,7 @@ class PageHTMLParser {
 	 * This has the benefit of excluding any additional h2s and h3s that may
 	 * have been added programatically.
 	 *
+	 * @memberof module:mobile.startup/PageHTMLParser
 	 * @param {number} sectionIndex as defined by the PHP parser.
 	 *  It should correspond to the section id
 	 *  used in the edit link for the section.
@@ -54,6 +62,7 @@ class PageHTMLParser {
 	 * This code should work on desktop (PHP parser HTML)
 	 * as well as mobile formatted HTML (PHP parser + MobileFormatter)
 	 *
+	 * @memberof module:mobile.startup/PageHTMLParser
 	 * @param {number} sectionIndex as defined by the PHP parser. It should correspond to
 	 *  the section id used in the edit link for the section.
 	 *  Note, confusingly, this is different from section "ID" which is
@@ -62,8 +71,9 @@ class PageHTMLParser {
 	 * @return {jQuery.Object}
 	 */
 	findChildInSectionLead( sectionIndex, selector ) {
-		var $heading, $nextHeading, $el, $lead,
-			headingSelector = HEADING_SELECTOR;
+		let $heading, $nextHeading;
+
+		const headingSelector = HEADING_SELECTOR;
 
 		function withNestedChildren( $matchingNodes ) {
 			return $matchingNodes.find( selector ).addBack();
@@ -71,8 +81,15 @@ class PageHTMLParser {
 
 		if ( sectionIndex === 0 ) {
 			// lead is easy
-			$lead = this.getLeadSectionElement();
+			const $lead = this.getLeadSectionElement();
 			if ( $lead && $lead.length ) {
+
+				// Handle nested sections in Parsoid wikitext parset opt-in scenario.
+				const $nestedSection = $lead.find( 'section[data-mw-section-id="0"]' );
+				if ( $nestedSection.length ) {
+					return withNestedChildren( $nestedSection.children( selector ) );
+				}
+
 				return withNestedChildren( $lead.children( selector ) );
 			} else {
 				$heading = this.findSectionHeadingByIndex( 1 );
@@ -94,7 +111,7 @@ class PageHTMLParser {
 		// and that this is a wrapped section
 		if ( $heading.hasClass( 'section-heading' ) ) {
 			// get content of section
-			$el = $heading.next();
+			const $el = $heading.next();
 			// inside section find the first heading
 			$nextHeading = $el.find( headingSelector ).eq( 0 );
 			return $nextHeading.length ?
@@ -114,6 +131,7 @@ class PageHTMLParser {
 	/**
 	 * Get the lead section of the page view.
 	 *
+	 * @memberof module:mobile.startup/PageHTMLParser
 	 * @return {jQuery.Object|null}
 	 */
 	getLeadSectionElement() {
@@ -138,6 +156,46 @@ class PageHTMLParser {
 	}
 
 	/**
+	 * Returns a Thumbnail object from an anchor element containing an image or
+	 * null if not valid.
+	 *
+	 * @memberof module:mobile.startup/PageHTMLParser
+	 * @param {jQuery} $a Anchor element that contains the image.
+	 * @return {Thumbnail|null}
+	 */
+	getThumbnail( $a ) {
+		const notSelector = '.' + EXCLUDE_THUMBNAIL_CLASS_SELECTORS.join( ',.' ),
+			$lazyImage = $a.find( '.lazy-image-placeholder' ),
+			href = $a.attr( 'href' ),
+			url = href && new URL( href, location.href ),
+			legacyTitle = url && url.searchParams.get( 'title' ),
+			match = url && url.pathname.match( /[^/]+$/ );
+
+		// Parents need to be checked as well.
+		let valid = $a.parents( notSelector ).length === 0 &&
+			$a.find( notSelector ).length === 0;
+
+		// filter out invalid lazy loaded images if so far image is valid
+		if ( $lazyImage.length && valid ) {
+			// if the regex matches it means the image has one of the classes
+			// thus we must invert the result
+			valid = !new RegExp( '\\b(' + EXCLUDE_THUMBNAIL_CLASS_SELECTORS.join( '|' ) + ')\\b' )
+				.test( $lazyImage.data( 'class' ) );
+		}
+
+		if ( valid && ( legacyTitle !== null || match ) ) {
+			return new Thumbnail( {
+				el: $a,
+				filename: mw.util.percentDecodeFragment(
+					legacyTitle !== null ? legacyTitle : match[0]
+				)
+			} );
+		}
+
+		return null;
+	}
+
+	/**
 	 * Return all the thumbnails in the article.
 	 * Images which have a class or link container (.image|.thumbimage)
 	 * that matches one of the items of the constant EXCLUDE_THUMBNAIL_CLASS_SELECTORS
@@ -147,46 +205,25 @@ class PageHTMLParser {
 	 * `<a class="image noviewer"><img></a>` is not a valid thumbnail
 	 * `<a class="image"><img class="noviewer"></a>` is not a valid thumbnail
 	 *
+	 * @memberof module:mobile.startup/PageHTMLParser
 	 * @param {jQuery} [$el] Container to search, defaults to this.$el.
 	 * @return {Thumbnail[]}
 	 */
 	getThumbnails( $el ) {
-		var $thumbs,
-			notSelector = '.' + EXCLUDE_THUMBNAIL_CLASS_SELECTORS.join( ',.' ),
+		const
+			self = this,
 			thumbs = [];
 
 		$el = $el || this.$el;
 
-		$thumbs = $el.find( 'a.image, a.thumbimage' )
-			.not( notSelector );
+		const $thumbs = $el.find( THUMB_SELECTOR );
 
 		$thumbs.each( function () {
-			var $a = $el.find( this ),
-				$lazyImage = $a.find( '.lazy-image-placeholder' ),
-				// Parents need to be checked as well.
-				valid = $a.parents( notSelector ).length === 0 &&
-					$a.find( notSelector ).length === 0,
-				href = $a.attr( 'href' ),
-				legacyMatch = href && href.match( /title=([^/&]+)/ ),
-				match = href && href.match( /[^/]+$/ );
+			const $a = $el.find( this );
+			const thumb = self.getThumbnail( $a );
 
-			// filter out invalid lazy loaded images if so far image is valid
-			if ( $lazyImage.length && valid ) {
-				// if the regex matches it means the image has one of the classes
-				// thus we must invert the result
-				valid = !new RegExp( '\\b(' + EXCLUDE_THUMBNAIL_CLASS_SELECTORS.join( '|' ) + ')\\b' )
-					.test( $lazyImage.data( 'class' ) );
-			}
-
-			if ( valid && ( legacyMatch || match ) ) {
-				thumbs.push(
-					new Thumbnail( {
-						el: $a,
-						filename: mw.util.percentDecodeFragment(
-							legacyMatch ? legacyMatch[1] : match[0]
-						)
-					} )
-				);
+			if ( thumb ) {
+				thumbs.push( thumb );
 			}
 		} );
 		return thumbs;
@@ -195,10 +232,57 @@ class PageHTMLParser {
 	/**
 	 * Returns a jQuery object representing all redlinks on the page.
 	 *
+	 * @memberof module:mobile.startup/PageHTMLParser
 	 * @return {jQuery.Object}
 	 */
 	getRedLinks() {
 		return this.$el.find( '.new' );
+	}
+
+	/**
+	 * Returns an object consistent with MediaWiki API representing languages
+	 * associated with the page in the user's current language.
+	 *
+	 * @memberof module:mobile.startup/PageHTMLParser
+	 * @param {string} pageTitle to fallback to if none found
+	 * @return {Object} containing langlinks
+	 *   and variant links as defined @ https://en.m.wikipedia.org/w/api.php?action=help&modules=query%2Blanglinks
+	 */
+	getLanguages( pageTitle ) {
+		const mapLinkToLanguageObj = ( node ) => {
+			const DELIMITER = ' – ';
+			// Name of language (e.g. עברית for Hebrew)
+			const autonym = node.textContent;
+			// The name of the language in the current language
+			// e.g. for english this would be Hebrew
+			let langname;
+			let title = node.getAttribute( 'title' ) || pageTitle;
+			if ( title.indexOf( DELIMITER ) > -1 ) {
+				title = title.split( DELIMITER );
+				langname = title.pop();
+				title = title.join( DELIMITER );
+			}
+			if ( !langname ) {
+				langname = autonym;
+			}
+			return {
+				lang: node.getAttribute( 'hreflang' ),
+				autonym,
+				langname,
+				title,
+				url: node.getAttribute( 'href' )
+			};
+		};
+		return {
+			languages: Array.prototype.map.call(
+				document.querySelectorAll( '#p-lang .interlanguage-link a' ),
+				mapLinkToLanguageObj
+			),
+			variants: Array.prototype.map.call(
+				document.querySelectorAll( '#p-variants li a' ),
+				mapLinkToLanguageObj
+			)
+		};
 	}
 }
 
@@ -208,5 +292,12 @@ class PageHTMLParser {
  * @memberof PageHTMLParser
  */
 PageHTMLParser.HEADING_SELECTOR = HEADING_SELECTOR;
+
+/**
+ * Selector for thumbnails.
+ *
+ * @memberof PageHTMLParser
+ */
+PageHTMLParser.THUMB_SELECTOR = THUMB_SELECTOR;
 
 module.exports = PageHTMLParser;

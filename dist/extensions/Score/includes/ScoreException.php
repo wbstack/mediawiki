@@ -26,8 +26,8 @@
 namespace MediaWiki\Extension\Score;
 
 use Exception;
-use Html;
-use Title;
+use MediaWiki\Html\Html;
+use MediaWiki\Title\Title;
 
 /**
  * Score exception

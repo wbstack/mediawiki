@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"S.Örvarr.S",
+			"Stefán Örvar Sigmundsson",
 			"Sveinn í Felli",
 			"Ævar Arnfjörð Bjarmason"
 		]
@@ -11,12 +12,12 @@
 	"usercredentials-leg-areas": "Aðal áhugamál",
 	"usercredentials-leg-person": "Persónulegar upplýsingar",
 	"usercredentials-leg-other": "Aðrar upplýsingar",
-	"usercredentials-email": "Netfang:",
+	"usercredentials-email": "Tölvupóstfang:",
 	"usercredentials-real": "Raunverulegt nafn:",
 	"usercredentials-bio": "Æviágrip:",
 	"usercredentials-attach": "Ferilskrá:",
 	"usercredentials-notes": "Viðbótarskýring:",
 	"usercredentials-urls": "Listi yfir vefsíður:",
-	"usercredentials-ip": "Upprunalegt vistfang:",
+	"usercredentials-ip": "Upprunalegt IP-staðfang:",
 	"usercredentials-member": "Réttindi:"
 }

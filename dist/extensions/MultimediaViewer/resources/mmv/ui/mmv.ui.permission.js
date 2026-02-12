@@ -15,28 +15,23 @@
  * along with MediaViewer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function () {
-	var P;
+const HtmlUtils = require( '../mmv.HtmlUtils.js' );
+const UiElement = require( './mmv.ui.js' );
+const MetadataPanelScroller = require( './mmv.ui.metadataPanelScroller.js' );
 
+/**
+ * A box to display additional terms or remarks from the image author.
+ * (Typically comes from the Permission field of the {{Information}} template.)
+ * It has two states: when closed, it just shows some text, when open, it shows the HTML
+ * block supplied by the author in its full beauty.
+ */
+class Permission extends UiElement {
 	/**
-	 * A box to display additional terms or remarks from the image author.
-	 * (Typically comes from the Permission field of the {{Information}} template.)
-	 * It has two states: when closed, it just shows some text, when open, it shows the HTML
-	 * block supplied by the author in its full beauty.
-	 *
-	 * @class mw.mmv.ui.Permission
-	 * @extends mw.mmv.ui.Element
-	 * @constructor
 	 * @param {jQuery} $container
-	 * @param {mw.mmv.ui.MetadataPanelScroller} scroller
+	 * @param {MetadataPanelScroller} scroller
 	 */
-	function Permission( $container, scroller ) {
-		var permission = this;
-
-		mw.mmv.ui.Element.call( this, $container );
-
-		/** @property {mw.mmv.HtmlUtils} htmlUtils - */
-		this.htmlUtils = new mw.mmv.HtmlUtils();
+	constructor( $container, scroller ) {
+		super( $container );
 
 		/**
 		 * Contains everything else.
@@ -53,7 +48,7 @@
 		 * @property {jQuery}
 		 */
 		this.$title = $( '<h3>' )
-			.text( mw.message( 'multimediaviewer-permission-title' ).text() )
+			.text( mw.msg( 'multimediaviewer-permission-title' ) )
 			.appendTo( this.$box );
 
 		/**
@@ -66,10 +61,10 @@
 		this.$text = $( '<div>' )
 			.addClass( 'mw-mmv-permission-text' )
 			.appendTo( this.$box )
-			.on( 'click', '.mw-mmv-permission-text-viewmore', function ( e ) {
+			.on( 'click', '.mw-mmv-permission-text-viewmore', ( e ) => {
 				e.preventDefault();
-				permission.grow();
-				permission.scroller.toggle( 'up' );
+				this.grow();
+				this.scroller.toggle( 'up' );
 			} );
 
 		/**
@@ -83,7 +78,7 @@
 				$( '<a>' )
 					.addClass( 'mw-mmv-permission-text-viewmore' )
 					.prop( 'href', '#' )
-					.text( mw.message( 'multimediaviewer-permission-viewmore' ).text() )
+					.text( mw.msg( 'multimediaviewer-permission-viewmore' ) )
 			);
 
 		/**
@@ -103,77 +98,78 @@
 		 */
 		this.$close = $( '<button>' )
 			.addClass( 'mw-mmv-permission-close' )
-			.on( 'click', function () {
-				permission.shrink();
+			.on( 'click', () => {
+				this.shrink();
 			} )
 			.appendTo( this.$box );
 
 		/**
 		 * Panel scroller from the metadata panel object.
 		 *
-		 * @property {mw.mmv.ui.MetadataPanelScroller}
+		 * @property {MetadataPanelScroller}
 		 */
 		this.scroller = scroller;
 	}
-	OO.inheritClass( Permission, mw.mmv.ui.Element );
-	P = Permission.prototype;
 
 	/**
 	 * Clear everything
 	 */
-	P.empty = function () {
+	empty() {
 		this.$box.addClass( 'empty' );
 		this.$text.empty();
 		this.$html.empty();
-	};
+	}
 
 	/**
 	 * Set permission text/html
 	 *
 	 * @param {string} permission the text or HTML code written by the image author
 	 */
-	P.set = function ( permission ) {
+	set( permission ) {
 		this.$box.removeClass( 'empty' );
 
-		this.$text.html( this.htmlUtils.htmlToTextWithLinks( permission ) );
+		this.$text.html( HtmlUtils.htmlToTextWithLinks( permission ) );
 		this.$text.append( this.$fader );
 
 		this.$html.html( permission );
-	};
+	}
+
+	/**
+	 * @event Permission#mmv-permission-grow
+	 */
 
 	/**
 	 * Enlarge the box, show HTML instead of text.
 	 *
-	 * @fires mmv-permission-grow
+	 * @fires Permission#mmv-permission-grow
 	 */
-	P.grow = function () {
-		// FIXME: Use CSS transition
-		// eslint-disable-next-line no-jquery/no-animate
-		this.$box.addClass( 'full-size' )
-			.stop( true )
-			.animate( { backgroundColor: '#FFFFA0' }, 500 )
-			.animate( { backgroundColor: '#FFFFFF' }, 500 );
+	grow() {
+		this.$box.addClass( 'full-size' );
 		this.$container.trigger( 'mmv-permission-grow' );
-	};
+	}
+
+	/**
+	 * @event Permission#mmv-permission-shrink
+	 */
 
 	/**
 	 * Limit the size of the box, show text only.
 	 *
-	 * @fires mmv-permission-shrink
+	 * @fires Permission#mmv-permission-shrink
 	 */
-	P.shrink = function () {
+	shrink() {
 		this.$box.removeClass( 'full-size' );
 		this.$container.trigger( 'mmv-permission-shrink' );
-	};
+	}
 
 	/**
 	 * Returns whether the box is full-size.
 	 *
 	 * @return {boolean}
 	 */
-	P.isFullSize = function () {
+	isFullSize() {
 		return this.$box.hasClass( 'full-size' );
-	};
+	}
+}
 
-	mw.mmv.ui.Permission = Permission;
-}() );
+module.exports = Permission;

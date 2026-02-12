@@ -18,6 +18,8 @@
  * @file
  */
 
+use MediaWiki\Language\Language;
+
 /**
  * Cantonese (粵語)
  *
@@ -25,37 +27,21 @@
  */
 class LanguageYue extends Language {
 
-	/**
-	 * @return bool
-	 */
+	private const WORD_SEGMENTATION_REGEX = '/([\xc0-\xff][\x80-\xbf]*)/';
+
 	public function hasWordBreaks() {
 		return false;
 	}
 
 	/**
-	 * Eventually this should be a word segmentation;
-	 * for now just treat each character as a word.
+	 * Eventually, this should be a word segmentation;
+	 * but for now just treat each character as a word.
 	 * @todo FIXME: Only do this for Han characters...
 	 *
 	 * @param string $string
 	 * @return string
 	 */
 	public function segmentByWord( $string ) {
-		$reg = "/([\\xc0-\\xff][\\x80-\\xbf]*)/";
-		$s = self::insertSpace( $string, $reg );
-		return $s;
-	}
-
-	/**
-	 * @param string $string
-	 * @return string
-	 */
-	public function normalizeForSearch( $string ) {
-		// Double-width roman characters
-		$s = self::convertDoubleWidth( $string );
-		$s = trim( $s );
-		$s = parent::normalizeForSearch( $s );
-
-		return $s;
+		return self::insertSpace( $string, self::WORD_SEGMENTATION_REGEX );
 	}
 }

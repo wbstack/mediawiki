@@ -5,6 +5,7 @@ RUN apk add \
   # coreutils for a version of realpath with a -m option
   coreutils \
   curl \
+  wget \
   git \
   jq \
   libarchive-tools \

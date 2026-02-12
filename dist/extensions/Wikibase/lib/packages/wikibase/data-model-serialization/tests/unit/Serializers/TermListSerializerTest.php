@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Tests\Wikibase\DataModel\Serializers;
 
 use PHPUnit\Framework\TestCase;
@@ -18,37 +20,26 @@ use Wikibase\DataModel\Term\TermList;
  */
 class TermListSerializerTest extends TestCase {
 
-	/**
-	 * @param bool $useObjectsForMaps
-	 *
-	 * @return TermListSerializer
-	 */
-	private function buildSerializer( $useObjectsForMaps = false ) {
-		return new TermListSerializer( new TermSerializer(), $useObjectsForMaps );
+	private function buildSerializer( bool $useObjectsForEmptyMaps ): TermListSerializer {
+		return new TermListSerializer( new TermSerializer(), $useObjectsForEmptyMaps );
 	}
 
 	/**
 	 * @dataProvider serializationProvider
 	 */
-	public function testSerialization( TermList $input, $useObjectsForMaps, $expected ) {
-		$serializer = $this->buildSerializer( $useObjectsForMaps );
+	public function testSerialization( TermList $input, $expected ): void {
+		$serializer = $this->buildSerializer( false );
 
 		$output = $serializer->serialize( $input );
 
 		$this->assertEquals( $expected, $output );
 	}
 
-	public function serializationProvider() {
+	public static function serializationProvider(): array {
 		return [
 			[
 				new TermList( [] ),
-				false,
-				[]
-			],
-			[
-				new TermList( [] ),
-				true,
-				new \stdClass()
+				[],
 			],
 			[
 				new TermList( [
@@ -56,35 +47,39 @@ class TermListSerializerTest extends TestCase {
 					new Term( 'it', 'Lama' ),
 					new TermFallback( 'pt', 'Lama', 'de', 'zh' ),
 				] ),
-				false,
 				[
 					'en' => [ 'language' => 'en', 'value' => 'Water' ],
 					'it' => [ 'language' => 'it', 'value' => 'Lama' ],
 					'pt' => [ 'language' => 'de', 'value' => 'Lama', 'source' => 'zh' ],
-				]
+				],
 			],
 		];
 	}
 
-	public function testWithUnsupportedObject() {
-		$serializer = $this->buildSerializer();
+	public function testWithUnsupportedObject(): void {
+		$serializer = $this->buildSerializer( false );
 
 		$this->expectException( UnsupportedObjectException::class );
 		$serializer->serialize( new \stdClass() );
 	}
 
-	public function testTermListSerializerWithOptionObjectsForMaps() {
-		$serializer = $this->buildSerializer( true );
+	public function testTermListSerializerSerializesTermLists(): void {
+		$serializer = $this->buildSerializer( false );
 
 		$terms = new TermList( [ new Term( 'en', 'foo' ) ] );
 
-		$serial = new \stdClass();
-		$serial->en = [
+		$serial = [];
+		$serial['en'] = [
 			'language' => 'en',
-			'value' => 'foo'
+			'value' => 'foo',
 		];
 
 		$this->assertEquals( $serial, $serializer->serialize( $terms ) );
+		$this->assertEquals( [], $serializer->serialize( new TermList() ) );
 	}
 
+	public function testTermListSerializerUsesObjectsForEmptyLists(): void {
+		$serializer = $this->buildSerializer( true );
+		$this->assertEquals( (object)[], $serializer->serialize( new TermList() ) );
+	}
 }

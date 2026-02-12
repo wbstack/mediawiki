@@ -12,8 +12,7 @@
 	 * @param {Object} [config] Configuration object
 	 */
 	mw.echo.ui.DatedSubGroupListWidget = function MwEchoUiDatedSubGroupListWidget( controller, listModel, config ) {
-		var momentTimestamp, diff, fullDate, stringTimestamp,
-			now = moment(),
+		const now = moment(),
 			$primaryDate = $( '<span>' )
 				.addClass( 'mw-echo-ui-datedSubGroupListWidget-title-primary' ),
 			$secondaryDate = $( '<span>' )
@@ -23,7 +22,7 @@
 				.append( $primaryDate, $secondaryDate );
 
 		// Parent constructor
-		mw.echo.ui.DatedSubGroupListWidget.super.call( this, controller, listModel, $.extend( {
+		mw.echo.ui.DatedSubGroupListWidget.super.call( this, controller, listModel, Object.assign( {
 			// Since this widget is defined as a dated list, we sort
 			// its items according to timestamp without consideration
 			// of read state or foreignness.
@@ -41,10 +40,10 @@
 		}, config ) );
 
 		// Round all dates to the day they're in, as if they all happened at 00:00h
-		stringTimestamp = moment.utc( this.model.getTimestamp() ).local().format( 'YYYY-MM-DD' );
-		momentTimestamp = moment( stringTimestamp );
-		diff = now.diff( momentTimestamp, 'weeks' );
-		fullDate = momentTimestamp.format( 'LL' );
+		const stringTimestamp = moment.utc( this.model.getTimestamp() ).local().format( 'YYYY-MM-DD' );
+		const momentTimestamp = moment( stringTimestamp );
+		const diff = now.diff( momentTimestamp, 'weeks' );
+		const fullDate = momentTimestamp.format( 'LL' );
 
 		$primaryDate.text( fullDate );
 		if ( diff === 0 ) {

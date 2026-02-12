@@ -13,11 +13,9 @@ namespace TwoColConflict\TalkPageConflict;
 class TalkPageResolution {
 
 	/** @var array[] */
-	private $diff;
-	/** @var int */
-	private $otherIndex;
-	/** @var int */
-	private $yourIndex;
+	private array $diff;
+	private int $otherIndex;
+	private int $yourIndex;
 
 	/**
 	 * @param array[] $diff A list of changes as created by the AnnotatedHtmlDiffFormatter
@@ -37,16 +35,10 @@ class TalkPageResolution {
 		return $this->diff;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getOtherIndex(): int {
 		return $this->otherIndex;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getYourIndex(): int {
 		return $this->yourIndex;
 	}

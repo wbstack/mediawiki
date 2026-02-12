@@ -2,9 +2,10 @@
 
 namespace Wikibase\DataModel\Deserializers;
 
-use Deserializers\Deserializer;
+use DataValues\Deserializers\DataValueDeserializer;
 use Deserializers\DispatchingDeserializer;
 use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 
 /**
  * Factory for constructing Deserializer objects that can deserialize WikibaseDataModel objects.
@@ -17,26 +18,24 @@ use Wikibase\DataModel\Entity\EntityIdParser;
  */
 class DeserializerFactory {
 
-	/**
-	 * @var Deserializer
-	 */
-	private $dataValueDeserializer;
+	private DataValueDeserializer $dataValueDeserializer;
+	private EntityIdParser $entityIdParser;
+	private PropertyDataTypeLookup $dataTypeLookup;
+	private array $deserializerBuilders;
+	private array $dataTypeToValueTypeMap;
 
-	/**
-	 * @var EntityIdParser
-	 */
-	private $entityIdParser;
-
-	/**
-	 * @param Deserializer $dataValueDeserializer deserializer for DataValue objects
-	 * @param EntityIdParser $entityIdParser
-	 */
 	public function __construct(
-		Deserializer $dataValueDeserializer,
-		EntityIdParser $entityIdParser
+		DataValueDeserializer $dataValueDeserializer,
+		EntityIdParser $entityIdParser,
+		PropertyDataTypeLookup $dataTypeLookup,
+		array $deserializerBuilders,
+		array $dataTypeToValueTypeMap
 	) {
 		$this->dataValueDeserializer = $dataValueDeserializer;
 		$this->entityIdParser = $entityIdParser;
+		$this->dataTypeLookup = $dataTypeLookup;
+		$this->deserializerBuilders = $deserializerBuilders;
+		$this->dataTypeToValueTypeMap = $dataTypeToValueTypeMap;
 	}
 
 	/**
@@ -48,7 +47,7 @@ class DeserializerFactory {
 	public function newEntityDeserializer(): DispatchingDeserializer {
 		return new DispatchingDeserializer( [
 			$this->newItemDeserializer(),
-			$this->newPropertyDeserializer()
+			$this->newPropertyDeserializer(),
 		] );
 	}
 
@@ -137,7 +136,17 @@ class DeserializerFactory {
 	 * Returns a Deserializer that can deserialize Snak objects.
 	 */
 	public function newSnakDeserializer(): SnakDeserializer {
-		return new SnakDeserializer( $this->entityIdParser, $this->dataValueDeserializer );
+		return new SnakDeserializer(
+			$this->entityIdParser,
+			$this->dataValueDeserializer,
+			$this->dataTypeLookup,
+			$this->deserializerBuilders,
+			$this->dataTypeToValueTypeMap,
+			new SnakValueDeserializer(
+				$this->dataValueDeserializer,
+				$this->deserializerBuilders
+			)
+		);
 	}
 
 	/**

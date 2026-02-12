@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"TayfunEt."
+			"TayfunEt.",
+			"Zolgoyo"
 		]
 	},
 	"uls-plang-title-languages": "Тиллер",
@@ -11,5 +12,6 @@
 	"jquery-ime-other-languages": "Баска тиллер",
 	"jquery-ime-help": "Ярдам",
 	"ext-uls-compact-link-count": "{{PLURAL:$1|Тагы $1 тилде}}",
-	"prefs-languages": "Тиллер"
+	"prefs-languages": "Тиллер",
+	"ext-uls-add-languages-button-label": "Тил косув"
 }

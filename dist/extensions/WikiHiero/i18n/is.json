@@ -1,9 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
+			"Stefán Örvar Sigmundsson",
 			"Sveinn í Felli"
 		]
 	},
+	"hieroglyphs": "Prófa myndleturstákuppnmerkingu",
 	"wikihiero-comment": "Athugasemd",
 	"wikihiero-eol": "Í enda línu",
 	"wikihiero-help-link": "//en.wikipedia.org/wiki/Help:WikiHiero_syntax",
@@ -13,9 +15,11 @@
 	"wikihiero-separator": "Aðgreinir",
 	"wikihiero-submit": "Senda",
 	"wikihiero-superposition": "Undirskipting",
-	"wikihiero-syntax": "Málskipun",
+	"wikihiero-syntax": "Málskipan",
 	"wikihiero-th-code": "Kóði",
 	"wikihiero-th-meaning": "Merking",
 	"wikihiero-th-result": "Útkoma",
-	"wikihiero-visualeditor-mwhieroinspector-title": "Helgirúnir"
+	"wikihiero-visualeditor-mwhieroinspector-title": "Helgirúnir",
+	"wikihiero-usage-tracking-category": "Síður sem nota WikiHiero",
+	"wikihiero-usage-tracking-category-desc": "Þessum flokki er sjálfkrafa bætt við síður sem nota WikiHiero-viðbótina"
 }

@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"JeffreyKim",
+			"Ktchankt",
+			"Yueman"
+		]
+	},
+	"wikibasecirrus-desc": "用緊CirrusSearch功能嘅維基百科擴充程式",
+	"wikibasecirrus-keywordfeature-unknown-language-code": "$1關鍵字包含未知語言代碼：$2",
+	"wikibasecirrus-keywordfeature-too-many-language-codes": "$1呢個關鍵字畀出太多語言代碼。只係搵$3個畀出嚟嘅{{PLURAL:$3|語言}}入面嘅其中$2個。",
+	"wikibasecirrus-inlabel-no-query-provided": "inlabel關鍵字畀咗個空嘅搵嘢字串",
+	"wikibasecirrus-rescore-profile-prefix": "用喺全文搜尋嘅預設重新評分個人檔案",
+	"wikibasecirrus-rescore-profile-prefix-boost": "透過語句提升，重新評分畀個人檔案，以便完成搜尋",
+	"wikibasecirrus-rescore-profile-fulltext": "全文搜尋嘅預設資源配置文件",
+	"wikibasecirrus-rescore-profile-fulltext-phrase": "用短語評分嚟為搵全文重新評分嘅個人檔案",
+	"wikibasecirrus-search-bad-entity-type": "壞實體類型：$1",
+	"wikibasecirrus-search-bad-profile-name": "唔啱嘅個人檔案名：$1",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "acwb語句關鍵字唔包含任何有效嘅語句",
+	"wikibasecirrus-haslicense-feature-no-valid-arguments": "haslicense關鍵字唔包含任何有效嘅引數",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "wb語句數量關鍵字唔包含任何有效嘅語句",
+	"special-entitieswithoutdescription": "冇描述嘅實體",
+	"wikibasecirrus-entitieswithoutdescription-legend": "攞到冇描述嘅實體清單",
+	"special-entitieswithoutlabel": "冇標籤嘅實體",
+	"wikibasecirrus-entitieswithoutlabel-legend": "攞到冇標籤嘅實體清單",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "語言代碼:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "類型：",
+	"wikibasecirrus-entitieswithoutlabel-submit": "搵",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "「$1」唔係有效嘅語言代碼。",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "「$1」唔係有效嘅實體類型。"
+}

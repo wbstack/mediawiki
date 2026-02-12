@@ -20,6 +20,8 @@
  * @file
  */
 
+namespace MediaWiki\Config;
+
 /**
  * Provides a fallback sequence for Config objects
  *
@@ -70,3 +72,6 @@ class MultiConfig implements Config {
 		return false;
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( MultiConfig::class, 'MultiConfig' );

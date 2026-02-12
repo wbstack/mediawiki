@@ -45,7 +45,6 @@
 	"cite-ve-dialog-reference-editing-reused-long": "Tato reference se na této stránce používá $1{{PLURAL:$1|krát}}. Zde provedené změny se projeví všude, kde se tato reference používá.",
 	"cite-ve-dialog-reference-options-group-label": "Použít tuto skupinu",
 	"cite-ve-dialog-reference-options-group-placeholder": "Obecné reference",
-	"cite-ve-dialog-reference-options-name-label": "Znovupoužívat pod tímto názvem",
 	"cite-ve-dialog-reference-options-responsive-label": "Použít responzivní vzhled sloupců",
 	"cite-ve-dialog-reference-options-section": "Možnosti",
 	"cite-ve-dialog-reference-placeholder": "Sem napište nebo vložte svou referenci nebo citační šablonu.",
@@ -65,9 +64,7 @@
 	"cite-ve-referenceslist-isempty-default": "Na této stránce nejsou žádné reference, které by se v tomto seznamu zobrazily.",
 	"cite-ve-referenceslist-missingref": "Tato reference je definována v šabloně nebo jiné generované části textu a zatím ji lze editovat jen v režimu zdrojového textu.",
 	"cite-ve-referenceslist-missingref-in-list": "Tato reference je definována v šabloně nebo jiné generované části textu a její náhled si zatím lze zobrazit jen v režimu zdrojového textu.",
-	"cite-ve-referenceslist-missingreflist": "Tento seznam referencí je generován šablonou a zatím ho lze editovat pouze v režimu zdrojového textu.",
+	"cite-ve-referenceslist-missingreflist": "Tento seznam referencí je generován šablonou.",
 	"cite-ve-toolbar-group-label": "Citace",
-	"cite-ve-othergroup-item": "$1 reference",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "Reference",
-	"visualeditor-internal-list-diff-group-name-mwreference": "Název skupiny referencí: „$1“"
+	"cite-ve-othergroup-item": "$1 reference"
 }

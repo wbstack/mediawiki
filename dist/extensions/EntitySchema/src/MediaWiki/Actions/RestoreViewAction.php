@@ -1,39 +1,40 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\MediaWiki\Actions;
 
+use Article;
 use Diff\DiffOp\Diff\Diff;
 use EntitySchema\MediaWiki\Content\EntitySchemaContent;
 use EntitySchema\MediaWiki\Content\EntitySchemaSlotDiffRenderer;
 use EntitySchema\Presentation\ConfirmationFormRenderer;
 use EntitySchema\Presentation\DiffRenderer;
-use EntitySchema\Services\Diff\SchemaDiffer;
-use EntitySchema\Services\SchemaConverter\SchemaConverter;
-use IContextSource;
+use EntitySchema\Services\Converter\EntitySchemaConverter;
+use EntitySchema\Services\Diff\EntitySchemaDiffer;
+use MediaWiki\Context\IContextSource;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
-use Page;
-use Status;
+use MediaWiki\Status\Status;
 
 /**
  * @license GPL-2.0-or-later
  */
 final class RestoreViewAction extends AbstractRestoreAction {
 
-	/** @var EntitySchemaSlotDiffRenderer */
-	private $slotDiffRenderer;
+	private EntitySchemaSlotDiffRenderer $slotDiffRenderer;
 
 	public function __construct(
-		Page $page,
-		EntitySchemaSlotDiffRenderer $slotDiffRenderer,
-		IContextSource $context = null
+		Article $article,
+		IContextSource $context,
+		EntitySchemaSlotDiffRenderer $slotDiffRenderer
 	) {
-		parent::__construct( $page, $context );
+		parent::__construct( $article, $context );
 		$this->slotDiffRenderer = $slotDiffRenderer;
 	}
 
-	public function show() {
+	public function show(): void {
 		$this->checkPermissions();
 
 		$req = $this->getContext()->getRequest();
@@ -52,16 +53,16 @@ final class RestoreViewAction extends AbstractRestoreAction {
 		$this->showRestorePreview( $diffStatus->getValue(), $req->getInt( 'restore' ) );
 	}
 
-	private function showRestorePreview( Diff $diff, $restoredRevID ) {
+	private function showRestorePreview( Diff $diff, int $restoredRevID ): void {
 		$this->getOutput()->enableOOUI();
-		$this->getOutput()->setPageTitle(
+		$this->getOutput()->setPageTitleMsg(
 			$this->msg(
 				'entityschema-restore-heading',
 				$this->getTitle()->getTitleValue()->getText()
 			)
 		);
 
-		$diffRenderer = new DiffRenderer( $this );
+		$diffRenderer = new DiffRenderer( $this, $this->slotDiffRenderer );
 		$diffHTML = $diffRenderer->renderSchemaDiffTable(
 			$this->slotDiffRenderer->renderSchemaDiffRows( $diff ),
 			$this->msg( 'currentrev' )
@@ -93,8 +94,8 @@ final class RestoreViewAction extends AbstractRestoreAction {
 			->getRevisionById( $this->getTitle()->getLatestRevID() )
 			->getContent( SlotRecord::MAIN );
 
-		$differ = new SchemaDiffer();
-		$converter = new SchemaConverter();
+		$differ = new EntitySchemaDiffer();
+		$converter = new EntitySchemaConverter();
 		$diff = $differ->diffSchemas(
 		// @phan-suppress-next-line PhanUndeclaredMethod
 			$converter->getFullArraySchemaData( $baseContent->getText() ),

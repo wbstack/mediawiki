@@ -1,3 +1,5 @@
+'use strict';
+
 /*!
  * VisualEditor DataModel MWReferenceModel class.
  *
@@ -6,26 +8,35 @@
  */
 
 /**
- * MediaWiki reference model.
+ * Corresponds to one ref and its metadata, chosen for an action.
  *
- * @class
- * @mixin OO.EventEmitter
+ * TODO: Distinguish this module from ve.dm.MWReferenceNode
  *
  * @constructor
- * @param {ve.dm.Document} parentDoc Document that contains or will contain the reference
+ * @mixes OO.EventEmitter
+ * @param {ve.dm.Document} [parentDoc] The parent Document we can use to auto-generate a blank
+ *  Document for the reference in case {@see setDocument} was never called
+ * @property {ve.dm.Document|Function|undefined} doc Might be deferred via a function, to be
+ *  lazy-evaluated when {@see getDocument} is called
  */
 ve.dm.MWReferenceModel = function VeDmMWReferenceModel( parentDoc ) {
 	// Mixin constructors
 	OO.EventEmitter.call( this );
 
 	// Properties
+	this.extendsRef = null;
 	this.listKey = '';
 	this.listGroup = '';
 	this.listIndex = null;
 	this.group = '';
-	this.doc = null;
-	this.parentDoc = parentDoc;
-	this.deferDoc = null;
+	if ( parentDoc ) {
+		this.doc = () => parentDoc.cloneWithData( [
+			{ type: 'paragraph', internal: { generated: 'wrapper' } },
+			{ type: '/paragraph' },
+			{ type: 'internalList' },
+			{ type: '/internalList' }
+		] );
+	}
 };
 
 /* Inheritance */
@@ -41,18 +52,19 @@ OO.mixinClass( ve.dm.MWReferenceModel, OO.EventEmitter );
  * @return {ve.dm.MWReferenceModel} Reference model
  */
 ve.dm.MWReferenceModel.static.newFromReferenceNode = function ( node ) {
-	var doc = node.getDocument(),
-		internalList = doc.getInternalList(),
-		attr = node.getAttributes(),
-		ref = new ve.dm.MWReferenceModel( doc );
+	const doc = node.getDocument();
+	const internalList = doc.getInternalList();
+	const attributes = node.getAttributes();
+	const ref = new ve.dm.MWReferenceModel();
 
-	ref.setListKey( attr.listKey );
-	ref.setListGroup( attr.listGroup );
-	ref.setListIndex( attr.listIndex );
-	ref.setGroup( attr.refGroup );
-	ref.deferDoc = function () {
+	ref.extendsRef = attributes.extendsRef;
+	ref.listKey = attributes.listKey;
+	ref.listGroup = attributes.listGroup;
+	ref.listIndex = attributes.listIndex;
+	ref.group = attributes.refGroup;
+	ref.doc = function () {
 		// cloneFromRange is very expensive, so lazy evaluate it
-		return doc.cloneFromRange( internalList.getItemNode( attr.listIndex ).getRange() );
+		return doc.cloneFromRange( internalList.getItemNode( attributes.listIndex ).getRange() );
 	};
 
 	return ref;
@@ -83,17 +95,17 @@ ve.dm.MWReferenceModel.prototype.findInternalItem = function ( surfaceModel ) {
  */
 ve.dm.MWReferenceModel.prototype.insertInternalItem = function ( surfaceModel ) {
 	// Create new internal item
-	var doc = surfaceModel.getDocument(),
-		internalList = doc.getInternalList();
+	const doc = surfaceModel.getDocument();
+	const internalList = doc.getInternalList();
 
 	// Fill in data
-	this.setListKey( 'auto/' + internalList.getNextUniqueNumber() );
-	this.setListGroup( 'mwReference/' + this.group );
+	this.listKey = 'auto/' + internalList.getNextUniqueNumber();
+	this.listGroup = 'mwReference/' + this.group;
 
 	// Insert internal reference item into document
-	var item = internalList.getItemInsertion( this.listGroup, this.listKey, [] );
+	const item = internalList.getItemInsertion( this.listGroup, this.listKey, [] );
 	surfaceModel.change( item.transaction );
-	this.setListIndex( item.index );
+	this.listIndex = item.index;
 
 	// Inject reference document into internal reference item
 	surfaceModel.change(
@@ -113,26 +125,26 @@ ve.dm.MWReferenceModel.prototype.insertInternalItem = function ( surfaceModel ) 
  * @param {ve.dm.Surface} surfaceModel Surface model of main document
  */
 ve.dm.MWReferenceModel.prototype.updateInternalItem = function ( surfaceModel ) {
-	var doc = surfaceModel.getDocument(),
-		internalList = doc.getInternalList(),
-		listGroup = 'mwReference/' + this.group;
+	const doc = surfaceModel.getDocument();
+	const internalList = doc.getInternalList();
+	const listGroup = 'mwReference/' + this.group;
 
 	// Group/key has changed
 	if ( this.listGroup !== listGroup ) {
 		// Get all reference nodes with the same group and key
-		var group = internalList.getNodeGroup( this.listGroup );
-		var refNodes = group.keyedNodes[ this.listKey ] ?
+		const group = internalList.getNodeGroup( this.listGroup );
+		const refNodes = group.keyedNodes[ this.listKey ] ?
 			group.keyedNodes[ this.listKey ].slice() :
 			[ group.firstNodes[ this.listIndex ] ];
 		// Check for name collision when moving items between groups
-		var keyIndex = internalList.getKeyIndex( this.listGroup, this.listKey );
+		const keyIndex = internalList.getKeyIndex( this.listGroup, this.listKey );
 		if ( keyIndex !== undefined ) {
 			// Resolve name collision by generating a new list key
 			this.listKey = 'auto/' + internalList.getNextUniqueNumber();
 		}
 		// Update the group name of all references nodes with the same group and key
-		var txs = [];
-		for ( var i = 0, len = refNodes.length; i < len; i++ ) {
+		const txs = [];
+		for ( let i = 0, len = refNodes.length; i < len; i++ ) {
 			txs.push( ve.dm.TransactionBuilder.static.newFromAttributeChanges(
 				doc,
 				refNodes[ i ].getOuterRange().start,
@@ -143,11 +155,13 @@ ve.dm.MWReferenceModel.prototype.updateInternalItem = function ( surfaceModel ) 
 		this.listGroup = listGroup;
 	}
 	// Update internal node content
-	var itemNodeRange = internalList.getItemNode( this.listIndex ).getRange();
-	surfaceModel.change( ve.dm.TransactionBuilder.static.newFromRemoval( doc, itemNodeRange, true ) );
+	const itemNodeRange = internalList.getItemNode( this.listIndex ).getRange();
 	surfaceModel.change(
-		ve.dm.TransactionBuilder.static.newFromDocumentInsertion( doc, itemNodeRange.start, this.getDocument() )
-	);
+		ve.dm.TransactionBuilder.static
+			.newFromRemoval( doc, itemNodeRange, true ) );
+	surfaceModel.change(
+		ve.dm.TransactionBuilder.static
+			.newFromDocumentInsertion( doc, itemNodeRange.start, this.getDocument() ) );
 };
 
 /**
@@ -157,7 +171,8 @@ ve.dm.MWReferenceModel.prototype.updateInternalItem = function ( surfaceModel ) 
  * @param {boolean} [placeholder] Reference is a placeholder for staging purposes
  */
 ve.dm.MWReferenceModel.prototype.insertReferenceNode = function ( surfaceFragment, placeholder ) {
-	var attributes = {
+	const attributes = {
+		extendsRef: this.extendsRef,
 		listKey: this.listKey,
 		listGroup: this.listGroup,
 		listIndex: this.listIndex,
@@ -219,49 +234,13 @@ ve.dm.MWReferenceModel.prototype.getGroup = function () {
  *
  * Auto-generates a blank document if no document exists.
  *
- * @return {ve.dm.Document} Reference document
+ * @return {ve.dm.Document} The (small) document with the content of the reference
  */
 ve.dm.MWReferenceModel.prototype.getDocument = function () {
-	if ( !this.doc ) {
-		if ( this.deferDoc ) {
-			this.doc = this.deferDoc();
-		} else {
-			this.doc = this.parentDoc.cloneWithData( [
-				{ type: 'paragraph', internal: { generated: 'wrapper' } },
-				{ type: '/paragraph' },
-				{ type: 'internalList' },
-				{ type: '/internalList' }
-			] );
-		}
+	if ( typeof this.doc === 'function' ) {
+		this.doc = this.doc();
 	}
 	return this.doc;
-};
-
-/**
- * Set key of reference in list.
- *
- * @param {string} listKey Reference's list key
- */
-ve.dm.MWReferenceModel.prototype.setListKey = function ( listKey ) {
-	this.listKey = listKey;
-};
-
-/**
- * Set name of the group a references list is in.
- *
- * @param {string} listGroup References list's group
- */
-ve.dm.MWReferenceModel.prototype.setListGroup = function ( listGroup ) {
-	this.listGroup = listGroup;
-};
-
-/**
- * Set the index of reference in list.
- *
- * @param {string} listIndex Reference's list index
- */
-ve.dm.MWReferenceModel.prototype.setListIndex = function ( listIndex ) {
-	this.listIndex = listIndex;
 };
 
 /**
@@ -276,7 +255,7 @@ ve.dm.MWReferenceModel.prototype.setGroup = function ( group ) {
 /**
  * Set the reference document.
  *
- * @param {ve.dm.Document} doc Reference document
+ * @param {ve.dm.Document} doc The (small) document with the content of the reference
  */
 ve.dm.MWReferenceModel.prototype.setDocument = function ( doc ) {
 	this.doc = doc;

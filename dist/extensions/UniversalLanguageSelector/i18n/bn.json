@@ -3,6 +3,7 @@
 		"authors": [
 			"Aftab1995",
 			"Aftabuzzaman",
+			"Aishik Rehman",
 			"Bellayet",
 			"Nasir8891",
 			"Tanayb",
@@ -16,7 +17,7 @@
 	"ext-uls-undo-language-tooltip-text-local": "এই উইকির জন্য ভাষা পরিবর্তন করা হয়েছে। সকল উইকির জন্য ভাষা পরিবর্তন করতে আপনার [[Special:GlobalPreferences|বৈশ্বিক পছন্দগুলি]] দেখুন।",
 	"ext-uls-language-settings-preferences-link": "আরও ভাষা সেটিং",
 	"uls-betafeature-label": "সংক্ষেপিত ভাষা সংযোগ",
-	"uls-betafeature-desc": "অন্যান্য ভাষাসমূহের সাথে ভাষার তালিকার একটি সংক্ষিপ্ত সংস্করণ দেখাবে, যা আপনার কাছে আরো বেশি প্রাসঙ্গিক।",
+	"uls-betafeature-desc": "অন্যান্য ভাষাসমূহের সাথে ভাষার তালিকার একটি সংক্ষিপ্ত সংস্করণ দেখাবে, যা আপনার কাছে আরও বেশি প্রাসঙ্গিক।",
 	"ext-uls-display-settings-title": "প্রদর্শন সেটিং",
 	"ext-uls-display-settings-language-tab": "ভাষা",
 	"ext-uls-display-settings-fonts-tab": "ফন্ট",
@@ -72,10 +73,10 @@
 	"ext-uls-setlang-accept": "পরিবর্তন গ্রহণ করুন",
 	"ext-uls-setlang-loading": "প্রয়োগ হচ্ছে...",
 	"ext-uls-setlang-cancel": "পরিবর্তন করবেন না",
-	"ext-uls-actions-menu-header": "আরও বিকল্প",
 	"ext-uls-actions-menu-language-settings-item-label": "ভাষা সেটিং খুলুন",
 	"ext-uls-empty-state-header": "এখনো কোনও ভাষা নেই",
 	"ext-uls-empty-state-desc": "আপাতত কোনও ভাষা উপলব্ধ নেই",
 	"ext-uls-empty-state-header-actions-available": "এখনো কোনো ভাষা নেই। নতুন একটি যোগ করবেন?",
-	"ext-uls-empty-state-desc-actions-available": "বিষয়বস্তুটি আরও ভাষায় উপলব্ধ করুন।"
+	"ext-uls-empty-state-desc-actions-available": "বিষয়বস্তুটি আরও ভাষায় উপলব্ধ করুন।",
+	"ext-uls-add-languages-button-label": "ভাষা যোগ করুন"
 }

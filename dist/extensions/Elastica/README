@@ -49,6 +49,6 @@ Add this to LocalSettings.php:
 Licensing information
 ---------------------
 CirrusSearch makes use of the Elastica library to connect to Elasticsearch
-<http://elastica.io/>.
+<https://elastica.io/>.
 It is Apache licensed and you can read its LICENSE.txt for
 more information.

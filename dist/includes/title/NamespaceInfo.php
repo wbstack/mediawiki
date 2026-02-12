@@ -20,12 +20,15 @@
  * @file
  */
 
+namespace MediaWiki\Title;
+
+use InvalidArgumentException;
 use MediaWiki\Config\ServiceOptions;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MainConfigNames;
-use MediaWiki\MediaWikiServices;
+use MWException;
 
 /**
  * This is a utility class for dealing with namespaces that encodes all the "magic" behaviors of
@@ -40,7 +43,7 @@ class NamespaceInfo {
 	 * forevermore. Historically, they could've probably been lowercased too,
 	 * but some things are just too ingrained now. :)
 	 */
-	private $alwaysCapitalizedNamespaces = [ NS_SPECIAL, NS_USER, NS_MEDIAWIKI ];
+	private const ALWAYS_CAPITALIZED_NAMESPACES = [ NS_SPECIAL, NS_USER, NS_MEDIAWIKI ];
 
 	/** @var string[]|null Canonical namespaces cache */
 	private $canonicalNamespaces = null;
@@ -51,11 +54,10 @@ class NamespaceInfo {
 	/** @var int[]|null Valid namespaces cache */
 	private $validNamespaces = null;
 
-	/** @var ServiceOptions */
-	private $options;
-
-	/** @var HookRunner */
-	private $hookRunner;
+	private ServiceOptions $options;
+	private HookRunner $hookRunner;
+	private array $extensionNamespaces;
+	private array $extensionImmovableNamespaces;
 
 	/**
 	 * Definitions of the NS_ constants are in Defines.php
@@ -98,14 +100,17 @@ class NamespaceInfo {
 		MainConfigNames::NonincludableNamespaces,
 	];
 
-	/**
-	 * @param ServiceOptions $options
-	 * @param HookContainer $hookContainer
-	 */
-	public function __construct( ServiceOptions $options, HookContainer $hookContainer ) {
+	public function __construct(
+		ServiceOptions $options,
+		HookContainer $hookContainer,
+		array $extensionNamespaces,
+		array $extensionImmovableNamespaces
+	) {
 		$options->assertRequiredOptions( self::CONSTRUCTOR_OPTIONS );
 		$this->options = $options;
 		$this->hookRunner = new HookRunner( $hookContainer );
+		$this->extensionNamespaces = $extensionNamespaces;
+		$this->extensionImmovableNamespaces = $extensionImmovableNamespaces;
 	}
 
 	/**
@@ -145,7 +150,7 @@ class NamespaceInfo {
 			|| ( $index[0] === '-' && ctype_digit( substr( $index, 1 ) ) )
 		) ) {
 			throw new InvalidArgumentException(
-				"$method called with non-integer (" . gettype( $index ) . ") namespace '$index'"
+				"$method called with non-integer (" . get_debug_type( $index ) . ") namespace '$index'"
 			);
 		}
 
@@ -159,10 +164,7 @@ class NamespaceInfo {
 	 * @return bool
 	 */
 	public function isMovable( $index ) {
-		$extensionRegistry = ExtensionRegistry::getInstance();
-		$extNamespaces = $extensionRegistry->getAttribute( 'ImmovableNamespaces' );
-
-		$result = $index >= NS_MAIN && !in_array( $index, $extNamespaces );
+		$result = $index >= NS_MAIN && !in_array( $index, $this->extensionImmovableNamespaces );
 
 		/**
 		 * @since 1.20
@@ -192,7 +194,7 @@ class NamespaceInfo {
 		$index = $this->makeValidNamespace( $index, __METHOD__ );
 
 		return $index > NS_MAIN
-			&& $index % 2;
+			&& $index % 2 === 1;
 	}
 
 	/**
@@ -250,15 +252,9 @@ class NamespaceInfo {
 	 * @return bool True if this title either is a talk page or can have a talk page associated.
 	 */
 	public function canHaveTalkPage( LinkTarget $target ) {
-		if ( $target->getText() === '' || $target->getInterwiki() !== '' ) {
-			return false;
-		}
-
-		if ( $target->getNamespace() < NS_MAIN ) {
-			return false;
-		}
-
-		return true;
+		return $target->getNamespace() >= NS_MAIN &&
+			!$target->isExternal() &&
+			$target->getText() !== '';
 	}
 
 	/**
@@ -382,8 +378,7 @@ class NamespaceInfo {
 		if ( $this->canonicalNamespaces === null ) {
 			$this->canonicalNamespaces =
 				[ NS_MAIN => '' ] + $this->options->get( MainConfigNames::CanonicalNamespaceNames );
-			$this->canonicalNamespaces +=
-				ExtensionRegistry::getInstance()->getAttribute( 'ExtensionNamespaces' );
+			$this->canonicalNamespaces += $this->extensionNamespaces;
 			if ( is_array( $this->options->get( MainConfigNames::ExtraNamespaces ) ) ) {
 				$this->canonicalNamespaces += $this->options->get( MainConfigNames::ExtraNamespaces );
 			}
@@ -396,7 +391,7 @@ class NamespaceInfo {
 	 * Returns the canonical (English) name for a given index
 	 *
 	 * @param int $index Namespace index
-	 * @return string|bool If no canonical definition.
+	 * @return string|false If no canonical definition.
 	 */
 	public function getCanonicalName( $index ) {
 		$nslist = $this->getCanonicalNamespaces();
@@ -432,7 +427,7 @@ class NamespaceInfo {
 	public function getValidNamespaces() {
 		if ( $this->validNamespaces === null ) {
 			$this->validNamespaces = [];
-			foreach ( array_keys( $this->getCanonicalNamespaces() ) as $ns ) {
+			foreach ( $this->getCanonicalNamespaces() as $ns => $_ ) {
 				if ( $ns >= 0 ) {
 					$this->validNamespaces[] = $ns;
 				}
@@ -555,7 +550,7 @@ class NamespaceInfo {
 		$index = $this->getSubject( $index );
 
 		// Some namespaces are special and should always be upper case
-		if ( in_array( $index, $this->alwaysCapitalizedNamespaces ) ) {
+		if ( in_array( $index, self::ALWAYS_CAPITALIZED_NAMESPACES ) ) {
 			return true;
 		}
 		$overrides = $this->options->get( MainConfigNames::CapitalLinkOverrides );
@@ -604,25 +599,6 @@ class NamespaceInfo {
 	}
 
 	/**
-	 * Determine which restriction levels it makes sense to use in a namespace,
-	 * optionally filtered by a user's rights.
-	 *
-	 * @deprecated since 1.34 User PermissionManager::getNamespaceRestrictionLevels instead.
-	 * @param int $index Index to check
-	 * @param User|null $user User to check
-	 * @return string[]
-	 */
-	public function getRestrictionLevels( $index, User $user = null ) {
-		// PermissionManager is not injected because adding an explicit dependency
-		// breaks MW installer by adding a dependency chain on the database before
-		// it was set up. Also, the method is deprecated and will be soon removed.
-		wfDeprecated( __METHOD__, '1.34' );
-		return MediaWikiServices::getInstance()
-			->getPermissionManager()
-			->getNamespaceRestrictionLevels( $index, $user );
-	}
-
-	/**
 	 * Returns the link type to be used for categories.
 	 *
 	 * This determines which section of a category page titles
@@ -654,3 +630,6 @@ class NamespaceInfo {
 		return array_keys( self::CANONICAL_NAMES );
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( NamespaceInfo::class, 'NamespaceInfo' );

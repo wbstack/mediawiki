@@ -2,8 +2,8 @@
 
 namespace TwoColConflict\Html;
 
-use Html;
-use Language;
+use MediaWiki\Html\Html;
+use MediaWiki\Language\Language;
 use MessageLocalizer;
 use OOUI\ButtonWidget;
 
@@ -12,20 +12,9 @@ use OOUI\ButtonWidget;
  */
 class HtmlEditableTextComponent {
 
-	/**
-	 * @var MessageLocalizer
-	 */
-	private $messageLocalizer;
-
-	/**
-	 * @var Language
-	 */
-	private $language;
-
-	/**
-	 * @var string|null
-	 */
-	private $editFontOption;
+	private MessageLocalizer $messageLocalizer;
+	private Language $language;
+	private ?string $editFontOption;
 
 	/**
 	 * @param MessageLocalizer $messageLocalizer
@@ -36,7 +25,7 @@ class HtmlEditableTextComponent {
 	public function __construct(
 		MessageLocalizer $messageLocalizer,
 		Language $language,
-		string $editFontOption = null
+		?string $editFontOption = null
 	) {
 		$this->messageLocalizer = $messageLocalizer;
 		$this->language = $language;
@@ -61,11 +50,12 @@ class HtmlEditableTextComponent {
 	): string {
 		$diffHtml = trim( $diffHtml, "\r\n\u{00A0}" );
 		$editorText = trim( (string)$text, "\r\n" );
-		// This duplicates what EditPage::addNewLineAtEnd() does
+		// This duplicates what \MediaWiki\EditPage\EditPage::addNewLineAtEnd() does
 		if ( $editorText !== '' ) {
 			$editorText .= "\n";
 		}
-		$classes = [ 'mw-twocolconflict-split-editable' ];
+		// FIXME: Remove the temporary "notheme", see T373231
+		$classes = [ 'mw-twocolconflict-split-editable', 'notheme' ];
 
 		$innerHtml = Html::rawElement(
 			'span',

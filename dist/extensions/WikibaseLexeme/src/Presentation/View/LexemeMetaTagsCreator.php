@@ -14,8 +14,9 @@ use Wikimedia\Assert\Assert;
  */
 class LexemeMetaTagsCreator implements EntityMetaTagsCreator {
 
+	/** @var string */
 	private $lemmaSeparator;
-	private $labelDescriptionLookup;
+	private FallbackLabelDescriptionLookup $labelDescriptionLookup;
 
 	/**
 	 * @param string $lemmaSeparator
@@ -44,11 +45,11 @@ class LexemeMetaTagsCreator implements EntityMetaTagsCreator {
 		$metaTags = [
 			'title' => $this->getTitleText( $entity ),
 			'og:title' => $this->getTitleText( $entity ),
-			'twitter:card' => 'summary'
+			'twitter:card' => 'summary',
 		];
 
 		$description = $this->getDescriptionText( $entity );
-		if ( !empty( $description ) ) {
+		if ( $description !== '' ) {
 			$metaTags[ 'description' ] = $description;
 			$metaTags[ 'og:description' ] = $description;
 
@@ -64,7 +65,7 @@ class LexemeMetaTagsCreator implements EntityMetaTagsCreator {
 	 */
 	private function getTitleText( Lexeme $entity ) {
 		$lemmas = $entity->getLemmas()->toTextArray();
-		if ( empty( $lemmas ) ) {
+		if ( !$lemmas ) {
 			return $entity->getId()->getSerialization();
 		}
 		return implode( $this->lemmaSeparator, $lemmas );

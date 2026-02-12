@@ -10,7 +10,7 @@ use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Entity\SerializableEntityId;
 
 /**
- * @covers \Wikibase\DataModel\Entity\EntityId
+ * @coversNothing
  * @uses \Wikibase\DataModel\Entity\ItemId
  * @uses \Wikibase\DataModel\Entity\NumericPropertyId
  *
@@ -23,17 +23,14 @@ use Wikibase\DataModel\Entity\SerializableEntityId;
  */
 class EntityIdTest extends \PHPUnit\Framework\TestCase {
 
-	public function instanceProvider() {
+	public static function instanceProvider() {
 		$ids = [];
 
 		$ids[] = [ new ItemId( 'Q1' ), '' ];
 		$ids[] = [ new ItemId( 'Q42' ), '' ];
 		$ids[] = [ new ItemId( 'Q31337' ), '' ];
 		$ids[] = [ new ItemId( 'Q2147483647' ), '' ];
-		$ids[] = [ new ItemId( ':Q2147483647' ), '' ];
-		$ids[] = [ new ItemId( 'foo:Q2147483647' ), 'foo' ];
 		$ids[] = [ new NumericPropertyId( 'P101010' ), '' ];
-		$ids[] = [ new NumericPropertyId( 'foo:bar:P101010' ), 'foo' ];
 
 		return $ids;
 	}
@@ -55,12 +52,22 @@ class EntityIdTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals( $id, unserialize( serialize( $id ) ) );
 	}
 
-	public function testDeserializationCompatibility() {
-		$v05serialization = 'C:32:"Wikibase\DataModel\Entity\ItemId":15:{["item","Q123"]}';
+	public static function deserializationCompatibilityProvider(): array {
+		return [
+			'2022-03 PHP 7.4+' => [
+				new ItemId( 'q123' ),
+				'O:32:"Wikibase\DataModel\Entity\ItemId":1:{s:13:"serialization";s:4:"Q123";}',
+			],
+		];
+	}
 
+	/**
+	 * @dataProvider deserializationCompatibilityProvider
+	 */
+	public function testDeserializationCompatibility( $expected, $serialization ) {
 		$this->assertEquals(
-			new ItemId( 'q123' ),
-			unserialize( $v05serialization )
+			$expected,
+			unserialize( $serialization )
 		);
 	}
 
@@ -70,7 +77,7 @@ class EntityIdTest extends \PHPUnit\Framework\TestCase {
 	 * It is just here to catch unintentional changes.
 	 */
 	public function testSerializationStability() {
-		$serialization = 'C:32:"Wikibase\DataModel\Entity\ItemId":4:{Q123}';
+		$serialization = 'O:32:"Wikibase\DataModel\Entity\ItemId":1:{s:13:"serialization";s:4:"Q123";}';
 		$id = new ItemId( 'q123' );
 
 		$this->assertSame(
@@ -86,93 +93,11 @@ class EntityIdTest extends \PHPUnit\Framework\TestCase {
 		$this->assertIsString( $id->__toString() );
 	}
 
-	public function testIsForeign() {
-		$this->assertFalse( ( new ItemId( 'Q42' ) )->isForeign() );
-		$this->assertFalse( ( new ItemId( ':Q42' ) )->isForeign() );
-		$this->assertTrue( ( new ItemId( 'foo:Q42' ) )->isForeign() );
-		$this->assertFalse( ( new NumericPropertyId( ':P42' ) )->isForeign() );
-		$this->assertTrue( ( new NumericPropertyId( 'foo:P42' ) )->isForeign() );
-	}
-
-	/**
-	 * @dataProvider instanceProvider
-	 */
-	public function testGetRepositoryName( EntityId $id, $repoName ) {
-		$this->assertSame( $repoName, $id->getRepositoryName() );
-	}
-
-	public function serializationSplitProvider() {
+	public static function invalidSerializationProvider() {
 		return [
-			[ 'Q42', [ '', '', 'Q42' ] ],
-			[ 'foo:Q42', [ 'foo', '', 'Q42' ] ],
-			[ '0:Q42', [ '0', '', 'Q42' ] ],
-			[ 'foo:bar:baz:Q42', [ 'foo', 'bar:baz', 'Q42' ] ],
-		];
-	}
-
-	/**
-	 * @dataProvider serializationSplitProvider
-	 */
-	public function testSplitSerialization( $serialization, $split ) {
-		$this->assertSame( $split, SerializableEntityId::splitSerialization( $serialization ) );
-	}
-
-	/**
-	 * @dataProvider invalidSerializationProvider
-	 */
-	public function testSplitSerializationFails_GivenInvalidSerialization( $serialization ) {
-		$this->expectException( InvalidArgumentException::class );
-		SerializableEntityId::splitSerialization( $serialization );
-	}
-
-	/**
-	 * @dataProvider serializationSplitProvider
-	 */
-	public function testJoinSerialization( $serialization, $split ) {
-		$this->assertSame( $serialization, SerializableEntityId::joinSerialization( $split ) );
-	}
-
-	/**
-	 * @dataProvider invalidJoinSerializationDataProvider
-	 */
-	public function testJoinSerializationFails_GivenEmptyId( $parts ) {
-		$this->expectException( InvalidArgumentException::class );
-		SerializableEntityId::joinSerialization( $parts );
-	}
-
-	public function invalidJoinSerializationDataProvider() {
-		return [
-			[ [ 'Q42', '', '' ] ],
-			[ [ '', 'Q42', '' ] ],
-			[ [ 'foo', 'Q42', '' ] ],
-		];
-	}
-
-	public function testGivenNotNormalizedSerialization_splitSerializationReturnsNormalizedParts() {
-		$this->assertSame( [ '', '', 'Q42' ], SerializableEntityId::splitSerialization( ':Q42' ) );
-		$this->assertSame( [ 'foo', 'bar', 'Q42' ], SerializableEntityId::splitSerialization( ':foo:bar:Q42' ) );
-	}
-
-	public function localPartDataProvider() {
-		return [
-			[ 'Q42', 'Q42' ],
-			[ ':Q42', 'Q42' ],
-			[ 'foo:Q42', 'Q42' ],
-			[ 'foo:bar:Q42', 'bar:Q42' ],
-		];
-	}
-
-	/**
-	 * @dataProvider localPartDataProvider
-	 */
-	public function testGetLocalPart( $serialization, $localPart ) {
-		$id = new ItemId( $serialization );
-		$this->assertSame( $localPart, $id->getLocalPart() );
-	}
-
-	public function invalidSerializationProvider() {
-		return [
+			[ 'foo:Q42' ],
 			[ 's p a c e s:Q42' ],
+			[ ':Q42' ],
 			[ '::Q42' ],
 			[ '' ],
 			[ ':' ],
@@ -185,7 +110,9 @@ class EntityIdTest extends \PHPUnit\Framework\TestCase {
 	 * @dataProvider invalidSerializationProvider
 	 */
 	public function testConstructor( $serialization ) {
-		$mock = $this->createMock( SerializableEntityId::class );
+		$mock = $this->getMockBuilder( SerializableEntityId::class )
+			->disableOriginalConstructor()
+			->getMockForAbstractClass();
 
 		$constructor = ( new ReflectionClass( SerializableEntityId::class ) )->getConstructor();
 

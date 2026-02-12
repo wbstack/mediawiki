@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWLatexDialog class.
  *
- * @copyright 2015 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license MIT
  */
 
@@ -31,20 +31,7 @@ ve.ui.MWLatexDialog.static.size = 'larger';
 
 ve.ui.MWLatexDialog.static.dir = 'ltr';
 
-ve.ui.MWLatexDialog.static.symbols = null;
-
 ve.ui.MWLatexDialog.static.symbolsModule = null;
-
-/* static methods */
-
-/**
- * Set the symbols property
- *
- * @param {Object} symbols The symbols and their group names
- */
-ve.ui.MWLatexDialog.static.setSymbols = function ( symbols ) {
-	this.symbols = symbols;
-};
 
 /* Methods */
 
@@ -52,21 +39,21 @@ ve.ui.MWLatexDialog.static.setSymbols = function ( symbols ) {
  * @inheritdoc
  */
 ve.ui.MWLatexDialog.prototype.initialize = function () {
-	var dialog = this;
-
 	// Parent method
 	ve.ui.MWLatexDialog.super.prototype.initialize.call( this );
 
 	// Layout for the formula inserter (formula tab panel) and options form (options tab panel)
 	this.indexLayout = new OO.ui.IndexLayout();
 
-	var formulaTabPanel = new OO.ui.TabPanelLayout( 'formula', {
+	const formulaTabPanel = new OO.ui.TabPanelLayout( 'formula', {
 		label: ve.msg( 'math-visualeditor-mwlatexdialog-card-formula' ),
-		padded: true
+		padded: true,
+		classes: [ 'latex-dialog-formula-panel' ]
 	} );
-	var optionsTabPanel = new OO.ui.TabPanelLayout( 'options', {
+	const optionsTabPanel = new OO.ui.TabPanelLayout( 'options', {
 		label: ve.msg( 'math-visualeditor-mwlatexdialog-card-options' ),
-		padded: true
+		padded: true,
+		classes: [ 'latex-dialog-options-panel' ]
 	} );
 
 	this.indexLayout.addTabPanels( [
@@ -115,68 +102,94 @@ ve.ui.MWLatexDialog.prototype.initialize = function () {
 	this.idInput = new OO.ui.TextInputWidget();
 	this.qidInput = new mw.widgets.MathWbEntitySelector();
 
-	var inputField = new OO.ui.FieldLayout( this.input, {
+	const inputField = new OO.ui.FieldLayout( this.input, {
 		align: 'top',
+		classes: [ 'latex-dialog-formula-field' ],
 		label: ve.msg( 'math-visualeditor-mwlatexdialog-card-formula' )
 	} );
-	var displayField = new OO.ui.FieldLayout( this.displaySelect, {
+	const displayField = new OO.ui.FieldLayout( this.displaySelect, {
 		align: 'top',
+		classes: [ 'latex-dialog-display-field' ],
 		label: ve.msg( 'math-visualeditor-mwlatexinspector-display' )
 	} );
-	var idField = new OO.ui.FieldLayout( this.idInput, {
+	const idField = new OO.ui.FieldLayout( this.idInput, {
 		align: 'top',
+		classes: [ 'latex-dialog-id-field' ],
 		label: ve.msg( 'math-visualeditor-mwlatexinspector-id' )
 	} );
-	var qidField = new OO.ui.FieldLayout( this.qidInput, {
+	const qidField = new OO.ui.FieldLayout( this.qidInput, {
 		align: 'top',
+		classes: [ 'latex-dialog-qid-field' ],
 		label: ve.msg( 'math-visualeditor-mwlatexinspector-qid' )
 	} );
 
-	var formulaPanel = new OO.ui.PanelLayout( {
+	const formulaPanel = new OO.ui.PanelLayout( {
 		scrollable: true,
 		padded: true
 	} );
 
 	// Layout for the symbol picker
-	this.bookletLayout = new OO.ui.BookletLayout( {
-		classes: [ 've-ui-mwLatexDialog-symbols' ],
-		menuPosition: 'before',
-		outlined: true,
-		continuous: true
+	this.bookletLayout = new ve.ui.SymbolListBookletLayout( {
+		classes: [ 've-ui-mwLatexDialog-symbols' ]
 	} );
 	this.pages = [];
-	this.symbolsPromise = mw.loader.using( this.constructor.static.symbolsModule ).done( function () {
-		var symbols = dialog.constructor.static.symbols;
-		for ( var category in symbols ) {
-			dialog.pages.push(
-				new ve.ui.MWLatexPage(
-					// eslint-disable-next-line mediawiki/msg-doc
-					ve.msg( category ),
-					{
-						// eslint-disable-next-line mediawiki/msg-doc
-						label: ve.msg( category ),
-						symbols: symbols[ category ]
-					}
-				)
-			);
+	this.symbolsPromise = mw.loader.using( this.constructor.static.symbolsModule ).done( ( require ) => {
+		// eslint-disable-next-line security/detect-non-literal-require
+		const symbols = require( this.constructor.static.symbolsModule );
+		const symbolData = {};
+		for ( const category in symbols ) {
+			const symbolList = symbols[ category ].filter( ( symbol ) => {
+				if ( symbol.notWorking || symbol.duplicate ) {
+					return false;
+				}
+				const tex = symbol.tex || symbol.insert;
+				const classes = [ 've-ui-mwLatexDialog-symbol' ];
+				classes.push(
+					've-ui-mwLatexSymbol-' + tex.replace( /[^\w]/g, ( c ) => '_' + c.charCodeAt( 0 ) + '_' )
+				);
+				if ( symbol.width ) {
+					// The following classes are used here:
+					// * ve-ui-mwLatexDialog-symbol-wide
+					// * ve-ui-mwLatexDialog-symbol-wider
+					// * ve-ui-mwLatexDialog-symbol-widest
+					classes.push( 've-ui-mwLatexDialog-symbol-' + symbol.width );
+				}
+				if ( symbol.contain ) {
+					classes.push( 've-ui-mwLatexDialog-symbol-contain' );
+				}
+				if ( symbol.largeLayout ) {
+					classes.push( 've-ui-mwLatexDialog-symbol-largeLayout' );
+				}
+
+				// T366737 - make sure the symbols appear in night mode
+				classes.push( 'skin-invert' );
+
+				symbol.label = '';
+				symbol.classes = classes;
+
+				return true;
+			} );
+			symbolData[ category ] = {
+				// eslint-disable-next-line mediawiki/msg-doc
+				label: ve.msg( category ),
+				symbols: symbolList
+			};
 		}
-		dialog.bookletLayout.addPages( dialog.pages );
-		dialog.bookletLayout.$element.on(
-			'click',
-			'.ve-ui-mwLatexPage-symbol',
-			dialog.onListClick.bind( dialog )
-		);
+		this.bookletLayout.setSymbolData( symbolData );
+		this.bookletLayout.connect( this, {
+			choose: 'onSymbolChoose'
+		} );
 
 		// Append everything
 		formulaPanel.$element.append(
-			dialog.previewElement.$element,
+			this.previewElement.$element,
 			inputField.$element
 		);
-		dialog.menuLayout.setMenuPanel( dialog.bookletLayout );
-		dialog.menuLayout.setContentPanel( formulaPanel );
+		this.menuLayout.setMenuPanel( this.bookletLayout );
+		this.menuLayout.setContentPanel( formulaPanel );
 
 		formulaTabPanel.$element.append(
-			dialog.menuLayout.$element
+			this.menuLayout.$element
 		);
 		optionsTabPanel.$element.append(
 			displayField.$element,
@@ -184,9 +197,9 @@ ve.ui.MWLatexDialog.prototype.initialize = function () {
 			qidField.$element
 		);
 
-		dialog.$body
+		this.$body
 			.addClass( 've-ui-mwLatexDialog-content' )
-			.append( dialog.indexLayout.$element );
+			.append( this.indexLayout.$element );
 	} );
 
 };
@@ -196,8 +209,8 @@ ve.ui.MWLatexDialog.prototype.initialize = function () {
  */
 ve.ui.MWLatexDialog.prototype.getSetupProcess = function ( data ) {
 	return ve.ui.MWLatexDialog.super.prototype.getSetupProcess.call( this, data )
-		.next( function () {
-			var attributes = this.selectedNode && this.selectedNode.getAttribute( 'mw' ).attrs,
+		.next( () => {
+			const attributes = this.selectedNode && this.selectedNode.getAttribute( 'mw' ).attrs,
 				display = attributes && attributes.display || 'default',
 				id = attributes && attributes.id || '',
 				qid = attributes && attributes.qid || '',
@@ -214,23 +227,22 @@ ve.ui.MWLatexDialog.prototype.getSetupProcess = function ( data ) {
 			this.displaySelect.on( 'choose', this.onChangeHandler );
 			this.idInput.on( 'change', this.onChangeHandler );
 			this.qidInput.on( 'change', this.onChangeHandler );
-		}, this );
+		} );
 };
 
 /**
  * @inheritdoc
  */
 ve.ui.MWLatexDialog.prototype.getReadyProcess = function ( data ) {
+	mw.hook( 've.ui.MwLatexDialogReadyProcess' ).fire();
 	return ve.ui.MWLatexDialog.super.prototype.getReadyProcess.call( this, data )
-		.next( function () {
-			return this.symbolsPromise;
-		}, this )
-		.next( function () {
+		.next( () => this.symbolsPromise )
+		.next( () => {
 			// Resize the input once the dialog has been appended
 			this.input.adjustSize( true ).focus().moveCursorToEnd();
 			this.getManager().connect( this, { resize: 'onWindowManagerResize' } );
 			this.onWindowManagerResize();
-		}, this );
+		} );
 };
 
 /**
@@ -238,7 +250,7 @@ ve.ui.MWLatexDialog.prototype.getReadyProcess = function ( data ) {
  */
 ve.ui.MWLatexDialog.prototype.getTeardownProcess = function ( data ) {
 	return ve.ui.MWLatexDialog.super.prototype.getTeardownProcess.call( this, data )
-		.first( function () {
+		.first( () => {
 			this.input.off( 'change', this.onChangeHandler );
 			this.displaySelect.off( 'choose', this.onChangeHandler );
 			this.idInput.off( 'change', this.onChangeHandler );
@@ -248,7 +260,7 @@ ve.ui.MWLatexDialog.prototype.getTeardownProcess = function ( data ) {
 			this.indexLayout.resetScroll();
 			this.menuLayout.resetScroll();
 			this.bookletLayout.resetScroll();
-		}, this );
+		} );
 };
 
 /**
@@ -259,9 +271,9 @@ ve.ui.MWLatexDialog.prototype.updateMwData = function ( mwData ) {
 	ve.ui.MWLatexDialog.super.prototype.updateMwData.call( this, mwData );
 
 	// Get data from dialog
-	var display = this.displaySelect.findSelectedItem().getData();
-	var id = this.idInput.getValue();
-	var qid = this.qidInput.getValue();
+	const display = this.displaySelect.findSelectedItem().getData();
+	const id = this.idInput.getValue();
+	const qid = this.qidInput.getValue();
 
 	// Update attributes
 	mwData.attrs.display = display !== 'default' ? display : undefined;
@@ -280,56 +292,54 @@ ve.ui.MWLatexDialog.prototype.getBodyHeight = function () {
  * Handle the window resize event
  */
 ve.ui.MWLatexDialog.prototype.onWindowManagerResize = function () {
-	var dialog = this;
-	this.input.loadingPromise.always( function () {
+	this.input.loadingPromise.always( () => {
 		// Toggle short mode as necessary
 		// NB a change of mode triggers a transition...
-		dialog.menuLayout.$element.toggleClass(
-			've-ui-mwLatexDialog-menuLayout-short', dialog.menuLayout.$element.height() < 450
+		this.menuLayout.$element.toggleClass(
+			've-ui-mwLatexDialog-menuLayout-short', this.menuLayout.$element.height() < 450
 		);
 
 		// ...So wait for the possible menuLayout transition to finish
-		setTimeout( function () {
+		setTimeout( () => {
 			// Give the input the right number of rows to fit the space
-			var availableSpace = dialog.menuLayout.$content.height() - dialog.input.$element.position().top;
+			const availableSpace = this.menuLayout.$content.height() - this.input.$element.position().top;
 			// TODO: Compute this line height from the skin
-			var singleLineHeight = 21;
-			var border = 1;
-			var padding = 3;
-			var borderAndPadding = 2 * ( border + padding );
-			var maxInputHeight = availableSpace - borderAndPadding;
-			var minRows = Math.floor( maxInputHeight / singleLineHeight );
-			dialog.input.loadingPromise.done( function () {
-				dialog.input.setMinRows( minRows );
-			} ).fail( function () {
-				dialog.input.$input.attr( 'rows', minRows );
+			const singleLineHeight = 21;
+			const border = 1;
+			const padding = 3;
+			const borderAndPadding = 2 * ( border + padding );
+			const maxInputHeight = availableSpace - borderAndPadding;
+			const minRows = Math.floor( maxInputHeight / singleLineHeight );
+			this.input.loadingPromise.done( () => {
+				this.input.setMinRows( minRows );
+			} ).fail( () => {
+				this.input.$input.attr( 'rows', minRows );
 			} );
 		}, OO.ui.theme.getDialogTransitionDuration() );
 	} );
 };
 
 /**
- * Handle the click event on the list
+ * Handle a symbol being chosen from the list
  *
- * @param {jQuery.Event} e Mouse click event
+ * @param {Object} symbol
  */
-ve.ui.MWLatexDialog.prototype.onListClick = function ( e ) {
+ve.ui.MWLatexDialog.prototype.onSymbolChoose = function ( symbol ) {
 	if ( this.isReadOnly() ) {
 		return;
 	}
 
-	var symbol = $( e.target ).data( 'symbol' ),
-		encapsulate = symbol.encapsulate;
+	const encapsulate = symbol.encapsulate;
 
 	if ( encapsulate ) {
-		var range = this.input.getRange();
+		const range = this.input.getRange();
 		if ( range.from === range.to ) {
 			this.input.insertContent( encapsulate.placeholder );
 			this.input.selectRange( range.from, range.from + encapsulate.placeholder.length );
 		}
 		this.input.encapsulateContent( encapsulate.pre, encapsulate.post );
 	} else {
-		var insert = symbol.insert;
+		const insert = symbol.insert;
 		this.input.insertContent( insert );
 	}
 };

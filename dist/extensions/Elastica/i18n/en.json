@@ -2,5 +2,5 @@
 	"@metadata": {
 		"authors": []
 	},
-	"elastica-desc": "Base [http://www.elasticsearch.org/ Elasticsearch] functionality for other extensions by providing [http://elastica.io/ Elastica] library"
+	"elastica-desc": "Base [https://www.elastic.co/ Elasticsearch] functionality for other extensions by providing [https://elastica.io/ Elastica] library"
 }

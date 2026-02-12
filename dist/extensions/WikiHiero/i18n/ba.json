@@ -2,19 +2,22 @@
 	"@metadata": {
 		"authors": [
 			"Assele",
-			"Haqmar"
+			"Bashkorttan",
+			"Haqmar",
+			"З. ӘЙЛЕ"
 		]
 	},
-	"wikihiero-desc": "[[Special:Hieroglyphs|Иероглифтарҙы]] күрһәтеү өсөн <code>&lt;hiero&gt;</code> билдәһен өҫтәй",
+	"wikihiero-desc": "[[Special:Hieroglyphs|Иероглифтарҙы]] күрһәтеү өсөн <code>&lt;hiero&gt;</code> тамғаһын өҫтәй",
 	"wikihiero-eol": "Юл аҙағы",
-	"wikihiero-input": "Инеш тексты:",
-	"wikihiero-juxtaposition": "Горизонталь группалау",
+	"wikihiero-input": "Индерелгән текст:",
+	"wikihiero-juxtaposition": "Горизонталь төркөмләү",
 	"wikihiero-result": "Һөҙөмтә",
 	"wikihiero-separator": "Айырғыс",
-	"wikihiero-superposition": "Вертикаль группалау",
+	"wikihiero-superposition": "Вертикаль төркөмләү",
 	"wikihiero-syntax": "Синтаксис",
 	"wikihiero-th-code": "Код",
 	"wikihiero-th-example": "Код үрнәге",
 	"wikihiero-th-meaning": "Мәғәнәһе",
-	"wikihiero-th-result": "Һөҙөмтә"
+	"wikihiero-th-result": "Һөҙөмтә",
+	"wikihiero-visualeditor-mwhieroinspector-title": "Иероглифтар"
 }

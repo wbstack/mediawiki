@@ -1,8 +1,8 @@
-var
+const
 	mfExtend = require( '../mobile.startup/mfExtend' ),
 	PageList = require( '../mobile.startup/PageList' ),
 	WatchstarPageList = require( '../mobile.startup/watchstar/WatchstarPageList' ),
-	ScrollEndEventEmitter = require( '../mobile.startup/ScrollEndEventEmitter' ),
+	ScrollEndEventEmitter = require( './ScrollEndEventEmitter' ),
 	util = require( '../mobile.startup/util' ),
 	WatchListGateway = require( './WatchListGateway' );
 
@@ -18,12 +18,17 @@ var
  * @fires watch
  * @param {Object} params Configuration options
  * @param {OO.EventEmitter} params.eventBus Object used to listen for scroll:throttled events
+ * @private
  */
 function WatchList( params ) {
-	var lastTitle,
-		options = util.extend( {}, {
+	let lastTitle;
+	const options = util.extend(
+		{},
+		{
 			isBorderBox: false
-		}, params );
+		},
+		params
+	);
 
 	// Set up infinite scroll helper and listen to events
 	this.scrollEndEventEmitter = new ScrollEndEventEmitter( options.eventBus );
@@ -58,19 +63,15 @@ mfExtend( WatchList, WatchstarPageList, {
 	 * @instance
 	 */
 	postRender: function () {
-		var
-			$items,
-			statuses;
-
 		// Skip a level from WatchstarPageList directly to PageList.
 		PageList.prototype.postRender.apply( this );
 
-		$items = this.queryUnitializedItems();
+		const $items = this.queryUnitializedItems();
 
 		// WatchList requests list of watched pages. The list contains only
 		// watched pages so it's safe to transform the title map to a status map
 		// with each entry marked watched (true).
-		statuses = Object.keys( this.parsePagesFromItems( $items ) )
+		const statuses = Object.keys( this.parsePagesFromItems( $items ) )
 			.reduce( function ( arr, title ) {
 				arr[ title ] = true;
 				return arr;
@@ -106,7 +107,7 @@ mfExtend( WatchList, WatchstarPageList, {
 	 */
 	appendPage: function ( page ) {
 		// wikidata descriptions should not show in this view.
-		var templateOptions = util.extend( {}, page, {
+		const templateOptions = util.extend( {}, page, {
 			wikidataDescription: undefined
 		} );
 		this.$el.append( this.templatePartials.item.render( templateOptions ) );

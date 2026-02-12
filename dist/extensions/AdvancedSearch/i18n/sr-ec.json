@@ -3,13 +3,17 @@
 		"authors": [
 			"BadDog",
 			"Kizule",
+			"Milicevic01",
 			"Obsuser",
+			"Zenfiric",
 			"Zoranzoki21",
-			"Милан Јелисавчић"
+			"Милан Јелисавчић",
+			"Aca"
 		]
 	},
 	"advancedsearch-desc": "Лак приступ напредним могућностима претраге на [[Special:Search|Посебно:Претражи]]",
 	"advancedsearch-options-pane-head": "Напредна претрага:",
+	"advancedsearch-options-pane-preview-list": "Актуелни термини који се претражују",
 	"advancedsearch-optgroup-text": "Претрага у тексту странице",
 	"advancedsearch-optgroup-structure": "Структура",
 	"advancedsearch-optgroup-files": "Датотеке и слике",
@@ -28,6 +32,7 @@
 	"advancedsearch-field-fileh": "Висина датотеке у пикселима",
 	"advancedsearch-field-sort": "Начин ређања",
 	"advancedsearch-field-preview-sort": "Поређај према $1",
+	"advancedsearch-help-general-instruction": "Детаљно упутство за $1",
 	"advancedsearch-help-plain": ";Опис\n:Претражује ове речи у наслову или тексту.\n;Имати на уму следеће:\n:* Више речи може да се унесе овде.\n:* Интерпункцијски знаци и други неалфанумерички карактери (са изузетком двотачке и зареза) биће игнорисани.\n:* Можда буде резултата који не садрже један или више ваших термина за претрагу.\n:* Стемовање речи се примењује. Пример: Ако се унесе ''дан'', претрага ће такође узети у обзир и ''дани''. Стемовање речи је језички специфично.\n;Страница за помоћ\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Претрага пуног текста]\n;Еквивалент синтаксе у нормалној претрази\n:<code>дани у седмици</code>",
 	"advancedsearch-help-phrase": ";Опис\n:Претражује специфичну секвенцу карактера. Интерпункцијски знаци се игноришу.\n;Имати на уму следеће:\n:(само валидно када се користе знаци навода, видети пример испод) \n:* Раздвојити фразе претраге зарезом или размаком, нпр. <code>\"добро јутро\"</code>, <code>\"здраво пријатељу!\"</code>.\n:* Интерпункцијски знаци и други неалфанумерички карактери (са изузетком двотачке и зареза) биће игнорисани.\n:* Претрага није осетљива на велико/мало слово.\n:* Стемовање речи се не примењује.\n;Страница за помоћ\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Речи, фразе и модификатори]\n;Еквивалент синтаксе у нормалној претрази\n:Речу под знацима навода, на пример <code>\"Почети на почетку\"</code>.",
 	"advancedsearch-help-or": ";Опис\n:Најмање један од темина претраге мора да буде укључен у страници.\n;Страница за помоћ\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Речи, фразе и модификатори]\n;Еквивалент синтаксе у нормалној претрази\n:Речи са <code>OR</code> између истих, на пример <code>лаптоп OR нотбук</code>.",
@@ -38,7 +43,7 @@
 	"advancedsearch-help-hastemplate": ";Опис\n:Претражује странице које садрже тачно ове шаблоне.\n;Имати на уму следеће:\n:* Можете да тражите укључене шаблоне (шаблоне које се састоје од других шаблона).\n:* Функција аутосугерисања може да пронађе само шаблоне који почињу на исти начин као и ваша претрага, нпр. претрага за <code>\"com...\"</code> ће сугерисати ''\"commons\"'' али не и ''\"nowcommons\"''.\n;Страница за помоћ\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Hastemplate ’Хезтемплејт’]\n;Еквивалент синтаксе у нормалној претрази\n:Речи под наводницима са <code>hastemplate:</code> пре истих, на пример <code>hastemplate:\"без извора\"</code>.",
 	"advancedsearch-help-filetype": ";Опис\n:Претражује само датотеке одабраног типа.\n;Имати на уму следеће:\n:* Можете да тражите само један тип датотеке.\n:* Можете само да изаберете дате типове датотека из падајућег менија.\n;Странице за помоћ\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#filetype Тип датотеке] и [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#filemime ’фајлмим’]\n;Еквивалент синтаксе у нормалној претрази\n:Речи са <code>filetype:</code> пре истих, на пример <code>filetype:ogg</code>.",
 	"advancedsearch-help-sort": ";Опис\n:Мења редослед сортирања резултата. Стандард је да најрелевантније странице буду смештене на врху резултата.\n;Страница за помоћ\n: [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Explicit_sort_orders Експлицитни редоследи сортирања]\n;Еквивалент синтаксе у нормалној претрази\n: Ова функција нема кључне речи коју можете унети у унос претраге пошто је функција одређена параметром у URL-у.",
-	"advancedsearch-placeholder-exact-text": "\"мачка воли козу\"",
+	"advancedsearch-placeholder-exact-text": "„мачка воли козу”",
 	"advancedsearch-inlanguage-default": "Изаберите језик",
 	"advancedsearch-filetype-section-types": "Општи типови датотека",
 	"advancedsearch-filetype-section-image": "Формати слика",
@@ -56,13 +61,18 @@
 	"advancedsearch-filesize-greater-than": "већа од",
 	"advancedsearch-filesize-smaller-than": "мања од",
 	"advancedsearch-sort-relevance": "важност",
+	"advancedsearch-sort-last-edit-asc": "Датум уређивања — најстарији прво",
 	"advancedsearch-sort-last-edit-desc": "датум измене — тренутни на врху",
+	"advancedsearch-sort-create-timestamp-asc": "Датум прављења — најстарији прво",
 	"advancedsearch-sort-create-timestamp-desc": "датум прављења — тренутни на врху",
 	"advancedsearch-sort-preview-relevance": "важности",
+	"advancedsearch-sort-preview-last-edit-asc": "најкасније уређивани",
 	"advancedsearch-sort-preview-last-edit-desc": "датуму измене",
+	"advancedsearch-sort-preview-create-timestamp-asc": "најкасније направљени",
 	"advancedsearch-sort-preview-create-timestamp-desc": "датуму прављења",
 	"advancedsearch-namespaces-search-in": "Претрага по именским просторима:",
 	"advancedsearch-namespaces-remember": "Запамти избор за будуће претраге",
+	"advancedsearch-namespaces-pane-preview-list": "Тренутно активни филтери за именске просторе",
 	"advancedsearch-namespaces-preset-all": "Све",
 	"advancedsearch-namespaces-preset-default": "Подразумевано",
 	"advancedsearch-namespaces-preset-general-help": "Општа помоћ",
@@ -70,5 +80,5 @@
 	"advancedsearch-namespaces-placeholder": "Додајте именске просторе…",
 	"prefs-advancedsearch": "Напредна претрага",
 	"advancedsearch-preference-help": "Напредна претрага додаје образац на страницу „Посебно:Претражи”. Ово вам омогућава да извршите специјализоване претраге, чак и ако не знате никакву синтаксу претраге. Мења и начин на који се могу изабрати именски простори.",
-	"advancedsearch-preference-disable": "Не приказуј интерфејс напредне претраге при употреби странице Посебно:Претражи"
+	"advancedsearch-preference-disable": "Не приказуј напредни интерфејс при употреби Special:Search"
 }

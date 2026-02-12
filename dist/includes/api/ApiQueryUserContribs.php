@@ -20,15 +20,26 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use MediaWiki\CommentFormatter\CommentFormatter;
+use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\MainConfigNames;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\ParamValidator\TypeDef\UserDef;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\RevisionStore;
 use MediaWiki\Storage\NameTableAccessException;
 use MediaWiki\Storage\NameTableStore;
+use MediaWiki\Title\Title;
+use MediaWiki\User\ActorMigration;
+use MediaWiki\User\ExternalUserNames;
 use MediaWiki\User\UserIdentity;
 use MediaWiki\User\UserIdentityLookup;
+use MediaWiki\User\UserIdentityValue;
 use MediaWiki\User\UserNameUtils;
+use RecentChange;
+use stdClass;
 use Wikimedia\IPUtils;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
@@ -41,43 +52,24 @@ use Wikimedia\Rdbms\SelectQueryBuilder;
  */
 class ApiQueryUserContribs extends ApiQueryBase {
 
-	/** @var CommentStore */
-	private $commentStore;
+	private CommentStore $commentStore;
+	private UserIdentityLookup $userIdentityLookup;
+	private UserNameUtils $userNameUtils;
+	private RevisionStore $revisionStore;
+	private NameTableStore $changeTagDefStore;
+	private ActorMigration $actorMigration;
+	private CommentFormatter $commentFormatter;
 
-	/** @var UserIdentityLookup */
-	private $userIdentityLookup;
-
-	/** @var UserNameUtils */
-	private $userNameUtils;
-
-	/** @var RevisionStore */
-	private $revisionStore;
-
-	/** @var NameTableStore */
-	private $changeTagDefStore;
-
-	/** @var ActorMigration */
-	private $actorMigration;
-
-	/**
-	 * @param ApiQuery $query
-	 * @param string $moduleName
-	 * @param CommentStore $commentStore
-	 * @param UserIdentityLookup $userIdentityLookup
-	 * @param UserNameUtils $userNameUtils
-	 * @param RevisionStore $revisionStore
-	 * @param NameTableStore $changeTagDefStore
-	 * @param ActorMigration $actorMigration
-	 */
 	public function __construct(
 		ApiQuery $query,
-		$moduleName,
+		string $moduleName,
 		CommentStore $commentStore,
 		UserIdentityLookup $userIdentityLookup,
 		UserNameUtils $userNameUtils,
 		RevisionStore $revisionStore,
 		NameTableStore $changeTagDefStore,
-		ActorMigration $actorMigration
+		ActorMigration $actorMigration,
+		CommentFormatter $commentFormatter
 	) {
 		parent::__construct( $query, $moduleName, 'uc' );
 		$this->commentStore = $commentStore;
@@ -86,13 +78,24 @@ class ApiQueryUserContribs extends ApiQueryBase {
 		$this->revisionStore = $revisionStore;
 		$this->changeTagDefStore = $changeTagDefStore;
 		$this->actorMigration = $actorMigration;
+		$this->commentFormatter = $commentFormatter;
 	}
 
-	private $params, $multiUserMode, $orderBy, $parentLens;
+	private array $params;
+	private bool $multiUserMode;
+	private string $orderBy;
+	private array $parentLens;
 
-	private $fld_ids = false, $fld_title = false, $fld_timestamp = false,
-		$fld_comment = false, $fld_parsedcomment = false, $fld_flags = false,
-		$fld_patrolled = false, $fld_tags = false, $fld_size = false, $fld_sizediff = false;
+	private bool $fld_ids = false;
+	private bool $fld_title = false;
+	private bool $fld_timestamp = false;
+	private bool $fld_comment = false;
+	private bool $fld_parsedcomment = false;
+	private bool $fld_flags = false;
+	private bool $fld_patrolled = false;
+	private bool $fld_tags = false;
+	private bool $fld_size = false;
+	private bool $fld_sizediff = false;
 
 	public function execute() {
 		// Parse some parameters
@@ -110,14 +113,11 @@ class ApiQueryUserContribs extends ApiQueryBase {
 		$this->fld_patrolled = isset( $prop['patrolled'] );
 		$this->fld_tags = isset( $prop['tags'] );
 
-		// The main query may use the 'contributions' group DB, which can map to replica DBs
-		// with extra user based indexes or partitioning by user. The additional metadata
-		// queries should use a regular replica DB since the lookup pattern is not all by user.
 		$dbSecondary = $this->getDB(); // any random replica DB
 
 		$sort = ( $this->params['dir'] == 'newer' ?
 			SelectQueryBuilder::SORT_ASC : SelectQueryBuilder::SORT_DESC );
-		$op = ( $this->params['dir'] == 'older' ? '<' : '>' );
+		$op = ( $this->params['dir'] == 'older' ? '<=' : '>=' );
 
 		// Create an Iterator that produces the UserIdentity objects we need, depending
 		// on which of the 'userprefix', 'userids', 'iprange', or 'user' params
@@ -134,21 +134,22 @@ class ApiQueryUserContribs extends ApiQueryBase {
 			$userIter = call_user_func( function () use ( $dbSecondary, $sort, $op, $fname ) {
 				$fromName = false;
 				if ( $this->params['continue'] !== null ) {
-					$continue = explode( '|', $this->params['continue'] );
-					$this->dieContinueUsageIf( count( $continue ) != 4 );
+					$continue = $this->parseContinueParamOrDie( $this->params['continue'],
+						[ 'string', 'string', 'string', 'int' ] );
 					$this->dieContinueUsageIf( $continue[0] !== 'name' );
 					$fromName = $continue[1];
 				}
 
 				$limit = 501;
 				do {
-					$from = $fromName ? "$op= " . $dbSecondary->addQuotes( $fromName ) : false;
 					$usersBatch = $this->userIdentityLookup
 						->newSelectQueryBuilder()
 						->caller( $fname )
 						->limit( $limit )
 						->whereUserNamePrefix( $this->params['userprefix'] )
-						->where( $from ? [ "actor_name $from" ] : [] )
+						->where( $fromName !== false
+							? $dbSecondary->buildComparison( $op, [ 'actor_name' => $fromName ] )
+							: [] )
 						->orderByName( $sort )
 						->fetchUserIdentities();
 
@@ -180,17 +181,15 @@ class ApiQueryUserContribs extends ApiQueryBase {
 				$ids[] = $uid;
 			}
 
-			$this->orderBy = 'id';
+			$this->orderBy = 'actor';
 			$this->multiUserMode = count( $ids ) > 1;
 
-			$from = $fromId = false;
+			$fromId = false;
 			if ( $this->multiUserMode && $this->params['continue'] !== null ) {
-				$continue = explode( '|', $this->params['continue'] );
-				$this->dieContinueUsageIf( count( $continue ) != 4 );
-				$this->dieContinueUsageIf( $continue[0] !== 'id' && $continue[0] !== 'actor' );
-				$fromId = (int)$continue[1];
-				$this->dieContinueUsageIf( $continue[1] !== (string)$fromId );
-				$from = "$op= $fromId";
+				$continue = $this->parseContinueParamOrDie( $this->params['continue'],
+					[ 'string', 'int', 'string', 'int' ] );
+				$this->dieContinueUsageIf( $continue[0] !== 'actor' );
+				$fromId = $continue[1];
 			}
 
 			$userIter = $this->userIdentityLookup
@@ -198,7 +197,7 @@ class ApiQueryUserContribs extends ApiQueryBase {
 				->caller( __METHOD__ )
 				->whereUserIds( $ids )
 				->orderByUserId( $sort )
-				->where( $from ? [ "actor_id $from" ] : [] )
+				->where( $fromId ? $dbSecondary->buildComparison( $op, [ 'actor_id' => $fromId ] ) : [] )
 				->fetchUserIdentities();
 			$batchSize = count( $ids );
 		} elseif ( isset( $this->params['iprange'] ) ) {
@@ -228,16 +227,15 @@ class ApiQueryUserContribs extends ApiQueryBase {
 			// Because 'iprange' might produce a huge number of ips, use a
 			// generator with batched lookup and continuation.
 			$userIter = call_user_func( function () use ( $dbSecondary, $sort, $op, $fname, $ipRange ) {
-				$fromName = false;
-				list( $start, $end ) = IPUtils::parseRange( $ipRange );
+				[ $start, $end ] = IPUtils::parseRange( $ipRange );
 				if ( $this->params['continue'] !== null ) {
-					$continue = explode( '|', $this->params['continue'] );
-					$this->dieContinueUsageIf( count( $continue ) != 4 );
+					$continue = $this->parseContinueParamOrDie( $this->params['continue'],
+						[ 'string', 'string', 'string', 'int' ] );
 					$this->dieContinueUsageIf( $continue[0] !== 'name' );
 					$fromName = $continue[1];
 					$fromIPHex = IPUtils::toHex( $fromName );
 					$this->dieContinueUsageIf( $fromIPHex === false );
-					if ( $op == '<' ) {
+					if ( $op == '<=' ) {
 						$end = $fromIPHex;
 					} else {
 						$start = $fromIPHex;
@@ -250,9 +248,7 @@ class ApiQueryUserContribs extends ApiQueryBase {
 					$res = $dbSecondary->newSelectQueryBuilder()
 						->select( 'ipc_hex' )
 						->from( 'ip_changes' )
-						->where( [ 'ipc_hex BETWEEN ' . $dbSecondary->addQuotes( $start ) .
-							' AND ' . $dbSecondary->addQuotes( $end )
-						] )
+						->where( $dbSecondary->expr( 'ipc_hex', '>=', $start )->and( 'ipc_hex', '<=', $end ) )
 						->groupBy( 'ipc_hex' )
 						->orderBy( 'ipc_hex', $sort )
 						->limit( $limit )
@@ -267,7 +263,7 @@ class ApiQueryUserContribs extends ApiQueryBase {
 							$fromName = $ipAddr;
 							break;
 						}
-						yield User::newFromName( $ipAddr, false );
+						yield UserIdentityValue::newAnonymous( $ipAddr );
 					}
 				} while ( $fromName !== false );
 			} );
@@ -304,31 +300,25 @@ class ApiQueryUserContribs extends ApiQueryBase {
 				}
 			}
 
-			$this->orderBy = 'name';
+			$this->orderBy = 'actor';
 			$this->multiUserMode = count( $names ) > 1;
 
-			$from = $fromName = false;
+			$fromId = false;
 			if ( $this->multiUserMode && $this->params['continue'] !== null ) {
-				$continue = explode( '|', $this->params['continue'] );
-				$this->dieContinueUsageIf( count( $continue ) != 4 );
-				$this->dieContinueUsageIf( $continue[0] !== 'name' && $continue[0] !== 'actor' );
-				$fromName = $continue[1];
-				$from = "$op= " . $dbSecondary->addQuotes( $fromName );
+				$continue = $this->parseContinueParamOrDie( $this->params['continue'],
+					[ 'string', 'int', 'string', 'int' ] );
+				$this->dieContinueUsageIf( $continue[0] !== 'actor' );
+				$fromId = $continue[1];
 			}
 
 			$userIter = $this->userIdentityLookup
 				->newSelectQueryBuilder()
 				->caller( __METHOD__ )
 				->whereUserNames( array_keys( $names ) )
-				->where( $from ? [ "actor_id $from" ] : [] )
 				->orderByName( $sort )
+				->where( $fromId ? $dbSecondary->buildComparison( $op, [ 'actor_id' => $fromId ] ) : [] )
 				->fetchUserIdentities();
 			$batchSize = count( $names );
-		}
-
-		// The DB query will order by actor so update $this->orderBy to match.
-		if ( $batchSize > 1 ) {
-			$this->orderBy = 'actor';
 		}
 
 		$count = 0;
@@ -389,7 +379,7 @@ class ApiQueryUserContribs extends ApiQueryBase {
 		$this->resetQueryParams();
 		$db = $this->getDB();
 
-		$revQuery = $this->revisionStore->getQueryInfo( [ 'page' ] );
+		$queryBuilder = $this->revisionStore->newSelectQueryBuilder( $db )->joinComment()->joinPage();
 		$revWhere = $this->actorMigration->getWhere( $db, 'rev_user', $users );
 
 		$orderUserField = 'rev_actor';
@@ -397,42 +387,38 @@ class ApiQueryUserContribs extends ApiQueryBase {
 		$tsField = 'rev_timestamp';
 		$idField = 'rev_id';
 
-		$this->addTables( $revQuery['tables'] );
-		$this->addJoinConds( $revQuery['joins'] );
-		$this->addFields( $revQuery['fields'] );
+		$this->getQueryBuilder()->merge( $queryBuilder );
 		$this->addWhere( $revWhere['conds'] );
+		// Force the appropriate index to avoid bad query plans (T307815 and T307295)
+		if ( isset( $revWhere['orconds']['newactor'] ) ) {
+			$this->addOption( 'USE INDEX', [ 'revision' => 'rev_actor_timestamp' ] );
+		}
 
 		// Handle continue parameter
 		if ( $this->params['continue'] !== null ) {
-			$continue = explode( '|', $this->params['continue'] );
 			if ( $this->multiUserMode ) {
-				$this->dieContinueUsageIf( count( $continue ) != 4 );
+				$continue = $this->parseContinueParamOrDie( $this->params['continue'],
+					[ 'string', 'string', 'timestamp', 'int' ] );
 				$modeFlag = array_shift( $continue );
 				$this->dieContinueUsageIf( $modeFlag !== $this->orderBy );
-				$encUser = $db->addQuotes( array_shift( $continue ) );
+				$encUser = array_shift( $continue );
 			} else {
-				$this->dieContinueUsageIf( count( $continue ) != 2 );
+				$continue = $this->parseContinueParamOrDie( $this->params['continue'],
+					[ 'timestamp', 'int' ] );
 			}
-			$encTS = $db->addQuotes( $db->timestamp( $continue[0] ) );
-			$encId = (int)$continue[1];
-			$this->dieContinueUsageIf( $encId != $continue[1] );
-			$op = ( $this->params['dir'] == 'older' ? '<' : '>' );
+			$op = ( $this->params['dir'] == 'older' ? '<=' : '>=' );
 			if ( $this->multiUserMode ) {
-				$this->addWhere(
+				$this->addWhere( $db->buildComparison( $op, [
 					// @phan-suppress-next-line PhanPossiblyUndeclaredVariable encUser is set when used
-					"$userField $op $encUser OR " .
-					// @phan-suppress-next-line PhanPossiblyUndeclaredVariable encUser is set when used
-					"($userField = $encUser AND " .
-					"($tsField $op $encTS OR " .
-					"($tsField = $encTS AND " .
-					"$idField $op= $encId)))"
-				);
+					$userField => $encUser,
+					$tsField => $db->timestamp( $continue[0] ),
+					$idField => $continue[1],
+				] ) );
 			} else {
-				$this->addWhere(
-					"$tsField $op $encTS OR " .
-					"($tsField = $encTS AND " .
-					"$idField $op= $encId)"
-				);
+				$this->addWhere( $db->buildComparison( $op, [
+					$tsField => $db->timestamp( $continue[0] ),
+					$idField => $continue[1],
+				] ) );
 			}
 		}
 
@@ -480,28 +466,28 @@ class ApiQueryUserContribs extends ApiQueryBase {
 				$this->dieWithError( 'apierror-show' );
 			}
 
-			$this->addWhereIf( 'rev_minor_edit = 0', isset( $show['!minor'] ) );
-			$this->addWhereIf( 'rev_minor_edit != 0', isset( $show['minor'] ) );
+			$this->addWhereIf( [ 'rev_minor_edit' => 0 ], isset( $show['!minor'] ) );
+			$this->addWhereIf( $db->expr( 'rev_minor_edit', '!=', 0 ), isset( $show['minor'] ) );
 			$this->addWhereIf(
-				'rc_patrolled = ' . RecentChange::PRC_UNPATROLLED,
+				[ 'rc_patrolled' => RecentChange::PRC_UNPATROLLED ],
 				isset( $show['!patrolled'] )
 			);
 			$this->addWhereIf(
-				'rc_patrolled != ' . RecentChange::PRC_UNPATROLLED,
+				$db->expr( 'rc_patrolled', '!=', RecentChange::PRC_UNPATROLLED ),
 				isset( $show['patrolled'] )
 			);
 			$this->addWhereIf(
-				'rc_patrolled != ' . RecentChange::PRC_AUTOPATROLLED,
+				$db->expr( 'rc_patrolled', '!=', RecentChange::PRC_AUTOPATROLLED ),
 				isset( $show['!autopatrolled'] )
 			);
 			$this->addWhereIf(
-				'rc_patrolled = ' . RecentChange::PRC_AUTOPATROLLED,
+				[ 'rc_patrolled' => RecentChange::PRC_AUTOPATROLLED ],
 				isset( $show['autopatrolled'] )
 			);
 			$this->addWhereIf( $idField . ' != page_latest', isset( $show['!top'] ) );
 			$this->addWhereIf( $idField . ' = page_latest', isset( $show['top'] ) );
-			$this->addWhereIf( 'rev_parent_id != 0', isset( $show['!new'] ) );
-			$this->addWhereIf( 'rev_parent_id = 0', isset( $show['new'] ) );
+			$this->addWhereIf( $db->expr( 'rev_parent_id', '!=', 0 ), isset( $show['!new'] ) );
+			$this->addWhereIf( [ 'rev_parent_id' => 0 ], isset( $show['new'] ) );
 		}
 		$this->addOption( 'LIMIT', $limit + 1 );
 
@@ -525,7 +511,10 @@ class ApiQueryUserContribs extends ApiQueryBase {
 		$this->addFieldsIf( 'rc_patrolled', $this->fld_patrolled );
 
 		if ( $this->fld_tags ) {
-			$this->addFields( [ 'ts_tags' => ChangeTags::makeTagSummarySubquery( 'revision' ) ] );
+			$this->addFields( [
+				'ts_tags' => MediaWikiServices::getInstance()->getChangeTagsStore()
+					->makeTagSummarySubquery( 'revision' )
+			] );
 		}
 
 		if ( isset( $this->params['tag'] ) ) {
@@ -611,7 +600,7 @@ class ApiQueryUserContribs extends ApiQueryBase {
 				}
 
 				if ( $this->fld_parsedcomment ) {
-					$vals['parsedcomment'] = Linker::formatComment( $comment, $title );
+					$vals['parsedcomment'] = $this->commentFormatter->format( $comment, $title );
 				}
 			}
 		}
@@ -653,8 +642,6 @@ class ApiQueryUserContribs extends ApiQueryBase {
 	private function continueStr( $row ) {
 		if ( $this->multiUserMode ) {
 			switch ( $this->orderBy ) {
-				case 'id':
-					return "id|$row->rev_user|$row->rev_timestamp|$row->rev_id";
 				case 'name':
 					return "name|$row->rev_user_text|$row->rev_timestamp|$row->rev_id";
 				case 'actor':
@@ -691,7 +678,7 @@ class ApiQueryUserContribs extends ApiQueryBase {
 			],
 			'user' => [
 				ParamValidator::PARAM_TYPE => 'user',
-				UserDef::PARAM_ALLOWED_USER_TYPES => [ 'name', 'ip', 'interwiki' ],
+				UserDef::PARAM_ALLOWED_USER_TYPES => [ 'name', 'ip', 'temp', 'interwiki' ],
 				ParamValidator::PARAM_ISMULTI => true
 			],
 			'userids' => [
@@ -707,6 +694,10 @@ class ApiQueryUserContribs extends ApiQueryBase {
 					'older'
 				],
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-direction',
+				ApiBase::PARAM_HELP_MSG_PER_VALUE => [
+					'newer' => 'api-help-paramvalue-direction-newer',
+					'older' => 'api-help-paramvalue-direction-older',
+				],
 			],
 			'namespace' => [
 				ParamValidator::PARAM_ISMULTI => true,
@@ -769,3 +760,6 @@ class ApiQueryUserContribs extends ApiQueryBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Usercontribs';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryUserContribs::class, 'ApiQueryUserContribs' );

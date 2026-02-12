@@ -10,16 +10,16 @@ use Diff\DiffOp\DiffOp;
 use Diff\DiffOp\DiffOpAdd;
 use Diff\DiffOp\DiffOpChange;
 use Diff\DiffOp\DiffOpRemove;
-use Html;
 use InvalidArgumentException;
-use LanguageCode;
+use MediaWiki\Html\Html;
+use MediaWiki\Language\LanguageCode;
+use MediaWiki\Site\Site;
+use MediaWiki\Site\SiteLookup;
 use MessageLocalizer;
-use MWException;
-use Site;
-use SiteLookup;
+use UnexpectedValueException;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Services\EntityId\EntityIdFormatter;
-use WordLevelDiff;
+use Wikimedia\Diff\WordLevelDiff;
 
 /**
  * Class for generating views of DiffOp objects
@@ -91,7 +91,6 @@ class SiteLinkDiffView implements DiffView {
 	 * @param DiffOp $op
 	 *
 	 * @return string
-	 * @throws MWException
 	 */
 	protected function generateOpHtml( array $path, DiffOp $op ): string {
 		if ( $op instanceof AtomicDiffOp ) {
@@ -142,7 +141,7 @@ class SiteLinkDiffView implements DiffView {
 			$oldHtml = $this->getDeletedLine( $this->getBadgeLinkElement( $op->getOldValue() ) );
 			$newHtml = $this->getAddedLine( $this->getBadgeLinkElement( $op->getNewValue() ) );
 		} else {
-			throw new MWException( 'Unknown DiffOp type' );
+			throw new UnexpectedValueException( 'Unknown DiffOp type' );
 		}
 
 		return $this->generateHtmlDiffTableRow( $oldHtml, $newHtml );
@@ -155,7 +154,7 @@ class SiteLinkDiffView implements DiffView {
 		if ( $op instanceof DiffOpAdd ) {
 			$newHtml = $this->getAddedLine( $this->getSiteLinkElement( $siteId, $op->getNewValue() ) );
 		} elseif ( $op instanceof DiffOpRemove ) {
-			$oldHtml = $this->getDeletedLine( $this->getSiteLinkElement( $siteId,  $op->getOldValue() ) );
+			$oldHtml = $this->getDeletedLine( $this->getSiteLinkElement( $siteId, $op->getOldValue() ) );
 		} elseif ( $op instanceof DiffOpChange ) {
 			$wordLevelDiff = new WordLevelDiff(
 				[ $op->getOldValue() ],
@@ -164,7 +163,7 @@ class SiteLinkDiffView implements DiffView {
 			$oldHtml = $this->getSiteLinkElement( $siteId, $op->getOldValue(), $wordLevelDiff->orig()[0] );
 			$newHtml = $this->getSiteLinkElement( $siteId, $op->getNewValue(), $wordLevelDiff->closing()[0] );
 		} else {
-			throw new MWException( 'Unknown DiffOp type' );
+			throw new UnexpectedValueException( 'Unknown DiffOp type' );
 		}
 
 		return $this->generateHtmlDiffTableRow( $oldHtml, $newHtml );
@@ -184,7 +183,7 @@ class SiteLinkDiffView implements DiffView {
 		}
 		if ( $newHtml !== null ) {
 			if ( $oldHtml === null ) {
-				$html .= Html::rawElement( 'td', [ 'colspan' => '2' ], '&nbsp;' );
+				$html .= Html::element( 'td', [ 'colspan' => '2' ], "\u{00A0}" );
 			}
 			$html .= Html::rawElement( 'td', [ 'class' => 'diff-marker', 'data-marker' => '+' ] );
 			$html .= Html::rawElement( 'td', [ 'class' => 'diff-addedline' ],
@@ -214,7 +213,7 @@ class SiteLinkDiffView implements DiffView {
 	 *
 	 * @return string
 	 */
-	private function getSiteLinkElement( string $siteId, string $pageName, string $html = null ): string {
+	private function getSiteLinkElement( string $siteId, string $pageName, ?string $html = null ): string {
 		$site = $this->siteLookup->getSite( $siteId );
 
 		$tagName = 'span';

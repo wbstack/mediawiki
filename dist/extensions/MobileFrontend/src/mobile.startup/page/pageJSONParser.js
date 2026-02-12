@@ -9,8 +9,8 @@ const util = require( '../util' );
  * @return {Page}
  */
 function parse( resp ) {
-	var revision, displayTitle,
-		thumb = resp.thumbnail,
+	let displayTitle;
+	const thumb = resp.thumbnail,
 		pageprops = resp.pageprops || {
 			displaytitle: mw.html.escape( resp.title )
 		},
@@ -32,18 +32,12 @@ function parse( resp ) {
 		resp.thumbnail.isLandscape = thumb.width > thumb.height;
 	}
 
-	// page may or may not exist.
-	if ( resp.revisions && resp.revisions[0] ) {
-		revision = resp.revisions[0];
-		resp.lastModified = new Date( revision.timestamp );
-	}
-
 	return new Page(
 		util.extend( resp, {
 			id: resp.pageid,
 			isMissing: !!resp.missing,
 			url: mw.util.getUrl( resp.title ),
-			displayTitle: displayTitle // this is HTML!
+			displayTitle // this is HTML!
 		} )
 	);
 }

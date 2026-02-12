@@ -54,11 +54,11 @@ class SearchRequestBuilder {
 		$query = new Query();
 		$query->setTrackTotalHits( $this->searchContext->getTrackTotalHits() );
 		$query->setSource( $resultsType->getSourceFiltering() );
-		$query->setStoredFields( $resultsType->getStoredFields() );
+		$query->setParam( "fields", $resultsType->getFields() );
 
 		$extraIndexes = $this->searchContext->getExtraIndices();
 
-		if ( !empty( $extraIndexes ) ) {
+		if ( $extraIndexes && $this->searchContext->getConfig()->getElement( 'CirrusSearchDeduplicateInQuery' ) !== false ) {
 			$this->searchContext->addNotFilter( new \Elastica\Query\Term(
 				[ 'local_sites_with_dupe' => $this->indexBaseName ]
 			) );
@@ -77,7 +77,7 @@ class SearchRequestBuilder {
 		}
 
 		$suggestQueries = $this->searchContext->getFallbackRunner()->getElasticSuggesters();
-		if ( !empty( $suggestQueries ) ) {
+		if ( $suggestQueries ) {
 			$query->setParam( 'suggest', [
 				// TODO: remove special case on 1-elt array, added to not change the test fixtures
 				// We should switch to explicit naming
@@ -162,9 +162,19 @@ class SearchRequestBuilder {
 						] ) ) );
 				break;
 
+			case 'title_natural_asc':
+			case 'title_natural_desc':
+				if ( $this->searchContext->getConfig()->getElement( 'CirrusSearchNaturalTitleSort', 'use' ) ) {
+					$query->setSort( [
+						'title.natural_sort' => explode( '_', $this->sort, 3 )[2],
+					] );
+					break;
+				}
+				// Intentional fall-through to default error case.
+
 			default:
 				// Same as just_match. No user warning since an invalid sort
-				// getting this far as a bug in the calling code which should
+				// getting this far is a bug in the calling code which should
 				// be validating it's input.
 				LoggerFactory::getInstance( 'CirrusSearch' )->warning(
 					"Invalid sort type: {sort}",
@@ -192,7 +202,7 @@ class SearchRequestBuilder {
 		$search = $this->getIndex()->createSearch( $query, $queryOptions );
 		$crossClusterName = $this->connection->getConfig()->getClusterAssignment()->getCrossClusterName();
 		foreach ( $extraIndexes as $i ) {
-			$search->addIndex( $i->getSearchIndex( $crossClusterName ) );
+			$search->addIndex( $this->connection->getIndex( $i->getSearchIndex( $crossClusterName ) ) );
 		}
 
 		$this->searchContext->getDebugOptions()->applyDebugOptions( $query );

@@ -21,24 +21,33 @@ namespace MediaWiki\Extension\OAuth\Frontend\SpecialPages;
  * http://www.gnu.org/copyleft/gpl.html
  */
 
+use LogEventsList;
+use LogPage;
 use MediaWiki\Extension\OAuth\Backend\Consumer;
 use MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance;
 use MediaWiki\Extension\OAuth\Backend\Utils;
 use MediaWiki\Extension\OAuth\Control\ConsumerAccessControl;
 use MediaWiki\Extension\OAuth\Frontend\Pagers\ListConsumersPager;
 use MediaWiki\Extension\OAuth\Frontend\UIUtils;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\GrantsLocalization;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\User\User;
+use MediaWiki\WikiMap\WikiMap;
+use MediaWiki\Xml\Xml;
+use MWException;
 use OOUI\HtmlSnippet;
-use SpecialPage;
-use WikiMap;
-use Wikimedia\Rdbms\DBConnRef;
+use PermissionsError;
+use stdClass;
+use Wikimedia\Rdbms\IDatabase;
 
 /**
  * Special page for listing the queue of consumer requests and managing
  * their approval/rejection and also for listing approved/disabled consumers
  */
-class SpecialMWOAuthListConsumers extends \SpecialPage {
+class SpecialMWOAuthListConsumers extends SpecialPage {
 	/** @var GrantsLocalization */
 	private $grantsLocalization;
 
@@ -62,12 +71,12 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 		$this->showConsumerListForm();
 
 		switch ( $type ) {
-		case 'view':
-			$this->showConsumerInfo( $consumerKey );
-			break;
-		default:
-			$this->showConsumerList();
-			break;
+			case 'view':
+				$this->showConsumerInfo( $consumerKey );
+				break;
+			default:
+				$this->showConsumerList();
+				break;
 		}
 
 		$this->getOutput()->addModuleStyles( 'ext.MWOAuth.styles' );
@@ -77,7 +86,7 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 	 * Show the form to approve/reject/disable/re-enable consumers
 	 *
 	 * @param string $consumerKey
-	 * @throws \PermissionsError
+	 * @throws PermissionsError
 	 */
 	protected function showConsumerInfo( $consumerKey ) {
 		$user = $this->getUser();
@@ -97,7 +106,7 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 			return;
 		} elseif ( $cmrAc->getDeleted()
 			&& !$permissionManager->userHasRight( $user, 'mwoauthviewsuppressed' ) ) {
-			throw new \PermissionsError( 'mwoauthviewsuppressed' );
+			throw new PermissionsError( 'mwoauthviewsuppressed' );
 		}
 
 		$grants = $cmrAc->getGrants();
@@ -119,27 +128,43 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 			'mwoauthlistconsumers-user' => $cmrAc->getUserName(),
 			'mwoauthlistconsumers-status' => $this->msg( "mwoauthlistconsumers-status-$stageKey" ),
 			'mwoauthlistconsumers-description' => $cmrAc->getDescription(),
+			'mwoauthlistconsumers-owner-only' => $cmrAc->getDAO()->getOwnerOnly()
+				? $this->msg( 'htmlform-yes' ) : $this->msg( 'htmlform-no' ),
 			'mwoauthlistconsumers-wiki' => $cmrAc->getWikiName(),
 			'mwoauthlistconsumers-callbackurl' => $cmrAc->getCallbackUrl(),
 			'mwoauthlistconsumers-callbackisprefix' => $cmrAc->getCallbackIsPrefix() ?
 				$this->msg( 'htmlform-yes' ) : $this->msg( 'htmlform-no' ),
 			'mwoauthlistconsumers-grants' => new HtmlSnippet( $out->parseInlineAsInterface( $s ) ),
 		];
+		if ( $cmrAc->getOAuthVersion() === Consumer::OAUTH_VERSION_2 ) {
+			$data += [
+				'mwoauthlistconsumers-oauth2-is-confidential' => $cmrAc->isConfidential() ?
+					$this->msg( 'htmlform-yes' ) : $this->msg( 'htmlform-no' ),
+			];
+		}
 
 		$out->addHTML( UIUtils::generateInfoTable( $data, $this->getContext() ) );
+
+		$rcLink = $this->getLinkRenderer()->makeKnownLink(
+			SpecialPage::getTitleFor( 'Recentchanges' ),
+			$this->msg( 'mwoauthlistconsumers-rclink' )->plain(),
+			[],
+			[ 'tagfilter' => Utils::getTagName( $cmrAc->getId() ) ]
+		);
+		$out->addHTML( "<p>$rcLink</p>" );
 
 		$this->addNavigationSubtitle( $cmrAc );
 
 		if ( Utils::isCentralWiki() ) {
 			// Show all of the status updates
-			$logPage = new \LogPage( 'mwoauthconsumer' );
-			$out->addHTML( \Xml::element( 'h2', null, $logPage->getName()->text() ) );
-			\LogEventsList::showLogExtract( $out, 'mwoauthconsumer', '', '', [
+			$logPage = new LogPage( 'mwoauthconsumer' );
+			$out->addHTML( Xml::element( 'h2', null, $logPage->getName()->text() ) );
+			LogEventsList::showLogExtract( $out, 'mwoauthconsumer', '', '', [
 				'conds' => [
 					'ls_field' => 'OAuthConsumer',
 					'ls_value' => $cmrAc->getConsumerKey(),
 				],
-				'flags' => \LogEventsList::NO_EXTRA_USER_LINKS,
+				'flags' => LogEventsList::NO_EXTRA_USER_LINKS,
 			] );
 		}
 	}
@@ -148,7 +173,7 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 	 * Show a form for the paged list of consumers
 	 */
 	protected function showConsumerListForm() {
-		$form = \HTMLForm::factory( 'ooui',
+		$form = HTMLForm::factory( 'ooui',
 			[
 				'name' => [
 					'name'     => 'name',
@@ -228,11 +253,11 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 	}
 
 	/**
-	 * @param DBConnRef $db
-	 * @param \stdClass $row
+	 * @param IDatabase $db
+	 * @param stdClass $row
 	 * @return string
 	 */
-	public function formatRow( DBConnRef $db, $row ) {
+	public function formatRow( IDatabase $db, $row ) {
 		$cmrAc = ConsumerAccessControl::wrap(
 			Consumer::newFromRow( $db, $row ), $this->getContext() );
 		$cmrKey = $cmrAc->getConsumerKey();
@@ -278,6 +303,11 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 			'mwoauthlistconsumers-status' =>
 				$this->msg( "mwoauthlistconsumers-status-$stageKey" )->escaped(),
 		];
+		if ( $cmrAc->getDAO()->getOwnerOnly() ) {
+			$data = wfArrayInsertAfter( $data, [
+				'mwoauthlistconsumers-owner-only' => $this->msg( 'htmlform-yes' ),
+			], 'mwoauthlistconsumers-description' );
+		}
 
 		foreach ( $data as $msg => $encValue ) {
 			$r .= '<p>' . $this->msg( $msg )->escaped() . ': ' . $encValue . '</p>';
@@ -302,7 +332,7 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 
 	/**
 	 * @param ConsumerAccessControl $cmrAc
-	 * @throws \MWException
+	 * @throws MWException
 	 */
 	private function addNavigationSubtitle( ConsumerAccessControl $cmrAc ): void {
 		$user = $this->getUser();
@@ -327,13 +357,13 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 	/**
 	 * @param ConsumerAccessControl $cmrAc
 	 * @param int $centralUserId Add update link for this user id, if they can update the consumer
-	 * @param \MediaWiki\Linker\LinkRenderer $linkRenderer
-	 * @return array
-	 * @throws \MWException
+	 * @param LinkRenderer $linkRenderer
+	 * @return string[]
+	 * @throws MWException
 	 */
 	private function updateLink(
 		ConsumerAccessControl $cmrAc, $centralUserId,
-		\MediaWiki\Linker\LinkRenderer $linkRenderer
+		LinkRenderer $linkRenderer
 	): array {
 		if ( Utils::isCentralWiki() && $cmrAc->getDAO()->getUserId() === $centralUserId ) {
 			return [
@@ -348,13 +378,13 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 
 	/**
 	 * @param Consumer $consumer
-	 * @param \User $user
-	 * @param \MediaWiki\Linker\LinkRenderer $linkRenderer
-	 * @return array
-	 * @throws \MWException
+	 * @param User $user
+	 * @param LinkRenderer $linkRenderer
+	 * @return string[]
+	 * @throws MWException
 	 */
 	private function manageConsumerLink(
-		Consumer $consumer, \User $user, \MediaWiki\Linker\LinkRenderer $linkRenderer
+		Consumer $consumer, User $user, LinkRenderer $linkRenderer
 	): array {
 		$permMgr = MediaWikiServices::getInstance()->getPermissionManager();
 
@@ -373,12 +403,12 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 	 * @param Consumer $consumer
 	 * @param int $centralUserId Add link to manage grants for this user, if they've granted this
 	 * consumer
-	 * @param \MediaWiki\Linker\LinkRenderer $linkRenderer
-	 * @return array
-	 * @throws \MWException
+	 * @param LinkRenderer $linkRenderer
+	 * @return string[]
+	 * @throws MWException
 	 */
 	private function manageMyGrantsLink(
-		Consumer $consumer, $centralUserId, \MediaWiki\Linker\LinkRenderer $linkRenderer
+		Consumer $consumer, $centralUserId, LinkRenderer $linkRenderer
 	): array {
 		$acceptance = $this->userGrantedAcceptance( $consumer, $centralUserId );
 		if ( $acceptance !== false ) {

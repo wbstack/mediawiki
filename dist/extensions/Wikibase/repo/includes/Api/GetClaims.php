@@ -4,8 +4,8 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
-use ApiMain;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiMain;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -121,7 +121,7 @@ class GetClaims extends ApiBase {
 		$params = $this->extractRequestParams();
 		$this->validateParameters( $params );
 
-		list( $idString, $guid ) = $this->getIdentifiers( $params );
+		[ $idString, $guid ] = $this->getIdentifiers( $params );
 
 		try {
 			$entityId = $this->idParser->parse( $idString );

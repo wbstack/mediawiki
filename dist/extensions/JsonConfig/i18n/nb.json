@@ -13,7 +13,7 @@
 	"jsonconfig-edit-action-cancel": "Avbryt",
 	"jsonconfig-edit-button-label": "Rediger som tabell",
 	"jsonconfig-edit-dialog-error": "Kunne ikke redigere som tabell: $1",
-	"jsonconfig-edit-dialog-error-data-inavlid": "Dataene matcher ikke skjemaet",
+	"jsonconfig-edit-dialog-error-data-invalid": "Dataene matcher ikke skjemaet",
 	"jsonconfig-edit-dialog-error-data-missing": "JSONs <code>data</code>-egenskap mangler eller er ikke en tabell",
 	"jsonconfig-edit-dialog-error-data-too-large": "Datasettet er for stort til å redigeres som tabell",
 	"jsonconfig-edit-dialog-error-field-name-missing": "Hvert felt må ha et navn",
@@ -82,10 +82,11 @@
 	"jsonconfig-license-url-CC-BY-SA-3.0": "https://creativecommons.org/licenses/by-sa/3.0/deed.no",
 	"jsonconfig-license-url-CC-BY-SA-4.0": "https://creativecommons.org/licenses/by-sa/4.0/deed.no",
 	"jsonconfig-license-url-CC-BY-SA-4.0+": "https://creativecommons.org/licenses/by-sa/4.0/deed.no",
-	"jsonconfig-license-copyrightwarning": "Ved å lagre endringene samtykker du i [https://foundation.wikimedia.org/wiki/Terms_of_Use bruksvilkårene], og gir ugjenkallelig samtykke til å slippe bidraget ditt under lisensen [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
-	"jsonconfig-license-copyrightwarning-license-unset": "Ved å lagre endringer godtar du [https://foundation.wikimedia.org/wiki/Terms_of_Use bruksvilkårene], og gir ugjenkallelig samtykke til å slippe bidraget ditt under lisensen som angis i <code>licence</code>-feltet.",
-	"jsonconfig-license-notice": "'''Merk:''' Når du redigerer denne siden samtykker du i å slippe bidraget ditt under [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning": "Ved å publisere endringene samtykker du i å utgi bidraget ditt under lisensen [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning-license-unset": "Ved å publisere endringer gir du ugjenkallelig samtykke til å utgi bidraget ditt under lisensen som angis i <code>licence</code>-feltet.",
+	"jsonconfig-license-notice": "'''Merk:''' Når du redigerer denne siden samtykker du i å utgi bidraget ditt under lisensen [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
 	"jsonconfig-license-notice-license-unset": "'''Merk:''' Når du redirerer denne siden samtykker du i å slippe bidraget ditt under lisensen angitt i <code>licence</code>-feltet.",
 	"right-jsonconfig-flush": "Manipulere JsonConfig via API",
-	"action-jsonconfig-flush": "manipulere JsonConfig via API"
+	"action-jsonconfig-flush": "manipulere JsonConfig via API",
+	"jsonconfig-blocked-page-creation": "Sidetittelen du har angitt matcher ikke noen av mønstrene som er satt opp for JSONConfig-utvidelsen på denne wikien."
 }

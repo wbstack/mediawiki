@@ -26,22 +26,24 @@ use CirrusSearch\Search\SearchRequestBuilder;
 use CirrusSearch\Search\TeamDraftInterleaver;
 use CirrusSearch\Search\TitleHelper;
 use CirrusSearch\Search\TitleResultsType;
+use Elastica\Exception\ResponseException;
 use Elastica\Exception\RuntimeException;
 use Elastica\Multi\Search as MultiSearch;
 use Elastica\Query;
 use Elastica\Query\BoolQuery;
 use Elastica\Query\MultiMatch;
 use Elastica\Search;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
-use RequestContext;
-use Status;
-use Title;
-use User;
-use WebRequest;
-use WikiMap;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
+use MediaWiki\WikiMap\WikiMap;
 use Wikimedia\Assert\Assert;
 use Wikimedia\ObjectFactory\ObjectFactory;
+use Wikimedia\Stats\StatsFactory;
 
 /**
  * Performs searches using Elasticsearch.  Note that each instance of this class
@@ -159,14 +161,14 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 		Connection $conn, $offset,
 		$limit,
 		SearchConfig $config,
-		array $namespaces = null,
-		User $user = null,
+		?array $namespaces = null,
+		?User $user = null,
 		$index = false,
-		CirrusDebugOptions $options = null,
-		NamespacePrefixParser $namespacePrefixParser = null,
-		InterwikiResolver $interwikiResolver = null,
-		TitleHelper $titleHelper = null,
-		CirrusSearchHookRunner $cirrusSearchHookRunner = null
+		?CirrusDebugOptions $options = null,
+		?NamespacePrefixParser $namespacePrefixParser = null,
+		?InterwikiResolver $interwikiResolver = null,
+		?TitleHelper $titleHelper = null,
+		?CirrusSearchHookRunner $cirrusSearchHookRunner = null
 	) {
 		parent::__construct(
 			$conn,
@@ -210,7 +212,8 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 					$this->searchContext->getFetchPhaseBuilder(),
 					$query->getParsedQuery()->isQueryOfClass( BasicQueryClassifier::COMPLEX_QUERY ),
 					$this->titleHelper,
-					$query->getExtraFieldsToExtract()
+					$query->getExtraFieldsToExtract(),
+					$this->searchContext->getConfig()->getElement( 'CirrusSearchDeduplicateInMemory' ) === true
 				)
 			);
 			return $this->searchTextInternal( $query->getParsedQuery()->getQueryWithoutNsHeader() );
@@ -306,6 +309,22 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 		$qb = self::buildFullTextBuilder( $builderSettings, $this->config, $features );
 
 		$qb->build( $this->searchContext, $term );
+
+		if ( $this->searchContext->getSearchQuery() !== null ) {
+			$degradeOnParseWarnings = [
+				// && test, test AND && test
+				'cirrussearch-parse-error-unexpected-token',
+				// test AND
+				'cirrussearch-parse-error-unexpected-end'
+			];
+			// Quick hack to avoid sending bad queries to the backend
+			foreach ( $this->searchContext->getSearchQuery()->getParsedQuery()->getParseWarnings() as $warning ) {
+				if ( in_array( $warning->getMessage(), $degradeOnParseWarnings ) ) {
+					$qb->buildDegraded( $this->searchContext );
+					return $qb;
+				}
+			}
+		}
 
 		return $qb;
 	}
@@ -433,7 +452,13 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 				// supported on aliases with multiple indices (content/general)
 				$index = $connection->getIndex( $this->indexBaseName, $indexSuffix );
 				$query = new \Elastica\Query( new \Elastica\Query\Ids( $docIds ) );
-				$query->setParam( '_source', $sourceFiltering );
+				if ( is_array( $sourceFiltering ) ) {
+					// The title is a required field in the ApiTrait
+					if ( !in_array( "title", $sourceFiltering ) ) {
+						array_push( $sourceFiltering, "title" );
+					}
+					$query->setParam( '_source', $sourceFiltering );
+				}
 				$query->addParam( 'stats', 'get' );
 				// We ignore limits provided to the searcher
 				// otherwize we could return fewer results than
@@ -441,6 +466,16 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 				$query->setFrom( 0 );
 				$query->setSize( $size );
 				$resultSet = $index->search( $query, [ 'search_type' => 'query_then_fetch' ] );
+				if ( !$resultSet->getResponse()->isOK() ) {
+					$request = $connection->getClient()->getLastRequest();
+					if ( $request == null ) {
+						// I can't imagine how this would happen, but the type signature allows
+						// for a null last request so we provide a minimal workaround.
+						throw new \Elastica\Exception\RuntimeException(
+							"Response reports failure, but no last request available" );
+					}
+					throw new ResponseException( $request, $resultSet->getResponse() );
+				}
 				return $this->success( $resultSet->getResults(), $connection );
 			} catch ( \Elastica\Exception\NotFoundException $e ) {
 				// NotFoundException just means the field didn't exist.
@@ -597,7 +632,7 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 		if ( $this->searchContext->getCacheTtl() > 0 && !$skipCache ) {
 			$work = function () use ( $work, $searches, $log, $contextResultsType ) {
 				$services = MediaWikiServices::getInstance();
-				$requestStats = $services->getStatsdDataFactory();
+				$requestStats = $services->getStatsFactory();
 				$cache = $services->getMainWANObjectCache();
 				$keyParts = [];
 				foreach ( $searches as $key => $search ) {
@@ -610,10 +645,9 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 					implode( '|', $keyParts )
 				) );
 				$cacheResult = $cache->get( $key );
-				$statsKey = $this->getQueryCacheStatsKey();
 				if ( $cacheResult ) {
-					list( $logVariables, $multiResultSet ) = $cacheResult;
-					$requestStats->increment( "$statsKey.hit" );
+					[ $logVariables, $multiResultSet ] = $cacheResult;
+					$this->recordQueryCacheMetrics( $requestStats, "hit" );
 					$log->setCachedResult( $logVariables );
 					$this->successViaCache( $log );
 
@@ -629,17 +663,17 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 										'nb_queries' => count( $searches ),
 										'nb_responses' => count( $cachedMResultSet->getResultSets() )
 									] );
-							$requestStats->increment( "$statsKey.incoherent" );
+							$this->recordQueryCacheMetrics( $requestStats, "incoherent" );
 						} else {
 							return $multiResultSet;
 						}
 					} else {
 						LoggerFactory::getInstance( 'CirrusSearch' )
 							->warning( 'Cached a Status value that is not OK' );
-						$requestStats->increment( "$statsKey.nok" );
+						$this->recordQueryCacheMetrics( $requestStats, "nok" );
 					}
 				} else {
-					$requestStats->increment( "$statsKey.miss" );
+					$this->recordQueryCacheMetrics( $requestStats, "miss" );
 				}
 
 				$multiResultSet = $work();
@@ -654,7 +688,7 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 						}
 					}
 					if ( !$isPartialResult ) {
-						$requestStats->increment( "$statsKey.set" );
+						$this->recordQueryCacheMetrics( $requestStats, "set" );
 						$cache->set(
 							$key,
 							[ $log->getLogVariables(), $multiResultSet ],
@@ -744,7 +778,8 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 		// pools with specific limits. Prefix is only high volume
 		// when completion is disabled.
 		$poolCounterTypes = [
-			'regex' => 'CirrusSearch-Regex',
+			'deepcat' => 'CirrusSearch-ExpensiveFullText',
+			'regex' => 'CirrusSearch-ExpensiveFullText',
 			'prefix' => 'CirrusSearch-Prefix',
 			'more_like' => 'CirrusSearch-MoreLike',
 		];
@@ -762,7 +797,7 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 		// those can be very expensive and usually use a small pool. If both
 		// the automation and regex pools filled with regexes it would be
 		// significantly more load than expected.
-		if ( $pool !== 'CirrusSearch-Regex' && $this->isAutomatedRequest() ) {
+		if ( $pool !== 'CirrusSearch-ExpensiveFullText' && $this->isAutomatedRequest() ) {
 			$pool = 'CirrusSearch-Automated';
 		}
 		return $pool;
@@ -785,7 +820,7 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 			return false;
 		}
 		return Util::looksLikeAutomation(
-			$this->config, $req->getIP(), $req->getHeader( 'User-Agent' ) );
+			$this->config, $ip, $req->getAllHeaders() );
 	}
 
 	/**
@@ -804,13 +839,13 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 		return $this->connection;
 	}
 
-	/**
-	 * @return string The stats key used for reporting hit/miss rates of the
-	 *  application side query cache.
-	 */
-	protected function getQueryCacheStatsKey() {
-		$type = $this->searchContext->getSearchType();
-		return "CirrusSearch.query_cache.$type";
+	protected function recordQueryCacheMetrics( StatsFactory $requestStats, string $cacheStatus, ?string $type = null ): void {
+		$type = $type ?: $this->getSearchContext()->getSearchType();
+		$requestStats->getCounter( "query_cache_total" )
+			->setLabel( "type", $type )
+			->setLabel( "status", $cacheStatus )
+			->copyToStatsdAt( "CirrusSearch.query_cache.$type.$cacheStatus" )
+			->increment();
 	}
 
 	/**

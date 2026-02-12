@@ -15,7 +15,8 @@ return [
 			'exact'        => 2,
 			'folded'       => 1.5,
 			'partial'      => 1,
-			'form-discount' => 1,
+			'form-discount' => 0.95,
+			'tie-breaker'  => 0.02,
 		]
 	],
 ];

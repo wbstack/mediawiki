@@ -15,23 +15,22 @@
  * along with MultimediaViewer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function () {
+/**
+ * Represents image width information.
+ *
+ * To utilize caching as much as possible, we use images which are displayed at a slightly
+ * different size than their screen size. The ThumbnailWidth model stores the various types of
+ * sizes and helps avoiding accidental incompatible assignments. (Think of it as a slightly
+ * overcomplicated Hungarian notation)
+ */
+class ThumbnailWidth {
 	/**
-	 * Represents image width information.
-	 *
-	 * To utilize caching as much as possible, we use images which are displayed at a slightly
-	 * different size than their screen size. The ThumbnailWidth model stores the various types of
-	 * sizes and helps avoiding accidental incompatible assignments. (Think of it as a slightly
-	 * overcomplicated Hungarian notation)
-	 *
-	 * @class mw.mmv.model.ThumbnailWidth
-	 * @constructor
 	 * @param {number} cssWidth width in CSS pixels
 	 * @param {number} cssHeight height in CSS pixels
 	 * @param {number} screen width in screen pixels
 	 * @param {number} real width in real pixels
 	 */
-	function ThumbnailWidth( cssWidth, cssHeight, screen, real ) {
+	constructor( cssWidth, cssHeight, screen, real ) {
 		if ( !cssWidth || !cssHeight || !screen || !real ) {
 			throw new Error( 'All parameters are required and cannot be empty or zero' );
 		}
@@ -76,7 +75,6 @@
 		 */
 		this.real = real;
 	}
+}
 
-	mw.mmv.model.ThumbnailWidth = ThumbnailWidth;
-
-}() );
+module.exports = ThumbnailWidth;

@@ -1,6 +1,6 @@
 <?php
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserFactory;
 
 class ConfirmAccountsPage extends SpecialPage {
 	protected $queueType = -1;
@@ -22,8 +22,16 @@ class ConfirmAccountsPage extends SpecialPage {
 	protected $submitType;
 	protected $reason;
 
-	function __construct() {
+	private UserFactory $userFactory;
+	private WANObjectCache $cache;
+
+	function __construct(
+		UserFactory $userFactory,
+		WANObjectCache $cache
+	) {
 		parent::__construct( 'ConfirmAccounts', 'confirmaccount' );
+		$this->userFactory = $userFactory;
+		$this->cache = $cache;
 	}
 
 	public function doesWrites() {
@@ -248,7 +256,7 @@ class ConfirmAccountsPage extends SpecialPage {
 
 			// Give grep a chance to find the usages: confirmaccount-type-0, confirmaccount-type-1
 			$out->addHTML( "<li><i>" . $this->msg( "confirmaccount-type-$i" )->escaped() . "</i>" );
-			$out->addHTML( $this->msg( 'word-separator' )->plain() );
+			$out->addHTML( $this->msg( 'word-separator' )->escaped() );
 			$params = $this->getLanguage()->pipeList( [ $open, $held, $rejects, $stale ] );
 			$out->addHTML( $this->msg( 'parentheses' )->rawParams( $params )->escaped() );
 			$out->addHTML( '</li>' );
@@ -268,7 +276,7 @@ class ConfirmAccountsPage extends SpecialPage {
 		$titleObj = $this->getFullTitle();
 
 		$accountReq = $this->accountReq; // convenience
-		if ( !$accountReq || $accountReq->isDeleted() && !$this->showRejects ) {
+		if ( !$accountReq || ( $accountReq->isDeleted() && !$this->showRejects ) ) {
 			$out->addHTML( $this->msg( 'confirmaccount-badid' )->escaped() );
 			$out->returnToMain( true, $titleObj );
 			return;
@@ -276,7 +284,7 @@ class ConfirmAccountsPage extends SpecialPage {
 
 		# Output any failure message
 		if ( $msg != '' ) {
-			$out->addHTML( '<div class="errorbox">' . $msg . '</div><div class="visualClear"></div>' );
+			$out->addHTML( Html::errorBox( $msg ) );
 		}
 
 		$out->addWikiMsg( 'confirmaccount-text' );
@@ -295,7 +303,11 @@ class ConfirmAccountsPage extends SpecialPage {
 			# Auto-rejected requests have a user ID of zero
 			if ( $adminId ) {
 				$out->addHTML( '<p><b>' . $this->msg( 'confirmaccount-reject',
-					User::whoIs( $adminId ), $datim, $date, $time )->parse() . '</b></p>' );
+					$this->userFactory->newFromId( $adminId )->getName(),
+					$datim,
+					$date,
+					$time
+				)->parse() . '</b></p>' );
 				$out->addHTML(
 					'<p><strong>' . $this->msg( 'confirmaccount-rational' )->escaped() . '</strong><i> ' .
 					$reason . '</i></p>'
@@ -309,7 +321,7 @@ class ConfirmAccountsPage extends SpecialPage {
 			$time = $this->getLanguage()->time( $heldTimestamp, true );
 
 			$out->addHTML( '<p><b>' . $this->msg( 'confirmaccount-held',
-				User::whoIs( $adminId ), $datim, $date, $time )->parse() . '</b></p>' );
+				$this->userFactory->newFromId( $adminId )->getName(), $datim, $date, $time )->parse() . '</b></p>' );
 			$out->addHTML(
 				'<p><strong>' . $this->msg( 'confirmaccount-rational' )->escaped() . '</strong><i> ' .
 				$reason . '</i></p>'
@@ -519,9 +531,8 @@ class ConfirmAccountsPage extends SpecialPage {
 
 		# Set a key to who is looking at this request.
 		# Have it expire in 10 minutes...
-		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-		$key = $cache->makeKey( 'acctrequest', 'view', $accountReq->getId() );
-		$cache->set( $key, $reqUser->getID(), 60 * 10 );
+		$key = $this->cache->makeKey( 'acctrequest', 'view', $accountReq->getId() );
+		$this->cache->set( $key, $reqUser->getID(), 60 * 10 );
 	}
 
 	protected function hasItem( $name ) {
@@ -584,7 +595,7 @@ class ConfirmAccountsPage extends SpecialPage {
 		);
 
 		# Actually submit!
-		list( $status, $msg, $url ) = $submission->submit( $this->getContext() );
+		[ $status, $msg, $url ] = $submission->submit( $this->getContext() );
 
 		# Check for error messages
 		if ( $status !== true ) {
@@ -767,15 +778,15 @@ class ConfirmAccountsPage extends SpecialPage {
 			$date = $this->getLanguage()->date( wfTimestamp( TS_MW, $row->acr_held ), true );
 			$time = $this->getLanguage()->time( wfTimestamp( TS_MW, $row->acr_held ), true );
 			$r .= ' <b>' . $this->msg(
-				'confirmaccount-held', User::whoIs( $row->acr_user ), $datim, $date, $time
+				'confirmaccount-held', $this->userFactory->newFromId( $row->acr_user )->getName(), $datim, $date, $time
 			)->parse() . '</b>';
 		}
 		# Check if someone is viewing this request
-		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-		$key = $cache->makeKey( 'acctrequest', 'view', $row->acr_id );
-		$value = $cache->get( $key );
+		$key = $this->cache->makeKey( 'acctrequest', 'view', $row->acr_id );
+		$value = $this->cache->get( $key );
 		if ( $value ) {
-			$r .= ' <b>' . $this->msg( 'confirmaccount-viewing', User::whoIs( $value ) )->parse() . '</b>';
+			$r .= ' <b>' . $this->msg( 'confirmaccount-viewing', $this->userFactory->newFromId( $value )->getName() )
+				->parse() . '</b>';
 		}
 
 		$r .= "<br /><table class='mw-confirmaccount-body-{$this->queueType}'

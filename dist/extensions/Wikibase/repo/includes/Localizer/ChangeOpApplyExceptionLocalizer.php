@@ -1,10 +1,12 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Localizer;
 
 use Exception;
 use InvalidArgumentException;
-use Message;
+use MediaWiki\Message\Message;
 use Wikibase\Repo\ChangeOp\ChangeOpApplyException;
 
 /**
@@ -14,14 +16,7 @@ use Wikibase\Repo\ChangeOp\ChangeOpApplyException;
  */
 class ChangeOpApplyExceptionLocalizer implements ExceptionLocalizer {
 
-	/**
-	 * @see ExceptionLocalizer::hasExceptionMessage()
-	 *
-	 * @param Exception $exception
-	 *
-	 * @return bool
-	 */
-	public function hasExceptionMessage( Exception $exception ) {
+	public function hasExceptionMessage( Exception $exception ): bool {
 		if ( !$exception instanceof ChangeOpApplyException ) {
 			return false;
 		}
@@ -29,15 +24,7 @@ class ChangeOpApplyExceptionLocalizer implements ExceptionLocalizer {
 		return $this->getMessage( $exception )->exists();
 	}
 
-	/**
-	 * @see ExceptionLocalizer::getExceptionMessage()
-	 *
-	 * @param Exception $exception
-	 *
-	 * @return Message
-	 * @throws InvalidArgumentException
-	 */
-	public function getExceptionMessage( Exception $exception ) {
+	public function getExceptionMessage( Exception $exception ): Message {
 		if ( !$this->hasExceptionMessage( $exception ) ) {
 			throw new InvalidArgumentException( '$exception cannot be localized.' );
 		}
@@ -47,11 +34,7 @@ class ChangeOpApplyExceptionLocalizer implements ExceptionLocalizer {
 		return $this->getMessage( $exception );
 	}
 
-	/**
-	 * @param ChangeOpApplyException $exception
-	 * @return Message
-	 */
-	private function getMessage( ChangeOpApplyException $exception ) {
+	private function getMessage( ChangeOpApplyException $exception ): Message {
 		return new Message( $exception->getMessage(), $exception->getParams() );
 	}
 

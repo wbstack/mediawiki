@@ -6,7 +6,8 @@
 			"Kranix",
 			"Saederup92",
 			"Sarrus",
-			"Weblars"
+			"Weblars",
+			"Naitsa"
 		]
 	},
 	"mwoauth-prefs-managegrants": "Forbundne apps:",
@@ -27,7 +28,6 @@
 	"mwoauthconsumerregistration-description": "Beskrivelse",
 	"mwoauthconsumerregistration-stage": "Status",
 	"mwoauthconsumerregistration-lastchange": "Seneste ændring",
-	"mwoauthmanageconsumers-notloggedin": "Du skal være logget på for at tilgå denne side.",
 	"mwoauthmanageconsumers-type": "Køer:",
 	"mwoauthmanageconsumers-name": "Kunde",
 	"mwoauthmanageconsumers-user": "Udgiver",

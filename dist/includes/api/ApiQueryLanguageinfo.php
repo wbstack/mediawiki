@@ -18,10 +18,14 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use MediaWiki\Language\LanguageCode;
 use MediaWiki\Languages\LanguageConverterFactory;
 use MediaWiki\Languages\LanguageFactory;
 use MediaWiki\Languages\LanguageFallback;
 use MediaWiki\Languages\LanguageNameUtils;
+use MediaWiki\Message\Message;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 
@@ -41,31 +45,16 @@ class ApiQueryLanguageinfo extends ApiQueryBase {
 	 * not yield more than a handful of languages before the time is exceeded
 	 * and continuation is applied, if one of the expensive props is requested.
 	 */
-	private const MAX_EXECUTE_SECONDS = 2;
+	private const MAX_EXECUTE_SECONDS = 3;
 
-	/** @var LanguageFactory */
-	private $languageFactory;
+	private LanguageFactory $languageFactory;
+	private LanguageNameUtils $languageNameUtils;
+	private LanguageFallback $languageFallback;
+	private LanguageConverterFactory $languageConverterFactory;
 
-	/** @var LanguageNameUtils */
-	private $languageNameUtils;
-
-	/** @var LanguageFallback */
-	private $languageFallback;
-
-	/** @var LanguageConverterFactory */
-	private $languageConverterFactory;
-
-	/**
-	 * @param ApiQuery $queryModule
-	 * @param string $moduleName
-	 * @param LanguageFactory $languageFactory
-	 * @param LanguageNameUtils $languageNameUtils
-	 * @param LanguageFallback $languageFallback
-	 * @param LanguageConverterFactory $languageConverterFactory
-	 */
 	public function __construct(
 		ApiQuery $queryModule,
-		$moduleName,
+		string $moduleName,
 		LanguageFactory $languageFactory,
 		LanguageNameUtils $languageNameUtils,
 		LanguageFallback $languageFallback,
@@ -88,11 +77,12 @@ class ApiQueryLanguageinfo extends ApiQueryBase {
 		$includeDir = isset( $props['dir'] );
 		$includeAutonym = isset( $props['autonym'] );
 		$includeName = isset( $props['name'] );
+		$includeVariantnames = isset( $props['variantnames'] );
 		$includeFallbacks = isset( $props['fallbacks'] );
 		$includeVariants = isset( $props['variants'] );
 
 		$targetLanguageCode = $this->getLanguage()->getCode();
-		$include = 'all';
+		$include = LanguageNameUtils::ALL;
 
 		$availableLanguageCodes = array_keys( $this->languageNameUtils->getLanguageNames(
 			// MediaWiki and extensions may return different sets of language codes
@@ -126,10 +116,7 @@ class ApiQueryLanguageinfo extends ApiQueryBase {
 		// order of $languageCodes is guaranteed by LanguageNameUtils::getLanguageNames()
 		// and preserved by array_values() + array_intersect()
 
-		$continue = $this->getParameter( 'continue' );
-		if ( $continue === null ) {
-			$continue = reset( $languageCodes );
-		}
+		$continue = $this->getParameter( 'continue' ) ?? reset( $languageCodes );
 
 		$result = $this->getResult();
 		$rootPath = [
@@ -194,12 +181,21 @@ class ApiQueryLanguageinfo extends ApiQueryBase {
 				$info['fallbacks'] = $fallbacks;
 			}
 
-			if ( $includeVariants ) {
+			if ( $includeVariants || $includeVariantnames ) {
 				$language = $this->languageFactory->getLanguage( $languageCode );
 				$converter = $this->languageConverterFactory->getLanguageConverter( $language );
 				$variants = $converter->getVariants();
-				ApiResult::setIndexedTagName( $variants, 'var' );
-				$info['variants'] = $variants;
+
+				if ( $includeVariants ) {
+					$info['variants'] = $variants;
+					ApiResult::setIndexedTagName( $info['variants'], 'var' );
+				}
+				if ( $includeVariantnames ) {
+					$info['variantnames'] = [];
+					foreach ( $variants as $variantCode ) {
+						$info['variantnames'][$variantCode] = $language->getVariantname( $variantCode );
+					}
+				}
 			}
 
 			$fit = $result->addValue( $rootPath, $languageCode, $info );
@@ -225,6 +221,7 @@ class ApiQueryLanguageinfo extends ApiQueryBase {
 					'dir',
 					'autonym',
 					'name',
+					'variantnames',
 					'fallbacks',
 					'variants',
 				],
@@ -259,3 +256,6 @@ class ApiQueryLanguageinfo extends ApiQueryBase {
 	}
 
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryLanguageinfo::class, 'ApiQueryLanguageinfo' );

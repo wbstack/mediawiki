@@ -1,5 +1,7 @@
 <?php
 
+namespace MediaWiki\Deferred;
+
 use Wikimedia\Rdbms\IDatabase;
 
 /**
@@ -15,11 +17,11 @@ class AtomicSectionUpdate implements DeferrableUpdate, DeferrableCallback {
 	private $callback;
 
 	/**
+	 * @see IDatabase::doAtomicSection()
 	 * @param IDatabase $dbw DB handle; update aborts if a transaction now this rolls back
 	 * @param string $fname Caller name (usually __METHOD__)
 	 * @param callable $callback
-	 * @param IDatabase[] $conns Abort if a transaction now on one of these rolls back [optional]
-	 * @see IDatabase::doAtomicSection()
+	 * @param IDatabase[] $conns Cancel the update if a DB transaction is rolled back [optional]
 	 */
 	public function __construct( IDatabase $dbw, $fname, callable $callback, array $conns = [] ) {
 		$this->dbw = $dbw;
@@ -54,3 +56,6 @@ class AtomicSectionUpdate implements DeferrableUpdate, DeferrableCallback {
 		return $this->fname;
 	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( AtomicSectionUpdate::class, 'AtomicSectionUpdate' );

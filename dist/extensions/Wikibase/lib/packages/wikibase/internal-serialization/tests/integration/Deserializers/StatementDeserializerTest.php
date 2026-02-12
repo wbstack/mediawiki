@@ -51,7 +51,7 @@ class StatementDeserializerTest extends \PHPUnit\Framework\TestCase {
 
 		$statement->setQualifiers( new SnakList( [
 			new PropertyNoValueSnak( 1337 ),
-			new PropertyValueSnak( 23, new NumberValue( 42 ) )
+			new PropertyValueSnak( 23, new NumberValue( 42 ) ),
 		] ) );
 
 		$statement->setGuid( 'some guid be here' );
@@ -66,7 +66,7 @@ class StatementDeserializerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertDeserializesToStatement( json_decode( $serialization, true ) );
 	}
 
-	public function statementsInLegacyFormatProvider() {
+	public static function statementsInLegacyFormatProvider() {
 		return [
 			[ '{"m":["somevalue",42],"q":[],"g":"some guid be here","rank":1,"refs":[]}' ],
 			[ '{"m":["somevalue",42],"q":[["novalue",1337],["value",23,"number",42]],'

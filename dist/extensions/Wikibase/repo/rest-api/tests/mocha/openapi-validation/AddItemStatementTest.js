@@ -1,30 +1,23 @@
 'use strict';
 
-const { RequestBuilder } = require( '../helpers/RequestBuilder' );
-const { createUniqueStringProperty, createEntity, createRedirectForItem } = require( '../helpers/entityHelper' );
-const expect = require( 'chai' ).expect;
+const { expect } = require( '../helpers/chaiHelper' );
+const { createUniqueStringProperty, createRedirectForItem } = require( '../helpers/entityHelper' );
+const {
+	newAddItemStatementRequestBuilder,
+	newCreateItemRequestBuilder
+} = require( '../helpers/RequestBuilderFactory' );
 
-function newAddItemStatementRequestBuilder( itemId, statement ) {
-	return new RequestBuilder()
-		.withRoute( 'POST', '/entities/items/{item_id}/statements' )
-		.withPathParam( 'item_id', itemId )
-		.withJsonBodyParam( 'statement', statement );
-}
-
-describe( 'validate POST /entities/items/{id}/statements', () => {
+describe( newAddItemStatementRequestBuilder().getRouteDescription(), () => {
 
 	let validStatementSerialization;
 	let itemId;
 
 	before( async () => {
-		itemId = ( await createEntity( 'item', {} ) ).entity.id;
-		const propertyId = ( await createUniqueStringProperty() ).entity.id;
+		itemId = ( await newCreateItemRequestBuilder( {} ).makeRequest() ).body.id;
+		const propertyId = ( await createUniqueStringProperty() ).body.id;
 		validStatementSerialization = {
-			type: 'statement',
-			mainsnak: {
-				snaktype: 'novalue',
-				property: propertyId
-			}
+			value: { type: 'novalue' },
+			property: { id: propertyId }
 		};
 	} );
 
@@ -34,16 +27,16 @@ describe( 'validate POST /entities/items/{id}/statements', () => {
 			validStatementSerialization
 		).makeRequest();
 
-		expect( response.status ).to.equal( 201 );
-		expect( response ).to.satisfyApiSpec;
+		expect( response ).to.have.status( 201 );
+		expect( response ).to.satisfyApiSchema;
 	} );
 
 	it( '404 Not Found is valid for non-existent Item', async () => {
 		const response = await newAddItemStatementRequestBuilder( 'Q9999999', validStatementSerialization )
 			.makeRequest();
 
-		expect( response.status ).to.equal( 404 );
-		expect( response ).to.satisfyApiSpec;
+		expect( response ).to.have.status( 404 );
+		expect( response ).to.satisfyApiSchema;
 	} );
 
 	it( '400 Bad Request is valid for invalid statement', async () => {
@@ -52,18 +45,8 @@ describe( 'validate POST /entities/items/{id}/statements', () => {
 			{ invalid: 'statement' }
 		).makeRequest();
 
-		expect( response.status ).to.equal( 400 );
-		expect( response ).to.satisfyApiSpec;
-	} );
-
-	it( '400 Bad Request is valid for invalid statement param type', async () => {
-		const response = await newAddItemStatementRequestBuilder(
-			itemId,
-			'invalid statement param type'
-		).makeRequest();
-
-		expect( response.status ).to.equal( 400 );
-		expect( response ).to.satisfyApiSpec;
+		expect( response ).to.have.status( 400 );
+		expect( response ).to.satisfyApiSchema;
 	} );
 
 	it( '409 Conflict is valid for redirected Item', async () => {
@@ -73,8 +56,17 @@ describe( 'validate POST /entities/items/{id}/statements', () => {
 			validStatementSerialization
 		).makeRequest();
 
-		expect( response.status ).to.equal( 409 );
-		expect( response ).to.satisfyApiSpec;
+		expect( response ).to.have.status( 409 );
+		expect( response ).to.satisfyApiSchema;
 	} );
 
+	it( '412 - precondition failed', async () => {
+		const yesterday = new Date( Date.now() - 24 * 60 * 60 * 1000 ).toUTCString();
+		const response = await newAddItemStatementRequestBuilder( itemId, validStatementSerialization )
+			.withHeader( 'If-Unmodified-Since', yesterday )
+			.makeRequest();
+
+		expect( response ).to.have.status( 412 );
+		expect( response ).to.satisfyApiSchema;
+	} );
 } );

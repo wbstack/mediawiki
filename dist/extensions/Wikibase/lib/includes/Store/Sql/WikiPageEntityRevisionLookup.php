@@ -2,9 +2,9 @@
 
 namespace Wikibase\Lib\Store\Sql;
 
-use IDBAccessObject;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\Revision\RevisionStore;
+use MediaWiki\Revision\SlotRecord;
 use MWContentSerializationException;
 use Psr\Log\LoggerInterface;
 use stdClass;
@@ -20,6 +20,7 @@ use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Store\RevisionedUnresolvedRedirectException;
 use Wikibase\Lib\Store\StorageException;
 use Wikimedia\Assert\Assert;
+use Wikimedia\Rdbms\IDBAccessObject;
 
 /**
  * Implements an entity repo based on blobs stored in wiki pages on a locally reachable
@@ -30,8 +31,6 @@ use Wikimedia\Assert\Assert;
  * @author Daniel Kinzler
  */
 class WikiPageEntityRevisionLookup implements EntityRevisionLookup {
-
-	private const MAIN_SLOT = 'main';
 
 	/**
 	 * @var WikiPageEntityMetaDataAccessor
@@ -109,7 +108,7 @@ class WikiPageEntityRevisionLookup implements EntityRevisionLookup {
 		if ( $row ) {
 			/** @var EntityRedirect $redirect */
 			try {
-				list( $entityRevision, $redirect ) = $this->loadEntity( $row, $mode );
+				[ $entityRevision, $redirect ] = $this->loadEntity( $row, $mode );
 			} catch ( MWContentSerializationException $ex ) {
 				throw new StorageException( 'Failed to unserialize the content object.', 0, $ex );
 			}
@@ -142,8 +141,9 @@ class WikiPageEntityRevisionLookup implements EntityRevisionLookup {
 			// Get the revision id we actually loaded, if none was passed explicitly
 			$revisionId = $revisionId ?: $entityRevision->getRevisionId();
 			throw new DivergingEntityIdException(
+				$revisionId,
 				$entityRevision,
-				"Revision $revisionId belongs to $actualEntityId instead of expected $entityId"
+				$entityId->getSerialization()
 			);
 		}
 
@@ -175,10 +175,10 @@ class WikiPageEntityRevisionLookup implements EntityRevisionLookup {
 		if ( $row && $row->page_latest ) {
 			if ( $row->page_is_redirect ) {
 				/** @var EntityRedirect $redirect */
-				list( , $redirect ) = $this->loadEntity( $row, $mode );
+				[ , $redirect ] = $this->loadEntity( $row, $mode );
 				if ( $redirect === null ) {
 					$revisionId = $row->rev_id;
-					$slot = $row->role_name ?? self::MAIN_SLOT;
+					$slot = $row->role_name ?? SlotRecord::MAIN;
 
 					throw new InconsistentRedirectException(
 						$revisionId,
@@ -221,7 +221,7 @@ class WikiPageEntityRevisionLookup implements EntityRevisionLookup {
 			return [ null, null ];
 		}
 
-		$slotRole = $row->role_name ?? self::MAIN_SLOT;
+		$slotRole = $row->role_name ?? SlotRecord::MAIN;
 
 		return $this->entityDataLoader->loadEntityDataFromWikiPageRevision( $revision, $slotRole, $revStoreFlags );
 	}

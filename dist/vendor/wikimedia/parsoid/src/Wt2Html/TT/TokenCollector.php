@@ -21,7 +21,8 @@ use Wikimedia\Parsoid\Wt2Html\TokenTransformManager;
  * end-of-input'.
  */
 abstract class TokenCollector extends TokenHandler {
-	protected $scopeStack;
+	/** @var array<Token|string>[] */
+	protected array $scopeStack = [];
 
 	/**
 	 * @param TokenTransformManager $manager manager enviroment
@@ -30,7 +31,6 @@ abstract class TokenCollector extends TokenHandler {
 	public function __construct( TokenTransformManager $manager, array $options ) {
 		parent::__construct( $manager, $options );
 		$this->onAnyEnabled = false;
-		$this->scopeStack = [];
 	}
 
 	/**
@@ -120,7 +120,7 @@ abstract class TokenCollector extends TokenHandler {
 			} else {
 				// EOF -- collapse stack!
 				$allToks = [];
-				for ( $i = 0,  $n = count( $this->scopeStack );  $i < $n;  $i++ ) {
+				for ( $i = 0, $n = count( $this->scopeStack );  $i < $n;  $i++ ) {
 					PHPUtils::pushArray( $allToks, $this->scopeStack[$i] );
 				}
 				PHPUtils::pushArray( $allToks, $activeTokens );
@@ -194,25 +194,18 @@ abstract class TokenCollector extends TokenHandler {
 		);
 	}
 
-	/**
-	 * @param TokenTransformManager $manager
-	 * @param string $tokenName
-	 * @param Token $startDelim
-	 * @param ?Token $endDelim
-	 * @return SelfclosingTagTk
-	 */
 	protected static function buildStrippedMetaToken(
 		TokenTransformManager $manager, string $tokenName, Token $startDelim,
 		?Token $endDelim
 	): SelfclosingTagTk {
-		$da = $startDelim->dataAttribs;
-		$tsr0 = $da ? $da->tsr : null;
+		$da = $startDelim->dataParsoid;
+		$tsr0 = $da->tsr;
 		$t0 = $tsr0 ? $tsr0->start : null;
 		$t1 = null;
 
 		if ( $endDelim !== null ) {
-			$da = $endDelim->dataAttribs ?? null;
-			$tsr1 = $da ? $da->tsr : null;
+			$da = $endDelim->dataParsoid;
+			$tsr1 = $da->tsr;
 			$t1 = $tsr1 ? $tsr1->end : null;
 		} else {
 			$t1 = strlen( $manager->getFrame()->getSrcText() );

@@ -3,49 +3,39 @@
 namespace Kartographer;
 
 use JsonSerializable;
-use ParserOutput;
+use MediaWiki\Parser\ParserOutput;
+use UnexpectedValueException;
+use Wikimedia\Parsoid\Core\ContentMetadataCollector;
 
 /**
  * Stores information about map tags on page in ParserOutput
+ *
+ * @license MIT
  */
 class State implements JsonSerializable {
 
 	public const DATA_KEY = 'kartographer';
 
-	/** @var bool If the page contains at least one valid <map…> tag */
-	private $valid = false;
-	/** @var bool If the page contains one or more invalid <map…> tags */
-	private $broken = false;
+	/** @var int Total number of invalid <map…> tags on the page */
+	private int $broken = 0;
 
 	/**
-	 * @var int Total number of <maplink> tags on the page, to be stored as a page property
+	 * @var array<string,int> Total number of <maplink> and <mapframe> tags on the page, to be
+	 *  stored as a page property
 	 */
-	private $maplinks = 0;
+	private array $usages = [];
+
+	/** @var array<string,null> Flipped set, values are meaningless */
+	private array $interactiveGroups = [];
+	/** @var array<string,null> Flipped set, values are meaningless */
+	private array $requestedGroups = [];
+	/** @var array<string,int> */
+	private array $counters = [];
 
 	/**
-	 * @var int Total number of <mapframe> tags on the page, to be stored as a page property
+	 * @var array<string,array> Indexed per group identifier
 	 */
-	private $mapframes = 0;
-
-	/**
-	 * @var int[]
-	 */
-	private $interactiveGroups = [];
-
-	/**
-	 * @var int[]
-	 */
-	private $requestedGroups = [];
-
-	/**
-	 * @var int[]|null
-	 */
-	private $counters;
-
-	/**
-	 * @var array[] Indexed per group identifier
-	 */
-	private $data = [];
+	private array $data = [];
 
 	/**
 	 * Retrieves an instance of self from ParserOutput, if present
@@ -73,83 +63,56 @@ class State implements JsonSerializable {
 	 * @return self
 	 */
 	public static function getOrCreate( ParserOutput $output ): self {
-		$result = self::getState( $output );
-		if ( !$result ) {
-			$result = new self;
-		}
-
-		return $result;
+		return self::getState( $output ) ?? new self();
 	}
 
 	/**
 	 * Stores an instance of self in the ParserOutput.
 	 *
-	 * @param ParserOutput $output
+	 * @param ContentMetadataCollector $output
 	 * @param self $state
 	 */
-	public static function setState( ParserOutput $output, self $state ) {
+	public static function saveState( ContentMetadataCollector $output, self $state ): void {
 		$output->setExtensionData( self::DATA_KEY, $state->jsonSerialize() );
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function hasValidTags(): bool {
-		return $this->valid;
+		return ( array_sum( $this->usages ) - $this->broken ) > 0;
 	}
 
-	public function setValidTags() {
-		$this->valid = true;
-	}
-
-	/**
-	 * @return bool
-	 */
 	public function hasBrokenTags(): bool {
-		return $this->broken;
+		return $this->broken > 0;
 	}
 
-	public function setBrokenTags() {
-		$this->broken = true;
+	public function incrementBrokenTags(): void {
+		$this->broken++;
 	}
 
-	/**
-	 * Increment the number of maplinks by one.
-	 */
-	public function useMaplink() {
-		$this->maplinks++;
-	}
-
-	/**
-	 * @return int Number of maplinks.
-	 */
-	public function getMaplinks(): int {
-		return $this->maplinks;
+	public function incrementUsage( string $tag ): void {
+		if ( !str_starts_with( $tag, 'map' ) ) {
+			throw new UnexpectedValueException( 'Unsupported tag name' );
+		}
+		// Resulting keys will be "maplinks" and "mapframes"
+		$key = "{$tag}s";
+		$this->usages[$key] = ( $this->usages[$key] ?? 0 ) + 1;
 	}
 
 	/**
-	 * Increment the number of mapframes by one.
+	 * @return array<string,int>
 	 */
-	public function useMapframe() {
-		$this->mapframes++;
-	}
-
-	/**
-	 * @return int Number of mapframes.
-	 */
-	public function getMapframes(): int {
-		return $this->mapframes;
+	public function getUsages(): array {
+		return $this->usages;
 	}
 
 	/**
 	 * @param string[] $groupIds
 	 */
-	public function addInteractiveGroups( array $groupIds ) {
-		$this->interactiveGroups += array_flip( $groupIds );
+	public function addInteractiveGroups( array $groupIds ): void {
+		$this->interactiveGroups += array_fill_keys( $groupIds, null );
 	}
 
 	/**
-	 * @return string[]
+	 * @return string[] Group ids, guaranteed to be unique
 	 */
 	public function getInteractiveGroups(): array {
 		return array_keys( $this->interactiveGroups );
@@ -158,28 +121,28 @@ class State implements JsonSerializable {
 	/**
 	 * @param string[] $groupIds
 	 */
-	public function addRequestedGroups( array $groupIds ) {
-		$this->requestedGroups += array_flip( $groupIds );
+	public function addRequestedGroups( array $groupIds ): void {
+		$this->requestedGroups += array_fill_keys( $groupIds, null );
 	}
 
 	/**
-	 * @return int[] Group id => original index map (flipped version of addRequestedGroups)
+	 * @return string[] Group ids, guaranteed to be unique
 	 */
 	public function getRequestedGroups(): array {
-		return $this->requestedGroups;
+		return array_keys( $this->requestedGroups );
 	}
 
 	/**
-	 * @return int[]
+	 * @return array<string,int>
 	 */
 	public function getCounters(): array {
-		return $this->counters ?: [];
+		return $this->counters;
 	}
 
 	/**
-	 * @param int[] $counters A JSON-serializable structure
+	 * @param array<string,int> $counters A JSON-serializable structure
 	 */
-	public function setCounters( array $counters ) {
+	public function setCounters( array $counters ): void {
 		$this->counters = $counters;
 	}
 
@@ -187,9 +150,9 @@ class State implements JsonSerializable {
 	 * @param string $groupId
 	 * @param array $data A JSON-serializable structure
 	 */
-	public function addData( $groupId, array $data ) {
+	public function addData( $groupId, array $data ): void {
 		// There is no way to ever add anything to a private group starting with `_`
-		if ( array_key_exists( $groupId, $this->data ) && !str_starts_with( $groupId, '_' ) ) {
+		if ( isset( $this->data[$groupId] ) && !str_starts_with( $groupId, '_' ) ) {
 			$this->data[$groupId] = array_merge( $this->data[$groupId], $data );
 		} else {
 			$this->data[$groupId] = $data;
@@ -197,7 +160,7 @@ class State implements JsonSerializable {
 	}
 
 	/**
-	 * @return array[] Associative key-value array, build up by {@see addData}
+	 * @return array<string,array> Associative key-value array, build up by {@see addData}
 	 */
 	public function getData(): array {
 		return $this->data;
@@ -207,16 +170,14 @@ class State implements JsonSerializable {
 	 * @return array A JSON serializable associative array
 	 */
 	public function jsonSerialize(): array {
-		return [
-			'valid' => $this->valid,
+		// TODO: Replace with the ...$this->usages syntax when we can use PHP 8.1
+		return array_merge( [
 			'broken' => $this->broken,
-			'maplinks' => $this->maplinks,
-			'mapframes' => $this->mapframes,
-			'interactiveGroups' => $this->interactiveGroups,
-			'requestedGroups' => $this->requestedGroups,
-			'counters' => $this->counters,
+			'interactiveGroups' => $this->getInteractiveGroups(),
+			'requestedGroups' => $this->getRequestedGroups(),
+			'counters' => $this->counters ?: null,
 			'data' => $this->data,
-		];
+		], $this->usages );
 	}
 
 	/**
@@ -224,16 +185,25 @@ class State implements JsonSerializable {
 	 *
 	 * @return self
 	 */
-	public static function newFromJson( array $data ): self {
+	private static function newFromJson( array $data ): self {
 		$status = new self();
-		$status->valid = $data['valid'];
-		$status->broken = $data['broken'];
-		$status->maplinks = $data['maplinks'];
-		$status->mapframes = $data['mapframes'];
-		$status->interactiveGroups = $data['interactiveGroups'];
-		$status->requestedGroups = $data['requestedGroups'];
-		$status->counters = $data['counters'];
-		$status->data = $data['data'];
+		$status->broken = (int)( $data['broken'] ?? 0 );
+		$status->usages = array_filter( $data, static function ( $count, $key ) {
+			return is_int( $count ) && $count > 0 && str_starts_with( $key, 'map' );
+		}, ARRAY_FILTER_USE_BOTH );
+
+		// TODO: Backwards compatibility, can be removed 30 days later
+		if ( !array_is_list( $data['interactiveGroups'] ?? [] ) ) {
+			$data['interactiveGroups'] = array_keys( $data['interactiveGroups'] );
+		}
+		if ( !array_is_list( $data['requestedGroups'] ?? [] ) ) {
+			$data['requestedGroups'] = array_keys( $data['requestedGroups'] );
+		}
+
+		$status->addInteractiveGroups( $data['interactiveGroups'] ?? [] );
+		$status->addRequestedGroups( $data['requestedGroups'] ?? [] );
+		$status->counters = $data['counters'] ?? [];
+		$status->data = $data['data'] ?? [];
 
 		return $status;
 	}

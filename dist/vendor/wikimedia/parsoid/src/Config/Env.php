@@ -4,10 +4,12 @@ declare( strict_types = 1 );
 namespace Wikimedia\Parsoid\Config;
 
 use Wikimedia\Assert\Assert;
+use Wikimedia\Bcp47Code\Bcp47Code;
 use Wikimedia\Parsoid\Core\ContentMetadataCollector;
 use Wikimedia\Parsoid\Core\ContentModelHandler;
 use Wikimedia\Parsoid\Core\ResourceLimitExceededException;
 use Wikimedia\Parsoid\Core\Sanitizer;
+use Wikimedia\Parsoid\Core\TOCData;
 use Wikimedia\Parsoid\DOM\Document;
 use Wikimedia\Parsoid\DOM\DocumentFragment;
 use Wikimedia\Parsoid\Logger\ParsoidLogger;
@@ -17,8 +19,8 @@ use Wikimedia\Parsoid\Utils\DOMDataUtils;
 use Wikimedia\Parsoid\Utils\PHPUtils;
 use Wikimedia\Parsoid\Utils\Title;
 use Wikimedia\Parsoid\Utils\TitleException;
-use Wikimedia\Parsoid\Utils\TitleNamespace;
 use Wikimedia\Parsoid\Utils\TokenUtils;
+use Wikimedia\Parsoid\Utils\UrlUtils;
 use Wikimedia\Parsoid\Utils\Utils;
 use Wikimedia\Parsoid\Wikitext\ContentModelHandler as WikitextContentModelHandler;
 use Wikimedia\Parsoid\Wt2Html\Frame;
@@ -46,6 +48,9 @@ class Env {
 	/** @var ContentMetadataCollector */
 	private $metadata;
 
+	/** @var TOCData Table of Contents metadata for the article */
+	private $tocData;
+
 	/**
 	 * The top-level frame for this conversion.  This largely wraps the
 	 * PageConfig.
@@ -71,10 +76,10 @@ class Env {
 	 */
 	private $nativeTemplateExpansion;
 
-	/** @phan-var array<string,int> */
+	/** @var array<string,int> */
 	private $wt2htmlUsage = [];
 
-	/** @phan-var array<string,int> */
+	/** @var array<string,int> */
 	private $html2wtUsage = [];
 
 	/** @var bool */
@@ -84,13 +89,16 @@ class Env {
 	private $profileStack = [];
 
 	/** @var bool */
-	private $wrapSections = true;
+	private $wrapSections;
 
 	/** @var string */
 	private $requestOffsetType = 'byte';
 
 	/** @var string */
 	private $currentOffsetType = 'byte';
+
+	/** @var bool */
+	private $skipLanguageConversionPass = false;
 
 	/** @var array<string,mixed> */
 	private $behaviorSwitches = [];
@@ -117,6 +125,9 @@ class Env {
 
 	/** @var bool logLinterData */
 	public $logLinterData = false;
+
+	/** @var array linterOverrides */
+	private $linterOverrides = [];
 
 	/** @var bool[] */
 	private $traceFlags;
@@ -148,7 +159,7 @@ class Env {
 	/**
 	 * If non-null, the language variant used for Parsoid HTML;
 	 * we convert to this if wt2html, or from this if html2wt.
-	 * @var string
+	 * @var ?Bcp47Code
 	 */
 	private $htmlVariantLanguage;
 
@@ -156,7 +167,7 @@ class Env {
 	 * If non-null, the language variant to be used for wikitext.
 	 * If null, heuristics will be used to identify the original wikitext variant
 	 * in wt2html mode, and in html2wt mode new or edited HTML will be left unconverted.
-	 * @var string
+	 * @var ?Bcp47Code
 	 */
 	private $wtVariantLanguage;
 
@@ -170,7 +181,7 @@ class Env {
 	public $styleTagKeys = [];
 
 	/** @var bool */
-	public $pageBundle = false;
+	public $pageBundle;
 
 	/** @var bool */
 	public $discardDataParsoid = false;
@@ -233,6 +244,8 @@ class Env {
 	 */
 	private $wikitextContentModelHandler;
 
+	private ?Title $cachedContextTitle = null;
+
 	/**
 	 * @param SiteConfig $siteConfig
 	 * @param PageConfig $pageConfig
@@ -247,13 +260,18 @@ class Env {
 	 *  - nativeTemplateExpansion: boolean
 	 *  - discardDataParsoid: boolean
 	 *  - offsetType: 'byte' (default), 'ucs2', 'char'
-	 *                See `Parsoid\Wt2Html\PP\Processors\ConvertOffsets`.
+	 *                See `Parsoid\Wt2Html\DOM\Processors\ConvertOffsets`.
 	 *  - logLinterData: (bool) Should we log linter data if linting is enabled?
-	 *  - htmlVariantLanguage: string|null
-	 *      If non-null, the language variant used for Parsoid HTML;
-	 *      we convert to this if wt2html, or from this if html2wt.
-	 *  - wtVariantLanguage: string|null
-	 *      If non-null, the language variant to be used for wikitext.
+	 *  - linterOverrides: (array) Override the site linting configs.
+	 *  - skipLanguageConversionPass: (bool) Should we skip the language
+	 *      conversion pass? (defaults to false)
+	 *  - htmlVariantLanguage: Bcp47Code|null
+	 *      If non-null, the language variant used for Parsoid HTML
+	 *      as a BCP 47 object.
+	 *      We convert to this if wt2html, or from this if html2wt.
+	 *  - wtVariantLanguage: Bcp47Code|null
+	 *      If non-null, the language variant to be used for wikitext
+	 *      as a BCP 47 object.
 	 *      If null, heuristics will be used to identify the original
 	 *      wikitext variant in wt2html mode, and in html2wt mode new
 	 *      or edited HTML will be left unconverted.
@@ -269,18 +287,15 @@ class Env {
 		?array $options = null
 	) {
 		self::checkPlatform();
-		$options = $options ?? [];
+		$options ??= [];
 		$this->siteConfig = $siteConfig;
 		$this->pageConfig = $pageConfig;
 		$this->dataAccess = $dataAccess;
 		$this->metadata = $metadata;
+		$this->tocData = new TOCData();
 		$this->topFrame = new PageConfigFrame( $this, $pageConfig, $siteConfig );
-		if ( isset( $options['wrapSections'] ) ) {
-			$this->wrapSections = !empty( $options['wrapSections'] );
-		}
-		if ( isset( $options['pageBundle'] ) ) {
-			$this->pageBundle = !empty( $options['pageBundle'] );
-		}
+		$this->wrapSections = (bool)( $options['wrapSections'] ?? true );
+		$this->pageBundle = (bool)( $options['pageBundle'] ?? false );
 		$this->pipelineFactory = new ParserPipelineFactory( $this );
 		$defaultContentVersion = Parsoid::defaultHTMLVersion();
 		$this->inputContentVersion = $options['inputContentVersion'] ?? $defaultContentVersion;
@@ -291,12 +306,25 @@ class Env {
 			throw new \UnexpectedValueException(
 				$this->outputContentVersion . ' is not an available content version.' );
 		}
-		$this->htmlVariantLanguage = $options['htmlVariantLanguage'] ?? null;
-		$this->wtVariantLanguage = $options['wtVariantLanguage'] ?? null;
+		$this->skipLanguageConversionPass =
+			$options['skipLanguageConversionPass'] ?? false;
+		$this->htmlVariantLanguage = !empty( $options['htmlVariantLanguage'] ) ?
+			Utils::mwCodeToBcp47(
+				$options['htmlVariantLanguage'],
+				// Be strict in what we accept here.
+				true, $this->siteConfig->getLogger()
+			) : null;
+		$this->wtVariantLanguage = !empty( $options['wtVariantLanguage'] ) ?
+			Utils::mwCodeToBcp47(
+				$options['wtVariantLanguage'],
+				// Be strict in what we accept here.
+				true, $this->siteConfig->getLogger()
+			) : null;
 		$this->nativeTemplateExpansion = !empty( $options['nativeTemplateExpansion'] );
 		$this->discardDataParsoid = !empty( $options['discardDataParsoid'] );
 		$this->requestOffsetType = $options['offsetType'] ?? 'byte';
 		$this->logLinterData = !empty( $options['logLinterData'] );
+		$this->linterOverrides = $options['linterOverrides'] ?? [];
 		$this->traceFlags = $options['traceFlags'] ?? [];
 		$this->dumpFlags = $options['dumpFlags'] ?? [];
 		$this->debugFlags = $options['debugFlags'] ?? [];
@@ -310,6 +338,21 @@ class Env {
 			$this->profiling = true;
 		}
 		$this->setupTopLevelDoc( $options['topLevelDoc'] ?? null );
+		// NOTE:
+		// Don't try to do this in setupTopLevelDoc since it is called on existing Env objects
+		// in a couple of places. That then leads to a multiple-write to tocdata property on
+		// the metadata object.
+		//
+		// setupTopLevelDoc is called outside Env in these couple cases:
+		// 1. html2wt in ContentModelHandler for dealing with
+		//    missing original HTML.
+		// 2. ParserTestRunner's html2html tests
+		//
+		// That is done to either reuse an existing Env object (as in 1.)
+		// OR to refresh the attached DOC (html2html as in 2.).
+		// Constructing a new Env in both cases could eliminate this issue.
+		$this->metadata->setTOCData( $this->tocData );
+
 		$this->wikitextContentModelHandler = new WikitextContentModelHandler( $this );
 	}
 
@@ -381,9 +424,6 @@ class Env {
 		return array_pop( $this->profileStack );
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function hasTraceFlags(): bool {
 		return !empty( $this->traceFlags );
 	}
@@ -398,9 +438,6 @@ class Env {
 		return isset( $this->traceFlags[$flag] );
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function hasDumpFlags(): bool {
 		return !empty( $this->dumpFlags );
 	}
@@ -455,6 +492,14 @@ class Env {
 		return $this->metadata;
 	}
 
+	/**
+	 * Return the Table of Contents information for the article.
+	 * @return TOCData
+	 */
+	public function getTOCData(): TOCData {
+		return $this->tocData;
+	}
+
 	public function nativeTemplateExpansionEnabled(): bool {
 		return $this->nativeTemplateExpansion;
 	}
@@ -499,7 +544,7 @@ class Env {
 	 * representation), but for external use we can convert these to
 	 * other formats when we output wt2html or input for html2wt.
 	 *
-	 * @see Parsoid\Wt2Html\PP\Processors\ConvertOffsets
+	 * @see Parsoid\Wt2Html\DOM\Processors\ConvertOffsets
 	 * @return string 'byte', 'ucs2', or 'char'
 	 */
 	public function getRequestOffsetType(): string {
@@ -512,7 +557,7 @@ class Env {
 	 * been converted to the external format (as returned by
 	 * `getRequestOffsetType`) yet.
 	 *
-	 * @see Parsoid\Wt2Html\PP\Processors\ConvertOffsets
+	 * @see Parsoid\Wt2Html\DOM\Processors\ConvertOffsets
 	 * @return string 'byte', 'ucs2', or 'char'
 	 */
 	public function getCurrentOffsetType(): string {
@@ -521,11 +566,24 @@ class Env {
 
 	/**
 	 * Update the current offset type. Only
-	 * Parsoid\Wt2Html\PP\Processors\ConvertOffsets should be doing this.
+	 * Parsoid\Wt2Html\DOM\Processors\ConvertOffsets should be doing this.
 	 * @param string $offsetType 'byte', 'ucs2', or 'char'
 	 */
 	public function setCurrentOffsetType( string $offsetType ) {
 		$this->currentOffsetType = $offsetType;
+	}
+
+	/**
+	 * Return the title from the PageConfig, as a Parsoid title.
+	 * @return Title
+	 */
+	public function getContextTitle(): Title {
+		if ( $this->cachedContextTitle === null ) {
+			$this->cachedContextTitle = Title::newFromLinkTarget(
+				$this->pageConfig->getLinkTarget(), $this->siteConfig
+			);
+		}
+		return $this->cachedContextTitle;
 	}
 
 	/**
@@ -542,21 +600,26 @@ class Env {
 		$str = trim( $str );
 
 		$pageConfig = $this->getPageConfig();
+		$title = $this->getContextTitle();
 
 		// Resolve lonely fragments (important if the current page is a subpage,
 		// otherwise the relative link will be wrong)
 		if ( $str !== '' && $str[0] === '#' ) {
-			$str = $pageConfig->getTitle() . $str;
+			return $title->getPrefixedText() . $str;
 		}
 
 		// Default return value
 		$titleKey = $str;
-		if ( $this->getSiteConfig()->namespaceHasSubpages( $pageConfig->getNs() ) ) {
+		if ( $this->getSiteConfig()->namespaceHasSubpages( $title->getNamespace() ) ) {
 			// Resolve subpages
 			$reNormalize = false;
 			if ( preg_match( '!^(?:\.\./)+!', $str, $relUp ) ) {
 				$levels = strlen( $relUp[0] ) / 3;  // Levels are indicated by '../'.
-				$titleBits = explode( '/', $pageConfig->getTitle() );
+				$titleBits = explode( '/', $title->getPrefixedText() );
+				if ( $titleBits[0] === '' ) {
+					// FIXME: Punt on subpages of titles starting with "/" for now
+					return $origName;
+				}
 				if ( count( $titleBits ) <= $levels ) {
 					// Too many levels -- invalid relative link
 					return $origName;
@@ -569,7 +632,7 @@ class Env {
 				$reNormalize = true;
 			} elseif ( $str !== '' && $str[0] === '/' ) {
 				// Resolve absolute subpage links
-				$str = $pageConfig->getTitle() . $str;
+				$str = $title->getPrefixedText() . $str;
 				$reNormalize = true;
 			}
 
@@ -597,7 +660,7 @@ class Env {
 	private function titleToString( Title $title, bool $ignoreFragment = false ): string {
 		$ret = $title->getPrefixedDBKey();
 		if ( !$ignoreFragment ) {
-			$fragment = $title->getFragment() ?? '';
+			$fragment = $title->getFragment();
 			if ( $fragment !== '' ) {
 				$ret .= '#' . $fragment;
 			}
@@ -626,14 +689,14 @@ class Env {
 	/**
 	 * Create a Title object
 	 * @param string $text URL-decoded text
-	 * @param int|TitleNamespace $defaultNs
+	 * @param ?int $defaultNs
 	 * @param bool $noExceptions
 	 * @return Title|null
 	 */
-	private function makeTitle( string $text, $defaultNs = 0, bool $noExceptions = false ): ?Title {
+	private function makeTitle( string $text, ?int $defaultNs = null, bool $noExceptions = false ): ?Title {
 		try {
 			if ( preg_match( '!^(?:[#/]|\.\./)!', $text ) ) {
-				$defaultNs = $this->getPageConfig()->getNs();
+				$defaultNs = $this->getContextTitle()->getNamespace();
 			}
 			$text = $this->resolveTitle( $text );
 			return Title::newFromText( $text, $this->getSiteConfig(), $defaultNs );
@@ -649,12 +712,12 @@ class Env {
 	 * Create a Title object
 	 * @see Title::newFromURL in MediaWiki
 	 * @param string $str URL-encoded text
-	 * @param int|TitleNamespace $defaultNs
+	 * @param ?int $defaultNs
 	 * @param bool $noExceptions
 	 * @return Title|null
 	 */
 	public function makeTitleFromText(
-		string $str, $defaultNs = 0, bool $noExceptions = false
+		string $str, ?int $defaultNs = null, bool $noExceptions = false
 	): ?Title {
 		return $this->makeTitle( Utils::decodeURIComponent( $str ), $defaultNs, $noExceptions );
 	}
@@ -663,12 +726,12 @@ class Env {
 	 * Create a Title object
 	 * @see Title::newFromText in MediaWiki
 	 * @param string $str URL-decoded text
-	 * @param int|TitleNamespace $defaultNs
+	 * @param ?int $defaultNs
 	 * @param bool $noExceptions
 	 * @return Title|null
 	 */
 	public function makeTitleFromURLDecodedStr(
-		string $str, $defaultNs = 0, bool $noExceptions = false
+		string $str, ?int $defaultNs = null, bool $noExceptions = false
 	): ?Title {
 		return $this->makeTitle( $str, $defaultNs, $noExceptions );
 	}
@@ -771,6 +834,7 @@ class Env {
 	 */
 	public function setupTopLevelDoc( ?Document $topLevelDoc = null ) {
 		if ( $topLevelDoc ) {
+			$this->remexPipeline = null;
 			$this->topLevelDoc = $topLevelDoc;
 		} else {
 			$this->remexPipeline = new RemexPipeline( $this );
@@ -779,12 +843,8 @@ class Env {
 		DOMDataUtils::prepareDoc( $this->topLevelDoc );
 	}
 
-	/**
-	 * @param bool $atTopLevel
-	 * @return RemexPipeline
-	 */
-	public function fetchRemexPipeline( bool $atTopLevel ): RemexPipeline {
-		if ( $atTopLevel ) {
+	public function fetchRemexPipeline( bool $toFragment ): RemexPipeline {
+		if ( !$toFragment ) {
 			return $this->remexPipeline;
 		} else {
 			$pipeline = new RemexPipeline( $this );
@@ -798,21 +858,8 @@ class Env {
 	}
 
 	/**
-	 * BehaviorSwitchHandler support function that adds a property named by
-	 * $variable and sets it to $state
-	 *
-	 * @deprecated Use setBehaviorSwitch() instead.
-	 * @param string $variable
-	 * @param mixed $state
-	 */
-	public function setVariable( string $variable, $state ): void {
-		$this->setBehaviorSwitch( $variable, $state );
-	}
-
-	/**
 	 * Record a behavior switch.
 	 *
-	 * @todo Does this belong here, or on some equivalent to MediaWiki's ParserOutput?
 	 * @param string $switch Switch name
 	 * @param mixed $state Relevant state data to record
 	 */
@@ -823,7 +870,6 @@ class Env {
 	/**
 	 * Fetch the state of a previously-recorded behavior switch.
 	 *
-	 * @todo Does this belong here, or on some equivalent to MediaWiki's ParserOutput?
 	 * @param string $switch Switch name
 	 * @param mixed $default Default value if the switch was never set
 	 * @return mixed State data that was previously passed to setBehaviorSwitch(), or $default
@@ -858,9 +904,6 @@ class Env {
 		$this->fragmentMap[$id] = $forest;
 	}
 
-	/**
-	 * @param string $id
-	 */
 	public function removeDOMFragment( string $id ): void {
 		$domFragment = $this->fragmentMap[$id];
 		Assert::invariant(
@@ -878,10 +921,9 @@ class Env {
 	 *  - templateInfo: (array|null)
 	 */
 	public function recordLint( string $type, array $lintData ): void {
-		// Parsoid-JS tests don't like getting null properties where JS had undefined.
-		$lintData = array_filter( $lintData, static function ( $v ) {
-			return $v !== null;
-		} );
+		if ( !$this->linting( $type ) ) {
+			return;
+		}
 
 		if ( empty( $lintData['dsr'] ) ) {
 			$this->log( 'error/lint', "Missing DSR; msg=", $lintData );
@@ -889,12 +931,8 @@ class Env {
 		}
 
 		// This will always be recorded as a native 'byte' offset
-		$lintData['dsr'] = $lintData['dsr']->jsonSerialize();
-
-		// Ensure a "params" array
-		if ( !isset( $lintData['params'] ) ) {
-			$lintData['params'] = [];
-		}
+		$lintData['dsr'] = $lintData['dsr']->toJsonArray();
+		$lintData['params'] ??= [];
 
 		$this->lints[] = [ 'type' => $type ] + $lintData;
 	}
@@ -922,10 +960,11 @@ class Env {
 	}
 
 	/**
+	 * @param string $prefix
 	 * @param mixed ...$args
 	 */
-	public function log( ...$args ): void {
-		$this->parsoidLogger->log( ...$args );
+	public function log( string $prefix, ...$args ): void {
+		$this->parsoidLogger->log( $prefix, ...$args );
 	}
 
 	/**
@@ -988,7 +1027,7 @@ class Env {
 	public function getContentHandler(
 		?string &$contentmodel = null
 	): ContentModelHandler {
-		$contentmodel = $contentmodel ?? $this->pageConfig->getContentModel();
+		$contentmodel ??= $this->pageConfig->getContentModel();
 		$handler = $this->siteConfig->getContentModelHandler( $contentmodel );
 		if ( !$handler && $contentmodel !== 'wikitext' ) {
 			// For now, fallback to 'wikitext' as the default handler
@@ -1005,8 +1044,8 @@ class Env {
 	 * @return bool
 	 */
 	public function langConverterEnabled(): bool {
-		return $this->siteConfig->langConverterEnabledForLanguage(
-			$this->pageConfig->getPageLanguage()
+		return $this->siteConfig->langConverterEnabledBcp47(
+			$this->pageConfig->getPageLanguageBcp47()
 		);
 	}
 
@@ -1034,10 +1073,10 @@ class Env {
 	 * If non-null, the language variant used for Parsoid HTML; we convert
 	 * to this if wt2html, or from this (if html2wt).
 	 *
-	 * @return string|null
+	 * @return ?Bcp47Code a BCP-47 language code
 	 */
-	public function getHtmlVariantLanguage(): ?string {
-		return $this->htmlVariantLanguage;
+	public function getHtmlVariantLanguageBcp47(): ?Bcp47Code {
+		return $this->htmlVariantLanguage; // Stored as BCP-47
 	}
 
 	/**
@@ -1046,10 +1085,14 @@ class Env {
 	 * in wt2html mode, and in html2wt mode new or edited HTML will be left
 	 * unconverted.
 	 *
-	 * @return string|null
+	 * @return ?Bcp47Code a BCP-47 language code
 	 */
-	public function getWtVariantLanguage(): ?string {
+	public function getWtVariantLanguageBcp47(): ?Bcp47Code {
 		return $this->wtVariantLanguage;
+	}
+
+	public function getSkipLanguageConversionPass(): bool {
+		return $this->skipLanguageConversionPass;
 	}
 
 	/**
@@ -1068,12 +1111,90 @@ class Env {
 
 	/**
 	 * Determine an appropriate content-language for the HTML form of this page.
-	 * @return string
+	 * @return Bcp47Code a BCP-47 language code.
 	 */
-	public function htmlContentLanguage(): string {
+	public function htmlContentLanguageBcp47(): Bcp47Code {
 		// PageConfig::htmlVariant is set iff we do variant conversion on the
 		// HTML
-		return $this->pageConfig->getVariant() ??
-			$this->pageConfig->getPageLanguage();
+		return $this->pageConfig->getVariantBcp47() ??
+			$this->pageConfig->getPageLanguageBcp47();
+	}
+
+	/**
+	 * Get an array of attributes to apply to an anchor linking to $url
+	 */
+	public function getExternalLinkAttribs( string $url ): array {
+		$siteConfig = $this->getSiteConfig();
+		$noFollowConfig = $siteConfig->getNoFollowConfig();
+		$attribs = [];
+		$ns = $this->getContextTitle()->getNamespace();
+		if (
+			$noFollowConfig['nofollow'] &&
+			!in_array( $ns, $noFollowConfig['nsexceptions'], true ) &&
+			!UrlUtils::matchesDomainList(
+				$url,
+				// Cast to an array because parserTests sets it as a string
+				(array)$noFollowConfig['domainexceptions']
+			)
+		) {
+			$attribs['rel'] = [ 'nofollow' ];
+		}
+		$target = $siteConfig->getExternalLinkTarget();
+		if ( $target ) {
+			$attribs['target'] = $target;
+			if ( !in_array( $target, [ '_self', '_parent', '_top' ], true ) ) {
+				// T133507. New windows can navigate parent cross-origin.
+				// Including noreferrer due to lacking browser
+				// support of noopener. Eventually noreferrer should be removed.
+				if ( !isset( $attribs['rel'] ) ) {
+					$attribs['rel'] = [];
+				}
+				array_push( $attribs['rel'], 'noreferrer', 'noopener' );
+			}
+		}
+		return $attribs;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getLinterConfig(): array {
+		return $this->linterOverrides + $this->getSiteConfig()->getLinterSiteConfig();
+	}
+
+	/**
+	 * Whether to enable linter Backend.
+	 * Consults the allow list and block list from ::getLinterConfig().
+	 *
+	 * @param null $type If $type is null or omitted, returns true if *any* linting
+	 *   type is enabled; otherwise returns true only if the specified
+	 *   linting type is enabled.
+	 * @return bool If $type is null or omitted, returns true if *any* linting
+	 *   type is enabled; otherwise returns true only if the specified
+	 *   linting type is enabled.
+	 */
+	public function linting( ?string $type = null ) {
+		if ( !$this->getSiteConfig()->linterEnabled() ) {
+			return false;
+		}
+		$lintConfig = $this->getLinterConfig();
+		// Allow list
+		$allowList = $lintConfig['enabled'] ?? null;
+		if ( is_array( $allowList ) ) {
+			if ( $type === null ) {
+				return count( $allowList ) > 0;
+			}
+			return in_array( $type, $allowList, true );
+		}
+		// Block list
+		if ( $type === null ) {
+			return true;
+		}
+		$blockList = $lintConfig['disabled'] ?? null;
+		if ( is_array( $blockList ) ) {
+			return !in_array( $type, $blockList, true );
+		}
+		// No specific configuration
+		return true;
 	}
 }

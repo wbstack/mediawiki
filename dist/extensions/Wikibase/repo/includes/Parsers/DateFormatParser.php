@@ -4,6 +4,8 @@ namespace Wikibase\Repo\Parsers;
 
 use DataValues\IllegalValueException;
 use DataValues\TimeValue;
+use ValueParsers\CalendarModelParser;
+use ValueParsers\IsoTimestampParser;
 use ValueParsers\ParseException;
 use ValueParsers\ParserOptions;
 use ValueParsers\StringValueParser;
@@ -44,7 +46,10 @@ class DateFormatParser extends StringValueParser {
 	 */
 	public const OPT_PRECISION = 'precision';
 
-	public function __construct( ParserOptions $options = null ) {
+	/** @var IsoTimestampParser */
+	private $isoTimestampParser;
+
+	public function __construct( ?ParserOptions $options = null ) {
 		parent::__construct( $options );
 
 		$this->defaultOption( self::OPT_DATE_FORMAT, 'j F Y' );
@@ -52,6 +57,11 @@ class DateFormatParser extends StringValueParser {
 		$this->defaultOption( self::OPT_DIGIT_TRANSFORM_TABLE, null );
 		$this->defaultOption( self::OPT_MONTH_NAMES, null );
 		$this->defaultOption( self::OPT_PRECISION, null );
+
+		$this->isoTimestampParser = new IsoTimestampParser(
+			new CalendarModelParser( $this->options ),
+			$this->options
+		);
 	}
 
 	/**
@@ -109,8 +119,14 @@ class DateFormatParser extends StringValueParser {
 
 		$timestamp = vsprintf( '+%04s-%02s-%02sT%02s:%02s:%02sZ', $time );
 
+		// Use IsoTimestampParser to detect the correct calendar model.
+		$iso = $this->isoTimestampParser->parse( $timestamp );
+
 		try {
-			return new TimeValue( $timestamp, 0, 0, 0, $precision, TimeValue::CALENDAR_GREGORIAN );
+			// We intentionally do not re-use the precision from IsoTimestampParser here,
+			// because it reduces precision for values with zeros in the right-most fields.
+			// Our above method of determining the precision is therefore better.
+			return new TimeValue( $timestamp, 0, 0, 0, $precision, $iso->getCalendarModel() );
 		} catch ( IllegalValueException $ex ) {
 			throw new ParseException( $ex->getMessage(), $value, self::FORMAT_NAME );
 		}
@@ -208,6 +224,12 @@ class DateFormatParser extends StringValueParser {
 					}
 					break;
 
+				// Textual representation of the day of the week. Redundant, can be ignored.
+				case 'D':
+				case 'l':
+					$pattern .= '\p{L}*' . $optionalPunctuation . $separation;
+					break;
+
 				// We can ignore "raw" and "raw toggle" when parsing, because we always accept
 				// canonical digits.
 				case 'xN':
@@ -223,9 +245,7 @@ class DateFormatParser extends StringValueParser {
 				case 'c':
 				case 'r':
 				case 'U':
-				// Day of the week
-				case 'D':
-				case 'l':
+				// Numeric representation of the day of the week
 				case 'N':
 				case 'w':
 				// Timezone
@@ -342,10 +362,10 @@ class DateFormatParser extends StringValueParser {
 		}
 
 		if ( !isset( $matches['year'] )
-			|| isset( $matches['day'] ) && !isset( $matches['month'] )
-			|| isset( $matches['hour'] ) && !isset( $matches['day'] )
-			|| isset( $matches['minute'] ) && !isset( $matches['hour'] )
-			|| isset( $matches['second'] ) && !isset( $matches['minute'] )
+			|| ( isset( $matches['day'] ) && !isset( $matches['month'] ) )
+			|| ( isset( $matches['hour'] ) && !isset( $matches['day'] ) )
+			|| ( isset( $matches['minute'] ) && !isset( $matches['hour'] ) )
+			|| ( isset( $matches['second'] ) && !isset( $matches['minute'] ) )
 		) {
 			throw new ParseException( 'Non-continuous date format', $input, self::FORMAT_NAME );
 		}

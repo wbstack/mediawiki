@@ -4,11 +4,11 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
-use ApiQuery;
-use ApiQueryBase;
-use ApiResult;
-use SiteLookup;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiQuery;
+use MediaWiki\Api\ApiQueryBase;
+use MediaWiki\Api\ApiResult;
+use MediaWiki\Site\SiteLookup;
 use stdClass;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
@@ -142,15 +142,12 @@ class ListSubscribers extends ApiQueryBase {
 				'param-invalid'
 			);
 		}
-		$entityContinueSql = $db->addQuotes( $continueParams[0] );
-		$wikiContinueSql = $db->addQuotes( $continueParams[1] );
 		// Filtering out results that have been shown already and
 		// starting the query from where it ended.
-		$this->addWhere(
-			"cs_entity_id > $entityContinueSql OR " .
-			"(cs_entity_id = $entityContinueSql AND " .
-			"cs_subscriber_id >= $wikiContinueSql)"
-		);
+		$this->addWhere( $db->buildComparison( '>=', [
+			'cs_entity_id' => $continueParams[0],
+			'cs_subscriber_id' => $continueParams[1],
+		] ) );
 	}
 
 	/**
@@ -181,10 +178,10 @@ class ListSubscribers extends ApiQueryBase {
 				$entry = [ 'subscribers' => [ $entry ] ];
 				ApiResult::setIndexedTagName( $entry['subscribers'], 'subscriber' );
 
-				$fit = $result->addValue( [ 'query', 'subscribers' ], $row->cs_entity_id, $entry );
+				$fit = $result->addValue( [ 'query', $this->getModuleName() ], $row->cs_entity_id, $entry );
 			} else {
 				$fit = $result->addValue(
-					[ 'query', 'subscribers', $row->cs_entity_id, 'subscribers' ],
+					[ 'query', $this->getModuleName(), $row->cs_entity_id, 'subscribers' ],
 					null,
 					$entry );
 			}
@@ -239,7 +236,7 @@ class ListSubscribers extends ApiQueryBase {
 			'entities' => [
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_ISMULTI => true,
-				ParamValidator::PARAM_REQUIRED => true
+				ParamValidator::PARAM_REQUIRED => true,
 			],
 			'prop' => [
 				ParamValidator::PARAM_TYPE => [
@@ -253,7 +250,7 @@ class ListSubscribers extends ApiQueryBase {
 				ParamValidator::PARAM_TYPE => 'limit',
 				IntegerDef::PARAM_MIN => 1,
 				IntegerDef::PARAM_MAX => ApiBase::LIMIT_BIG1,
-				IntegerDef::PARAM_MAX2 => ApiBase::LIMIT_BIG2
+				IntegerDef::PARAM_MAX2 => ApiBase::LIMIT_BIG2,
 			],
 			'continue' => [
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',
@@ -281,11 +278,7 @@ class ListSubscribers extends ApiQueryBase {
 	 */
 	private function getEntityUsageUrl( string $subscription, string $entityIdString ): ?string {
 		$site = $this->siteLookup->getSite( $subscription );
-		if ( !$site ) {
-			return null;
-		}
-
-		return $site->getPageUrl( 'Special:EntityUsage/' . $entityIdString );
+		return $site ? $site->getPageUrl( 'Special:EntityUsage/' . $entityIdString ) : null;
 	}
 
 	/**

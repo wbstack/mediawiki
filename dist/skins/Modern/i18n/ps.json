@@ -1,6 +1,9 @@
 {
 	"@metadata": {
-		"authors": []
+		"authors": [
+			"شاه زمان پټان"
+		]
 	},
-	"skinname-modern": "نوی"
+	"skinname-modern": "نوی",
+	"modern-desc": "يو نيلي/خړه پوښۍ له څنگپټې او سرپټې سره. له مونوبوک څخه اخيستل شوې."
 }

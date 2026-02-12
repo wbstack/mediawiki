@@ -8,10 +8,13 @@
 			"Xosé"
 		]
 	},
-	"confirmaccount-newrequests": "Actualmente hai '''$1''' [[Special:ConfirmAccounts|{{PLURAL:$1|solicitude de conta pendente|solicitudes de contas pendentes}}]]. '''Cómpre a súa atención!'''",
-	"requestaccount-loginnotice": "Para obter unha conta de usuario ten que '''[[Special:RequestAccount|solicitar unha]]'''.",
+	"confirmaccount-newrequests": "Actualmente hai '''$1''' [[Special:ConfirmAccounts|{{PLURAL:$1|solicitude de conta pendente|solicitudes de contas pendentes}}]] co enderezo de correo electrónico confirmado. '''Cómpre a túa atención!'''",
+	"requestaccount-loginnotice": "Para obter unha conta de usuario, tes que '''[[Special:RequestAccount|solicitala]]'''.",
 	"action-confirmaccount": "revisar e aceptar contas",
 	"right-confirmaccount": "Ver a [[Special:ConfirmAccounts|cola coas solicitudes de contas]]",
-	"right-requestips": "Ver os enderezos IP que solicitan contas",
+	"right-confirmaccount-notify": "Recibir unha notificación por correo electrónico sobre as solicitudes de contas aprobadas recentemente",
+	"action-requestips": "ver os enderezos IP que solicitan contas ao procesar as solicitudes de contas",
+	"right-requestips": "Ver os enderezos IP que solicitan contas ao procesar as solicitudes de contas",
+	"action-lookupcredentials": "ver as credenciais de usuario",
 	"right-lookupcredentials": "Ver as [[Special:UserCredentials|credenciais de usuario]]"
 }

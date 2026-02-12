@@ -2,16 +2,34 @@
 	.collapsible-heading {
 		cursor: pointer;
 	}
+
+	.collapsible-heading-disabled {
+		cursor: default;
+
+		.indicator {
+			opacity: 0.5;
+		}
+	}
+
+	// Vertically center toggle buttons in the case of long, multiline headings
+	.section-heading {
+		display: flex;
+		align-items: center;
+
+		.indicator {
+			max-height: 32px;
+		}
+	}
 }
 
 @media print {
-	.collapsible-heading .indicator,
-	.collapsible-heading .edit-page {
+	.collapsible-heading .indicator {
 		display: none;
 	}
 
 	// need to be this specific in order to override the default style
 	.client-js .collapsible-block {
 		display: block;
+		content-visibility: visible;
 	}
 }

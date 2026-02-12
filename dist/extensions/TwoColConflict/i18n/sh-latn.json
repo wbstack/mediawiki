@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Winston Sung"
+		]
+	},
+	"twocolconflictprovidesubmittedtext": "Sukob izmjena:",
+	"twocolconflict-beta-feature-description": "Prikaz sukoba uređivanja u naprednom pasusnom dvostupčanom pregledu.",
+	"twocolconflict-copy-action": "kopiraj sav tekst",
+	"twocolconflict-copy-notice": "Cijeli wikitekst Vaše izmjene prekopiran je u međuspremnik (uređivanja ispod nisu uključena).",
+	"twocolconflict-split-your-version-header": "Vaša izmjena",
+	"twocolconflict-split-current-version-header": "Posljednja izmjena dana $1",
+	"twocolconflict-split-not-saved-at": "Još uvijek neobjavljeno",
+	"twocolconflict-split-choose-version": "Izaberite verziju",
+	"twocolconflict-split-tour-dialog-btn-text": "Počni sa spajanjem",
+	"twocolconflict-split-tour-popup-btn-text": "Razumijem",
+	"twocolconflict-split-tour-popup1-header": "Razlike u promjenama prikazane su red po red.",
+	"twocolconflict-split-tour-popup3-header": "Istaknuti tekst",
+	"twocolconflict-split-edit-tooltip": "Uredi tekst",
+	"twocolconflict-split-reset-tooltip": "Ponovno postavi tekst",
+	"twocolconflict-split-reset-warning-cancel": "Otkaži",
+	"twocolconflict-split-reset-warning-accept": "Odbaci",
+	"twocolconflict-split-collapse-tooltip": "Sažmi tekst",
+	"twocolconflict-split-expand-tooltip": "Proširi tekst"
+}

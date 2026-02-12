@@ -15,12 +15,6 @@ class TraceProxy extends TokenHandler {
 	private $handler;
 	private $name;
 
-	/**
-	 * @param TokenTransformManager $manager
-	 * @param array $options
-	 * @param string $traceType
-	 * @param TokenHandler $handler
-	 */
 	public function __construct( TokenTransformManager $manager, array $options,
 		string $traceType, TokenHandler $handler
 	) {
@@ -37,11 +31,11 @@ class TraceProxy extends TokenHandler {
 	 * @param string|Token $token
 	 * @return TokenHandlerResult|null
 	 */
-	private function traceEvent( $func, $token ) {
+	private function traceEvent( string $func, $token ) {
 		$this->env->log(
 			$this->traceType, $this->pipelineId,
 			function () {
-				return str_pad( $this->name, 23, ' ',  STR_PAD_LEFT ) . "|";
+				return str_pad( $this->name, 23, ' ', STR_PAD_LEFT ) . "|";
 			},
 			static function () use ( $token ) {
 				return PHPUtils::jsonEncode( $token );
@@ -52,7 +46,7 @@ class TraceProxy extends TokenHandler {
 		if ( $profile ) {
 			$s = microtime( true );
 			$res = $this->handler->$func( $token );
-			$t = ( microtime( true ) - $s ) * 1000;
+			$t = (int)( ( microtime( true ) - $s ) * 1000 );
 			$traceName = "{$this->name}::$func";
 			$profile->bumpTimeUse( $traceName, $t, "TT" );
 			$profile->bumpCount( $traceName );
@@ -65,26 +59,14 @@ class TraceProxy extends TokenHandler {
 		return $res;
 	}
 
-	/**
-	 * @param EOFTk $token
-	 * @return TokenHandlerResult|null
-	 */
 	public function onEnd( EOFTk $token ): ?TokenHandlerResult {
 		return $this->traceEvent( 'onEnd', $token );
 	}
 
-	/**
-	 * @param NlTk $token
-	 * @return TokenHandlerResult|null
-	 */
 	public function onNewline( NlTk $token ): ?TokenHandlerResult {
 		return $this->traceEvent( 'onNewline', $token );
 	}
 
-	/**
-	 * @param Token $token
-	 * @return TokenHandlerResult|null
-	 */
 	public function onTag( Token $token ): ?TokenHandlerResult {
 		return $this->traceEvent( 'onTag', $token );
 	}
@@ -97,24 +79,17 @@ class TraceProxy extends TokenHandler {
 		return $this->traceEvent( 'onAny', $token );
 	}
 
-	/**
-	 * @param array $options
-	 */
 	public function resetState( array $options ): void {
 		$this->handler->resetState( $options );
+		// Copy onAnyEnabled for TraceProxy::process() to read
+		$this->onAnyEnabled = $this->handler->onAnyEnabled;
 	}
 
-	/**
-	 * @param int $id
-	 */
 	public function setPipelineId( int $id ): void {
 		$this->pipelineId = $id;
 		$this->handler->setPipelineId( $id );
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function isDisabled(): bool {
 		return $this->handler->isDisabled();
 	}

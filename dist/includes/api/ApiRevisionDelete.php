@@ -21,7 +21,13 @@
  * @since 1.23
  */
 
+namespace MediaWiki\Api;
+
+use ChangeTags;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
+use RevisionDeleter;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -191,8 +197,11 @@ class ApiRevisionDelete extends ApiBase {
 	}
 
 	protected function getExamplesMessages() {
+		$title = Title::newMainPage()->getPrefixedText();
+		$mp = rawurlencode( $title );
+
 		return [
-			'action=revisiondelete&target=Main%20Page&type=revision&ids=12345&' .
+			"action=revisiondelete&target={$mp}&type=revision&ids=12345&" .
 				'hide=content&token=123ABC'
 				=> 'apihelp-revisiondelete-example-revision',
 			'action=revisiondelete&type=logging&ids=67890&hide=content|comment|user&' .
@@ -205,3 +214,6 @@ class ApiRevisionDelete extends ApiBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Revisiondelete';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiRevisionDelete::class, 'ApiRevisionDelete' );

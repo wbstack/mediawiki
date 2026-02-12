@@ -19,20 +19,28 @@
  * @ingroup Parser
  */
 
-use MediaWiki\BadFileLookup;
+namespace MediaWiki\Parser;
+
+use MediaWiki\Category\TrackingCategories;
 use MediaWiki\Config\ServiceOptions;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\Http\HttpRequestFactory;
+use MediaWiki\Language\Language;
 use MediaWiki\Languages\LanguageConverterFactory;
+use MediaWiki\Languages\LanguageNameUtils;
 use MediaWiki\Linker\LinkRendererFactory;
+use MediaWiki\Page\File\BadFileLookup;
 use MediaWiki\Preferences\SignatureValidatorFactory;
 use MediaWiki\SpecialPage\SpecialPageFactory;
 use MediaWiki\Tidy\TidyDriverBase;
+use MediaWiki\Title\NamespaceInfo;
+use MediaWiki\Title\TitleFormatter;
+use MediaWiki\User\Options\UserOptionsLookup;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserNameUtils;
-use MediaWiki\User\UserOptionsLookup;
 use MediaWiki\Utils\UrlUtils;
 use Psr\Log\LoggerInterface;
+use Wikimedia\ObjectCache\WANObjectCache;
 
 /**
  * @since 1.32
@@ -67,6 +75,9 @@ class ParserFactory {
 
 	/** @var LanguageConverterFactory */
 	private $languageConverterFactory;
+
+	/** @var LanguageNameUtils */
+	private $languageNameUtils;
 
 	/** @var UserOptionsLookup */
 	private $userOptionsLookup;
@@ -122,6 +133,7 @@ class ParserFactory {
 	 * @param LoggerInterface $logger
 	 * @param BadFileLookup $badFileLookup
 	 * @param LanguageConverterFactory $languageConverterFactory
+	 * @param LanguageNameUtils $languageNameUtils
 	 * @param HookContainer $hookContainer
 	 * @param TidyDriverBase $tidy
 	 * @param WANObjectCache $wanCache
@@ -146,6 +158,7 @@ class ParserFactory {
 		LoggerInterface $logger,
 		BadFileLookup $badFileLookup,
 		LanguageConverterFactory $languageConverterFactory,
+		LanguageNameUtils $languageNameUtils,
 		HookContainer $hookContainer,
 		TidyDriverBase $tidy,
 		WANObjectCache $wanCache,
@@ -171,6 +184,7 @@ class ParserFactory {
 		$this->logger = $logger;
 		$this->badFileLookup = $badFileLookup;
 		$this->languageConverterFactory = $languageConverterFactory;
+		$this->languageNameUtils = $languageNameUtils;
 		$this->hookContainer = $hookContainer;
 		$this->tidy = $tidy;
 		$this->wanCache = $wanCache;
@@ -185,6 +199,10 @@ class ParserFactory {
 
 	/**
 	 * Creates a new parser
+	 *
+	 * @note Use this function to get a new Parser instance to store
+	 * in a local class property.  Where possible use lazy creation and
+	 * create the Parser only when needed, not directly in service wiring.
 	 *
 	 * @return Parser
 	 * @since 1.32
@@ -204,6 +222,7 @@ class ParserFactory {
 				$this->logger,
 				$this->badFileLookup,
 				$this->languageConverterFactory,
+				$this->languageNameUtils,
 				$this->hookContainer,
 				$this->tidy,
 				$this->wanCache,
@@ -225,6 +244,10 @@ class ParserFactory {
 	 * a top-level context, because re-entering the parser will throw an
 	 * exception.
 	 *
+	 * @note This function is used to get metadata from the parser. Avoid
+	 * using this function to parse wikitext.  (Generally avoid using this
+	 * function at all in new code.)
+	 *
 	 * @since 1.39
 	 * @return Parser
 	 */
@@ -238,6 +261,11 @@ class ParserFactory {
 	/**
 	 * Get the main shared instance, or if it is locked, get a new instance
 	 *
+	 * @note This function was used to parse wikitext. The instance it
+	 * returned should be used only in local scope.  Do not hold a
+	 * reference to this parser in class properties.  In general,
+	 * avoid using this method and use ::create() instead.
+	 *
 	 * @since 1.39
 	 * @return Parser
 	 */
@@ -250,3 +278,6 @@ class ParserFactory {
 	}
 
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ParserFactory::class, 'ParserFactory' );

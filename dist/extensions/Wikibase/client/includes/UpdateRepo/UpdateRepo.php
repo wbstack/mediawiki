@@ -5,10 +5,10 @@ namespace Wikibase\Client\UpdateRepo;
 use IJobSpecification;
 use JobQueueGroup;
 use JobSpecification;
+use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
-use Title;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\Rdbms\ClientDomainDb;
 use Wikibase\Lib\Store\SiteLinkLookup;
@@ -60,6 +60,7 @@ abstract class UpdateRepo {
 	/**
 	 * @param SiteLinkLookup $siteLinkLookup
 	 * @param LoggerInterface $logger
+	 * @param ClientDomainDb $clientDb
 	 * @param UserIdentity $user
 	 * @param string $siteId Global id of the client wiki
 	 * @param Title $title Title in the client that has been changed
@@ -96,7 +97,7 @@ abstract class UpdateRepo {
 				$this->logger->debug(
 					'Could not find an item for "{titleText}"',
 					[
-						'titleText' => $this->title->getPrefixedText()
+						'titleText' => $this->title->getPrefixedText(),
 					]
 				);
 			}

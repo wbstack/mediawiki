@@ -11,11 +11,12 @@
 	"license-name": "MIT",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.39.0",
+		"MediaWiki": ">= 1.43",
 		"extensions": {
 			"JsonConfig": "*"
 		}
 	},
+	"callback": "Kartographer\\Hooks::onRegistration",
 	"MessagesDirs": {
 		"Kartographer": [
 			"i18n",
@@ -27,34 +28,33 @@
 		"KartographerAliases": "Kartographer.alias.php"
 	},
 	"SpecialPages": {
-		"Map": "Kartographer\\SpecialMap"
+		"Map": "Kartographer\\Special\\SpecialMap"
 	},
 	"AutoloadNamespaces": {
 		"Kartographer\\": "includes/"
 	},
-	"TestAutoloadNamespaces": {
-		"Kartographer\\Tests\\Tag\\": "tests/phpunit/Tag/",
-		"Kartographer\\Tests\\Mock\\": "tests/phpunit/Mock/"
-	},
 	"APIModules": {
 		"sanitize-mapdata": {
-			"class": "Kartographer\\ApiSanitizeMapData",
+			"class": "Kartographer\\Api\\ApiSanitizeMapData",
 			"services": [
-				"Parser"
+				"ParserFactory"
 			]
 		}
 	},
 	"APIPropModules": {
 		"mapdata": {
-			"class": "Kartographer\\ApiQueryMapData",
+			"class": "Kartographer\\Api\\ApiQueryMapData",
 			"services": [
 				"WikiPageFactory"
+			],
+			"optional_services": [
+				"FlaggedRevsParserCache"
 			]
 		}
 	},
 	"ResourceModules": {
 		"ext.kartographer": {
-			"class": "Kartographer\\DataModule"
+			"class": "Kartographer\\Modules\\DataModule"
 		},
 		"ext.kartographer.style": {
 			"styles": [
@@ -68,23 +68,15 @@
 				"minerva": [
 					"styles/skins.minerva.kartographer.less"
 				]
-			},
-			"targets": [
-				"mobile",
-				"desktop"
-			]
+			}
 		},
 		"ext.kartographer.site": {
-			"class": "ResourceLoaderWikiModule",
+			"class": "MediaWiki\\ResourceLoader\\WikiModule",
 			"scripts": [
 				"MediaWiki:Kartographer.js"
 			],
 			"styles": [
 				"MediaWiki:Kartographer.css"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"mapbox": {
@@ -94,16 +86,12 @@
 			],
 			"styles": [
 				"lib/external/mapbox/mapbox.css",
-				"lib/mapbox-style-fixes.css"
+				"lib/mapbox-style-fixes.less"
 			],
 			"messages": [
 				"kartographer-fullscreen-text",
 				"mapbox-control-zoomin-title",
 				"mapbox-control-zoomout-title"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"leaflet.draw": {
@@ -156,10 +144,6 @@
 				"leafletdraw-edit-toolbar-buttons-removedisabled",
 				"leafletdraw-draw-toolbar-finish-text",
 				"leafletdraw-draw-toolbar-finish-title"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"ext.kartographer.link": {
@@ -169,18 +153,14 @@
 			],
 			"packageFiles": [
 				"modules/maplink/maplink.js"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"ext.kartographer.box": {
 			"localBasePath": "modules/box",
 			"dependencies": [
+				"web2017-polyfills",
 				"mediawiki.api",
 				"mediawiki.util",
-				"mediawiki.Uri",
 				"oojs-ui.styles.icons-media",
 				"mapbox",
 				"ext.kartographer.lib.topojson",
@@ -192,8 +172,14 @@
 			],
 			"packageFiles": [
 				"index.js",
-				{ "name": "leaflet.sleep.js", "file": "../../lib/external/leaflet.sleep.js" },
-				{ "name": "mapbox-settings.js", "file": "../settings/settings.js" },
+				{
+					"name": "leaflet.sleep.js",
+					"file": "../../lib/external/leaflet.sleep.js"
+				},
+				{
+					"name": "mapbox-settings.js",
+					"file": "../settings/settings.js"
+				},
 				"openfullscreen_control.js",
 				"scale_control.js",
 				"dataLayerOpts.js",
@@ -203,10 +189,6 @@
 			],
 			"messages": [
 				"kartographer-attribution"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"ext.kartographer.linkbox": {
@@ -217,10 +199,6 @@
 			],
 			"dependencies": [
 				"ext.kartographer.util"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"ext.kartographer.data": {
@@ -230,20 +208,17 @@
 			"messages": [
 				"kartographer-attribution-externaldata",
 				"project-localized-name-commonswiki"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"ext.kartographer.dialog": {
 			"localBasePath": "modules/dialog",
+			"remoteExtPath": "Kartographer/modules/dialog",
 			"dependencies": [
-				"oojs-ui.styles.icons-interactions",
-				"oojs-ui.styles.icons-location",
+				"oojs-ui-core",
 				"oojs-ui-windows",
 				"oojs-ui-widgets",
 				"mediawiki.router",
+				"mediawiki.Title",
 				"mapbox"
 			],
 			"packageFiles": [
@@ -258,11 +233,8 @@
 			"messages": [
 				"kartographer-fullscreen-close",
 				"kartographer-sidebar-nearbybutton",
+				"kartographer-sidebar-reload-nearbybutton",
 				"kartographer-sidebar-togglebutton"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"ext.kartographer.dialog.sidebar": {
@@ -276,25 +248,20 @@
 				"sidebar.js",
 				{
 					"name": "externalLinks.json",
-					"callback": "Kartographer\\ExternalLinksProvider::getData"
+					"callback": "Kartographer\\Modules\\ExternalLinksProvider::getData"
 				}
 			],
 			"messages": [
 				"kartographer-fullscreen-close",
-				"kartographer-fullscreen-collapse",
 				"kartographer-sidebar-coordinates",
+				"kartographer-sidebar-close-button",
 				"kartographer-sidebar-filterdropdown",
 				"kartographer-sidebar-externalservices",
 				"kartographer-sidebar-externalservices-show-featured",
 				"kartographer-sidebar-externalservices-show-all",
 				"kartographer-sidebar-latitude",
 				"kartographer-sidebar-longitude",
-				"kartographer-sidebar-mapdetails",
-				"kartographer-sidebar-service"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
+				"kartographer-sidebar-mapdetails"
 			]
 		},
 		"ext.kartographer.util": {
@@ -303,10 +270,6 @@
 			],
 			"dependencies": [
 				"ext.kartographer"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"ext.kartographer.frame": {
@@ -317,10 +280,6 @@
 			],
 			"packageFiles": [
 				"modules/mapframe/mapframe.js"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"ext.kartographer.staticframe": {
@@ -336,10 +295,6 @@
 			"messages": [
 				"kartographer-attribution-short",
 				"kartographer-fullscreen-text"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"ext.kartographer.preview": {
@@ -350,10 +305,6 @@
 				"visualeditor-mwmapsdialog-position-lat",
 				"visualeditor-mwmapsdialog-position-lon",
 				"visualeditor-mwmapsdialog-position-zoom"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"ext.kartographer.editing": {
@@ -362,20 +313,12 @@
 			],
 			"packageFiles": [
 				"modules/editing/editing.js"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"ext.kartographer.editor": {
 			"dependencies": [
 				"leaflet.draw",
 				"ext.kartographer.box"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"ext.kartographer.visualEditor": {
@@ -384,12 +327,15 @@
 				"modules/ve-maps/ve.ce.MWInlineMapsNode.js",
 				"modules/ve-maps/ve.dm.MWMapsNode.js",
 				"modules/ve-maps/ve.ce.MWMapsNode.js",
+				"modules/ve-maps/ve.dm.MWFramelessMapsNode.js",
+				"modules/ve-maps/ve.ce.MWFramelessMapsNode.js",
+				"modules/ve-maps/ve.ui.MWMapsCaptionInputWidget.js",
 				"modules/ve-maps/ve.ui.MWMapsContextItem.js",
 				"modules/ve-maps/ve.ui.MWMapsDialog.js",
 				"modules/ve-maps/ve.ui.MWMapsTool.js"
 			],
 			"styles": [
-				"modules/ve-maps/ve.ui.MWMaps.css"
+				"modules/ve-maps/ve.ui.MWMaps.less"
 			],
 			"messages": [
 				"visualeditor-mwmapscontextitem-nosupport",
@@ -397,9 +343,16 @@
 				"visualeditor-mwmapsdialog-area",
 				"visualeditor-mwmapsdialog-content",
 				"visualeditor-mwmapsdialog-options",
-				"visualeditor-mwmapsdialog-align",
+				"visualeditor-mwmapsdialog-display",
+				"visualeditor-mwmapsdialog-display-help",
+				"visualeditor-mwmapsdialog-frame",
+				"visualeditor-mwmapsdialog-caption",
+				"visualeditor-mwmapsdialog-caption-help",
 				"visualeditor-mwmapsdialog-geojson",
 				"visualeditor-mwmapsdialog-language",
+				"visualeditor-mwmapsdialog-language-help",
+				"visualeditor-mwmapsdialog-language-option",
+				"visualeditor-mwmapsdialog-language-local",
 				"visualeditor-mwmapsdialog-help-title",
 				"visualeditor-mwmapsdialog-position-lat",
 				"visualeditor-mwmapsdialog-position-lon",
@@ -413,26 +366,18 @@
 				"ext.visualEditor.mwcore",
 				"ext.kartographer",
 				"ext.kartographer.util"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
-		"ext.kartographer.lib.prunecluster": {
+		"ext.kartographer.lib.leaflet.markercluster": {
 			"dependencies": [
 				"mapbox"
 			],
 			"scripts": [
-				"lib/external/prunecluster/PruneCluster.js",
-				"modules/prunecluster/prunecluster.js"
+				"lib/external/leaflet.markercluster/leaflet.markercluster-src.js"
 			],
 			"styles": [
-				"lib/external/prunecluster/LeafletStyleSheet.css"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
+				"lib/external/leaflet.markercluster/MarkerCluster.css",
+				"lib/external/leaflet.markercluster/MarkerCluster.Default.css"
 			]
 		},
 		"ext.kartographer.lib.topojson": {
@@ -442,54 +387,36 @@
 			"scripts": [
 				"lib/topojson/topojson.js",
 				"lib/topojson/loader.js"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"ext.kartographer.wv": {
 			"dependencies": [
 				"oojs-ui.styles.icons-editing-core",
-				"mapbox",
-				"ext.kartographer.lib.prunecluster"
+				"mapbox"
 			],
 			"packageFiles": [
 				"modules/wikivoyage/index.js",
 				"modules/wikivoyage/wikivoyage.js",
-				"modules/wikivoyage/NearbyArticles.js",
 				"modules/wikivoyage/ControlLayers.js",
-				"modules/wikivoyage/ControlNearby.js",
 				"modules/wikivoyage/WVMapLayers.js",
 				"modules/wikivoyage/WVMap.js"
 			],
 			"styles": [
 				"modules/wikivoyage/styles/wv-leaflet.less",
-				"modules/wikivoyage/styles/control-layers.less",
-				"modules/wikivoyage/styles/control-nearby.less"
+				"modules/wikivoyage/styles/control-layers.less"
 			],
 			"messages": [
 				"kartographer-wv-group",
-				"kartographer-wv-layer-nearby-articles",
 				"kartographer-wv-layer-wikimedia",
-				"kartographer-wv-nearby-articles-control",
 				"kartographer-wv-warning-external-source-title",
 				"kartographer-wv-warning-external-source-message",
 				"kartographer-wv-warning-external-source-agree",
 				"kartographer-wv-warning-external-source-disagree"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		},
 		"ext.kartographer.specialMap": {
 			"styles": [
 				"styles/specialMap.less"
-			],
-			"targets": [
-				"mobile",
-				"desktop"
 			]
 		}
 	},
@@ -497,8 +424,10 @@
 		"localBasePath": "",
 		"remoteExtPath": "Kartographer"
 	},
+	"LateJSConfigVarNames": [
+		"wgKartographerLiveData"
+	],
 	"Hooks": {
-		"ParserTestGlobals": "KartographerHooks",
 		"ParserFirstCallInit": "KartographerHooks",
 		"ParserAfterParse": "KartographerHooks"
 	},
@@ -506,7 +435,9 @@
 		"KartographerHooks": {
 			"class": "Kartographer\\Hooks",
 			"services": [
-				"MainConfig"
+				"MainConfig",
+				"LanguageNameUtils",
+				"TitleFormatter"
 			]
 		}
 	},
@@ -543,37 +474,34 @@
 		},
 		"KartographerStyles": {
 			"description": "Available map styles users can request from your KartographerMapServer via mapstyle=\"…\".",
-			"value": [ "osm-intl", "osm" ],
+			"value": [
+				"osm-intl",
+				"osm"
+			],
 			"merge_strategy": "provide_default"
 		},
 		"KartographerSrcsetScales": {
 			"description": "Set of allowed high-DPI pixelratios supported by your KartographerMapServer, to be used in <img srcset=\"…\"> and KartographerMapServer URLs. Must be in incremental order. Doesn't need to start with 1, this happens automatically.",
-			"value": [ 1.3, 1.5, 2, 2.6, 3 ],
+			"value": [
+				1.3,
+				1.5,
+				2,
+				2.6,
+				3
+			],
 			"merge_strategy": "provide_default"
 		},
 		"KartographerMapServer": {
 			"description": "Server providing the map tiles. This is the only setting that doesn't have a default. You must provide a value. Note that the Wikimedia tile server \"https://maps.wikimedia.org\" can't be used outside of the Wikimedia cluster.",
 			"value": null
 		},
-		"KartographerVersionedLiveMaps": {
-			"description": "Temporary feature flag to allow Kartographer to render versioned live mapframes.",
-			"value": false
-		},
-		"KartographerVersionedMapdata": {
-			"description": "Temporary feature flag to disable serving versioned mapdata from the API.",
-			"value": false
-		},
-		"KartographerVersionedStaticMaps": {
-			"description": "Do not enable in production until varnish rules are merged. Temporary feature flag to allow Kartographer to render versioned mapframe images.",
-			"value": false
+		"KartographerStaticFullWidth": {
+			"description": "The actual width of static map images when a <mapframe> uses the special value width=\"full\". Relevant on wikis in static mode or when JavaScript is disabled. It's recommended to use one of the $wgImageLimits widths for consistency.",
+			"value": 1024
 		},
 		"KartographerUseMarkerStyle": {
 			"description": "Allows Kartographer to extract marker styles from the GeoJSON to style a <maplink> accordingly. Currently only the \"marker-color\" is considered.",
 			"value": false
-		},
-		"KartographerEnableMapFrame": {
-			"description": "Enables the <mapframe> tag to embed mini-maps directly into pages. The <maplink> tag is always enabled.",
-			"value": true
 		},
 		"KartographerUsePageLanguage": {
 			"description": "Use the language of the page to render the map labels, instead of the language of the territory of the map (lang=local).",
@@ -588,17 +516,33 @@
 			"value": true
 		},
 		"KartographerNearby": {
-			"description": "Enable a beta-quality \"nearby\" feature, currently in development.  Wikivoyage already has its own implementation which this feature may conflict with.",
+			"description": "Number of nearby articles to load via the coordinates API. A number between 100 and 500 is recommended. Requires the GeoData and CirrusSearch extensions to be installed. Set to 0 to disable the feature.",
 			"value": false
 		},
 		"KartographerMediaWikiInternalUrl": {
 			"description": "Development setting allowing kartotherian to call back to the mapdata API on either a different MediaWiki server or via a non-standard port. Passed as a URL, e.g. \"http://dev.wiki.local.wmftest.net:8080\". Defaults to $wgServerName if not set.",
 			"value": null
+		},
+		"KartographerParsoidSupport": {
+			"description": "Enable Parsoid support for Kartographer. This flag should be removed once the Parsoid support is rolled out to all MW production wikis.",
+			"value": false
+		},
+		"KartographerParsoidVersion": {
+			"description": "Version of the Parsoid integration code. This is added to the extension data to enable cache rejection if necessary.",
+			"value": "1.0.1"
 		}
 	},
 	"TrackingCategories": [
 		"kartographer-tracking-category",
 		"kartographer-broken-category"
+	],
+	"ParsoidModules": [
+		{
+			"class": "Kartographer\\Tag\\ParsoidKartographerConfig",
+			"services": [
+				"MainConfig"
+			]
+		}
 	],
 	"load_composer_autoloader": true,
 	"manifest_version": 2

@@ -14,11 +14,11 @@ import { ENTITY_UPDATE } from '@/store/entity/mutationTypes';
 import { EDITMODE_SET } from '@/store/mutationTypes';
 import newFingerprintable from '../../newFingerprintable';
 import hotUpdateDeep from '@wmde/vuex-helpers/dist/hotUpdateDeep';
-import emptyServices from '../emptyServices';
+import mockTempUserConfigService from '../mockTempUserConfigService';
 import { ENTITY_DESCRIPTION_EDIT, ENTITY_LABEL_EDIT } from '@/store/entity/actionTypes';
 
 function createMinimalStoreWithLanguage( languageCode: string ) {
-	const store = createStore( emptyServices as any );
+	const store = createStore( mockTempUserConfigService as any );
 	store.commit( mutation( NS_LANGUAGE, LANGUAGE_UPDATE ), {
 		[ languageCode ]: { code: languageCode, directionality: 'ltr' },
 	} );
@@ -41,7 +41,7 @@ describe( 'MonolingualFingerprintView.vue', () => {
 
 			const language = { code: 'de', directionality: 'ltr' };
 
-			const store = createStore( emptyServices as any );
+			const store = createStore( mockTempUserConfigService as any );
 			store.commit( mutation( NS_LANGUAGE, LANGUAGE_UPDATE ), { de: language } );
 			store.commit( mutation( NS_ENTITY, ENTITY_UPDATE ), entity );
 			store.commit( EDITMODE_SET, false );
@@ -73,7 +73,7 @@ describe( 'MonolingualFingerprintView.vue', () => {
 			const languageCode = 'de';
 			const language = { code: languageCode, directionality: 'ltr' };
 
-			const store = createStore( emptyServices as any );
+			const store = createStore( mockTempUserConfigService as any );
 			store.commit( mutation( NS_LANGUAGE, LANGUAGE_UPDATE ), { de: language } );
 			store.commit( mutation( NS_ENTITY, ENTITY_UPDATE ), entity );
 			store.commit( EDITMODE_SET, true );
@@ -102,7 +102,7 @@ describe( 'MonolingualFingerprintView.vue', () => {
 		it( 'triggers ENTITY_LABEL_EDIT on label edits', () => {
 			const languageCode = 'de';
 
-			const store = createStore( emptyServices as any );
+			const store = createStore( mockTempUserConfigService as any );
 			store.dispatch = jest.fn();
 
 			store.commit( EDITMODE_SET, true );
@@ -125,7 +125,7 @@ describe( 'MonolingualFingerprintView.vue', () => {
 	} );
 
 	it( 'triggers ENTITY_DESCRIPTION_EDIT on description edits', () => {
-		const store = createStore( emptyServices as any );
+		const store = createStore( mockTempUserConfigService as any );
 		store.dispatch = jest.fn();
 		store.commit( EDITMODE_SET, true );
 
@@ -184,7 +184,7 @@ describe( 'MonolingualFingerprintView.vue', () => {
 		const languageTranslation = 'Teutonic';
 
 		const getTranslationInUserLanguage = jest.fn().mockReturnValue( languageTranslation );
-		const store = hotUpdateDeep( createStore( emptyServices as any ), {
+		const store = hotUpdateDeep( createStore( mockTempUserConfigService as any ), {
 			modules: {
 				[ NS_LANGUAGE ]: {
 					getters: {
@@ -208,6 +208,41 @@ describe( 'MonolingualFingerprintView.vue', () => {
 		expect( getTranslationInUserLanguage ).toHaveBeenCalledWith( languageCode );
 		expect( languageNameInUserLanguage.element.tagName ).toBe( 'SPAN' );
 		expect( languageNameInUserLanguage.text() ).toBe( languageTranslation );
+	} );
+
+	describe( 'mul default language support', () => {
+
+		it( 'shows mul label as fallback in readmode', () => {
+			const entity = newFingerprintable( {
+				labels: { mul: 'Mul-Kartoffel' },
+				descriptions: { de: 'Art der Gattung Nachtschatten (Solanum)' },
+				aliases: { de: [ ] },
+			} );
+
+			const language = { code: 'de', directionality: 'ltr' };
+
+			const store = createStore( mockTempUserConfigService as any );
+			store.commit( mutation( NS_LANGUAGE, LANGUAGE_UPDATE ), { de: language } );
+			store.commit( mutation( NS_ENTITY, ENTITY_UPDATE ), entity );
+			store.commit( EDITMODE_SET, false );
+
+			const wrapper = shallowMount( MonolingualFingerprintView, {
+				global: { plugins: [ store ] },
+				props: { languageCode: language.code },
+			} );
+
+			expect( wrapper.findComponent( Label ).exists() ).toBeTruthy();
+			expect( wrapper.findComponent( Label ).props( 'mulLabel' ) ).toStrictEqual( entity.labels.mul );
+
+			expect( wrapper.findComponent( Description ).exists() ).toBeTruthy();
+			expect( wrapper.findComponent( Description ).props( 'description' ) )
+				.toStrictEqual( entity.descriptions[ language.code ] );
+
+			expect( wrapper.findComponent( Aliases ).exists() ).toBeTruthy();
+			expect( wrapper.findComponent( Aliases ).props( 'aliases' ) )
+				.toStrictEqual( entity.aliases[ language.code ] );
+		} );
+
 	} );
 
 } );

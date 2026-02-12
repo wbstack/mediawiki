@@ -25,18 +25,18 @@ class SiteLinkListTest extends \PHPUnit\Framework\TestCase {
 		new SiteLinkList( $notSiteLinks );
 	}
 
-	public function notSiteLinksProvider() {
+	public static function notSiteLinksProvider() {
 		return [
 			[
 				[
-					null
-				]
+					null,
+				],
 			],
 
 			[
 				[
-					42
-				]
+					42,
+				],
 			],
 
 			[
@@ -44,7 +44,7 @@ class SiteLinkListTest extends \PHPUnit\Framework\TestCase {
 					new SiteLink( 'foo', 'bar' ),
 					42,
 					new SiteLink( 'baz', 'bah' ),
-				]
+				],
 			],
 		];
 	}
@@ -57,17 +57,17 @@ class SiteLinkListTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals( $siteLinkArray, array_values( iterator_to_array( $list ) ) );
 	}
 
-	public function siteLinkArrayProvider() {
+	public static function siteLinkArrayProvider() {
 		return [
 			[
 				[
-				]
+				],
 			],
 
 			[
 				[
-					new SiteLink( 'foo', 'bar' )
-				]
+					new SiteLink( 'foo', 'bar' ),
+				],
 			],
 
 			[
@@ -75,7 +75,7 @@ class SiteLinkListTest extends \PHPUnit\Framework\TestCase {
 					new SiteLink( 'foo', 'bar' ),
 					new SiteLink( 'baz', 'bah' ),
 					new SiteLink( 'hax', 'bar' ),
-				]
+				],
 			],
 		];
 	}
@@ -93,13 +93,13 @@ class SiteLinkListTest extends \PHPUnit\Framework\TestCase {
 		new SiteLinkList( $siteLinkArray );
 	}
 
-	public function siteLinkArrayWithDuplicateSiteIdProvider() {
+	public static function siteLinkArrayWithDuplicateSiteIdProvider() {
 		return [
 			[
 				[
 					new SiteLink( 'foo', 'bar' ),
 					new SiteLink( 'foo', 'bar' ),
-				]
+				],
 			],
 
 			[
@@ -107,7 +107,7 @@ class SiteLinkListTest extends \PHPUnit\Framework\TestCase {
 					new SiteLink( 'foo', 'one' ),
 					new SiteLink( 'baz', 'two' ),
 					new SiteLink( 'foo', 'tree' ),
-				]
+				],
 			],
 		];
 	}
@@ -232,7 +232,7 @@ class SiteLinkListTest extends \PHPUnit\Framework\TestCase {
 		$list = new SiteLinkList( [
 			new SiteLink( 'foo', 'spam', new ItemIdSet( [
 				new ItemId( 'Q42' ),
-				new ItemId( 'Q1337' )
+				new ItemId( 'Q1337' ),
 			] ) ),
 		] );
 

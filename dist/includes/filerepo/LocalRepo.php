@@ -18,14 +18,24 @@
  * @file
  */
 
+use MediaWiki\Context\RequestContext;
+use MediaWiki\FileRepo\File\FileSelectQueryBuilder;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Permissions\Authority;
+use MediaWiki\Status\Status;
 use MediaWiki\Storage\BlobStore;
+use MediaWiki\Title\Title;
+use MediaWiki\WikiMap\WikiMap;
+use Wikimedia\ObjectCache\WANObjectCache;
 use Wikimedia\Rdbms\Database;
+use Wikimedia\Rdbms\IConnectionProvider;
 use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IExpression;
+use Wikimedia\Rdbms\IReadableDatabase;
 use Wikimedia\Rdbms\IResultWrapper;
+use Wikimedia\Rdbms\LikeValue;
 
 /**
  * Local repository that stores files in the local filesystem and registers them
@@ -52,6 +62,7 @@ class LocalRepo extends FileRepo {
 
 	/** @var string DB domain of the repo wiki */
 	protected $dbDomain;
+	protected IConnectionProvider $dbProvider;
 	/** @var bool Whether shared cache keys are exposed/accessible */
 	protected $hasAccessibleSharedCache;
 
@@ -73,13 +84,14 @@ class LocalRepo extends FileRepo {
 	/** @var bool */
 	protected $reserializeMetadata = false;
 
-	public function __construct( array $info = null ) {
+	public function __construct( ?array $info = null ) {
 		parent::__construct( $info );
 
 		$this->dbDomain = WikiMap::getCurrentWikiDbDomain();
 		$this->hasAccessibleSharedCache = true;
 
 		$this->hasSha1Storage = ( $info['storageLayout'] ?? null ) === 'sha1';
+		$this->dbProvider = MediaWikiServices::getInstance()->getConnectionProvider();
 
 		if ( $this->hasSha1Storage() ) {
 			$this->backend = new FileBackendDBRepoWrapper( [
@@ -105,7 +117,6 @@ class LocalRepo extends FileRepo {
 	}
 
 	/**
-	 * @throws MWException
 	 * @param stdClass $row
 	 * @return LocalFile
 	 */
@@ -115,7 +126,7 @@ class LocalRepo extends FileRepo {
 		} elseif ( isset( $row->oi_name ) ) {
 			return call_user_func( $this->oldFileFromRowFactory, $row, $this );
 		} else {
-			throw new MWException( __METHOD__ . ': invalid row' );
+			throw new InvalidArgumentException( __METHOD__ . ': invalid row' );
 		}
 	}
 
@@ -183,12 +194,14 @@ class LocalRepo extends FileRepo {
 	 * @return bool File with this key is in use
 	 */
 	protected function deletedFileHasKey( $key, $lock = null ) {
-		$dbw = $this->getPrimaryDB();
-		return (bool)$dbw->selectField( 'filearchive', '1',
-			[ 'fa_storage_group' => 'deleted', 'fa_storage_key' => $key ],
-			__METHOD__,
-			$lock === 'lock' ? [ 'FOR UPDATE' ] : []
-		);
+		$queryBuilder = $this->getPrimaryDB()->newSelectQueryBuilder()
+			->select( '1' )
+			->from( 'filearchive' )
+			->where( [ 'fa_storage_group' => 'deleted', 'fa_storage_key' => $key ] );
+		if ( $lock === 'lock' ) {
+			$queryBuilder->forUpdate();
+		}
+		return (bool)$queryBuilder->caller( __METHOD__ )->fetchField();
 	}
 
 	/**
@@ -203,15 +216,19 @@ class LocalRepo extends FileRepo {
 		$ext = File::normalizeExtension( substr( $key, strcspn( $key, '.' ) + 1 ) );
 
 		$dbw = $this->getPrimaryDB();
-		return (bool)$dbw->selectField( 'oldimage', '1',
-			[
+		$queryBuilder = $dbw->newSelectQueryBuilder()
+			->select( '1' )
+			->from( 'oldimage' )
+			->where( [
 				'oi_sha1' => $sha1,
-				'oi_archive_name ' . $dbw->buildLike( $dbw->anyString(), ".$ext" ),
+				$dbw->expr( 'oi_archive_name', IExpression::LIKE, new LikeValue( $dbw->anyString(), ".$ext" ) ),
 				$dbw->bitAnd( 'oi_deleted', File::DELETED_FILE ) => File::DELETED_FILE,
-			],
-			__METHOD__,
-			$lock === 'lock' ? [ 'FOR UPDATE' ] : []
-		);
+			] );
+		if ( $lock === 'lock' ) {
+			$queryBuilder->forUpdate();
+		}
+
+		return (bool)$queryBuilder->caller( __METHOD__ )->fetchField();
 	}
 
 	/**
@@ -232,7 +249,7 @@ class LocalRepo extends FileRepo {
 	 * Checks if there is a redirect named as $title
 	 *
 	 * @param PageIdentity|LinkTarget $title Title of file
-	 * @return bool|Title
+	 * @return Title|false
 	 */
 	public function checkRedirect( $title ) {
 		$title = File::normalizeTitle( $title, 'exception' );
@@ -254,16 +271,12 @@ class LocalRepo extends FileRepo {
 
 				$setOpts += Database::getCacheSetOptions( $dbr );
 
-				$row = $dbr->selectRow(
-					[ 'page', 'redirect' ],
-					[ 'rd_namespace', 'rd_title' ],
-					[
-						'page_namespace' => $title->getNamespace(),
-						'page_title' => $title->getDBkey(),
-						'rd_from = page_id'
-					],
-					$method
-				);
+				$row = $dbr->newSelectQueryBuilder()
+					->select( [ 'rd_namespace', 'rd_title' ] )
+					->from( 'page' )
+					->join( 'redirect', null, 'rd_from = page_id' )
+					->where( [ 'page_namespace' => $title->getNamespace(), 'page_title' => $title->getDBkey() ] )
+					->caller( $method )->fetchRow();
 
 				return ( $row && $row->rd_namespace == NS_FILE )
 					? Title::makeTitle( $row->rd_namespace, $row->rd_title )->getDBkey()
@@ -352,14 +365,13 @@ class LocalRepo extends FileRepo {
 
 		// Query image table
 		$imgNames = [];
-		foreach ( array_keys( $searchSet ) as $dbKey ) {
+		foreach ( $searchSet as $dbKey => $_ ) {
 			$imgNames[] = $this->getNameFromTitle( File::normalizeTitle( $dbKey ) );
 		}
 
 		if ( count( $imgNames ) ) {
-			$fileQuery = LocalFile::getQueryInfo();
-			$res = $dbr->select( $fileQuery['tables'], $fileQuery['fields'], [ 'img_name' => $imgNames ],
-				__METHOD__, [], $fileQuery['joins'] );
+			$queryBuilder = FileSelectQueryBuilder::newForFile( $dbr );
+			$res = $queryBuilder->where( [ 'img_name' => $imgNames ] )->caller( __METHOD__ )->fetchResultSet();
 			$applyMatchingFiles( $res, $searchSet, $finalFiles );
 		}
 
@@ -367,21 +379,17 @@ class LocalRepo extends FileRepo {
 		$oiConds = []; // WHERE clause array for each file
 		foreach ( $searchSet as $dbKey => $search ) {
 			if ( isset( $search['time'] ) ) {
-				$oiConds[] = $dbr->makeList(
-					[
-						'oi_name' => $this->getNameFromTitle( File::normalizeTitle( $dbKey ) ),
-						'oi_timestamp' => $dbr->timestamp( $search['time'] )
-					],
-					LIST_AND
-				);
+				$oiConds[] = $dbr
+					->expr( 'oi_name', '=', $this->getNameFromTitle( File::normalizeTitle( $dbKey ) ) )
+					->and( 'oi_timestamp', '=', $dbr->timestamp( $search['time'] ) );
 			}
 		}
 
 		if ( count( $oiConds ) ) {
-			$fileQuery = OldLocalFile::getQueryInfo();
-			$res = $dbr->select( $fileQuery['tables'], $fileQuery['fields'],
-				$dbr->makeList( $oiConds, LIST_OR ),
-				__METHOD__, [], $fileQuery['joins'] );
+			$queryBuilder = FileSelectQueryBuilder::newForOldFile( $dbr );
+
+			$res = $queryBuilder->where( $dbr->orExpr( $oiConds ) )
+				->caller( __METHOD__ )->fetchResultSet();
 			$applyMatchingFiles( $res, $searchSet, $finalFiles );
 		}
 
@@ -421,16 +429,10 @@ class LocalRepo extends FileRepo {
 	 * @return LocalFile[]
 	 */
 	public function findBySha1( $hash ) {
-		$dbr = $this->getReplicaDB();
-		$fileQuery = LocalFile::getQueryInfo();
-		$res = $dbr->select(
-			$fileQuery['tables'],
-			$fileQuery['fields'],
-			[ 'img_sha1' => $hash ],
-			__METHOD__,
-			[ 'ORDER BY' => 'img_name' ],
-			$fileQuery['joins']
-		);
+		$queryBuilder = FileSelectQueryBuilder::newForFile( $this->getReplicaDB() );
+		$res = $queryBuilder->where( [ 'img_sha1' => $hash ] )
+			->orderBy( 'img_name' )
+			->caller( __METHOD__ )->fetchResultSet();
 
 		$result = [];
 		foreach ( $res as $row ) {
@@ -456,15 +458,11 @@ class LocalRepo extends FileRepo {
 		}
 
 		$dbr = $this->getReplicaDB();
-		$fileQuery = LocalFile::getQueryInfo();
-		$res = $dbr->select(
-			$fileQuery['tables'],
-			$fileQuery['fields'],
-			[ 'img_sha1' => $hashes ],
-			__METHOD__,
-			[ 'ORDER BY' => 'img_name' ],
-			$fileQuery['joins']
-		);
+		$queryBuilder = FileSelectQueryBuilder::newForFile( $dbr );
+
+		$queryBuilder->where( [ 'img_sha1' => $hashes ] )
+			->orderBy( 'img_name' );
+		$res = $queryBuilder->caller( __METHOD__ )->fetchResultSet();
 
 		$result = [];
 		foreach ( $res as $row ) {
@@ -484,19 +482,14 @@ class LocalRepo extends FileRepo {
 	 * @return LocalFile[]
 	 */
 	public function findFilesByPrefix( $prefix, $limit ) {
-		$selectOptions = [ 'ORDER BY' => 'img_name', 'LIMIT' => intval( $limit ) ];
-
-		// Query database
 		$dbr = $this->getReplicaDB();
-		$fileQuery = LocalFile::getQueryInfo();
-		$res = $dbr->select(
-			$fileQuery['tables'],
-			$fileQuery['fields'],
-			'img_name ' . $dbr->buildLike( $prefix, $dbr->anyString() ),
-			__METHOD__,
-			$selectOptions,
-			$fileQuery['joins']
-		);
+		$queryBuilder = FileSelectQueryBuilder::newForFile( $dbr );
+
+		$queryBuilder
+			->where( $dbr->expr( 'img_name', IExpression::LIKE, new LikeValue( $prefix, $dbr->anyString() ) ) )
+			->orderBy( 'img_name' )
+			->limit( intval( $limit ) );
+		$res = $queryBuilder->caller( __METHOD__ )->fetchResultSet();
 
 		// Build file objects
 		$files = [];
@@ -509,10 +502,10 @@ class LocalRepo extends FileRepo {
 
 	/**
 	 * Get a connection to the replica DB
-	 * @return IDatabase
+	 * @return IReadableDatabase
 	 */
 	public function getReplicaDB() {
-		return wfGetDB( DB_REPLICA );
+		return $this->dbProvider->getReplicaDatabase();
 	}
 
 	/**
@@ -521,17 +514,7 @@ class LocalRepo extends FileRepo {
 	 * @since 1.37
 	 */
 	public function getPrimaryDB() {
-		return wfGetDB( DB_PRIMARY );
-	}
-
-	/**
-	 * Get a connection to the primary DB
-	 * @deprecated since 1.37
-	 * @return IDatabase
-	 */
-	public function getMasterDB() {
-		wfDeprecated( __METHOD__, '1.37' );
-		return $this->getPrimaryDB();
+		return $this->dbProvider->getPrimaryDatabase();
 	}
 
 	/**
@@ -539,8 +522,13 @@ class LocalRepo extends FileRepo {
 	 * @return Closure
 	 */
 	protected function getDBFactory() {
+		// TODO: DB_REPLICA/DB_PRIMARY shouldn't be passed around
 		return static function ( $index ) {
-			return wfGetDB( $index );
+			if ( $index === DB_PRIMARY ) {
+				return MediaWikiServices::getInstance()->getConnectionProvider()->getPrimaryDatabase();
+			} else {
+				return MediaWikiServices::getInstance()->getConnectionProvider()->getReplicaDatabase();
+			}
 		};
 	}
 

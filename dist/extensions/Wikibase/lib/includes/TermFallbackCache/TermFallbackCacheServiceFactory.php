@@ -4,21 +4,21 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Lib\TermFallbackCache;
 
-use BagOStuff;
-use CachedBagOStuff;
-use IBufferingStatsdDataFactory;
-use ObjectCache;
+use ObjectCacheFactory;
 use Psr\SimpleCache\CacheInterface;
 use Wikibase\Lib\SimpleCacheWithBagOStuff;
 use Wikibase\Lib\StatsdRecordingSimpleCache;
+use Wikimedia\ObjectCache\BagOStuff;
+use Wikimedia\ObjectCache\CachedBagOStuff;
+use Wikimedia\Stats\IBufferingStatsdDataFactory;
 
 /**
  * @license GPL-2.0-or-later
  */
 class TermFallbackCacheServiceFactory {
 
-	public function newSharedCache( $termFallbackCacheType ): BagOStuff {
-		return ObjectCache::getInstance( $termFallbackCacheType );
+	public function newSharedCache( $termFallbackCacheType, ObjectCacheFactory $objectCacheFactory ): BagOStuff {
+		return $objectCacheFactory->getInstance( $termFallbackCacheType );
 	}
 
 	public function newInMemoryCache( BagOStuff $bagOStuff ): CachedBagOStuff {

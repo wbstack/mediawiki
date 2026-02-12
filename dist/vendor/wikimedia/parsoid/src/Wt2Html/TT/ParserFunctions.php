@@ -47,9 +47,6 @@ class ParserFunctions {
 	/** @var Env */
 	private $env;
 
-	/**
-	 * @param Env $env
-	 */
 	public function __construct( Env $env ) {
 		$this->env = $env;
 	}
@@ -73,10 +70,10 @@ class ParserFunctions {
 
 	// XXX: move to frame?
 	private function expandKV(
-		$kv, Frame $frame, $defaultValue = null, string $type = null, bool $trim = false
+		$kv, Frame $frame, $defaultValue = null, ?string $type = null, bool $trim = false
 	): array {
 		if ( $type === null ) {
-			$type = 'tokens/x-mediawiki/expanded';
+			$type = 'expanded-tokens-to-fragment';
 		}
 
 		if ( $kv === null ) {
@@ -93,6 +90,10 @@ class ParserFunctions {
 			$v = $this->expandV( $kv->v, $frame );
 			return $this->rejoinKV( $trim, $kv->k, $v );
 		}
+	}
+
+	private function prefixedTitleText(): string {
+		return $this->env->getContextTitle()->getPrefixedText();
 	}
 
 	public function pf_if( $token, Frame $frame, Params $params ): array {
@@ -185,7 +186,7 @@ class ParserFunctions {
 					//
 					// 'val' may be an array of tokens rather than a string as in the
 					// example above where 'val' is indeed the final return value.
-					// Hence 'tokens/x-mediawiki/expanded' type below.
+					// Hence 'expanded-tokens-to-fragment' type below.
 					$v = $this->expandV( $kv->v, $frame );
 					return $this->switchLookupFallback( $frame, array_slice( $kvs, $i + 1 ), $key, $dict, $v );
 				}
@@ -253,6 +254,7 @@ class ParserFunctions {
 		$target = $args[0]->k;
 		if ( $target ) {
 			try {
+				// phpcs:ignore MediaWiki.Usage.ForbiddenFunctions.eval
 				$res = eval( $target );
 			} catch ( \Exception $e ) {
 				$res = null;
@@ -276,6 +278,7 @@ class ParserFunctions {
 		$res = null;
 		if ( $target ) {
 			try {
+				// phpcs:ignore MediaWiki.Usage.ForbiddenFunctions.eval
 				$res = eval( $target );
 			} catch ( \Exception $e ) {
 				return [ 'class="error" in expression ' . $target ];
@@ -593,7 +596,7 @@ class ParserFunctions {
 		$accum = [];
 		foreach ( $args as $item ) {
 			// FIXME: we are swallowing all errors
-			$res = $this->expandKV( $item, $frame, '', 'text/x-mediawiki/expanded', false );
+			$res = $this->expandKV( $item, $frame, '', 'expanded-tokens-to-fragment', false );
 			PHPUtils::pushArray( $accum, $res );
 		}
 
@@ -627,19 +630,23 @@ class ParserFunctions {
 	public function pf_fullpagename( $token, Frame $frame, Params $params ): array {
 		$args = $params->args;
 		$target = $args[0]->k;
-		return [ $target ?: ( $this->env->getPageConfig()->getTitle() ) ];
+		return [ $target ?: ( $this->prefixedTitleText() ) ];
 	}
 
 	public function pf_fullpagenamee( $token, Frame $frame, Params $params ): array {
 		$args = $params->args;
 		$target = $args[0]->k;
-		return [ $target ?: ( $this->env->getPageConfig()->getTitle() ) ];
+		return [ $target ?: ( $this->prefixedTitleText() ) ];
 	}
 
 	public function pf_pagelanguage( $token, Frame $frame, Params $params ): array {
 		$args = $params->args;
 		// The language (code) of the current page.
-		return [ $this->env->getPageConfig()->getPageLanguage() ];
+		// Note: this is exposed as a mediawiki-internal code.
+		$code = Utils::bcp47ToMwCode(
+			$this->env->getPageConfig()->getPageLanguageBcp47()
+		);
+		return [ $code ];
 	}
 
 	public function pf_directionmark( $token, Frame $frame, Params $args ): array {
@@ -657,7 +664,7 @@ class ParserFunctions {
 	public function pf_fullurl( $token, Frame $frame, Params $params ): array {
 		$args = $params->args;
 		$target = $args[0]->k;
-		$target = str_replace( ' ', '_', $target ?: ( $this->env->getPageConfig()->getTitle() ) );
+		$target = str_replace( ' ', '_', $target ?: ( $this->prefixedTitleText() ) );
 		$wikiConf = $this->env->getSiteConfig();
 		$url = null;
 		if ( $args[1] ) {
@@ -799,7 +806,11 @@ class ParserFunctions {
 		$args = $params->args;
 		// Despite the name, this returns the wiki's default interface language
 		// ($wgLanguageCode), *not* the language of the current page content.
-		return [ $this->env->getSiteConfig()->lang() ];
+		// Note: this is exposed as a mediawiki-internal code.
+		$code = Utils::bcp47ToMwCode(
+			$this->env->getSiteConfig()->langBcp47()
+		);
+		return [ $code ];
 	}
 
 	public function pf_contentlang( $token, Frame $frame, Params $params ): array {
@@ -836,12 +847,12 @@ class ParserFunctions {
 
 	public function pf_pagename( $token, Frame $frame, Params $params ): array {
 		$args = $params->args;
-		return [ $this->env->getPageConfig()->getTitle() ];
+		return [ $this->prefixedTitleText() ];
 	}
 
 	public function pf_pagenamebase( $token, Frame $frame, Params $params ): array {
 		$args = $params->args;
-		return [ $this->env->getPageConfig()->getTitle() ];
+		return [ $this->prefixedTitleText() ];
 	}
 
 	public function pf_scriptpath( $token, Frame $frame, Params $params ): array {
@@ -851,14 +862,14 @@ class ParserFunctions {
 
 	public function pf_server( $token, Frame $frame, Params $params ): array {
 		$args = $params->args;
-		$dataAttribs = $token->dataAttribs->clone();
+		$dataParsoid = $token->dataParsoid->clone();
 		return [
 			new TagTk( 'a', [
 					new KV( 'rel', 'nofollow' ),
 					new KV( 'class', 'external free' ),
 					new KV( 'href', $this->env->getSiteConfig()->server() ),
 					new KV( 'typeof', 'mw:ExtLink/URL' )
-				], $dataAttribs
+				], $dataParsoid
 			),
 			$this->env->getSiteConfig()->server(),
 			new EndTagTk( 'a' )
@@ -873,7 +884,7 @@ class ParserFunctions {
 
 	public function pf_talkpagename( $token, Frame $frame, Params $params ): array {
 		$args = $params->args;
-		$title = $this->env->getPageConfig()->getTitle();
+		$title = $this->prefixedTitleText();
 		return [ preg_replace( '/^[^:]:/', 'Talk:', $title, 1 ) ];
 	}
 

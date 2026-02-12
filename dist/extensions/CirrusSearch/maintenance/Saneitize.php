@@ -7,7 +7,8 @@ use CirrusSearch\Sanity\NoopRemediator;
 use CirrusSearch\Sanity\PrintingRemediator;
 use CirrusSearch\Sanity\QueueingRemediator;
 use CirrusSearch\Searcher;
-use WikiMap;
+use CirrusSearch\Util;
+use MediaWiki\WikiMap\WikiMap;
 
 /**
  * Make sure the index for the wiki is sane.
@@ -91,7 +92,7 @@ class Saneitize extends Maintenance {
 		$buildChunks = $this->getOption( 'buildChunks' );
 		if ( $buildChunks ) {
 			$builder = new \CirrusSearch\Maintenance\ChunkBuilder();
-			$builder->build( $this->mSelf, $this->mOptions, $buildChunks, $this->fromPageId, $this->toPageId );
+			$builder->build( $this->mSelf, $this->getParameters()->getOptions(), $buildChunks, $this->fromPageId, $this->toPageId );
 			return null;
 		}
 		$this->buildChecker();
@@ -135,7 +136,11 @@ class Saneitize extends Maintenance {
 		}
 		$this->toPageId = $this->getOption( 'toId' );
 		if ( $this->toPageId === null ) {
-			$this->toPageId = $dbr->selectField( 'page', 'MAX(page_id)', [], __METHOD__ );
+			$this->toPageId = $dbr->newSelectQueryBuilder()
+				->select( 'MAX(page_id)' )
+				->from( 'page' )
+				->caller( __METHOD__ )
+				->fetchField();
 			if ( $this->toPageId === false ) {
 				$this->toPageId = 0;
 			} else {
@@ -164,6 +169,7 @@ class Saneitize extends Maintenance {
 			$this->getConnection(),
 			$remediator,
 			$searcher,
+			Util::getStatsFactory(),
 			$this->getOption( 'logSane' ),
 			$this->fastCheck
 		);

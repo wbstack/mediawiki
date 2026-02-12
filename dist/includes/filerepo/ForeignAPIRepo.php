@@ -18,11 +18,15 @@
  * @file
  */
 
+use MediaWiki\Json\FormatJson;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageIdentity;
+use MediaWiki\Title\Title;
+use Wikimedia\FileBackend\FileBackend;
+use Wikimedia\ObjectCache\WANObjectCache;
 
 /**
  * A foreign repository for a remote MediaWiki accessible through api.php requests.
@@ -54,25 +58,26 @@ class ForeignAPIRepo extends FileRepo implements IForeignRepoWithMWApi {
 		'timestamp',
 	];
 
+	/** @var callable */
 	protected $fileFactory = [ ForeignAPIFile::class, 'newFromTitle' ];
 	/** @var int Check back with Commons after this expiry */
-	protected $apiThumbCacheExpiry = 86400; // 1 day (24*3600)
+	protected $apiThumbCacheExpiry = 24 * 3600; // 1 day
 
 	/** @var int Redownload thumbnail files after this expiry */
-	protected $fileCacheExpiry = 2592000; // 1 month (30*24*3600)
+	protected $fileCacheExpiry = 30 * 24 * 3600; // 1 month
 
 	/**
 	 * @var int API metadata cache time.
 	 * @since 1.38
 	 *
 	 * This is often the performance bottleneck for ForeignAPIRepo. For
-	 * each file used, we must fetch file metadata for it and every high-dpi
+	 * each file used, we must fetch file metadata for it and every high-DPI
 	 * variant, in serial, during the parse. This is slow if a page has many
 	 * files, with RTT of the handshake often being significant. The metadata
 	 * rarely changes, but if a new version of the file was uploaded, it might
 	 * be displayed incorrectly until its metadata entry falls out of cache.
 	 */
-	protected $apiMetadataExpiry = 14400; // 4 hours
+	protected $apiMetadataExpiry = 4 * 3600; // 4 hours
 
 	/** @var array */
 	protected $mFileExists = [];
@@ -114,18 +119,11 @@ class ForeignAPIRepo extends FileRepo implements IForeignRepoWithMWApi {
 	}
 
 	/**
-	 * @return string
-	 */
-	private function getApiUrl() {
-		return $this->mApiBase;
-	}
-
-	/**
 	 * Per docs in FileRepo, this needs to return false if we don't support versioned
 	 * files. Well, we don't.
 	 *
 	 * @param PageIdentity|LinkTarget|string $title
-	 * @param string|bool $time
+	 * @param string|false $time
 	 * @return File|false
 	 */
 	public function newFile( $title, $time = false ) {
@@ -231,7 +229,7 @@ class ForeignAPIRepo extends FileRepo implements IForeignRepoWithMWApi {
 
 	/**
 	 * @param array $data
-	 * @return bool|array
+	 * @return array|false
 	 */
 	public function getImageInfo( $data ) {
 		if ( $data && isset( $data['query']['pages'] ) ) {
@@ -310,7 +308,7 @@ class ForeignAPIRepo extends FileRepo implements IForeignRepoWithMWApi {
 	 * @param int $height
 	 * @param string $otherParams
 	 * @param string|null $lang Language code for language of error
-	 * @return bool|MediaTransformError
+	 * @return MediaTransformError|false
 	 * @since 1.22
 	 */
 	public function getThumbError(
@@ -353,7 +351,7 @@ class ForeignAPIRepo extends FileRepo implements IForeignRepoWithMWApi {
 	 * @param int $height
 	 * @param string $params Other rendering parameters (page number, etc)
 	 *   from handler's makeParamString.
-	 * @return bool|string
+	 * @return string|false
 	 */
 	public function getThumbUrlFromCache( $name, $width, $height, $params = "" ) {
 		// We can't check the local cache using FileRepo functions because
@@ -466,7 +464,7 @@ class ForeignAPIRepo extends FileRepo implements IForeignRepoWithMWApi {
 	/**
 	 * Get the local directory corresponding to one of the basic zones
 	 * @param string $zone
-	 * @return bool|null|string
+	 * @return null|string|false
 	 */
 	public function getZonePath( $zone ) {
 		$supported = [ 'public', 'thumb' ];
@@ -490,8 +488,10 @@ class ForeignAPIRepo extends FileRepo implements IForeignRepoWithMWApi {
 	 * @return string
 	 */
 	public static function getUserAgent() {
-		return MediaWikiServices::getInstance()->getHttpRequestFactory()->getUserAgent() .
-			" ForeignAPIRepo/" . self::VERSION;
+		$mediaWikiVersion = MediaWikiServices::getInstance()->getHttpRequestFactory()->getUserAgent();
+		$classVersion = self::VERSION;
+		$contactUrl = MediaWikiServices::getInstance()->getUrlUtils()->getCanonicalServer();
+		return "$mediaWikiVersion ($contactUrl) ForeignAPIRepo/$classVersion";
 	}
 
 	/**
@@ -502,7 +502,7 @@ class ForeignAPIRepo extends FileRepo implements IForeignRepoWithMWApi {
 	 */
 	public function getInfo() {
 		$info = parent::getInfo();
-		$info['apiurl'] = $this->getApiUrl();
+		$info['apiurl'] = $this->mApiBase;
 
 		$query = [
 			'format' => 'json',
@@ -537,10 +537,15 @@ class ForeignAPIRepo extends FileRepo implements IForeignRepoWithMWApi {
 	public static function httpGet(
 		$url, $timeout = 'default', $options = [], &$mtime = false
 	) {
+		$urlUtils = MediaWikiServices::getInstance()->getUrlUtils();
+		$requestFactory = MediaWikiServices::getInstance()->getHttpRequestFactory();
+
 		$options['timeout'] = $timeout;
-		/* Http::get */
-		$url = wfExpandUrl( $url, PROTO_HTTP );
+		$url = $urlUtils->expand( $url, PROTO_HTTP );
 		wfDebug( "ForeignAPIRepo: HTTP GET: $url" );
+		if ( !$url ) {
+			return false;
+		}
 		$options['method'] = "GET";
 
 		if ( !isset( $options['timeout'] ) ) {
@@ -549,8 +554,8 @@ class ForeignAPIRepo extends FileRepo implements IForeignRepoWithMWApi {
 
 		$options['userAgent'] = self::getUserAgent();
 
-		$req = MediaWikiServices::getInstance()->getHttpRequestFactory()
-			->create( $url, $options, __METHOD__ );
+		$req = $requestFactory->create( $url, $options, __METHOD__ );
+		$req->setHeader( 'Referer', $urlUtils->getCanonicalServer() );
 		$status = $req->execute();
 
 		if ( $status->isOK() ) {
@@ -616,17 +621,16 @@ class ForeignAPIRepo extends FileRepo implements IForeignRepoWithMWApi {
 
 	/**
 	 * @param callable $callback
-	 * @throws MWException
+	 * @return never
 	 */
 	public function enumFiles( $callback ) {
-		// @phan-suppress-previous-line PhanPluginNeverReturnMethod
-		throw new MWException( 'enumFiles is not supported by ' . static::class );
+		throw new RuntimeException( 'enumFiles is not supported by ' . static::class );
 	}
 
 	/**
-	 * @throws MWException
+	 * @return never
 	 */
 	protected function assertWritableRepo() {
-		throw new MWException( static::class . ': write operations are not supported.' );
+		throw new LogicException( static::class . ': write operations are not supported.' );
 	}
 }

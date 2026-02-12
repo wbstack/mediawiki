@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\DataModel\Serializers;
 
 use InvalidArgumentException;
@@ -20,7 +22,10 @@ use Serializers\Serializer;
 class SerializerFactory {
 
 	public const OPTION_DEFAULT = 0;
-	/** @since 1.2.0 */
+	/**
+	 * @since 1.2.0
+	 * @deprecated since 2.10.0 option has no effect
+	 */
 	public const OPTION_OBJECTS_FOR_MAPS = 1;
 	/**
 	 * @since 1.7.0
@@ -46,15 +51,11 @@ class SerializerFactory {
 		self::OPTION_SERIALIZE_QUALIFIER_SNAKS_WITHOUT_HASH |
 		self::OPTION_SERIALIZE_REFERENCE_SNAKS_WITHOUT_HASH; */
 
-	/**
-	 * @var int
-	 */
-	private $options;
+	public const OPTION_SERIALIZE_USE_OBJECTS_FOR_EMPTY_MAPS = 16;
 
-	/**
-	 * @var Serializer
-	 */
-	private $dataValueSerializer;
+	private int $options;
+
+	private Serializer $dataValueSerializer;
 
 	/**
 	 * @param Serializer $dataValueSerializer serializer for DataValue objects
@@ -71,31 +72,19 @@ class SerializerFactory {
 		$this->options = $options;
 	}
 
-	/**
-	 * @return bool
-	 */
-	private function shouldUseObjectsForMaps() {
-		return (bool)( $this->options & self::OPTION_OBJECTS_FOR_MAPS );
+	private function shouldUseObjectsForEmptyMaps(): bool {
+		return (bool)( $this->options & self::OPTION_SERIALIZE_USE_OBJECTS_FOR_EMPTY_MAPS );
 	}
 
-	/**
-	 * @return bool
-	 */
-	private function shouldSerializeMainSnaksWithHash() {
+	private function shouldSerializeMainSnaksWithHash(): bool {
 		return !(bool)( $this->options & self::OPTION_SERIALIZE_MAIN_SNAKS_WITHOUT_HASH );
 	}
 
-	/**
-	 * @return bool
-	 */
-	private function shouldSerializeQualifierSnaksWithHash() {
+	private function shouldSerializeQualifierSnaksWithHash(): bool {
 		return !(bool)( $this->options & self::OPTION_SERIALIZE_QUALIFIER_SNAKS_WITHOUT_HASH );
 	}
 
-	/**
-	 * @return bool
-	 */
-	private function shouldSerializeReferenceSnaksWithHash() {
+	private function shouldSerializeReferenceSnaksWithHash(): bool {
 		return !(bool)( $this->options & self::OPTION_SERIALIZE_REFERENCE_SNAKS_WITHOUT_HASH );
 	}
 
@@ -105,10 +94,10 @@ class SerializerFactory {
 	 *  and properties this is not what you want. If in doubt, favor a custom
 	 *  `DispatchingSerializer` containing the exact entity serializers you need.
 	 */
-	public function newEntitySerializer() {
+	public function newEntitySerializer(): DispatchableSerializer {
 		return new DispatchingSerializer( [
 			$this->newItemSerializer(),
-			$this->newPropertySerializer()
+			$this->newPropertySerializer(),
 		] );
 	}
 
@@ -123,7 +112,7 @@ class SerializerFactory {
 			$this->newAliasGroupListSerializer(),
 			$this->newStatementListSerializer(),
 			$this->newSiteLinkSerializer(),
-			$this->shouldUseObjectsForMaps()
+			$this->shouldUseObjectsForEmptyMaps(),
 		);
 	}
 
@@ -155,7 +144,7 @@ class SerializerFactory {
 	public function newStatementListSerializer(): StatementListSerializer {
 		return new StatementListSerializer(
 			$this->newStatementSerializer(),
-			$this->shouldUseObjectsForMaps()
+			$this->shouldUseObjectsForEmptyMaps(),
 		);
 	}
 
@@ -200,7 +189,7 @@ class SerializerFactory {
 	public function newSnakListSerializer( $serializeSnaksWithHash = true ): SnakListSerializer {
 		return new SnakListSerializer(
 			$this->newSnakSerializer( $serializeSnaksWithHash ),
-			$this->shouldUseObjectsForMaps()
+			$this->shouldUseObjectsForEmptyMaps(),
 		);
 	}
 
@@ -239,7 +228,10 @@ class SerializerFactory {
 	 * @since 1.5
 	 */
 	public function newTermListSerializer(): TermListSerializer {
-		return new TermListSerializer( $this->newTermSerializer(), $this->shouldUseObjectsForMaps() );
+		return new TermListSerializer(
+			$this->newTermSerializer(),
+			$this->shouldUseObjectsForEmptyMaps(),
+		);
 	}
 
 	/**
@@ -259,7 +251,7 @@ class SerializerFactory {
 	public function newAliasGroupListSerializer(): AliasGroupListSerializer {
 		return new AliasGroupListSerializer(
 			$this->newAliasGroupSerializer(),
-			$this->shouldUseObjectsForMaps()
+			$this->shouldUseObjectsForEmptyMaps(),
 		);
 	}
 

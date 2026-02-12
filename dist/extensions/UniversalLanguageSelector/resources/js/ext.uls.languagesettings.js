@@ -35,8 +35,8 @@
 	// Apply and Cancel buttons
 	buttonsRow = '<div class="row collapse language-settings-buttons">' +
 		'<div class="twelve columns">' +
-		'<button class="mw-ui-button uls-settings-cancel" data-i18n="ext-uls-language-settings-cancel"></button>' +
-		'<button class="mw-ui-button mw-ui-progressive active uls-settings-apply" data-i18n="ext-uls-language-settings-apply" disabled></button>' +
+		'<button class="cdx-button uls-settings-cancel" data-i18n="ext-uls-language-settings-cancel"></button>' +
+		'<button class="cdx-button cdx-button--type-primary cdx-button--action-progressive active uls-settings-apply" data-i18n="ext-uls-language-settings-apply" disabled></button>' +
 		'</div>' +
 		'</div>' +
 		'</div>';
@@ -44,7 +44,7 @@
 		settingsMenu +
 		settingsPanel +
 		'</div>';
-	windowTemplate = '<div style="display: block;" id="language-settings-dialog" class="language-settings-dialog grid uls-menu uls-wide">' +
+	windowTemplate = '<div style="display: block;" id="language-settings-dialog" class="language-settings-dialog grid uls-menu uls-wide notheme skin-invert">' +
 		closeRow +
 		panelsRow +
 		buttonsRow +
@@ -52,7 +52,7 @@
 
 	function LanguageSettings( element, options ) {
 		this.$element = $( element );
-		this.options = $.extend( {}, $.fn.languagesettings.defaults, options );
+		this.options = Object.assign( {}, $.fn.languagesettings.defaults, options );
 		this.$window = $( this.options.template );
 		this.shown = false;
 		this.initialized = false;

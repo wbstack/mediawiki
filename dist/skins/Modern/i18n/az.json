@@ -1,10 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Vago"
+			"Vago",
+			"Nemoralis"
 		]
 	},
 	"skinname-modern": "Modern",
-	"modern.css": "/* Burada yerləşən CSS Modern skin istifadəçilərinə tətbiq olunur */",
-	"modern.js": "/* Burada Modern skin istifadəçiləri üçün istənilən JavaScript yüklənəcək */"
+	"modern.css": "/* Buradakı CSS Modern skin istifadəçilərinə tətbiq olunur */",
+	"modern.js": "/* Burada Modern skin istifadəçiləri üçün istənilən JavaScript yüklənəcək */",
+	"modern-desc": "Yan panel və üst çubuğu olan mavi/boz dizayn. MonoBook-dan təsirlənib."
 }

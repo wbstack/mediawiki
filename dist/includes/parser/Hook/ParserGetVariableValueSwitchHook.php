@@ -2,8 +2,8 @@
 
 namespace MediaWiki\Hook;
 
-use Parser;
-use PPFrame;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\PPFrame;
 
 /**
  * This is a hook handler interface, see docs/Hooks.md.

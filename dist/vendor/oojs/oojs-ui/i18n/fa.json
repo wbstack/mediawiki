@@ -19,6 +19,7 @@
 			"فلورانس"
 		]
 	},
+	"ooui-copytextlayout-copy": "رونوشت",
 	"ooui-outline-control-move-down": "انتقال مورد به پایین",
 	"ooui-outline-control-move-up": "انتقال مورد به بالا",
 	"ooui-outline-control-remove": "حذف مورد",
@@ -35,7 +36,6 @@
 	"ooui-combobox-button-label": "تغییر گزینه‌ها",
 	"ooui-selectfile-button-select": "انتخاب یک پرونده",
 	"ooui-selectfile-button-select-multiple": "انتخاب پرونده‌ها",
-	"ooui-selectfile-not-supported": "انتخاب پرونده پشتیبانی نمی‌شود",
 	"ooui-selectfile-placeholder": "هیچ پرونده‌ای انتخاب نشده است",
 	"ooui-selectfile-dragdrop-placeholder": "پرونده را اینجا رها کنید",
 	"ooui-selectfile-dragdrop-placeholder-multiple": "پرونده‌ها را اینجا رها کنید",

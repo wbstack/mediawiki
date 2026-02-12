@@ -1,13 +1,26 @@
 <?php
 
+use MediaWiki\Html\Html;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Specials\SpecialEditWatchlist;
+use MediaWiki\Title\Title;
+use MobileFrontend\Hooks\HookRunner;
 use MobileFrontend\Models\MobileCollection;
 use MobileFrontend\Models\MobilePage;
 
 /**
  * The mobile version of the watchlist editing page.
+ * @deprecated in future this should be the core SpecialEditWatchlist page (T109277)
  */
 class SpecialMobileEditWatchlist extends SpecialEditWatchlist {
+	private const WATCHLIST_TAB_PATHS = [
+		'Special:Watchlist',
+		'Special:EditWatchlist'
+	];
+	private const LIMIT = 50;
+
 	/** @var string The name of the title to begin listing the watchlist from */
 	protected $offsetTitle;
 
@@ -23,8 +36,6 @@ class SpecialMobileEditWatchlist extends SpecialEditWatchlist {
 	 */
 	protected function outputSubtitle() {
 		$user = $this->getUser();
-		// Make sure a header is rendered with a-z focused (as we know we're on that page)
-		$this->getOutput()->addHTML( SpecialMobileWatchlist::getWatchlistHeader( $user, 'a-z' ) );
 	}
 
 	/**
@@ -38,28 +49,20 @@ class SpecialMobileEditWatchlist extends SpecialEditWatchlist {
 		$thumb = $mp->getSmallThumbnailHtml( true );
 		$title = $mp->getTitle();
 		if ( !$thumb ) {
-			$thumb = MobilePage::getPlaceHolderThumbnailHtml( 'list-thumb-none', 'list-thumb-x' );
+			$thumb = Html::rawElement( 'div', [
+				'class' => 'list-thumb list-thumb-placeholder'
+				], Html::element( 'span', [
+					'class' => 'mf-icon-image'
+				] )
+			);
 		}
 		$timestamp = $mp->getLatestTimestamp();
 		$user = $this->getUser();
 		$titleText = $title->getPrefixedText();
 		if ( $timestamp ) {
-			$lastModified = $this->msg(
-				'mobile-frontend-last-modified-date',
-				$this->getLanguage()->userDate( $timestamp, $user ),
-				$this->getLanguage()->userTime( $timestamp, $user )
-			)->text();
-			$edit = $mp->getLatestEdit();
-			$dataAttrs = [
-				'data-timestamp' => $edit['timestamp'],
-				'data-user-name' => $edit['name'],
-				'data-user-gender' => $edit['gender'],
-			];
 			$className = 'title';
 		} else {
 			$className = 'title new';
-			$lastModified = '';
-			$dataAttrs = [];
 		}
 
 		$html =
@@ -73,12 +76,6 @@ class SpecialMobileEditWatchlist extends SpecialEditWatchlist {
 		$html .=
 			Html::element( 'h3', [], $titleText );
 
-		if ( $lastModified ) {
-			$html .= Html::openElement( 'div', [ 'class' => 'info' ] ) .
-				Html::element( 'span', array_merge( $dataAttrs, [ 'class' => 'modified-enhancement' ] ),
-					$lastModified ) .
-				Html::closeElement( 'div' );
-		}
 		$html .= Html::closeElement( 'a' ) .
 			Html::closeElement( 'li' );
 
@@ -98,7 +95,7 @@ class SpecialMobileEditWatchlist extends SpecialEditWatchlist {
 		$out = $this->getOutput();
 		$out->addBodyClasses( 'mw-mf-special-page' );
 		parent::execute( $mode );
-		$out->setPageTitle( $this->msg( 'watchlist' ) );
+		$out->setPageTitleMsg( $this->msg( 'watchlist' ) );
 	}
 
 	/**
@@ -134,7 +131,42 @@ class SpecialMobileEditWatchlist extends SpecialEditWatchlist {
 	private function getPagesToDisplay( $pages ) {
 		$offset = $this->getPageOffset( $pages );
 		// Get the slice we are going to display and display it
-		return array_slice( $pages, $offset, SpecialMobileWatchlist::LIMIT, true );
+		return array_slice( $pages, $offset, self::LIMIT, true );
+	}
+
+	/**
+	 * Get the HTML needed to show if a user doesn't watch any page, show information
+	 * how to watch pages where no pages have been watched.
+	 * @param bool $feed Render as feed (true) or list (false) view?
+	 * @param Language $lang The language of the current mode
+	 * @return string
+	 */
+	public static function getEmptyListHtml( $feed, $lang ) {
+		$dir = $lang->isRTL() ? 'rtl' : 'ltr';
+
+		$config = MediaWikiServices::getInstance()->getService( 'MobileFrontend.Config' );
+		$imgUrl = $config->get( 'ExtensionAssetsPath' ) .
+			"/MobileFrontend/images/emptywatchlist-page-actions-$dir.png";
+
+		if ( $feed ) {
+			$msg = Html::element( 'p', [], wfMessage( 'mobile-frontend-watchlist-feed-empty' )->plain() );
+		} else {
+			$msg = Html::element( 'p', [],
+				wfMessage( 'mobile-frontend-watchlist-a-z-empty-howto' )->plain()
+			);
+			$msg .= Html::element( 'img', [
+				'src' => $imgUrl,
+				'alt' => wfMessage( 'mobile-frontend-watchlist-a-z-empty-howto-alt' )->plain(),
+			] );
+		}
+
+		return Html::openElement( 'div', [ 'class' => 'info empty-page' ] ) .
+			$msg .
+			Html::element( 'a',
+				[ 'class' => 'button', 'href' => Title::newMainPage()->getLocalURL() ],
+				wfMessage( 'mobile-frontend-watchlist-back-home' )->plain()
+			) .
+			Html::closeElement( 'div' );
 	}
 
 	/**
@@ -147,7 +179,7 @@ class SpecialMobileEditWatchlist extends SpecialEditWatchlist {
 	private function getNextPage( $pages ) {
 		$total = count( $pages );
 		$offset = $this->getPageOffset( $pages );
-		$limit = SpecialMobileWatchlist::LIMIT;
+		$limit = self::LIMIT;
 
 		// Work out if we need a more button and where to start from
 		if ( $total > $offset + $limit ) {
@@ -180,10 +212,10 @@ class SpecialMobileEditWatchlist extends SpecialEditWatchlist {
 		// Begin rendering of watchlist.
 		$watchlist = [ $ns => $allPages ];
 		$services = MediaWikiServices::getInstance();
-		$services->getHookContainer()->run(
-			'SpecialMobileEditWatchlist::images',
-			[ $this->getContext(), &$watchlist, &$images ]
-		);
+		( new HookRunner( $services->getHookContainer() ) )
+			->onSpecialMobileEditWatchlist__images(
+				$this->getContext(), $watchlist, $images
+			);
 
 		// create list of pages
 		$mobilePages = new MobileCollection();
@@ -202,7 +234,7 @@ class SpecialMobileEditWatchlist extends SpecialEditWatchlist {
 		}
 
 		if ( $mobilePages->isEmpty() ) {
-			$html = SpecialMobileWatchlist::getEmptyListHtml( false, $this->getLanguage() );
+			$html = self::getEmptyListHtml( false, $this->getLanguage() );
 		} else {
 			$html = $this->getViewHtml( $mobilePages );
 		}
@@ -211,7 +243,7 @@ class SpecialMobileEditWatchlist extends SpecialEditWatchlist {
 			$qs = [ 'from' => $from ];
 			$html .= Html::element( 'a',
 				[
-					'class' => MobileUI::anchorClass( 'progressive', 'mw-mf-watchlist-more' ),
+					'class' => 'mw-mf-watchlist-more',
 					'href' => SpecialPage::getTitleFor( 'EditWatchlist' )->getLocalURL( $qs ),
 				],
 				$this->msg( 'mobile-frontend-watchlist-more' )->text() );
@@ -222,9 +254,7 @@ class SpecialMobileEditWatchlist extends SpecialEditWatchlist {
 		$out->addModuleStyles(
 			[
 				'mobile.pagelist.styles',
-				"mobile.placeholder.images",
-				'mobile.pagesummary.styles',
-				'mobile.special.pagefeed.styles'
+				'mobile.pagesummary.styles'
 			]
 		);
 	}
@@ -234,12 +264,19 @@ class SpecialMobileEditWatchlist extends SpecialEditWatchlist {
 	 * @return string html representation of collection in watchlist view
 	 */
 	protected function getViewHtml( MobileCollection $collection ) {
-		$html = Html::openElement( 'ul', [ 'class' => 'content-unstyled page-list thumbs'
+		$html = Html::openElement( 'ul', [ 'class' => 'content-unstyled mw-mf-page-list thumbs'
 			. ' page-summary-list mw-mf-watchlist-page-list' ] );
 		foreach ( $collection as $mobilePage ) {
 			$html .= $this->getLineHtml( $mobilePage );
 		}
 		$html .= Html::closeElement( 'ul' );
 		return $html;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getAssociatedNavigationLinks() {
+		return self::WATCHLIST_TAB_PATHS;
 	}
 }

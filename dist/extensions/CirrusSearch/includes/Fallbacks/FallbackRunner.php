@@ -16,6 +16,7 @@ use Elastica\Client;
 use Wikimedia\Assert\Assert;
 
 class FallbackRunner implements SearchMetricsProvider {
+	/** @var FallbackRunner */
 	private static $NOOP_RUNNER = null;
 
 	/**
@@ -42,7 +43,7 @@ class FallbackRunner implements SearchMetricsProvider {
 	 * @return FallbackRunner
 	 */
 	public static function noopRunner(): FallbackRunner {
-		self::$NOOP_RUNNER = self::$NOOP_RUNNER ?? new self( [] );
+		self::$NOOP_RUNNER ??= new self( [] );
 		return self::$NOOP_RUNNER;
 	}
 

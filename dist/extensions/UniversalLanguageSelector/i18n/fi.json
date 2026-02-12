@@ -10,7 +10,8 @@
 			"Pxos",
 			"Pyscowicz",
 			"Stryn",
-			"Yupik"
+			"Yupik",
+			"Samoasambia"
 		]
 	},
 	"uls-desc": "Tarjoaa useita tapoja kielen valitsemiseen ja kieliasetusten hienosäätöön",
@@ -80,5 +81,6 @@
 	"ext-uls-empty-state-header": "Ei vielä kieliä",
 	"ext-uls-empty-state-desc": "Kieliä ei ole tällä hetkellä saatavilla",
 	"ext-uls-empty-state-header-actions-available": "Ei vielä kieliä. Lisätäänkö uusi?",
-	"ext-uls-empty-state-desc-actions-available": "Tuo sisältö saataville muille kielille."
+	"ext-uls-empty-state-desc-actions-available": "Tuo sisältö saataville muille kielille.",
+	"ext-uls-add-languages-button-label": "Lisää kieliä"
 }

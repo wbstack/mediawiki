@@ -1,7 +1,12 @@
 <?php
 
+use MediaWiki\Context\ContextSource;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\HookContainer\ProtectedHookAccessorTrait;
 use MediaWiki\MainConfigNames;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 
 /**
  * Helper functions for the login form that need to be shared with other special pages
@@ -25,12 +30,15 @@ class LoginHelper extends ContextSource {
 	 */
 	public static $validErrorMessages = [
 		'exception-nologin-text',
+		'exception-nologin-text-for-temp-user',
 		'watchlistanontext',
+		'watchlistanontext-for-temp-user',
 		'changeemail-no-info',
-		'resetpass-no-info',
 		'confirmemail_needlogin',
 		'prefsnologintext2',
+		'prefsnologintext2-for-temp-user',
 		'specialmute-login-required',
+		'specialmute-login-required-for-temp-user',
 	];
 
 	/**
@@ -43,7 +51,8 @@ class LoginHelper extends ContextSource {
 		static $messages = null;
 		if ( !$messages ) {
 			$messages = self::$validErrorMessages;
-			Hooks::runner()->onLoginFormValidErrorMessages( $messages );
+			( new HookRunner( MediaWikiServices::getInstance()->getHookContainer() ) )
+				->onLoginFormValidErrorMessages( $messages );
 		}
 
 		return $messages;
@@ -81,9 +90,19 @@ class LoginHelper extends ContextSource {
 		} elseif ( is_string( $returnToQuery ) ) {
 			$returnToQuery = wfCgiToArray( $returnToQuery );
 		}
+		if ( $returnToAnchor !== '' && $returnToAnchor[0] !== '#' ) {
+			$returnToAnchor = '';
+		}
 
 		// Allow modification of redirect behavior
+		$oldReturnTo = $returnTo;
+		$oldReturnToQuery = $returnToQuery;
 		$this->getHookRunner()->onPostLoginRedirect( $returnTo, $returnToQuery, $type );
+		if ( $returnTo !== $oldReturnTo || $returnToQuery !== $oldReturnToQuery ) {
+			// PostLoginRedirect does not handle $returnToAnchor, and changing hooks is hard.
+			// At least don't add the anchor if the hook changed the URL.
+			$returnToAnchor = '';
+		}
 
 		$returnToTitle = Title::newFromText( $returnTo ) ?: Title::newMainPage();
 

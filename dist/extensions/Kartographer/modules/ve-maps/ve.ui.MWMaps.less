@@ -1,0 +1,83 @@
+@import 'mediawiki.skin.variables.less';
+
+.ve-ui-mwMapsDialog {
+	> .oo-ui-window-body {
+		display: flex;
+		flex-flow: column;
+	}
+
+	&-mapWidget {
+		flex: auto;
+
+		> div {
+			width: @size-full;
+			height: @size-full;
+			background-color: @background-color-neutral;
+		}
+	}
+
+	&-indexLayout {
+		max-height: @size-half;
+	}
+
+	&-geoJSONWidget {
+		max-width: none;
+
+		&,
+		.oo-ui-inputWidget-input:first-child,
+		.ace_editor.ace-tm {
+			min-height: 210px;
+		}
+	}
+
+	&-optionsPanel .oo-ui-fieldLayout-header {
+		font-weight: bold;
+	}
+
+	&-frameField.oo-ui-fieldLayout.oo-ui-labelElement > .oo-ui-fieldLayout-body > .oo-ui-fieldLayout-header {
+		flex-grow: 0;
+		font-weight: normal;
+
+		> .oo-ui-labelElement-label {
+			margin-right: 1em;
+		}
+	}
+
+	&-help {
+		position: absolute;
+		top: 0.714285em;
+		right: 0.714285em;
+		margin: 0;
+	}
+}
+
+.ve-ce-mwMapsNode {
+	background-position: center;
+	background-repeat: no-repeat;
+
+	&.center {
+		/* Fixes align=center */
+		position: relative;
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.thumbcaption > p {
+		&:first-child {
+			margin-top: 0;
+			padding-top: 0;
+		}
+
+		&:last-child {
+			margin-bottom: 0;
+			padding-bottom: 0;
+		}
+	}
+}
+
+.ve-ui-mwMapsContextItem-nosupport {
+	color: @color-base--subtle;
+	font-style: italic;
+	line-height: @line-height-medium;
+}

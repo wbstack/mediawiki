@@ -7,7 +7,8 @@
 			"Loupeter",
 			"Paucabot",
 			"SMP",
-			"Solde"
+			"Solde",
+			"Yupik"
 		]
 	},
 	"requestaccount": "Sol·licita un compte",
@@ -16,7 +17,7 @@
 	"requestaccount-leg-person": "Informació personal",
 	"requestaccount-leg-other": "Altres informacions",
 	"requestaccount-leg-tos": "Condicions d'ús",
-	"requestaccount-real": "Nom real:",
+	"requestaccount-real": "Nom real (opcional):",
 	"requestaccount-same": "(el mateix que el nom real)",
 	"requestaccount-email": "Adreça electrònica:",
 	"requestaccount-reqtype": "Posició:",

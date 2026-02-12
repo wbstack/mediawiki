@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Kaganer",
-			"Kotwys"
+			"Kotwys",
+			"Света Поторочина"
 		]
 	},
 	"uls-desc": "Юзчилы кыл бырйыны но кыл пуктэтъёсты тупатыны кӧня ке амалъёс сётэ",
@@ -20,7 +21,7 @@
 	"ext-uls-display-settings-desc": "Менюослэн но шрифтъёслэн кылзы",
 	"ext-uls-language-settings-title": "Кылъёслы настройкаос",
 	"ext-uls-language-settings-apply": "Пуктэтъёсты кутоно",
-	"ext-uls-language-settings-cancel": "Берытсконо",
+	"ext-uls-language-settings-cancel": "Берланьтон",
 	"ext-uls-language-buttons-help": "Менюлэсь кылзэ воштоно. Пуштрослэн кылыз уз воштӥськы.",
 	"ext-uls-display-settings-font-settings": "Шрифт пуктэтъёс",
 	"ext-uls-display-settings-ui-language": "Возьматон кыл",
@@ -28,7 +29,7 @@
 	"ext-uls-display-settings-anon-same-as-content": "$1 (пуштрослэн кадь ик)",
 	"ext-uls-display-settings-anon-log-in-cta": "[[Special:UserLogin|Пырелэ]] менюлы мукет кыл быръён понна.",
 	"ext-uls-webfonts-settings-title": "Кулэ луыку шрифтъёсты кысконо",
-	"ext-uls-webfonts-settings-info": "Ӧвӧлтэм луись шрифтъёсты асэрказ кысконо но умоен лыдъяно шрифтъёсты бырйыны лэзёно.",
+	"ext-uls-webfonts-settings-info": "Ӧвӧлтэм луись шрифтъёсты асэрказ инъяно но тупась шрифтъёсты быръёнэз лэзёно.",
 	"ext-uls-webfonts-settings-info-link": "Тросгес ивортодэт",
 	"ext-uls-webfonts-select-for": "$1лы шрифт быръён",
 	"ext-uls-webfonts-select-for-ui-info": "Юзчи интерфейсын уже кутэм шрифт",
@@ -61,7 +62,7 @@
 	"prefs-languages": "Кылъёс",
 	"ext-uls-compact-language-links-preference": "Тӥледлы тупасьёсыныз кылъёсын [[$1|пичи лыдметэз]] уже кутоно.",
 	"ext-uls-compact-no-results": "Тӥледын утчам кылын та бам учконтэм.",
-	"ext-uls-setlang-error": "Умоен лыдъяно кылдэс выльдыку янгыш кылдэм. Янгыш: $1",
+	"ext-uls-setlang-error": "быръем кылэз выльдыку янгыш кылдэм. Янгыш: $1",
 	"ext-uls-setlang-unknown-error": "Тодмотэм янгыш",
 	"ext-uls-setlang-message": "Выжем чӧлсконды куре, интерфейсэз <strong>$1ын ($2)</strong> мед возьматомы шуыса.",
 	"ext-uls-setlang-heading": "Интерфейс кылэз воштоно-а?",

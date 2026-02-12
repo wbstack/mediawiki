@@ -4,11 +4,11 @@ namespace CirrusSearch\Maintenance;
 
 use CirrusSearch\CirrusSearch;
 use Generator;
-use MalformedTitleException;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\ProperPageIdentity;
+use MediaWiki\Title\MalformedTitleException;
+use MediaWiki\Title\Title;
 use SplFileObject;
-use Title;
 
 /**
  * Update the weighted_tags field for a page for a specific tag.
@@ -156,6 +156,7 @@ class UpdateWeightedTags extends Maintenance {
 	private function readLineBatch( SplFileObject $file, bool $useIds ) {
 		$titleParser = MediaWikiServices::getInstance()->getTitleParser();
 		$pageStore = MediaWikiServices::getInstance()->getPageStore();
+		$linkBatchFactory = MediaWikiServices::getInstance()->getLinkBatchFactory();
 		$batchSize = $this->getBatchSize();
 		$identifiers = [];
 		$logNext = true;
@@ -163,10 +164,10 @@ class UpdateWeightedTags extends Maintenance {
 			if ( count( $identifiers ) >= $batchSize || $file->eof() ) {
 				if ( $useIds ) {
 					yield $pageStore->newSelectQueryBuilder()->wherePageIds( $identifiers )
+						->caller( __METHOD__ )
 						->fetchPageRecordArray();
 				} else {
-					$linkBatch = MediaWikiServices::getInstance()->getLinkBatchFactory()
-						->newLinkBatch( $identifiers );
+					$linkBatch = $linkBatchFactory->newLinkBatch( $identifiers );
 					$linkBatch->execute();
 					yield $linkBatch->getPageIdentities();
 				}

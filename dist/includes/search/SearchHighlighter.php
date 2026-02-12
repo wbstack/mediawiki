@@ -23,6 +23,8 @@
 
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\Sanitizer;
+use MediaWiki\Registration\ExtensionRegistry;
 
 /**
  * Highlight bits of wikitext
@@ -36,6 +38,7 @@ class SearchHighlighter {
 	public const DEFAULT_CONTEXT_LINES = 2;
 	public const DEFAULT_CONTEXT_CHARS = 75;
 
+	/** @var bool */
 	protected $mCleanWikitext = true;
 
 	/**
@@ -81,7 +84,7 @@ class SearchHighlighter {
 
 		// @todo FIXME: This should prolly be a hook or something
 		// instead of hardcoding the name of the Cite extension
-		if ( \ExtensionRegistry::getInstance()->isLoaded( 'Cite' ) ) {
+		if ( ExtensionRegistry::getInstance()->isLoaded( 'Cite' ) ) {
 			$spat .= '|(<ref>)'; // references via cite extension
 			$endPatterns[4] = '/(<ref>)|(<\/ref>)/';
 		}
@@ -472,7 +475,7 @@ class SearchHighlighter {
 	/**
 	 * Basic wikitext removal
 	 * @param string $text
-	 * @return mixed
+	 * @return string
 	 */
 	private function removeWiki( $text ) {
 		$text = preg_replace( "/\\{\\{([^|]+?)\\}\\}/", "", $text );
@@ -538,17 +541,14 @@ class SearchHighlighter {
 
 		$terms = implode( '|', $terms );
 		$max = intval( $contextchars ) + 1;
-		$pat1 = "/(.*)($terms)(.{0,$max})/i";
+		$pat1 = "/(.*)($terms)(.{0,$max})/ui";
 
-		$lineno = 0;
-
-		$extract = "";
+		$extract = '';
 		$contLang = MediaWikiServices::getInstance()->getContentLanguage();
 		foreach ( $lines as $line ) {
 			if ( $contextlines == 0 ) {
 				break;
 			}
-			++$lineno;
 			$m = [];
 			if ( !preg_match( $pat1, $line, $m ) ) {
 				continue;
@@ -566,8 +566,8 @@ class SearchHighlighter {
 			$found = $m[2];
 
 			$line = htmlspecialchars( $pre . $found . $post );
-			$pat2 = '/(' . $terms . ")/i";
-			$line = preg_replace( $pat2, "<span class='searchmatch'>\\1</span>", $line );
+			$pat2 = '/(' . $terms . ')/ui';
+			$line = preg_replace( $pat2, '<span class="searchmatch">\1</span>', $line );
 
 			$extract .= "{$line}\n";
 		}

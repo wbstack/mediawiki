@@ -12,7 +12,7 @@
 	"jsonconfig-edit-action-cancel": "Cancellar",
 	"jsonconfig-edit-button-label": "Modificar como tabella",
 	"jsonconfig-edit-dialog-error": "Non pote modificar como tabella: $1",
-	"jsonconfig-edit-dialog-error-data-inavlid": "Le datos non corresponde al schema",
+	"jsonconfig-edit-dialog-error-data-invalid": "Le datos non corresponde al schema",
 	"jsonconfig-edit-dialog-error-data-missing": "Le proprietate JSON <code>data</code> manca o non es un matrice",
 	"jsonconfig-edit-dialog-error-data-too-large": "Le insimul de datos es troppo grande pro esser modificate como tabella",
 	"jsonconfig-edit-dialog-error-field-name-missing": "Cata campo debe haber un nomine",
@@ -48,6 +48,8 @@
 	"jsonconfig-type-name-localized": "localisate",
 	"jsonconfig-type-name-number": "numero",
 	"jsonconfig-type-name-boolean": "booleano",
+	"jsonconfig-use-category": "Paginas que usa le extension JsonConfig",
+	"jsonconfig-use-category-desc": "Iste paginas usa le extension <code>mw.ext.data.get</code> method provided by the [[:mw:Extension:JsonConfig|JsonConfig]]. Le methodo <code>mw.ext.data.get</code> se considera costose.",
 	"jsonconfig-license": "Datos disponibile sub $1.",
 	"jsonconfig-license-not-set": "Quando tu modifica iste pagina, tu accepta de liberar tu contribution sub le licentia specificate in le campo <code>licence</code>.",
 	"jsonconfig-license-name-CC0-1.0": "Creative Commons Zero",
@@ -55,10 +57,11 @@
 	"jsonconfig-license-name-dl-de-by-1.0": "Licentia de datos Germania – attribution – Version 1.0",
 	"jsonconfig-license-name-dl-de-by-2.0": "Licentia de datos Germania – attribution – version 2.0",
 	"jsonconfig-license-name-GeoNutzV": "Licentia Geo Data Germania",
-	"jsonconfig-license-copyrightwarning": "Salveguardante le modificationes, tu accepta le [https://foundation.wikimedia.org/wiki/Terms_of_Use conditiones de uso] e tu accepta irrevocabilemente de liberar tu contribution sub [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
-	"jsonconfig-license-copyrightwarning-license-unset": "Salveguardante le modificationes, tu accepta le [https://foundation.wikimedia.org/wiki/Terms_of_Use conditiones de uso] e tu accepta irrevocabilemente de liberar tu contribution sub le licentia specificate in le campo <code>licence</code>.",
-	"jsonconfig-license-notice": "'''Nota:''' Quando tu modifica iste pagina, tu accepta de liberar tu contribution sub [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning": "Publicante le modificationes, tu accepta de liberar tu contribution secundo le terminos del licentia [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning-license-unset": "Publicante le modificationes, tu accepta de liberar tu contribution sub le licentia specificate in le campo <code>licence</code>.",
+	"jsonconfig-license-notice": "'''Nota:''' Quando tu modifica iste pagina, tu accepta de liberar tu contribution secundo le terminos del licentia [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
 	"jsonconfig-license-notice-license-unset": "'''Nota:''' Quando tu modifica iste pagina, tu accepta de liberar tu contribution sub le licentia specificate in le campo <code>licence</code>.",
 	"right-jsonconfig-flush": "Manipular JsonConfig per API",
-	"action-jsonconfig-flush": "manipular JsonConfig per API"
+	"action-jsonconfig-flush": "manipular JsonConfig per API",
+	"jsonconfig-blocked-page-creation": "Le titulo de pagina que tu ha specificate non corresponde a alcun del patronos configurate pro le extension JSONConfig pro iste wiki."
 }

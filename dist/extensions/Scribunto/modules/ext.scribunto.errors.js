@@ -1,41 +1,42 @@
-( function () {
+( () => {
 
-	mw.hook( 'wikipage.content' ).add( function () {
-		var errors = mw.config.get( 'ScribuntoErrors' ),
-			regex = /^mw-scribunto-error-(\d+)/,
-			$dialog = $( '<div>' );
+	mw.hook( 'wikipage.content' ).add( () => {
+		const regex = /\bmw-scribunto-error-(\w+)\b/;
+		let popup;
 
-		if ( !errors ) {
-			mw.log( 'mw.scribunto.errors: ScribuntoErrors does not exist in mw.config' );
-			errors = [];
-		}
-
-		$dialog.dialog( {
-			title: mw.msg( 'scribunto-parser-dialog-title' ),
-			autoOpen: false
-		} );
-
-		$( '.scribunto-error' ).each( function ( index, span ) {
-			var errorId,
+		$( '.scribunto-error' ).each( ( index, span ) => {
+			let matches = regex.exec( span.className );
+			if ( matches === null ) {
+				// T375539: backward-compatibility with old cached HTML
 				matches = regex.exec( span.id );
+			}
 			if ( matches === null ) {
 				mw.log( 'mw.scribunto.errors: regex mismatch!' );
 				return;
 			}
-			errorId = parseInt( matches[ 1 ], 10 );
-			$( span ).on( 'click', function ( e ) {
-				var error = errors[ errorId ];
+			const $span = $( span );
+			$span.on( 'click', () => {
+				const error = mw.config.get( 'ScribuntoErrors-' + matches[ 1 ] );
 				if ( typeof error !== 'string' ) {
 					mw.log( 'mw.scribunto.errors: error ' + matches[ 1 ] + ' not found.' );
 					return;
 				}
-				$dialog
-					.dialog( 'close' )
-					.html( error )
-					.dialog( 'option', 'position', [ e.clientX + 5, e.clientY + 5 ] )
-					.dialog( 'open' );
+
+				if ( !popup ) {
+					popup = new OO.ui.PopupWidget( {
+						padded: true,
+						head: true,
+						label: $( '<div>' )
+							.text( mw.msg( 'scribunto-parser-dialog-title' ) )
+							.addClass( 'scribunto-error-label' )
+					} );
+					OO.ui.getDefaultOverlay().append( popup.$element );
+				}
+				popup.$body.html( error );
+				popup.setFloatableContainer( $span );
+				popup.toggle( true );
 			} );
 		} );
 	} );
 
-}() );
+} )();

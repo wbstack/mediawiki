@@ -4,6 +4,7 @@ namespace WBStack\Internal;
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserFactory;
+use MediaWiki\Revision\SlotRecord;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -23,6 +24,7 @@ class ApiWbStackInit extends \ApiBase {
     public function execute() {
         $this->executeWikiUser();
         WbStackPlatformReservedUser::createIfNotExists();
+        $this->initMainPage();
     }
     public function executeWikiUser() {
         $username = $this->getParameter('username');
@@ -73,14 +75,17 @@ class ApiWbStackInit extends \ApiBase {
             $user->saveSettings();
         }
 
-        // Add groups to the user
+        // Add user to groups
         $promotions = [
             'sysop',
             'bureaucrat',
             //'interface-admin',
             //'bot'
         ];
-        array_map( [ $user, 'addGroup' ], $promotions );
+        $userGroupManager = $services->getUserGroupManager();
+        foreach ($promotions as $group) {
+            $userGroupManager->addUserToGroup($user, $group, null, true);
+        }
 
         // Send a password reset email (If password not specified)
         $sendResetPasswordEmail = $email && !$password;
@@ -137,5 +142,21 @@ class ApiWbStackInit extends \ApiBase {
                 ParamValidator::PARAM_REQUIRED => false
             ],
         ];
+    }
+
+    static public function initMainPage() {
+        $user = WbStackPlatformReservedUser::getUser();
+        $comment = \CommentStoreComment::newUnsavedComment( '(automated) add default content' );
+
+		$title = \Title::newMainPage();
+        $page = new \WikiPage( $title );
+        $text = ApiWbStackInitMainPage::TEXT;
+
+        $content = \ContentHandler::makeContent( $text, $title );
+
+		$updater = $page->newPageUpdater( $user );
+        $updater->setContent( SlotRecord::MAIN, $content );
+        $updater->setRcPatrolStatus( \RecentChange::PRC_PATROLLED );
+        $updater->saveRevision( $comment, EDIT_NEW | EDIT_FORCE_BOT );
     }
 }

@@ -1,8 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"Kareyac"
+			"Bashkorttan",
+			"Kareyac",
+			"З. ӘЙЛЕ"
 		]
 	},
-	"score-page": "Бит $1"
+	"score-page": "$1 бит",
+	"score-visualeditor-mwscoredialog-title": "Нота яҙмаһы",
+	"datatypes-type-musical-notation": "Нота яҙмаһы",
+	"wikibase-listdatatypes-musical-notation-head": "Нота яҙмаһы"
 }

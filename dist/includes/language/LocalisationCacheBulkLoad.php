@@ -28,8 +28,9 @@
 class LocalisationCacheBulkLoad extends LocalisationCache {
 
 	/**
-	 * A cache of the contents of data files.
-	 * Core files are serialized to avoid using ~1GB of RAM during a recache.
+	 * A cache for the contents of the data files.
+	 * Core files are serialized to avoid using ~1GB of RAM during a re-cache.
+	 * @var string[][]
 	 */
 	private $fileCache = [];
 
@@ -37,11 +38,13 @@ class LocalisationCacheBulkLoad extends LocalisationCache {
 	 * Most recently used languages. Uses the linked-list aspect of PHP hashtables
 	 * to keep the most recently used language codes at the end of the array, and
 	 * the language codes that are ready to be deleted at the beginning.
+	 * @var array<string,true>
 	 */
 	private $mruLangs = [];
 
 	/**
 	 * Maximum number of languages that may be loaded into $this->data
+	 * @var int
 	 */
 	private $maxLoadedLangs = 10;
 
@@ -119,8 +122,7 @@ class LocalisationCacheBulkLoad extends LocalisationCache {
 	 */
 	protected function trimCache() {
 		while ( count( $this->data ) > $this->maxLoadedLangs && count( $this->mruLangs ) ) {
-			reset( $this->mruLangs );
-			$code = key( $this->mruLangs );
+			$code = array_key_first( $this->mruLangs );
 			wfDebug( __METHOD__ . ": unloading $code" );
 			$this->unload( $code );
 		}

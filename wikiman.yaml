@@ -1,6 +1,6 @@
 ---
-mediawikiVersion: "1.39"
-mediawikiRepoRef: 2fdadd4096268cebab8fbc2f245dd441e2f05536
+mediawikiVersion: "1.43"
+#mediawikiRepoRef: commit hash goes here
 mediawikiRemove:
   - docs
   - extensions/README
@@ -92,8 +92,6 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-SecureLinkFixer
   - name: Echo
     repoName: wikimedia/mediawiki-extensions-Echo
-  - name: Graph
-    repoName: wikimedia/mediawiki-extensions-Graph
   - name: Poem
     repoName: wikimedia/mediawiki-extensions-Poem
   - name: TemplateData
@@ -108,8 +106,6 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-DeleteBatch
   - name: MultimediaViewer
     repoName: wikimedia/mediawiki-extensions-MultimediaViewer
-  - name: Auth_remoteuser
-    repoName: wikimedia/mediawiki-extensions-Auth_remoteuser
   - name: WikibaseManifest
     repoName: wikimedia/mediawiki-extensions-WikibaseManifest
     remove:
@@ -120,13 +116,15 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-TextExtracts
   - name: EntitySchema
     repoName: wikimedia/mediawiki-extensions-EntitySchema
+
+    # Uses this fork now https://www.mediawiki.org/wiki/Extension:EmbedVideo_(fork)
+  - name: EmbedVideo
+    repoName: StarCitizenWiki/mediawiki-extensions-EmbedVideo
+
   ## These extensions should not currently use the mediawikiVersion
   - name: WikibaseInWikitext
     repoName: wbstack/mediawiki-extensions-WikibaseInWikitext
     repoRef: 445c7efaa145fa7c31b0caca7400ef6a87cac7d9
-  - name: WikibaseExampleData
-    repoName: wmde/WikibaseExampleData
-    repoRef: c129f0b759bf4602aa9b09e2bb9b694682784320
   - name: WikibaseEdtf
     repoName: ProfessionalWiki/WikibaseEdtf
     repoRef: "1.2.0"
@@ -134,10 +132,8 @@ extensions:
     repoName: nyurik/ThatSrc
     repoRef: 3e039311504eb82f8c5c488a457b9e376b5cf7e3
   ## These extensions use urls directly
-  # Using our own archive repo temporarily for our Federated Properties endeavour
-  # discussion: https://github.com/wbstack/mediawiki/pull/155
   - name: Wikibase
-    url: https://github.com/wbstack/mediawiki-tars/raw/f5be8c3e515b6c3445fdbdd6a8153ae157470250/wikibase-1679416210-REL1_39.tar.gz
+    url: https://github.com/wbstack/mediawiki-tars/raw/ae333245e6fd22b888a925f088ac5637c6f9b6c1/Wikibase-1761224062-REL1_43.tar.gz
     remove:
       - build
       - vendor
@@ -167,11 +163,8 @@ extensions:
   # A subsequent patch, only available in REL1_40, appears to removes this dependency again (https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/commit/5e3aab6e8be0e8effa97f9b454020230b6a70e3d)
   - name: StopForumSpam
     url: https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/archive/5e3aab6e8be0e8effa97f9b454020230b6a70e3d.zip
-  # EmbedVideo is currently broken in releases due to deprecated warnings https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/issues/4784
-  # There was a MR up for fixing that https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/merge_requests/148 so lets directly use that commit?
-  # We were using v2.9.0 before this
-  - name: EmbedVideo
-    url: https://gitlab.com/jmnote/EmbedVideo/-/archive/e1e965527e19a00de34e534f87d6b7cdae8b262f/EmbedVideo-e1e965527e19a00de34e534f87d6b7cdae8b262f.zip
+  - name: VisualEditor
+    url: https://github.com/wbstack/mediawiki-tars/raw/75bedb27afda71878d19f62fc5d96e5c3481cd43/VisualEditor-1761224161-REL1_43.tar.gz
 
 skins:
   - name: Vector

@@ -1,8 +1,6 @@
 <?php
 /** Abkhazian (аԥсшәа)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -71,7 +69,7 @@ $specialPageAliases = [
 /** @phpcs-require-sorted-array */
 $magicWords = [
 	'index'                     => [ '1', '__АИНДЕКС__', '__ИНДЕКС__', '__INDEX__' ],
-	'language'                  => [ '0', '#АБЫЗШӘА:', '#ЯЗЫК:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#АБЫЗШӘА', '#ЯЗЫК', '#LANGUAGE' ],
 	'special'                   => [ '0', 'цастәи', 'служебная', 'special' ],
 ];
 

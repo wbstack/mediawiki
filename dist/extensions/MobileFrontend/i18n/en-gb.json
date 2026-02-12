@@ -10,13 +10,17 @@
 			"Chase me ladies, I'm the Cavalry",
 			"Jagwar",
 			"Macofe",
+			"Mako001",
 			"Mvolz",
+			"Nikki",
+			"Reedy",
 			"Robin Owain",
+			"Satdeep gill",
 			"Shirayuki"
 		]
 	},
-	"mobile-frontend-editor-licensing": "By saving changes, you agree to release your contribution under the $1 {{PLURAL:$2|licence|licences}}.",
-	"mobile-frontend-editor-licensing-with-terms": "By saving changes, you agree to the $1 and agree to release your contribution under the $2 {{PLURAL:$3|licence|licences}}.",
-	"mobile-frontend-last-modified-date": "Last modified on $1, at $2",
-	"mobile-frontend-media-license-link": "Licence information"
+	"mobile-frontend-editor-licensing": "By publishing changes, you agree to release your contribution under the $1 {{PLURAL:$2|licence|licences}}.",
+	"mobile-frontend-editor-licensing-with-terms": "By publishing changes, you agree to the $1 and agree to release your contribution under the $2 {{PLURAL:$3|licence|licences}}.",
+	"mobile-frontend-media-license-link": "Licence information",
+	"mobile-frontend-special-pages-pref": "Optimise and simplify special pages when on mobile (recommended)"
 }

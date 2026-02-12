@@ -31,9 +31,6 @@ use MediaWiki\MainConfigNames;
  * @internal
  */
 class SiteModule extends WikiModule {
-	/** @var string[] What client platforms the module targets (e.g. desktop, mobile) */
-	protected $targets = [ 'desktop', 'mobile' ];
-
 	/**
 	 * Get list of pages used by this module
 	 *
@@ -55,10 +52,7 @@ class SiteModule extends WikiModule {
 	 * @param Context|null $context
 	 * @return array
 	 */
-	public function getDependencies( Context $context = null ) {
+	public function getDependencies( ?Context $context = null ) {
 		return [ 'site.styles' ];
 	}
 }
-
-/** @deprecated since 1.39 */
-class_alias( SiteModule::class, 'ResourceLoaderSiteModule' );

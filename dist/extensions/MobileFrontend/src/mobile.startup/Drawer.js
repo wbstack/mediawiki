@@ -1,14 +1,13 @@
-var
+const
 	mfExtend = require( './mfExtend' ),
 	View = require( './View' ),
 	util = require( './util' ),
-	Icon = require( './Icon' );
+	IconButton = require( './IconButton' );
 
 /**
- * A {@link View} that pops up from the bottom of the screen.
- *
- * @class Drawer
- * @extends View
+ * @classdesc A {@link View} that pops up from the bottom of the screen.
+ * @class module:mobile.startup/Drawer
+ * @extends module:mobile.startup/View
  * @final
  * @param {Object} props
  * @param {string} [props.className] Additional CSS classes to add
@@ -19,9 +18,10 @@ var
  */
 function Drawer( props ) {
 	this.drawerClassName = props.className || '';
-	this.collapseIcon = new Icon( {
-		name: 'expand',
-		additionalClassNames: 'cancel'
+	this.collapseIcon = new IconButton( {
+		icon: 'expand',
+		additionalClassNames: 'cancel',
+		label: mw.msg( 'mobile-frontend-drawer-arrow-label' )
 	} );
 	View.call( this,
 		util.extend(
@@ -41,7 +41,7 @@ function Drawer( props ) {
 					ev.preventDefault();
 					this.hide();
 				}.bind( this ),
-				click: function ( ev ) {
+				click( ev ) {
 					ev.stopPropagation();
 				}
 			}, props.events ) }
@@ -50,36 +50,32 @@ function Drawer( props ) {
 }
 
 mfExtend( Drawer, View, {
-	// in milliseconds
-	minHideDelay: 100,
+	$mask: null,
 
 	/**
 	 * Shows panel after a slight delay
 	 *
-	 * @memberof View
+	 * @memberof module:mobile.startup/Drawer
 	 * @instance
 	 * @method
 	 * @return {jQuery.Promise}
 	 */
-	show: function () {
+	show() {
 		const d = util.Deferred();
-		this.$el.find( '.drawer-container__mask' )
-			.addClass( 'drawer-container__mask--visible' );
-		if ( !this.$el.find( '.drawer' ).hasClass( 'visible' ) ) {
-			// use setTimeout to allow the browser to redraw if render() was called
-			// just before show(); this is important for animations to work
-			// (0ms doesn't work on Firefox, 10ms is enough)
-			//
-			// FIXME: setTimeout should be reconsidered in T209129
-			setTimeout( function () {
-				this.$el.find( '.drawer' ).addClass( 'visible' );
-				if ( this.options.onShow ) {
-					this.options.onShow( d );
-				}
-				setTimeout( function () {
-					d.resolve();
-				}, this.minHideDelay );
-			}.bind( this ), this.minHideDelay );
+		this.$el.prepend( this.$mask );
+		// Force redraw by asking the browser to measure the element's width
+		this.$el.width();
+		const $drawer = this.$el.find( '.drawer' );
+		this.$mask.addClass( 'drawer-container__mask--visible' );
+		if ( !$drawer.hasClass( 'visible' ) ) {
+			$drawer.addClass( 'visible' );
+			// IntersectionObserver doesn't fire for content
+			// in drawers, so trigger manually (T361212)
+			mw.hook( 'mobileFrontend.loadLazyImages' ).fire( this.$el );
+			if ( this.options.onShow ) {
+				this.options.onShow( d );
+			}
+			requestAnimationFrame( () => d.resolve() );
 		} else {
 			d.resolve();
 		}
@@ -89,32 +85,35 @@ mfExtend( Drawer, View, {
 	/**
 	 * Hides panel
 	 *
-	 * @memberof View
+	 * @memberof module:mobile.startup/Drawer
 	 * @instance
 	 */
-	hide: function () {
-		this.$el.find( '.drawer-container__mask' )
-			.removeClass( 'drawer-container__mask--visible' );
-		this.$el.find( '.drawer' ).removeClass( 'visible' );
-		// see comment in show()
-		setTimeout( function () {
-			this.$el.find( '.drawer' ).removeClass( 'visible' );
+	hide() {
+		const $drawer = this.$el.find( '.drawer' );
+		$drawer.removeClass( 'visible' );
+		this.$mask.removeClass( 'drawer-container__mask--visible' );
+		// Should really use 'transitionend' event here, but as the
+		// parent $drawer element is often detatched as well, this
+		// might not fire until the next show animation.
+		setTimeout( () => {
+			this.$mask.detach();
+		}, 100 );
+		requestAnimationFrame( () => {
 			this.options.onBeforeHide( this );
-		}.bind( this ), this.minHideDelay );
+		} );
 	},
 
 	/**
 	 * @inheritdoc
-	 * @memberof Drawer
+	 * @memberof module:mobile.startup/Drawer
 	 * @instance
 	 */
-	postRender: function () {
+	postRender() {
+		this.$mask = util.parseHTML( '<div>' ).addClass( 'drawer-container__mask' );
 		const props = this.options,
-			$mask = util.parseHTML( '<div>' )
-				.addClass( 'drawer-container__mask' ),
 			// eslint-disable-next-line mediawiki/class-doc
 			$drawer = util.parseHTML( '<div>' )
-				.addClass( `drawer drawer-container__drawer position-fixed ${this.drawerClassName}`.trim() );
+				.addClass( `drawer drawer-container__drawer position-fixed ${ this.drawerClassName }`.trim() );
 
 		if ( props.showCollapseIcon ) {
 			// append the collapse icon at the top of the drawer
@@ -125,7 +124,6 @@ mfExtend( Drawer, View, {
 			// append children
 			$drawer.append( props.children );
 		}
-		this.$el.append( $mask );
 		this.$el.append( $drawer );
 	}
 } );

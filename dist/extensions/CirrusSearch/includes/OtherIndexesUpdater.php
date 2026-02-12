@@ -5,7 +5,7 @@ namespace CirrusSearch;
 use Elastica\Multi\ResultSet;
 use Elastica\Multi\Search as MultiSearch;
 use MediaWiki\Logger\LoggerFactory;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * Tracks whether a Title is known on other indexes.
@@ -151,25 +151,34 @@ class OtherIndexesUpdater extends Updater {
 		}
 	}
 
-	protected function runUpdates( Title $title, array $updates ) {
+	/**
+	 * @param Title $title
+	 * @param array $updates
+	 * @return void
+	 */
+	protected function runUpdates( Title $title, array $updates ): void {
 		// These are split into a job per index because the external indexes
 		// may be configured to write to different clusters. This maintains
 		// isolation of writes between clusters so one slow cluster doesn't
 		// drag down the others.
 		foreach ( $updates as [ $otherIndex, $actions ] ) {
-			$this->pushElasticaWriteJobs( $actions, function ( array $chunk, ClusterSettings $cluster ) use ( $otherIndex ) {
-				// Name of the index to write to on whatever cluster is connected to
-				$indexName = $otherIndex->getIndexName();
-				// Index name and, potentially, a replica group identifier. Needed to
-				// create an appropriate ExternalIndex instance in the job.
-				$externalIndex = $otherIndex->getGroupAndIndexName();
-				return Job\ElasticaWrite::build(
-					$cluster,
-					'sendOtherIndexUpdates',
-					[ $this->localSite, $indexName, $chunk ],
-					[ 'external-index' => $externalIndex ]
-				);
-			} );
+			$this->pushElasticaWriteJobs(
+				UpdateGroup::PAGE,
+				$actions,
+				function ( array $chunk, ClusterSettings $cluster ) use ( $otherIndex ) {
+					// Name of the index to write to on whatever cluster is connected to
+					$indexName = $otherIndex->getIndexName();
+					// Index name and, potentially, a replica group identifier. Needed to
+					// create an appropriate ExternalIndex instance in the job.
+					$externalIndex = $otherIndex->getGroupAndIndexName();
+					return Job\ElasticaWrite::build(
+						$cluster,
+						UpdateGroup::PAGE,
+						'sendOtherIndexUpdates',
+						[ $this->localSite, $indexName, $chunk ],
+						[ 'external-index' => $externalIndex ],
+					);
+				} );
 		}
 	}
 

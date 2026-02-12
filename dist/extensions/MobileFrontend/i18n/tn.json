@@ -1,15 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
-			"Rebelagent"
+			"Rebelagent",
+			"Sekhomba"
 		]
 	},
 	"mobile-frontend-clear-search": "Sutlha",
+	"mobile-frontend-copyright": "Tshedimosetso e teng ka fa tlase ga $1 ntle le fa go supilwe ka tsela e nngwe.",
 	"mobile-frontend-editor-blocked-drawer-action-login": "Tsena",
 	"mobile-frontend-editor-blocked-drawer-reason-header": "Lebaka",
 	"mobile-frontend-editor-summary": "Tshoboko",
-	"mobile-frontend-languages-header": "Diteme",
-	"mobile-frontend-languages-header-page": "$1 - Diteme tse dingwe",
 	"mobile-frontend-terms-text": "Melawana ya Tiriso",
 	"mobile-frontend-view": "Tebego ya mogala wa letlheka",
 	"mobile-frontend-view-desktop": "Kompotara",

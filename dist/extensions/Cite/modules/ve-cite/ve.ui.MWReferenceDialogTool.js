@@ -1,3 +1,5 @@
+'use strict';
+
 /*!
  * VisualEditor MediaWiki Reference dialog tool classes.
  *
@@ -8,9 +10,8 @@
 /**
  * MediaWiki UserInterface reference tool.
  *
- * @class
- * @extends ve.ui.FragmentWindowTool
  * @constructor
+ * @extends ve.ui.FragmentWindowTool
  * @param {OO.ui.ToolGroup} toolGroup
  * @param {Object} [config] Configuration options
  */
@@ -39,9 +40,8 @@ ve.ui.toolFactory.register( ve.ui.MWReferenceDialogTool );
 /**
  * MediaWiki UserInterface use existing reference tool.
  *
- * @class
- * @extends ve.ui.WindowTool
  * @constructor
+ * @extends ve.ui.WindowTool
  * @param {OO.ui.ToolGroup} toolGroup
  * @param {Object} [config] Configuration options
  */
@@ -51,7 +51,7 @@ ve.ui.MWUseExistingReferenceDialogTool = function VeUiMWUseExistingReferenceDial
 OO.inheritClass( ve.ui.MWUseExistingReferenceDialogTool, ve.ui.WindowTool );
 ve.ui.MWUseExistingReferenceDialogTool.static.name = 'reference/existing';
 ve.ui.MWUseExistingReferenceDialogTool.static.group = 'object';
-ve.ui.MWUseExistingReferenceDialogTool.static.icon = 'reference-existing';
+ve.ui.MWUseExistingReferenceDialogTool.static.icon = 'referenceExisting';
 if ( mw.config.get( 'wgCiteVisualEditorOtherGroup' ) ) {
 	ve.ui.MWUseExistingReferenceDialogTool.static.title = OO.ui.deferMsg(
 		'cite-ve-othergroup-item',
@@ -91,12 +91,13 @@ ve.ui.commandHelpRegistry.register( 'insert', 'ref', {
 
 ve.ui.mwWikitextTransferRegistry.register( 'reference', /<ref[^>]*>/ );
 
+ve.ui.HelpCompletionAction.static.toolGroups.cite = { mergeWith: 'insert' };
+
 /**
  * MediaWiki UserInterface references list tool.
  *
- * @class
- * @extends ve.ui.FragmentWindowTool
  * @constructor
+ * @extends ve.ui.FragmentWindowTool
  * @param {OO.ui.ToolGroup} toolGroup
  * @param {Object} [config] Configuration options
  */

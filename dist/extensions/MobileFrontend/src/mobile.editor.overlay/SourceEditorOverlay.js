@@ -1,14 +1,15 @@
-var EditorOverlayBase = require( './EditorOverlayBase' ),
+const EditorOverlayBase = require( './EditorOverlayBase' ),
 	util = require( '../mobile.startup/util' ),
 	icons = require( '../mobile.startup/icons' ),
 	Section = require( '../mobile.startup/Section' ),
 	saveFailureMessage = require( './saveFailureMessage' ),
 	EditorGateway = require( './EditorGateway' ),
 	fakeToolbar = require( '../mobile.init/fakeToolbar' ),
+	MessageBox = require( '../mobile.startup/MessageBox' ),
 	mfExtend = require( '../mobile.startup/mfExtend' ),
-	toast = require( '../mobile.startup/showOnPageReload' ),
 	setPreferredEditor = require( './setPreferredEditor' ),
-	VisualEditorOverlay = require( './VisualEditorOverlay' );
+	VisualEditorOverlay = require( './VisualEditorOverlay' ),
+	currentPage = require( '../mobile.startup/currentPage' );
 
 /**
  * Overlay that shows an editor
@@ -18,26 +19,27 @@ var EditorOverlayBase = require( './EditorOverlayBase' ),
  * @uses EditorGateway
  * @uses VisualEditorOverlay
  * @extends EditorOverlayBase
+ * @private
  *
  * @param {Object} options Configuration options
- * @param {Object} [options.visualEditorConfig] falls back to wgVisualEditorConfig if not defined
  * @param {jQuery.Promise} [dataPromise] Optional promise for loading content
  */
 function SourceEditorOverlay( options, dataPromise ) {
 	this.isFirefox = /firefox/i.test( window.navigator.userAgent );
-	this.visualEditorConfig = options.visualEditorConfig ||
-		mw.config.get( 'wgVisualEditorConfig' ) || {};
 	this.gateway = new EditorGateway( {
 		api: options.api,
 		title: options.title,
 		sectionId: options.sectionId,
 		oldId: options.oldId,
-		isNewPage: options.isNewPage,
-		fromModified: !!dataPromise
+		fromModified: !!dataPromise,
+		preload: options.preload,
+		preloadparams: options.preloadparams,
+		editintro: options.editintro
 	} );
 	this.readOnly = !!options.oldId; // If old revision, readOnly mode
 	this.dataPromise = dataPromise || this.gateway.getContent();
-	if ( this.isVisualEditorEnabled() ) {
+	this.currentPage = currentPage();
+	if ( this.currentPage.isVEVisualAvailable() ) {
 		options.editSwitcher = true;
 	}
 	if ( this.readOnly ) {
@@ -66,7 +68,7 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 		content: util.template( `
 <div lang="{{contentLang}}" dir="{{contentDir}}" class="editor-container content">
 	<textarea class="wikitext-editor" id="wikitext-editor" cols="40" rows="10" placeholder="{{placeholder}}"></textarea>
-	<div class="preview"></div>
+	<div class="preview collapsible-headings-expanded mw-body-content"></div>
 </div>
 		` )
 	} ),
@@ -90,24 +92,6 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 		EditorOverlayBase.prototype.show.apply( this, arguments );
 		// Ensure we do this after showing the overlay, otherwise it doesn't work.
 		this._resizeEditor();
-	},
-	/**
-	 * Check whether VisualEditor is enabled or not.
-	 *
-	 * @memberof SourceEditorOverlay
-	 * @instance
-	 * @return {boolean}
-	 */
-	isVisualEditorEnabled: function () {
-		var config = this.visualEditorConfig,
-			ns = config.namespaces;
-
-		return ns &&
-			ns.indexOf(
-				mw.config.get( 'wgNamespaceNumber' )
-			) > -1 &&
-			mw.config.get( 'wgTranslatePageTranslation' ) !== 'translation' &&
-			mw.config.get( 'wgPageContentModel' ) === 'wikitext';
 	},
 	/**
 	 * Wikitext Editor input handler
@@ -134,48 +118,30 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 	 * @instance
 	 */
 	postRender: function () {
-		var self = this,
-			config = this.visualEditorConfig,
-			options = this.options,
-			showAnonWarning = options.isAnon && !options.switched;
+		const self = this;
 
 		// log edit attempt
 		this.log( { action: 'ready' } );
 		this.log( { action: 'loaded' } );
 
-		if ( this.isVisualEditorEnabled() ) {
+		if ( this.currentPage.isVEVisualAvailable() ) {
 			mw.loader.using( 'ext.visualEditor.switching' ).then( function () {
-				var switchToolbar, windowManager, switchWindow,
-					toolFactory = new OO.ui.ToolFactory(),
+				const toolFactory = new OO.ui.ToolFactory(),
 					toolGroupFactory = new OO.ui.ToolGroupFactory();
 
 				toolFactory.register( mw.libs.ve.MWEditModeVisualTool );
 				toolFactory.register( mw.libs.ve.MWEditModeSourceTool );
-				switchToolbar = new OO.ui.Toolbar( toolFactory, toolGroupFactory, {
+				const switchToolbar = new OO.ui.Toolbar( toolFactory, toolGroupFactory, {
 					classes: [ 'editor-switcher' ]
 				} );
 
 				switchToolbar.on( 'switchEditor', function ( mode ) {
-					var
-						canSwitch = config.fullRestbaseUrl || config.allowLossySwitching;
 					if ( mode === 'visual' ) {
 						if ( !self.gateway.hasChanged ) {
 							self._switchToVisualEditor();
-						} else if ( canSwitch ) {
+						} else {
 							// Pass wikitext if there are changes.
 							self._switchToVisualEditor( self.gateway.content );
-						} else {
-							windowManager = new OO.ui.WindowManager();
-							switchWindow = new mw.libs.ve.SwitchConfirmDialog();
-							windowManager.$element.appendTo( document.body );
-							windowManager.addWindows( [ switchWindow ] );
-							windowManager.openWindow( switchWindow, { mode: 'simple' } )
-								.closed.then( function ( data ) {
-									if ( data && data.action === 'discard' ) {
-										self._switchToVisualEditor();
-									}
-									windowManager.destroy();
-								} );
 						}
 					}
 				} );
@@ -208,15 +174,7 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 		// * mw-editfont-sans-serif
 		// * mw-editfont-serif
 		this.$content.addClass( 'mw-editfont-' + mw.user.options.get( 'editfont' ) );
-		if ( showAnonWarning ) {
-			this.$anonWarning = this.createAnonWarning( options );
-			this.$anonTalkWarning = this.createAnonTalkWarning();
-			this.$el.find( '.editor-container' ).append( [ this.$anonTalkWarning, this.$anonWarning ] );
-			this.$content.hide();
-			// the user has to click login, signup or edit without login,
-			// disable "Next" button on top right
-			this.$anonHiddenButtons = this.$el.find( '.overlay-header .continue, .editor-switcher' ).hide();
-		}
+
 		// make license links open in separate tabs
 		this.$el.find( '.license a' ).attr( 'target', '_blank' );
 
@@ -241,7 +199,7 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 				// The page will still flicker every time the user touches
 				// to place the cursor, but this is better than completely
 				// losing your scroll offset. (T214880)
-				var docEl = document.documentElement,
+				const docEl = document.documentElement,
 					scrollTop = docEl.scrollTop;
 				function blockScroll() {
 					docEl.scrollTop = scrollTop;
@@ -253,9 +211,18 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 			} );
 		}
 
-		if ( !showAnonWarning ) {
-			this._loadContent();
-		}
+		// Render edit summary
+		this.summaryTextArea = new OO.ui.MultilineTextInputWidget( {
+			placeholder: this.options.summaryMsg,
+			classes: [ 'summary' ],
+			value: '',
+			maxRows: 2
+		} );
+		this.$el.find( '.summary-input' ).append(
+			this.summaryTextArea.$element
+		);
+
+		this._loadContent();
 	},
 
 	/**
@@ -270,7 +237,8 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 		this.$anonTalkWarning.hide();
 		// reenable "Next" button
 		this.$anonHiddenButtons.show();
-		this._loadContent();
+		this.$content.show();
+		this._resizeEditor();
 	},
 
 	/**
@@ -281,7 +249,7 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 	 * @instance
 	 */
 	onStageChanges: function () {
-		var self = this,
+		const self = this,
 			params = {
 				text: this.getContent()
 			};
@@ -301,7 +269,7 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 		}
 
 		this.gateway.getPreview( params ).then( function ( result ) {
-			var parsedText = result.text,
+			const parsedText = result.text,
 				parsedSectionLine = result.line;
 
 			self.sectionId = result.id;
@@ -314,10 +282,12 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 
 			hideSpinnerAndShowPreview();
 		}, function () {
-			self.$preview.addClass(
-				'mw-message-box mw-message-box-error'
-			).text( mw.msg( 'mobile-frontend-editor-error-preview' ) );
-
+			self.$preview.replaceWith(
+				new MessageBox( {
+					type: 'error',
+					msg: mw.msg( 'mobile-frontend-editor-error-preview' )
+				} ).$el
+			);
 			hideSpinnerAndShowPreview();
 		} );
 
@@ -334,8 +304,9 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 	_hidePreview: function () {
 		this.gateway.abortPreview();
 		this.hideSpinner();
+		// FIXME: Don't rely on internals - we re-render template instead.
 		this.$preview.removeClass(
-			'mw-message-box-error'
+			'cdx-message--error'
 		).hide();
 		this.$content.show();
 		window.scrollTo( 0, this.scrollTop );
@@ -349,7 +320,7 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 	 * @instance
 	 */
 	_resizeEditor: function () {
-		var scrollTop, container, $scrollContainer;
+		let scrollTop, container, $scrollContainer;
 
 		if ( !this.$scrollContainer ) {
 			container = OO.ui.Element.static
@@ -408,20 +379,40 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 	 * @private
 	 */
 	_loadContent: function () {
-		var self = this;
+		const self = this;
 
 		this.$content.hide();
 
 		this.getLoadingPromise()
 			.then( function ( result ) {
-				var content = result.text;
+				const content = result.text;
 
 				self.setContent( content );
+
+				// If the loaded content is not the default content, enable the save button
+				if ( self.hasChanged() ) {
+					self.$el.find( '.continue, .submit' ).prop( 'disabled', false );
+				}
+
+				const options = self.options;
+				const showAnonWarning = options.isAnon && !options.switched;
+
+				if ( showAnonWarning ) {
+					self.$anonWarning = self.createAnonWarning( options );
+					self.$anonTalkWarning = self.createAnonTalkWarning();
+					self.$el.find( '.editor-container' ).append( [ self.$anonTalkWarning, self.$anonWarning ] );
+					self.$content.hide();
+					// the user has to click login, signup or edit without login,
+					// disable "Next" button on top right
+					self.$anonHiddenButtons = self.$el.find( '.overlay-header .continue' ).hide();
+				}
 
 				if ( self.gateway.fromModified ) {
 					// Trigger intial EditorGateway#setContent and update save button
 					self.onInputWikitextEditor();
 				}
+
+				self.showEditNotices();
 			} );
 	},
 
@@ -435,7 +426,7 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 	 * @param {string} [wikitext] Wikitext to pass to VE
 	 */
 	_switchToVisualEditor: function ( wikitext ) {
-		var self = this;
+		const self = this;
 		this.log( {
 			action: 'abort',
 			type: 'switchnochange',
@@ -455,11 +446,11 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 		this.$content.prop( 'readonly', true );
 
 		mw.loader.using( 'ext.visualEditor.targetLoader' ).then( function () {
-			mw.libs.ve.targetLoader.addPlugin( 'mobile.editor.ve' );
+			mw.libs.ve.targetLoader.addPlugin( 'ext.visualEditor.mobileArticleTarget' );
 			return mw.libs.ve.targetLoader.loadModules( 'visual' );
 		} ).then(
 			function () {
-				var newOverlay, options = self.getOptionsForSwitch();
+				const options = self.getOptionsForSwitch();
 				options.SourceEditorOverlay = SourceEditorOverlay;
 				if ( wikitext ) {
 					options.dataPromise = mw.libs.ve.targetLoader.requestPageData( 'visual', mw.config.get( 'wgRelevantPageName' ), {
@@ -472,7 +463,8 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 				} else {
 					delete options.dataPromise;
 				}
-				newOverlay = new VisualEditorOverlay( options );
+
+				const newOverlay = new VisualEditorOverlay( options );
 				newOverlay.getLoadingPromise().then( function () {
 					self.switching = true;
 					self.overlayManager.replaceCurrent( newOverlay );
@@ -491,6 +483,16 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 	},
 
 	/**
+	 * Get the current edit summary.
+	 *
+	 * @memberof SourceEditorOverlay
+	 * @return {string}
+	 */
+	getEditSummary: function () {
+		return this.summaryTextArea.getValue();
+	},
+
+	/**
 	 * Executed when the editor clicks the save/publish button. Handles logging and submitting
 	 * the save action to the editor API.
 	 *
@@ -499,9 +501,9 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 	 * @instance
 	 */
 	onSaveBegin: function () {
-		var self = this,
+		const self = this,
 			options = {
-				summary: this.$el.find( '.summary' ).val()
+				summary: this.getEditSummary()
 			};
 
 		if ( self.sectionLine !== '' ) {
@@ -519,17 +521,22 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 		this.showHidden( '.saving-header' );
 
 		this.gateway.save( options )
-			.then( function ( newRevId ) {
-				var title = self.options.title;
+			.then( function ( newRevId, redirectUrl, tempUserCreated ) {
+				const title = self.options.title;
 				// Special case behaviour of main page
-				if ( mw.config.get( 'wgIsMainPage' ) ) {
+				if ( mw.config.get( 'wgIsMainPage' ) && !redirectUrl ) {
 					// FIXME: Blocked on T189173
 					// eslint-disable-next-line no-restricted-properties
 					window.location = mw.util.getUrl( title );
 					return;
 				}
 
-				self.onSaveComplete( newRevId );
+				self.onSaveComplete( newRevId, redirectUrl, tempUserCreated );
+
+				if ( redirectUrl && tempUserCreated ) {
+					// eslint-disable-next-line no-restricted-properties
+					window.location.href = redirectUrl;
+				}
 			}, function ( data ) {
 				self.onSaveFailure( data );
 			} );
@@ -539,18 +546,34 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 	 * @inheritdoc
 	 * @memberof SourceEditorOverlay
 	 * @instance
+	 * @param {number|null} newRevId ID of the newly created revision, or null if it was a
+	 * null edit.
+	 * @param {string} [redirectUrl] URL to redirect to, if different than the current URL.
+	 * @param {boolean} [tempUserCreated] Whether a temporary user was created
 	 */
-	onSaveComplete: function () {
+	onSaveComplete: function ( newRevId, redirectUrl ) {
 		EditorOverlayBase.prototype.onSaveComplete.apply( this, arguments );
 
 		// The parent class changes the location hash in a setTimeout, so wait
 		// for that to happen before reloading.
 		setTimeout( function () {
-			// Note the "#" may be in the URL.
-			// If so, using window.location alone will not reload the page
-			// we need to forcefully refresh
-			// eslint-disable-next-line no-restricted-properties
-			window.location.reload();
+			if ( redirectUrl ) {
+				// eslint-disable-next-line no-restricted-properties
+				window.location.href = redirectUrl;
+			} else if ( newRevId ) {
+				// Set a notify parameter similar to venotify in VisualEditor.
+				const url = new URL( location.href );
+				url.searchParams.set( 'mfnotify', this.isNewPage ? 'created' : 'saved' );
+				// eslint-disable-next-line no-restricted-properties
+				window.location.search = url.search;
+			} else {
+				// Null edit; do not add notify parameter.
+				// Note the "#" may be in the URL.
+				// If so, using window.location alone will not reload the page
+				// we need to forcefully refresh
+				// eslint-disable-next-line no-restricted-properties
+				window.location.reload();
+			}
 		} );
 	},
 
@@ -559,8 +582,8 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 	 * @memberof SourceEditorOverlay
 	 * @instance
 	 */
-	showSaveCompleteMsg: function ( msg ) {
-		toast.showOnPageReload( msg, { type: 'success' } );
+	showSaveCompleteMsg: function ( action, tempUserCreated ) {
+		__non_webpack_require__( 'mediawiki.action.view.postEdit' ).fireHookOnPageReload( action, tempUserCreated );
 	},
 
 	/**
@@ -572,7 +595,7 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 	 * @instance
 	 */
 	onSaveFailure: function ( data ) {
-		var msg, noRetry;
+		let msg, noRetry;
 
 		if ( data.edit && data.edit.captcha ) {
 			this.captchaId = data.edit.captcha.id;

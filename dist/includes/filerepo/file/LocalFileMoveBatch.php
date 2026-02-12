@@ -20,8 +20,11 @@
 
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
 use Psr\Log\LoggerInterface;
 use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\RawSQLValue;
 use Wikimedia\ScopedCallback;
 
 /**
@@ -36,13 +39,14 @@ class LocalFileMoveBatch {
 	/** @var Title */
 	protected $target;
 
+	/** @var string[] */
 	protected $cur;
 
+	/** @var string[][] */
 	protected $olds;
 
+	/** @var int */
 	protected $oldCount;
-
-	protected $archive;
 
 	/** @var IDatabase */
 	protected $db;
@@ -118,12 +122,12 @@ class LocalFileMoveBatch {
 		$this->oldCount = 0;
 		$archiveNames = [];
 
-		$result = $this->db->select( 'oldimage',
-			[ 'oi_archive_name', 'oi_deleted' ],
-			[ 'oi_name' => $this->oldName ],
-			__METHOD__,
-			[ 'FOR UPDATE' ] // ignore snapshot
-		);
+		$result = $this->db->newSelectQueryBuilder()
+			->select( [ 'oi_archive_name', 'oi_deleted' ] )
+			->forUpdate() // ignore snapshot
+			->from( 'oldimage' )
+			->where( [ 'oi_name' => $this->oldName ] )
+			->caller( __METHOD__ )->fetchResultSet();
 
 		foreach ( $result as $row ) {
 			$archiveNames[] = $row->oi_archive_name;
@@ -138,7 +142,7 @@ class LocalFileMoveBatch {
 				continue;
 			}
 
-			list( $timestamp, $filename ) = $bits;
+			[ $timestamp, $filename ] = $bits;
 
 			if ( $this->oldName != $filename ) {
 				$this->logger->debug(
@@ -308,10 +312,10 @@ class LocalFileMoveBatch {
 
 		// Defer lock release until the transaction is committed.
 		if ( $this->db->trxLevel() ) {
-			$unlockScope->cancel();
+			ScopedCallback::cancel( $unlockScope );
 			$this->db->onTransactionResolution( function () {
 				$this->releaseLocks();
-			} );
+			}, __METHOD__ );
 		} else {
 			ScopedCallback::consume( $unlockScope );
 		}
@@ -332,16 +336,21 @@ class LocalFileMoveBatch {
 		$status = $repo->newGood();
 		$dbw = $this->db;
 
-		$hasCurrent = $dbw->lockForUpdate(
-			'image',
-			[ 'img_name' => $this->oldName ],
-			__METHOD__
-		);
-		$oldRowCount = $dbw->lockForUpdate(
-			'oldimage',
-			[ 'oi_name' => $this->oldName ],
-			__METHOD__
-		);
+		// Lock the image row
+		$hasCurrent = $dbw->newSelectQueryBuilder()
+			->from( 'image' )
+			->where( [ 'img_name' => $this->oldName ] )
+			->forUpdate()
+			->caller( __METHOD__ )
+			->fetchRowCount();
+
+		// Lock the oldimage rows
+		$oldRowCount = $dbw->newSelectQueryBuilder()
+			->from( 'oldimage' )
+			->where( [ 'oi_name' => $this->oldName ] )
+			->forUpdate()
+			->caller( __METHOD__ )
+			->fetchRowCount();
 
 		if ( $hasCurrent ) {
 			$status->successCount++;
@@ -368,24 +377,25 @@ class LocalFileMoveBatch {
 		$dbw = $this->db;
 
 		// Update current image
-		$dbw->update(
-			'image',
-			[ 'img_name' => $this->newName ],
-			[ 'img_name' => $this->oldName ],
-			__METHOD__
-		);
+		$dbw->newUpdateQueryBuilder()
+			->update( 'image' )
+			->set( [ 'img_name' => $this->newName ] )
+			->where( [ 'img_name' => $this->oldName ] )
+			->caller( __METHOD__ )->execute();
 
 		// Update old images
-		$dbw->update(
-			'oldimage',
-			[
+		$dbw->newUpdateQueryBuilder()
+			->update( 'oldimage' )
+			->set( [
 				'oi_name' => $this->newName,
-				'oi_archive_name = ' . $dbw->strreplace( 'oi_archive_name',
-					$dbw->addQuotes( $this->oldName ), $dbw->addQuotes( $this->newName ) ),
-			],
-			[ 'oi_name' => $this->oldName ],
-			__METHOD__
-		);
+				'oi_archive_name' => new RawSQLValue( $dbw->strreplace(
+					'oi_archive_name',
+					$dbw->addQuotes( $this->oldName ),
+					$dbw->addQuotes( $this->newName )
+				) ),
+			] )
+			->where( [ 'oi_name' => $this->oldName ] )
+			->caller( __METHOD__ )->execute();
 	}
 
 	/**

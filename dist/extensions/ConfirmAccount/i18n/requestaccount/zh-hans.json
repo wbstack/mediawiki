@@ -15,7 +15,8 @@
 			"Wilsonmess",
 			"Xiaomingyan",
 			"予弦",
-			"神樂坂秀吉"
+			"神樂坂秀吉",
+			"GuoPC"
 		]
 	},
 	"requestaccount": "请求账号",
@@ -33,7 +34,7 @@
 	"requestaccount-ext-text": "以下的资料将会保密，并且仅用于这次请求中。您可能需要列出电话号码等联络资料以帮助验证您的身份。",
 	"requestaccount-bio-text": "尝试在下方您的个人简介中包含任何相关凭据。",
 	"requestaccount-bio-text-i": "'''您的简履将会成为您的用户页的内容。'''请确保您可以发布该等资讯。",
-	"requestaccount-real": "真实姓名：",
+	"requestaccount-real": "真实姓名（可选）：",
 	"requestaccount-same": "（下同真实姓名）",
 	"requestaccount-email": "邮件地址：",
 	"requestaccount-reqtype": "位置：",

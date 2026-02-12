@@ -2,29 +2,26 @@
 // (see https://bugzilla.wikimedia.org/show_bug.cgi?id=44264)
 /**
  * mobileFrontend namespace
- *
- * @class mw.mobileFrontend
- * @singleton
+ * @private
  */
-var skin,
-	{ USER_FONT_SIZE_REGULAR, USER_FONT_SIZES } = require( '../constants' ),
-	storage = mw.storage,
+let url;
+
+const
 	toggling = require( './toggling' ),
+	FONT_SIZE_KEY = 'mf-font-size',
+	SECTION_COLLAPSING_TOGGLE = 'mf-expand-sections',
+	storage = mw.storage,
+	api = new mw.Api(),
 	lazyLoadedImages = require( './lazyLoadedImages' ),
-	skinName = mw.config.get( 'skin' ),
-	isPageContentModelEditable = mw.config.get( 'wgMFIsPageContentModelEditable' ),
-	editorAvailableSkins = mw.config.get( 'wgMFEditorAvailableSkins' ),
 	editor = require( './editor' ),
 	currentPage = require( '../mobile.startup/currentPage' )(),
 	currentPageHTMLParser = require( '../mobile.startup/currentPageHTMLParser' )(),
 	mfUtil = require( '../mobile.startup/util' ),
 	$window = mfUtil.getWindow(),
 	Skin = require( '../mobile.startup/Skin' ),
-	eventBus = require( '../mobile.startup/eventBusSingleton' ),
-	schemaEditAttemptStep = require( './eventLogging/schemaEditAttemptStep' ),
-	schemaVisualEditorFeatureUse = require( './eventLogging/schemaVisualEditorFeatureUse' );
+	eventBus = require( '../mobile.startup/eventBusSingleton' );
 
-skin = Skin.getSingleton();
+const skin = Skin.getSingleton();
 
 /**
  * Given 2 functions, it returns a function that will run both with it's
@@ -48,6 +45,7 @@ function apply2( fn1, fn2 ) {
  * resize event throttled to 200 ms.
  *
  * @event resize
+ * @memberof window
  */
 
 /**
@@ -56,48 +54,41 @@ function apply2( fn1, fn2 ) {
  * scroll event throttled to 200 ms.
  *
  * @event scroll
+ * @memberof window
  */
 
 $window
 	.on( 'resize', apply2(
-		mw.util.debounce( function () { eventBus.emit( 'resize' ); }, 100 ),
-		mw.util.throttle( function () { eventBus.emit( 'resize:throttled' ); }, 200 )
+		mw.util.debounce( function () {
+			eventBus.emit( 'resize' );
+		}, 100 ),
+		mw.util.throttle( function () {
+			eventBus.emit( 'resize:throttled' );
+		}, 200 )
 	) )
 	.on( 'scroll', apply2(
-		mw.util.debounce( function () { eventBus.emit( 'scroll' ); }, 100 ),
-		mw.util.throttle( function () { eventBus.emit( 'scroll:throttled' ); }, 200 )
+		mw.util.debounce( function () {
+			eventBus.emit( 'scroll' );
+		}, 100 ),
+		mw.util.throttle( function () {
+			eventBus.emit( 'scroll:throttled' );
+		}, 200 )
 	) );
 
-/**
- * Updates the font size based on the current value in storage
- */
-function updateFontSize() {
-	const userFontSize = storage.get( 'userFontSize', USER_FONT_SIZE_REGULAR );
-	// The following classes are used here:
-	// * mf-font-size-small
-	// * mf-font-size-regular
-	// * mf-font-size-large
-	// * mf-font-size-x-large
-	/* eslint-disable mediawiki/class-doc */
-	USER_FONT_SIZES.forEach( function ( fontSize ) {
-		const fontClass = `mf-font-size-${fontSize}`;
-		if ( fontSize === userFontSize ) {
-			document.documentElement.classList.add( fontClass );
-		} else {
-			// If Safari's back/forward cache is being used the previous class may be present.
-			document.documentElement.classList.remove( fontClass );
-		}
-	} );
-	/* eslint-enable mediawiki/class-doc */
+// Hide URL flags used to pass state through reloads
+// venotify is normally handled in ve.init.mw.DesktopArticleTarget.init.js
+// but that's not loaded on mobile
+// eslint-disable-next-line no-restricted-properties
+if ( window.history && history.pushState ) {
+	// eslint-disable-next-line no-restricted-properties
+	url = new URL( window.location.href );
+	if ( url.searchParams.has( 'venotify' ) || url.searchParams.has( 'mfnotify' ) ) {
+		url.searchParams.delete( 'venotify' );
+		url.searchParams.delete( 'mfnotify' );
+		// eslint-disable-next-line no-restricted-properties
+		window.history.replaceState( null, document.title, url.toString() );
+	}
 }
-
-// Font must be updated on back button press as users may click
-// back after changing font.
-window.addEventListener( 'pageshow', function () {
-	updateFontSize();
-} );
-
-updateFontSize();
 
 // Recruit volunteers through the console
 // (note console.log may not be a function so check via apply)
@@ -108,27 +99,34 @@ if ( window.console && window.console.log && window.console.log.apply &&
 }
 /* eslint-enable no-console */
 
-// setup editor
-if ( !currentPage.inNamespace( 'special' ) && isPageContentModelEditable ) {
-	// Mobile editor commonly doesn't work well with other skins than Minerva (it looks horribly
-	// broken without some styles that are only defined by Minerva). So we only enable it for the
-	// skin that wants it.
-	if ( editorAvailableSkins.indexOf( skinName ) !== -1 ) {
-		// TODO: This code should not even be loaded on desktop.
-		// Remove this check when that is fixed (T216537).
-		if ( mw.config.get( 'wgMFMode' ) !== null ) {
-			editor( currentPage, currentPageHTMLParser, skin );
+// Setup editor, if supported for the current page view
+if ( mw.config.get( 'wgMFIsSupportedEditRequest' ) ) {
+	editor( currentPage, currentPageHTMLParser, skin );
+}
+
+function migrateXLargeToLarge() {
+	if ( document.documentElement.classList.contains( 'mf-font-size-clientpref-xlarge' ) ) {
+		if ( mw.user.isAnon() ) {
+			mw.user.clientPrefs.set( FONT_SIZE_KEY, 'large' );
+		} else {
+			api.saveOption( FONT_SIZE_KEY, 'large' );
 		}
 	}
 }
 
+function migrateLegacyExpandAllSectionsToggle() {
+	const currentValue = mw.storage.get( 'expandSections' );
+	if ( currentValue ) {
+		if ( mw.user.isAnon() ) {
+			mw.user.clientPrefs.set( SECTION_COLLAPSING_TOGGLE, '1' );
+		} else {
+			api.saveOption( SECTION_COLLAPSING_TOGGLE, '1' );
+		}
+		storage.remove( 'expandSections' );
+	}
+}
+
+migrateXLargeToLarge();
+migrateLegacyExpandAllSectionsToggle();
 toggling();
 lazyLoadedImages();
-
-// Set up recording for the events we track. The module 'ext.eventLogging'
-// should already be loaded (this doesn't trigger a new HTTP request), but we
-// don't specify a hard dependency because EventLogging may not be installed.
-mw.loader.using( 'ext.eventLogging' ).then( function () {
-	schemaEditAttemptStep();
-	schemaVisualEditorFeatureUse();
-} );

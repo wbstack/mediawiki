@@ -11,5 +11,8 @@
 	"templatesandbox-title-output": "Probilo por shabloni: $1",
 	"templatesandbox-editform-legend": "Previdar pagino kun ica shablono",
 	"templatesandbox-editform-page-label": "Titulo di la pagino",
-	"templatesandbox-editform-view-label": "Montrez previdado"
+	"templatesandbox-editform-view-label": "Montrez previdado",
+	"templatesandbox-preview": "Previdado di $2",
+	"templatesandbox-previewnote": "'''Atencez ke ico nur esas previdado di [[:$1]].''' Vua modifikuri ankore ne registragesis!",
+	"templatesandbox-editform-title-not-exists": "La titulo quan vu mencionis por previdado ne existas."
 }

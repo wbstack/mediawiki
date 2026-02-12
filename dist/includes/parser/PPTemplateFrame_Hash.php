@@ -19,6 +19,10 @@
  * @ingroup Parser
  */
 
+namespace MediaWiki\Parser;
+
+use MediaWiki\Title\Title;
+
 /**
  * Expansion frame with template arguments
  * @ingroup Parser
@@ -48,7 +52,7 @@ class PPTemplateFrame_Hash extends PPFrame_Hash {
 		$namedArgs = [], $title = false
 	) {
 		parent::__construct( $preprocessor );
-		/** @var PPFrame_Hash parent */
+		/** @var PPFrame_Hash $parent */
 		'@phan-var PPFrame_Hash $parent';
 
 		$this->parent = $parent;
@@ -84,7 +88,6 @@ class PPTemplateFrame_Hash extends PPFrame_Hash {
 	}
 
 	/**
-	 * @throws MWException
 	 * @param string|int $key
 	 * @param string|PPNode $root
 	 * @param int $flags
@@ -128,7 +131,7 @@ class PPTemplateFrame_Hash extends PPFrame_Hash {
 	 */
 	public function getNumberedArguments() {
 		$arguments = [];
-		foreach ( array_keys( $this->numberedArgs ) as $key ) {
+		foreach ( $this->numberedArgs as $key => $_ ) {
 			$arguments[$key] = $this->getArgument( $key );
 		}
 		return $arguments;
@@ -139,7 +142,7 @@ class PPTemplateFrame_Hash extends PPFrame_Hash {
 	 */
 	public function getNamedArguments() {
 		$arguments = [];
-		foreach ( array_keys( $this->namedArgs ) as $key ) {
+		foreach ( $this->namedArgs as $key => $_ ) {
 			$arguments[$key] = $this->getArgument( $key );
 		}
 		return $arguments;
@@ -174,7 +177,6 @@ class PPTemplateFrame_Hash extends PPFrame_Hash {
 		if ( !isset( $this->namedExpansionCache[$name] ) ) {
 			# Trim named arguments post-expand, for backwards compatibility
 			$this->namedExpansionCache[$name] = trim(
-				// @phan-suppress-next-line SecurityCheck-XSS
 				$this->parent->expand( $this->namedArgs[$name], PPFrame::STRIP_COMMENTS ) );
 		}
 		return $this->namedExpansionCache[$name];
@@ -211,3 +213,6 @@ class PPTemplateFrame_Hash extends PPFrame_Hash {
 		$this->parent->setTTL( $ttl );
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( PPTemplateFrame_Hash::class, 'PPTemplateFrame_Hash' );

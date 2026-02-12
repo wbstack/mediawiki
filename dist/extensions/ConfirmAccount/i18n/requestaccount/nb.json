@@ -6,7 +6,8 @@
 			"Jon Harald Søby",
 			"Laaknor",
 			"Macofe",
-			"Nghtwlkr"
+			"Nghtwlkr",
+			"Yupik"
 		]
 	},
 	"requestaccount": "Etterspør konto",
@@ -24,7 +25,7 @@
 	"requestaccount-ext-text": "Følgende informasjon vil holdes privat, og vil kun brukes for denne forespørselen. Du vil kanskje liste opp kontaktinformasjon som et telefonnummer for å hjelpe til i bekreftelsesprosessen.",
 	"requestaccount-bio-text": "Ta med alle kunnskaps- og ferdighetsrelevante detaljer i biografien din under.",
 	"requestaccount-bio-text-i": "'''Biografien din blir satt som startinnholdet for brukersiden din.'''\nForsikre deg om at du synes det er greit å publisere denne informasjonen.",
-	"requestaccount-real": "Virkelig navn:",
+	"requestaccount-real": "Virkelig navn (valgfritt):",
 	"requestaccount-same": "(samme som virkelig navn)",
 	"requestaccount-email": "E-postadresse:",
 	"requestaccount-reqtype": "Stilling:",

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ukhant Erdemt",
+			"Алия"
+		]
+	},
+	"jsonconfig-license-name-CC0-1.0": "Creative Commons Zero",
+	"jsonconfig-license-copyrightwarning": "Хүврлтсән ниитлсәр та [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}] лицензин нөкцлиг дахад, хүв-немрән орулхиг зөвшәрҗәнәт.",
+	"jsonconfig-license-copyrightwarning-license-unset": "Хүврүлсн юман һарһхла, та <code>licence</code> талврт заасн лицензәр хүв-нэмрээ орулхиг зөвшәрч бәәнәт.",
+	"jsonconfig-license-notice": "'''Темдглл:''' Та энэ халхиг ясврлхларн, хуулин нөкцлиг дахад, [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}] лицензәр орулсн хүв- немрән һарһхиг зөвшәрҗәнәт.",
+	"jsonconfig-blocked-page-creation": "Тана заасн халхин һарцгнь эн Викин JSONConfig өргтклд тохрулсн үлгүрин ямаранднь чигн таарлго бәәнә."
+}

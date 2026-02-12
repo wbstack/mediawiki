@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2007 Roan Kattouw "<Firstname>.<Lastname>@gmail.com"
+ * Copyright © 2007 Roan Kattouw <roan.kattouw@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,17 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
 use MediaWiki\MainConfigNames;
 use MediaWiki\Page\UndeletePage;
 use MediaWiki\Page\UndeletePageFactory;
 use MediaWiki\Page\WikiPageFactory;
-use MediaWiki\Permissions\Authority;
-use MediaWiki\User\UserOptionsLookup;
+use MediaWiki\Title\Title;
+use MediaWiki\User\Options\UserOptionsLookup;
 use MediaWiki\Watchlist\WatchlistManager;
 use Wikimedia\ParamValidator\ParamValidator;
+use Wikimedia\Rdbms\IDBAccessObject;
 
 /**
  * @ingroup API
@@ -36,23 +39,12 @@ class ApiUndelete extends ApiBase {
 
 	use ApiWatchlistTrait;
 
-	/** @var UndeletePageFactory */
-	private $undeletePageFactory;
+	private UndeletePageFactory $undeletePageFactory;
+	private WikiPageFactory $wikiPageFactory;
 
-	/** @var WikiPageFactory */
-	private $wikiPageFactory;
-
-	/**
-	 * @param ApiMain $mainModule
-	 * @param string $moduleName
-	 * @param WatchlistManager $watchlistManager
-	 * @param UserOptionsLookup $userOptionsLookup
-	 * @param UndeletePageFactory $undeletePageFactory
-	 * @param WikiPageFactory $wikiPageFactory
-	 */
 	public function __construct(
 		ApiMain $mainModule,
-		$moduleName,
+		string $moduleName,
 		WatchlistManager $watchlistManager,
 		UserOptionsLookup $userOptionsLookup,
 		UndeletePageFactory $undeletePageFactory,
@@ -76,7 +68,7 @@ class ApiUndelete extends ApiBase {
 		$params = $this->extractRequestParams();
 
 		$user = $this->getUser();
-		$block = $user->getBlock( Authority::READ_LATEST );
+		$block = $user->getBlock( IDBAccessObject::READ_LATEST );
 		if ( $block && $block->isSitewide() ) {
 			$this->dieBlocked( $block );
 		}
@@ -84,6 +76,9 @@ class ApiUndelete extends ApiBase {
 		$titleObj = Title::newFromText( $params['title'] );
 		if ( !$titleObj || $titleObj->isExternal() ) {
 			$this->dieWithError( [ 'apierror-invalidtitle', wfEscapeWikiText( $params['title'] ) ] );
+		}
+		if ( !$titleObj->canExist() ) {
+			$this->dieWithError( 'apierror-pagecannotexist' );
 		}
 
 		// Convert timestamps
@@ -179,10 +174,13 @@ class ApiUndelete extends ApiBase {
 	}
 
 	protected function getExamplesMessages() {
+		$title = Title::newMainPage()->getPrefixedText();
+		$mp = rawurlencode( $title );
+
 		return [
-			'action=undelete&title=Main%20Page&token=123ABC&reason=Restoring%20main%20page'
+			"action=undelete&title={$mp}&token=123ABC&reason=Restoring%20{$mp}"
 				=> 'apihelp-undelete-example-page',
-			'action=undelete&title=Main%20Page&token=123ABC' .
+			"action=undelete&title={$mp}&token=123ABC" .
 				'&timestamps=2007-07-03T22:00:45Z|2007-07-02T19:48:56Z'
 				=> 'apihelp-undelete-example-revisions',
 		];
@@ -192,3 +190,6 @@ class ApiUndelete extends ApiBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Undelete';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiUndelete::class, 'ApiUndelete' );

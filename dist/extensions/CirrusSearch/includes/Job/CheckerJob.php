@@ -8,9 +8,12 @@ use CirrusSearch\Sanity\AllClustersQueueingRemediator;
 use CirrusSearch\Sanity\BufferedRemediator;
 use CirrusSearch\Sanity\Checker;
 use CirrusSearch\Sanity\CheckerException;
+use CirrusSearch\Sanity\LogOnlyRemediator;
 use CirrusSearch\Sanity\MultiClusterRemediatorHelper;
 use CirrusSearch\Sanity\QueueingRemediator;
 use CirrusSearch\Searcher;
+use CirrusSearch\UpdateGroup;
+use CirrusSearch\Util;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 
@@ -48,9 +51,10 @@ class CheckerJob extends CirrusGenericJob {
 	 * @param string|null $cluster
 	 * @param int $loopId The number of times the checker jobs have looped
 	 *  over the pages to be checked.
+	 * @param \JobQueueGroup $jobQueueGroup
 	 * @return CheckerJob
 	 */
-	public static function build( $fromPageId, $toPageId, $delay, $profile, $cluster, $loopId ) {
+	public static function build( $fromPageId, $toPageId, $delay, $profile, $cluster, $loopId, \JobQueueGroup $jobQueueGroup ) {
 		$job = new self( [
 			'fromPageId' => $fromPageId,
 			'toPageId' => $toPageId,
@@ -59,7 +63,7 @@ class CheckerJob extends CirrusGenericJob {
 			'profile' => $profile,
 			'cluster' => $cluster,
 			'loopId' => $loopId,
-		] + self::buildJobDelayOptions( self::class, $delay ) );
+		] + self::buildJobDelayOptions( self::class, $delay, $jobQueueGroup ) );
 		return $job;
 	}
 
@@ -85,7 +89,6 @@ class CheckerJob extends CirrusGenericJob {
 
 	/**
 	 * @return bool
-	 * @throws \MWException
 	 */
 	protected function doJob() {
 		$profile = $this->searchConfig
@@ -134,8 +137,8 @@ class CheckerJob extends CirrusGenericJob {
 			return true;
 		}
 
-		$connections = $this->decideClusters();
-		if ( empty( $connections ) ) {
+		$connections = $this->decideClusters( UpdateGroup::CHECK_SANITY );
+		if ( !$connections ) {
 			return true;
 		}
 
@@ -178,7 +181,7 @@ class CheckerJob extends CirrusGenericJob {
 		$isOld = null;
 		$reindexAfterLoops = $profile['reindex_after_loops'] ?? null;
 		if ( $reindexAfterLoops ) {
-			$isOld = self::makeIsOldClosure(
+			$isOld = Checker::makeIsOldClosure(
 				$this->params['loopId'],
 				$reindexAfterLoops
 			);
@@ -193,15 +196,19 @@ class CheckerJob extends CirrusGenericJob {
 		$checkers = [];
 		$perClusterRemediators = [];
 		$perClusterBufferedRemediators = [];
+		$logger = LoggerFactory::getInstance( 'CirrusSearch' );
+		$assignment = $this->searchConfig->getClusterAssignment();
 		foreach ( $connections as $cluster => $connection ) {
 			$searcher = new Searcher( $connection, 0, 0, $this->searchConfig, [], null );
-			$remediator = new QueueingRemediator( $cluster );
+			$remediator = $assignment->canWriteToCluster( $cluster, UpdateGroup::SANEITIZER )
+				? new QueueingRemediator( $cluster ) : new LogOnlyRemediator( $logger );
 			$bufferedRemediator = new BufferedRemediator();
 			$checker = new Checker(
 				$this->searchConfig,
 				$connection,
 				$bufferedRemediator,
 				$searcher,
+				Util::getStatsFactory(),
 				false, // logSane
 				false, // fastRedirectCheck
 				$pageCache,
@@ -219,7 +226,7 @@ class CheckerJob extends CirrusGenericJob {
 			) );
 
 		$ranges = array_chunk( range( $from, $to ), $batchSize );
-		while ( $pageIds = array_shift( $ranges ) ) {
+		foreach ( $ranges as $pageIds ) {
 			if ( self::getPressure() > $maxPressure ) {
 				$this->retry( "too much pressure on update jobs", reset( $pageIds ) );
 				return true;
@@ -233,36 +240,13 @@ class CheckerJob extends CirrusGenericJob {
 				try {
 					$checker->check( $pageIds );
 				} catch ( CheckerException $checkerException ) {
-					$this->retry( "Failed to verify ids: " . $checkerException->getMessage(), reset( $pageIds ), $cluster );
+					$this->retry( "Failed to verify ids on $cluster: " . $checkerException->getMessage(), reset( $pageIds ), $cluster );
 					unset( $checkers[$cluster] );
 				}
 			}
 			$multiClusterRemediator->sendBatch();
 		}
 		return true;
-	}
-
-	/**
-	 * Decide if a document should be reindexed based on time since last reindex
-	 *
-	 * Consider a page as old every $numCycles times the saneitizer loops over
-	 * the same document. This ensures documents have been reindexed within the
-	 * last `$numCycles * actual_loop_duration` (note that the configured
-	 * duration is min_loop_duration, but in practice configuration ensures min
-	 * and actual are typically the same).
-	 *
-	 * @param int $loopId The number of times the checker has looped over
-	 *  the document set.
-	 * @param int $numCycles The number of loops after which a document
-	 *  is considered old.
-	 * @return \Closure
-	 */
-	private static function makeIsOldClosure( $loopId, $numCycles ) {
-		$loopMod = $loopId % $numCycles;
-		return static function ( \WikiPage $page ) use ( $numCycles, $loopMod ) {
-			$pageIdMod = $page->getId() % $numCycles;
-			return $pageIdMod == $loopMod;
-		};
 	}
 
 	/**
@@ -324,7 +308,8 @@ class CheckerJob extends CirrusGenericJob {
 		$params['retryCount']++;
 		$params['fromPageId'] = $newFrom;
 		unset( $params['jobReleaseTimestamp'] );
-		$params += self::buildJobDelayOptions( self::class, $delay );
+		$jobQueue = MediaWikiServices::getInstance()->getJobQueueGroup();
+		$params += self::buildJobDelayOptions( self::class, $delay, $jobQueue );
 		$job = new self( $params );
 		LoggerFactory::getInstance( 'CirrusSearch' )->info(
 			"Sanitize CheckerJob: $cause ({fromPageId}:{toPageId}), Requeueing CheckerJob " .
@@ -336,6 +321,6 @@ class CheckerJob extends CirrusGenericJob {
 				'cluster' => $cluster ?: 'all clusters'
 			]
 		);
-		MediaWikiServices::getInstance()->getJobQueueGroup()->push( $job );
+		$jobQueue->push( $job );
 	}
 }

@@ -2,12 +2,12 @@
 
 namespace TwoColConflict;
 
-use ExtensionRegistry;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Registration\ExtensionRegistry;
 
 return [
 
-	'TwoColConflictContext' => static function ( MediaWikiServices $services ) {
+	'TwoColConflictContext' => static function ( MediaWikiServices $services ): TwoColConflictContext {
 		$extensionRegistry = ExtensionRegistry::getInstance();
 		$mobileContext = $extensionRegistry->isLoaded( 'MobileFrontend' )
 			? $services->getService( 'MobileFrontend.Context' )

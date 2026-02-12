@@ -1,40 +1,35 @@
-( function () {
-	'use strict';
+'use strict';
 
-	mw.libs = mw.libs || {};
-	mw.libs.advancedSearch = mw.libs.advancedSearch || {};
-	mw.libs.advancedSearch.ui = mw.libs.advancedSearch.ui || {};
+/**
+ * @class
+ * @extends OO.ui.TextInputWidget
+ *
+ * @constructor
+ * @param {SearchModel} store
+ * @param {Object} config
+ * @param {string} config.fieldId Field name
+ */
+const TextInput = function ( store, config ) {
+	this.store = store;
+	this.fieldId = config.fieldId;
 
-	/**
-	 * @class
-	 * @extends OO.ui.TextInputWidget
-	 * @constructor
-	 *
-	 * @param {mw.libs.advancedSearch.dm.SearchModel} store
-	 * @param {Object} config
-	 */
-	mw.libs.advancedSearch.ui.TextInput = function ( store, config ) {
-		config = $.extend( {}, config );
-		this.store = store;
-		this.fieldId = config.fieldId;
+	this.store.connect( this, { update: 'onStoreUpdate' } );
 
-		this.store.connect( this, { update: 'onStoreUpdate' } );
+	TextInput.super.call( this, config );
 
-		mw.libs.advancedSearch.ui.TextInput.parent.call( this, config );
+	this.populateFromStore();
+};
 
-		this.populateFromStore();
-	};
+OO.inheritClass( TextInput, OO.ui.TextInputWidget );
 
-	OO.inheritClass( mw.libs.advancedSearch.ui.TextInput, OO.ui.TextInputWidget );
+TextInput.prototype.onStoreUpdate = function () {
+	this.populateFromStore();
+};
 
-	mw.libs.advancedSearch.ui.TextInput.prototype.onStoreUpdate = function () {
-		this.populateFromStore();
-	};
+TextInput.prototype.populateFromStore = function () {
+	if ( this.store.hasFieldChanged( this.fieldId, this.getValue() ) ) {
+		this.setValue( this.store.getField( this.fieldId ) );
+	}
+};
 
-	mw.libs.advancedSearch.ui.TextInput.prototype.populateFromStore = function () {
-		if ( this.store.hasFieldChanged( this.fieldId, this.getValue() ) ) {
-			this.setValue( this.store.getField( this.fieldId ) );
-		}
-	};
-
-}() );
+module.exports = TextInput;

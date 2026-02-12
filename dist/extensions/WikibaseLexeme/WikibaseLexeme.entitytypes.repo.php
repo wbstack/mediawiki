@@ -1,6 +1,10 @@
 <?php
 
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Site\SiteLookup;
 use Wikibase\DataModel\Deserializers\TermDeserializer;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Serializers\SerializerFactory;
@@ -102,26 +106,20 @@ return [
 			return $factory->newLexemeView();
 		},
 		Def::META_TAGS_CREATOR_CALLBACK => static function () {
+			$services = MediaWikiServices::getInstance();
 			return new LexemeMetaTagsCreator(
 				RequestContext::getMain()
 					->msg( 'wikibaselexeme-presentation-lexeme-display-label-separator-multiple-lemma' )
 					->escaped(),
 				WikibaseRepo::getFallbackLabelDescriptionLookupFactory()
-					->newLabelDescriptionLookup( \Language::factory( 'en' ) )
+					->newLabelDescriptionLookup( $services->getLanguageFactory()->getLanguage( 'en' ) )
 			);
 		},
 		Def::CONTENT_MODEL_ID => LexemeContent::CONTENT_MODEL_ID,
 		Def::CONTENT_HANDLER_FACTORY_CALLBACK => static function () {
-			return new LexemeHandler(
-				WikibaseRepo::getEntityContentDataCodec(),
-				WikibaseRepo::getEntityConstraintProvider(),
-				WikibaseRepo::getValidatorErrorLocalizer(),
-				WikibaseRepo::getEntityIdParser(),
-				WikibaseRepo::getEntityIdLookup(),
-				WikibaseRepo::getEntityLookup(),
-				WikibaseRepo::getFieldDefinitionsFactory()
-					->getFieldDefinitionsByType( Lexeme::ENTITY_TYPE )
-			);
+			$services = MediaWikiServices::getInstance();
+			$requestContext = RequestContext::getMain();
+			return LexemeHandler::factory( $services, $requestContext );
 		},
 		Def::ENTITY_FACTORY_CALLBACK => static function () {
 			return new Lexeme();
@@ -146,7 +144,7 @@ return [
 				// TODO: WikibaseRepo::getTermsLanguage is not necessarily the list of language codes
 				// that should be allowed as "languages" of lemma terms
 					new LexemeTermSerializationValidator(
-						new LexemeTermLanguageValidator( WikibaseLexemeServices::getTermLanguages() )
+						new LexemeTermLanguageValidator( WikibaseLexemeServices::getTermLanguages( $services ) )
 					),
 					WikibaseLexemeServices::getLemmaTermValidator( $services ),
 					$stringNormalizer
@@ -165,7 +163,7 @@ return [
 					new FormChangeOpDeserializer(
 						$entityLookup,
 						$entityIdParser,
-						WikibaseLexemeServices::getEditFormChangeOpDeserializer()
+						WikibaseLexemeServices::getEditFormChangeOpDeserializer( $services )
 					)
 				),
 				new SenseListChangeOpDeserializer(
@@ -178,7 +176,9 @@ return [
 								new TermDeserializer(),
 								$stringNormalizer,
 								new LexemeTermSerializationValidator(
-									new LexemeTermLanguageValidator( WikibaseLexemeServices::getTermLanguages() )
+									new LexemeTermLanguageValidator(
+										WikibaseLexemeServices::getTermLanguages( $services )
+									)
 								)
 							),
 							new ClaimsChangeOpDeserializer(
@@ -281,7 +281,7 @@ return [
 				WikibaseRepo::getEntityLookup(),
 				WikibaseRepo::getEntityIdParser(),
 				new NullLabelDescriptionLookup(),
-				WikibaseRepo::getEntityTypeToRepositoryMapping()
+				WikibaseRepo::getEnabledEntityTypes()
 			);
 		},
 		Def::LINK_FORMATTER_CALLBACK => static function ( Language $language ) {
@@ -292,7 +292,7 @@ return [
 
 			return new LexemeLinkFormatter(
 				WikibaseRepo::getEntityTitleTextLookup(),
-				WikibaseRepo::getEntityLookup(),
+				WikibaseLexemeServices::getLemmaLookup(),
 				$linkFormatter,
 				new LexemeTermFormatter(
 					$requestContext
@@ -349,24 +349,16 @@ return [
 	],
 	'form' => [
 		Def::CONTENT_HANDLER_FACTORY_CALLBACK => static function () {
-
-			return new LexemeHandler(
-				WikibaseRepo::getEntityContentDataCodec(),
-				WikibaseRepo::getEntityConstraintProvider(),
-				WikibaseRepo::getValidatorErrorLocalizer(),
-				WikibaseRepo::getEntityIdParser(),
-				WikibaseRepo::getEntityIdLookup(),
-				WikibaseRepo::getEntityLookup(),
-				WikibaseRepo::getFieldDefinitionsFactory()
-					->getFieldDefinitionsByType( Lexeme::ENTITY_TYPE )
-			);
+			$services = MediaWikiServices::getInstance();
+			$requestContext = RequestContext::getMain();
+			return LexemeHandler::factory( $services, $requestContext );
 		},
 		Def::ENTITY_SEARCH_CALLBACK => static function ( WebRequest $request ) {
 			return new EntityIdSearchHelper(
 				WikibaseRepo::getEntityLookup(),
 				WikibaseRepo::getEntityIdParser(),
 				new NullLabelDescriptionLookup(),
-				WikibaseRepo::getEntityTypeToRepositoryMapping()
+				WikibaseRepo::getEnabledEntityTypes()
 			);
 		},
 		DEF::CHANGEOP_DESERIALIZER_CALLBACK => static function () {
@@ -496,19 +488,10 @@ return [
 		},
 	],
 	'sense' => [
-		// TODO lexemes and forms have identical content-handler-factory-callback, extract
 		Def::CONTENT_HANDLER_FACTORY_CALLBACK => static function () {
-
-			return new LexemeHandler(
-				WikibaseRepo::getEntityContentDataCodec(),
-				WikibaseRepo::getEntityConstraintProvider(),
-				WikibaseRepo::getValidatorErrorLocalizer(),
-				WikibaseRepo::getEntityIdParser(),
-				WikibaseRepo::getEntityIdLookup(),
-				WikibaseRepo::getEntityLookup(),
-				WikibaseRepo::getFieldDefinitionsFactory()
-					->getFieldDefinitionsByType( Lexeme::ENTITY_TYPE )
-			);
+			$services = MediaWikiServices::getInstance();
+			$requestContext = RequestContext::getMain();
+			return LexemeHandler::factory( $services, $requestContext );
 		},
 		Def::ENTITY_SEARCH_CALLBACK => static function ( WebRequest $request ) {
 			$entityLookup = WikibaseRepo::getEntityLookup();
@@ -523,7 +506,7 @@ return [
 				$entityLookup,
 				WikibaseRepo::getEntityIdParser(),
 				$senseLabelDescriptionLookup,
-				WikibaseRepo::getEntityTypeToRepositoryMapping()
+				WikibaseRepo::getEnabledEntityTypes()
 			);
 		},
 		Def::CHANGEOP_DESERIALIZER_CALLBACK => static function () {
@@ -611,14 +594,21 @@ return [
 			);
 		},
 		Def::ENTITY_ID_HTML_LINK_FORMATTER_CALLBACK => static function ( Language $language ) {
+			$services = MediaWikiServices::getInstance();
 
 			return new SenseIdHtmlFormatter(
-				WikibaseRepo::getEntityTitleLookup(),
-				WikibaseRepo::getEntityRevisionLookup(),
+				WikibaseRepo::getEntityTitleLookup( $services ),
+				WikibaseRepo::getEntityRevisionLookup( $services ),
 				new MediaWikiLocalizedTextProvider( $language ),
-				WikibaseRepo::getLanguageFallbackChainFactory()->newFromLanguage( $language ),
-				new LanguageFallbackIndicator( WikibaseRepo::getLanguageNameLookup() ),
-				MediaWikiServices::getInstance()->getLanguageFactory()
+				WikibaseRepo::getLanguageFallbackChainFactory( $services )
+					->newFromLanguage( $language ),
+				new LanguageFallbackIndicator(
+					WikibaseRepo::getLanguageNameLookupFactory( $services )
+						->getForLanguage( $language )
+				),
+				$services->getLanguageFactory(),
+				WikibaseRepo::getEntityIdLabelFormatterFactory( $services )
+					->getEntityIdFormatter( $language )
 			);
 		},
 		Def::ENTITY_METADATA_ACCESSOR_CALLBACK => static function ( $dbName, $repoName ) {

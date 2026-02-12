@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Zolgoyo"
+		]
+	},
+	"advancedsearch-field-plain": "Bo sózler",
+	"advancedsearch-field-not": "Bo sózler tuwîl",
+	"advancedsearch-field-filetype": "Dosiya tipí",
+	"advancedsearch-inlanguage-default": "Tíl sayla",
+	"advancedsearch-filetype-section-video": "Video formatlarî",
+	"advancedsearch-filetype-section-other": "Başka formatlar",
+	"advancedsearch-filetype-default": "Dosiya tipí sayla",
+	"advancedsearch-filetype-bitmap": "Resím",
+	"advancedsearch-namespaces-search-in": "Mínda kîdîr:",
+	"advancedsearch-namespaces-preset-all": "Hepísí",
+	"advancedsearch-namespaces-preset-discussion": "Muhabbet"
+}

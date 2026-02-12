@@ -20,8 +20,15 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use LocalisationCache;
+use MediaWiki\Language\Language;
 use MediaWiki\Languages\LanguageFactory;
 use MediaWiki\Languages\LanguageNameUtils;
+use MediaWiki\Pager\AllMessagesTablePager;
+use MediaWiki\Title\Title;
+use MessageCache;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -31,33 +38,15 @@ use Wikimedia\ParamValidator\ParamValidator;
  */
 class ApiQueryAllMessages extends ApiQueryBase {
 
-	/** @var Language */
-	private $contentLanguage;
+	private Language $contentLanguage;
+	private LanguageFactory $languageFactory;
+	private LanguageNameUtils $languageNameUtils;
+	private LocalisationCache $localisationCache;
+	private MessageCache $messageCache;
 
-	/** @var LanguageFactory */
-	private $languageFactory;
-
-	/** @var LanguageNameUtils */
-	private $languageNameUtils;
-
-	/** @var LocalisationCache */
-	private $localisationCache;
-
-	/** @var MessageCache */
-	private $messageCache;
-
-	/**
-	 * @param ApiQuery $query
-	 * @param string $moduleName
-	 * @param Language $contentLanguage
-	 * @param LanguageFactory $languageFactory
-	 * @param LanguageNameUtils $languageNameUtils
-	 * @param LocalisationCache $localisationCache
-	 * @param MessageCache $messageCache
-	 */
 	public function __construct(
 		ApiQuery $query,
-		$moduleName,
+		string $moduleName,
 		Language $contentLanguage,
 		LanguageFactory $languageFactory,
 		LanguageNameUtils $languageNameUtils,
@@ -122,8 +111,7 @@ class ApiQueryAllMessages extends ApiQueryBase {
 			$skip = false;
 			$messages_filtered = [];
 			foreach ( $messages_target as $message ) {
-				// === 0: must be at beginning of string (position 0)
-				if ( strpos( $message, $params['prefix'] ) === 0 ) {
+				if ( str_starts_with( $message, $params['prefix'] ) ) {
 					if ( !$skip ) {
 						$skip = true;
 					}
@@ -139,8 +127,7 @@ class ApiQueryAllMessages extends ApiQueryBase {
 		if ( isset( $params['filter'] ) ) {
 			$messages_filtered = [];
 			foreach ( $messages_target as $message ) {
-				// !== is used because filter can be at the beginning of the string
-				if ( strpos( $message, $params['filter'] ) !== false ) {
+				if ( str_contains( $message, $params['filter'] ) ) {
 					$messages_filtered[] = $message;
 				}
 			}
@@ -297,3 +284,6 @@ class ApiQueryAllMessages extends ApiQueryBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Allmessages';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryAllMessages::class, 'ApiQueryAllMessages' );

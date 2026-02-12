@@ -1,9 +1,13 @@
 <?php
 
 use MediaWiki\User\UserGroupManager;
+use MediaWiki\User\UserIdentityLookup;
+use Wikimedia\Rdbms\ILoadBalancer;
 
 class UserCredentialsPage extends SpecialPage {
 	protected $target, $file;
+
+	private ILoadBalancer $loadBalancer;
 
 	/**
 	 * @var UserGroupManager
@@ -11,11 +15,24 @@ class UserCredentialsPage extends SpecialPage {
 	private $userGroupManager;
 
 	/**
-	 * @param UserGroupManager $userGroupManager
+	 * @var UserIdentityLookup
 	 */
-	function __construct( UserGroupManager $userGroupManager ) {
+	private $userIdentityLookup;
+
+	/**
+	 * @param ILoadBalancer $loadBalancer
+	 * @param UserGroupManager $userGroupManager
+	 * @param UserIdentityLookup $userIdentityLookup
+	 */
+	function __construct(
+		ILoadBalancer $loadBalancer,
+		UserGroupManager $userGroupManager,
+		UserIdentityLookup $userIdentityLookup
+	) {
 		parent::__construct( 'UserCredentials', 'lookupcredentials' );
+		$this->loadBalancer = $loadBalancer;
 		$this->userGroupManager = $userGroupManager;
+		$this->userIdentityLookup = $userIdentityLookup;
 	}
 
 	public function userCanExecute( User $user ) {
@@ -252,14 +269,14 @@ class UserCredentialsPage extends SpecialPage {
 	}
 
 	function getAccountData() {
-		$uid = User::idFromName( $this->target );
-		if ( !$uid ) {
+		$userIdentity = $this->userIdentityLookup->getUserIdentityByName( $this->target );
+		if ( !$userIdentity || !$userIdentity->isRegistered() ) {
 			return false;
 		}
 		# For now, just get the first revision...
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = $this->loadBalancer->getConnection( DB_REPLICA );
 		$row = $dbr->selectRow( 'account_credentials', '*',
-			[ 'acd_user_id' => $uid ],
+			[ 'acd_user_id' => $userIdentity->getId() ],
 			__METHOD__,
 			[ 'ORDER BY' => 'acd_user_id,acd_id ASC' ] );
 		return $row;

@@ -23,6 +23,7 @@ use ValueFormatters\ValueFormatter;
  * MapsCoordinateParser class of the Maps extension for MediaWiki.
  *
  * @since 0.1, renamed in 2.0
+ * @api
  *
  * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
@@ -93,9 +94,9 @@ class LatLongFormatter implements ValueFormatter {
 
 	private const DEFAULT_PRECISION = 1 / 3600;
 
-	private $options;
+	private FormatterOptions $options;
 
-	public function __construct( FormatterOptions $options = null ) {
+	public function __construct( ?FormatterOptions $options = null ) {
 		$this->options = $options ?? new FormatterOptions();
 
 		$this->defaultOption( self::OPT_NORTH_SYMBOL, 'N' );
@@ -119,7 +120,7 @@ class LatLongFormatter implements ValueFormatter {
 		$this->defaultOption( self::OPT_PRECISION, 0 );
 
 		// Not used in this component, only here for downstream compatibility reasons
-		$this->options->defaultOption( ValueFormatter::OPT_LANG, 'en' );
+		$this->defaultOption( ValueFormatter::OPT_LANG, 'en' );
 	}
 
 	/**
@@ -160,7 +161,7 @@ class LatLongFormatter implements ValueFormatter {
 	 * @since 0.5
 	 *
 	 * @param LatLongValue $value
-	 * @param float|int $precision The desired precision, given as fractional degrees.
+	 * @param ?float $precision The desired precision, given as fractional degrees.
 	 *
 	 * @return string Plain text
 	 * @throws InvalidArgumentException
@@ -170,15 +171,13 @@ class LatLongFormatter implements ValueFormatter {
 			$precision = self::DEFAULT_PRECISION;
 		}
 
-		$formatted = implode(
+		return implode(
 			$this->options->getOption( self::OPT_SEPARATOR_SYMBOL ) . $this->getSpacing( self::OPT_SPACE_LATLONG ),
 			[
 				$this->formatLatitude( $value->getLatitude(), $precision ),
 				$this->formatLongitude( $value->getLongitude(), $precision )
 			]
 		);
-
-		return $formatted;
 	}
 
 	/**
@@ -187,10 +186,7 @@ class LatLongFormatter implements ValueFormatter {
 	 * @return string
 	 */
 	private function getSpacing( string $spacingLevel ): string {
-		if ( in_array( $spacingLevel, $this->options->getOption( self::OPT_SPACING_LEVEL ) ) ) {
-			return ' ';
-		}
-		return '';
+		return in_array( $spacingLevel, $this->options->getOption( self::OPT_SPACING_LEVEL ) ) ? ' ' : '';
 	}
 
 	private function formatLatitude( float $latitude, float $precision ): string {
@@ -211,7 +207,6 @@ class LatLongFormatter implements ValueFormatter {
 
 	private function makeDirectionalIfNeeded( string $coordinate, string $positiveSymbol,
 		string $negativeSymbol ): string {
-
 		if ( $this->options->getOption( self::OPT_DIRECTIONAL ) ) {
 			return $this->makeDirectional( $coordinate, $positiveSymbol, $negativeSymbol );
 		}
@@ -221,7 +216,6 @@ class LatLongFormatter implements ValueFormatter {
 
 	private function makeDirectional( string $coordinate, string $positiveSymbol,
 		string $negativeSymbol ): string {
-
 		$isNegative = substr( $coordinate, 0, 1 ) === '-';
 
 		if ( $isNegative ) {
@@ -348,9 +342,9 @@ class LatLongFormatter implements ValueFormatter {
 	}
 
 	/**
-	 * @param float|int $unitsPerDegree The number of target units per degree
+	 * @param float $unitsPerDegree The number of target units per degree
 	 * (60 for minutes, 3600 for seconds)
-	 * @param float|int $degreePrecision
+	 * @param float $degreePrecision
 	 *
 	 * @return int The number of digits to show after the decimal point
 	 * (resp. before, if the result is negative).
@@ -367,15 +361,13 @@ class LatLongFormatter implements ValueFormatter {
 	 */
 	private function formatNumber( float $number, int $digits = 0 ): string {
 		// TODO: use NumberLocalizer
-		return sprintf( '%.' . ( $digits > 0 ? $digits : 0 ) . 'F', $number );
+		return sprintf( '%.' . ( max( $digits, 0 ) ) . 'F', $number );
 	}
 
-	/**
-	 * @param string $option
-	 * @param mixed $default
-	 */
-	private function defaultOption( $option, $default ) {
-		$this->options->defaultOption( $option, $default );
+	private function defaultOption( string $option, mixed $default ): void {
+		if ( !$this->options->hasOption( $option ) ) {
+			$this->options->setOption( $option, $default );
+		}
 	}
 
 }

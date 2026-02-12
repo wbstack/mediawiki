@@ -1,12 +1,12 @@
 <?php
 namespace JsonConfig;
 
-use FormatJson;
 use Kartographer\SimpleStyleParser;
-use Language;
+use MediaWiki\Json\FormatJson;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
-use ParserOptions;
-use User;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\User\User;
 
 /**
  * @package JsonConfig
@@ -44,15 +44,8 @@ class JCMapDataContent extends JCDataContent {
 
 		$data = parent::getSafeData( $data );
 
-		$ssp = new SimpleStyleParser( $parser );
-		// FIXME: Replace with a straight normalizeAndSanitize() call when possible, see T281224
-		if ( is_array( $data->data ) ) {
-			$ssp->normalizeAndSanitize( $data->data );
-		} elseif ( is_object( $data->data ) ) {
-			$dummy = [ $data->data ];
-			$ssp->normalizeAndSanitize( $dummy );
-			$data->data = $dummy[0];
-		}
+		$ssp = SimpleStyleParser::newFromParser( $parser );
+		$ssp->normalizeAndSanitize( $data->data );
 
 		return $data;
 	}
@@ -60,7 +53,8 @@ class JCMapDataContent extends JCDataContent {
 	private static function isValidData() {
 		return static function ( JCValue $v, array $path ) {
 			$value = $v->getValue();
-			if ( !is_object( $value ) && !is_array( $value ) ||
+
+			if ( ( !is_object( $value ) && !is_array( $value ) ) ||
 				!JCMapDataContent::recursiveWalk( $value, false )
 			) {
 				$v->error( 'jsonconfig-err-bad-geojson', $path );

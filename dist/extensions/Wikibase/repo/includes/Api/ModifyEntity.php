@@ -4,13 +4,14 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
-use ApiMain;
-use ApiUsageException;
 use LogicException;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiCreateTempUserTrait;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiUsageException;
+use MediaWiki\Status\Status;
+use MediaWiki\User\User;
 use MWContentSerializationException;
-use Status;
-use User;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\Store\EntityRevisionLookup;
@@ -40,6 +41,7 @@ use Wikimedia\ParamValidator\ParamValidator;
 abstract class ModifyEntity extends ApiBase {
 
 	use FederatedPropertyApiValidatorTrait;
+	use ApiCreateTempUserTrait;
 
 	/**
 	 * @var StringNormalizer
@@ -187,7 +189,7 @@ abstract class ModifyEntity extends ApiBase {
 	 *
 	 * @return ChangeOpResult
 	 */
-	protected function applyChangeOp( ChangeOp $changeOp, EntityDocument $entity, Summary $summary = null ): ChangeOpResult {
+	protected function applyChangeOp( ChangeOp $changeOp, EntityDocument $entity, ?Summary $summary = null ): ChangeOpResult {
 		try {
 			// NOTE: Always validate modification against the current revision, if it exists!
 			//       Otherwise, we may miss e.g. a combination of language/label/description
@@ -416,10 +418,16 @@ abstract class ModifyEntity extends ApiBase {
 	}
 
 	private function addToOutput( EntityDocument $entity, Status $status, int $oldRevId ): void {
+		$params = $this->extractRequestParams();
+		$paramsForRedirect = $params;
+		if ( isset( $params['new'] ) && !isset( $paramsForRedirect['returnto'] ) ) {
+			// return to created entity by default
+			$paramsForRedirect['returnto'] = $this->titleLookup->getTitleForId( $entity->getId() )->getFullText();
+		}
+
 		$this->getResultBuilder()->addBasicEntityInformation( $entity->getId(), 'entity' );
 		$this->getResultBuilder()->addRevisionIdFromStatusToResult( $status, 'entity', $oldRevId );
-
-		$params = $this->extractRequestParams();
+		$this->getResultBuilder()->addTempUser( $status, fn( $user ) => $this->getTempUserRedirectUrl( $paramsForRedirect, $user ) );
 
 		if ( isset( $params['site'] ) && isset( $params['title'] ) ) {
 			$normTitle = $this->stringNormalizer->trimToNFC( $params['title'] );
@@ -439,7 +447,8 @@ abstract class ModifyEntity extends ApiBase {
 			parent::getAllowedParams(),
 			$this->getAllowedParamsForId(),
 			$this->getAllowedParamsForSiteLink(),
-			$this->getAllowedParamsForEntity()
+			$this->getAllowedParamsForEntity(),
+			$this->getCreateTempUserParams()
 		);
 	}
 

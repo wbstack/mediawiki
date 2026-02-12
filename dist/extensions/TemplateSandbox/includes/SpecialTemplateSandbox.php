@@ -2,28 +2,25 @@
 
 namespace MediaWiki\Extension\TemplateSandbox;
 
-use Content;
-use EditPage;
-use Html;
-use HTMLForm;
+use MediaWiki\Content\Content;
 use MediaWiki\Content\IContentHandlerFactory;
 use MediaWiki\Content\Renderer\ContentRenderer;
+use MediaWiki\EditPage\EditPage;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
 use MediaWiki\Page\WikiPageFactory;
+use MediaWiki\Parser\ParserOutput;
 use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
-use ParserOutput;
-use SpecialPage;
-use Status;
-use Title;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
+use MediaWiki\User\TempUser\TempUserConfig;
 
 class SpecialTemplateSandbox extends SpecialPage {
+	/** @var string[] */
 	private $prefixes = [];
-
-	/**
-	 * @var null|Title
-	 */
-	private $title = null;
 
 	/**
 	 * @var null|ParserOutput
@@ -42,6 +39,9 @@ class SpecialTemplateSandbox extends SpecialPage {
 	/** @var ContentRenderer */
 	private $contentRenderer;
 
+	/** @var TempUserConfig */
+	private $tempUserConfig;
+
 	/**
 	 * @param RevisionLookup $revisionLookup
 	 * @param IContentHandlerFactory $contentHandlerFactory
@@ -52,19 +52,25 @@ class SpecialTemplateSandbox extends SpecialPage {
 		RevisionLookup $revisionLookup,
 		IContentHandlerFactory $contentHandlerFactory,
 		WikiPageFactory $wikiPageFactory,
-		ContentRenderer $contentRenderer
+		ContentRenderer $contentRenderer,
+		TempUserConfig $tempUserConfig
 	) {
 		parent::__construct( 'TemplateSandbox' );
 		$this->revisionLookup = $revisionLookup;
 		$this->contentHandlerFactory = $contentHandlerFactory;
 		$this->wikiPageFactory = $wikiPageFactory;
 		$this->contentRenderer = $contentRenderer;
+		$this->tempUserConfig = $tempUserConfig;
 	}
 
+	/** @inheritDoc */
 	protected function getGroupName() {
 		return 'wiki';
 	}
 
+	/**
+	 * @param string|null $par
+	 */
 	public function execute( $par ) {
 		$this->setHeaders();
 		$this->addHelpLink( 'Help:Extension:TemplateSandbox' );
@@ -76,9 +82,14 @@ class SpecialTemplateSandbox extends SpecialPage {
 			$request->setVal( 'page', $par );
 		}
 
-		$default_prefix = Title::makeTitle( NS_USER,
-			$this->getUser()->getName() . '/' . $this->msg( 'templatesandbox-suffix' )->plain()
-		)->getPrefixedText();
+		if ( $this->tempUserConfig->isEnabled() && $this->getUser()->isAnon() ) {
+			// Don't expose IP address for anonymous users if using temp accounts.
+			$default_prefix = null;
+		} else {
+			$default_prefix = Title::makeTitle( NS_USER,
+				$this->getUser()->getName() . '/' . $this->msg( 'templatesandbox-suffix' )->plain()
+			)->getPrefixedText();
+		}
 
 		$form = HTMLForm::factory( 'ooui', [
 			'prefix' => [
@@ -113,7 +124,7 @@ class SpecialTemplateSandbox extends SpecialPage {
 		], $this->getContext() );
 		$form->setSubmitCallback( [ $this, 'onSubmit' ] );
 		$form->setWrapperLegendMsg( 'templatesandbox-legend' );
-		$form->addHeaderText( $this->msg( 'templatesandbox-text' )->parseAsBlock() );
+		$form->addHeaderHtml( $this->msg( 'templatesandbox-text' )->parseAsBlock() );
 		$form->setSubmitTextMsg( 'templatesandbox-submit' );
 
 		$form->prepareForm();
@@ -142,12 +153,6 @@ class SpecialTemplateSandbox extends SpecialPage {
 				)
 			);
 		} elseif ( $this->output !== null ) {
-			// Wrap output in a div for proper language markup.
-			$pageLang = $this->title->getPageViewLanguage();
-			$attribs = [ 'lang' => $pageLang->getHtmlCode(), 'dir' => $pageLang->getDir(),
-				'class' => 'mw-content-' . $pageLang->getDir() ];
-			$this->output->setText( Html::rawElement( 'div', $attribs, $this->output->getRawText() ) );
-
 			// Anons have predictable edit tokens, only do the JS/CSS preview for logged-in users.
 			if ( $user->isAnon() ) {
 				$output->addHTML(
@@ -170,7 +175,7 @@ class SpecialTemplateSandbox extends SpecialPage {
 
 			$titleText = $this->output->getTitleText();
 			if ( strval( $titleText ) !== '' ) {
-				$output->setPageTitle( $this->msg( 'templatesandbox-title-output', $titleText ) );
+				$output->setPageTitleMsg( $this->msg( 'templatesandbox-title-output', $titleText ) );
 			}
 		}
 	}
@@ -282,8 +287,7 @@ class SpecialTemplateSandbox extends SpecialPage {
 		$popts->setIsSectionPreview( false );
 		$logic = new Logic( $this->prefixes, null, null );
 		$reset = $logic->setupForParse( $popts );
-		$this->title = $title;
-		$this->output = $this->contentRenderer->getParserOutput( $content, $title, $rev->getId(), $popts );
+		$this->output = $this->contentRenderer->getParserOutput( $content, $title, $rev, $popts );
 
 		return Status::newGood();
 	}

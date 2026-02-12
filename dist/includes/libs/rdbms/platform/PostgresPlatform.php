@@ -19,6 +19,8 @@
  */
 namespace Wikimedia\Rdbms\Platform;
 
+use Wikimedia\Rdbms\DBLanguageError;
+use Wikimedia\Rdbms\Query;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 
 /**
@@ -60,7 +62,7 @@ class PostgresPlatform extends SQLPlatform {
 	}
 
 	public function selectSQLText(
-		$table, $vars, $conds = '', $fname = __METHOD__, $options = [], $join_conds = []
+		$tables, $vars, $conds = '', $fname = __METHOD__, $options = [], $join_conds = []
 	) {
 		if ( is_string( $options ) ) {
 			$options = [ $options ];
@@ -79,39 +81,41 @@ class PostgresPlatform extends SQLPlatform {
 				unset( $options[$forUpdateKey] );
 				$options['FOR UPDATE'] = [];
 
-				$toCheck = $table;
+				$toCheck = $tables;
 				reset( $toCheck );
 				while ( $toCheck ) {
 					$alias = key( $toCheck );
-					$name = $toCheck[$alias];
+					$table = $toCheck[$alias];
 					unset( $toCheck[$alias] );
 
-					$hasAlias = !is_numeric( $alias );
-					if ( !$hasAlias && is_string( $name ) ) {
-						$alias = $name;
+					if ( !is_string( $alias ) ) {
+						// No alias? Set it equal to the table name
+						$alias = $table;
 					}
 
 					if ( !isset( $join_conds[$alias] ) ||
 						!preg_match( '/^(?:LEFT|RIGHT|FULL)(?: OUTER)? JOIN$/i', $join_conds[$alias][0] )
 					) {
-						if ( is_array( $name ) ) {
+						if ( is_array( $table ) ) {
 							// It's a parenthesized group, process all the tables inside the group.
-							$toCheck = array_merge( $toCheck, $name );
+							$toCheck = array_merge( $toCheck, $table );
 						} else {
-							// Quote alias names so $this->tableName() won't mangle them
-							$options['FOR UPDATE'][] = $hasAlias ?
-								$this->addIdentifierQuotes( $alias ) : $alias;
+							// If an alias is declared, then any FOR UPDATE FOR must use it
+							$options['FOR UPDATE'][] = $alias;
 						}
 					}
 				}
 			}
 
-			if ( isset( $options['ORDER BY'] ) && $options['ORDER BY'] == 'NULL' ) {
+			if (
+				isset( $options['ORDER BY'] ) &&
+				( $options['ORDER BY'] == 'NULL' || $options['ORDER BY'] == [ 'NULL' ] )
+			) {
 				unset( $options['ORDER BY'] );
 			}
 		}
 
-		return parent::selectSQLText( $table, $vars, $conds, $fname, $options, $join_conds );
+		return parent::selectSQLText( $tables, $vars, $conds, $fname, $options, $join_conds );
 	}
 
 	protected function makeSelectOptions( array $options ) {
@@ -130,8 +134,10 @@ class PostgresPlatform extends SQLPlatform {
 		$preLimitTail .= $this->makeOrderBy( $options );
 
 		if ( isset( $options['FOR UPDATE'] ) ) {
-			$postLimitTail .= ' FOR UPDATE OF ' .
-				implode( ', ', array_map( [ $this, 'tableName' ], $options['FOR UPDATE'] ) );
+			$postLimitTail .= ' FOR UPDATE OF ' . implode(
+				', ',
+				array_map( [ $this, 'addIdentifierQuotes' ], $options['FOR UPDATE'] )
+			);
 		} elseif ( isset( $noKeyOptions['FOR UPDATE'] ) ) {
 			$postLimitTail .= ' FOR UPDATE';
 		}
@@ -141,6 +147,20 @@ class PostgresPlatform extends SQLPlatform {
 		}
 
 		return [ $startOpts, $preLimitTail, $postLimitTail ];
+	}
+
+	public function getDatabaseAndTableIdentifier( string $table ) {
+		$components = $this->qualifiedTableComponents( $table );
+		switch ( count( $components ) ) {
+			case 1:
+				return [ $this->currentDomain->getDatabase(), $components[0] ];
+			case 2:
+				return [ $this->currentDomain->getDatabase(), $components[1] ];
+			case 3:
+				return [ $components[0], $components[2] ];
+			default:
+				throw new DBLanguageError( 'Too many table components' );
+		}
 	}
 
 	protected function relationSchemaQualifier() {
@@ -153,11 +173,56 @@ class PostgresPlatform extends SQLPlatform {
 	}
 
 	public function buildGroupConcatField(
-		$delim, $table, $field, $conds = '', $join_conds = []
+		$delim, $tables, $field, $conds = '', $join_conds = []
 	) {
 		$fld = "array_to_string(array_agg($field)," . $this->quoter->addQuotes( $delim ) . ')';
 
-		return '(' . $this->selectSQLText( $table, $fld, $conds, null, [], $join_conds ) . ')';
+		return '(' . $this->selectSQLText( $tables, $fld, $conds, static::CALLER_SUBQUERY, [], $join_conds ) . ')';
+	}
+
+	public function makeInsertLists( array $rows, $aliasPrefix = '', array $typeByColumn = [] ) {
+		$firstRow = $rows[0];
+		if ( !is_array( $firstRow ) || !$firstRow ) {
+			throw new DBLanguageError( 'Got an empty row list or empty row' );
+		}
+		// List of columns that define the value tuple ordering
+		$tupleColumns = array_keys( $firstRow );
+
+		$valueTuples = [];
+		foreach ( $rows as $row ) {
+			$rowColumns = array_keys( $row );
+			// VALUES(...) requires a uniform correspondence of (column => value)
+			if ( $rowColumns !== $tupleColumns ) {
+				throw new DBLanguageError(
+					'Got row columns (' . implode( ', ', $rowColumns ) . ') ' .
+					'instead of expected (' . implode( ', ', $tupleColumns ) . ')'
+				);
+			}
+			// Make the value tuple that defines this row
+			$typedRowValues = [];
+			foreach ( $row as $column => $value ) {
+				$type = $typeByColumn[$column] ?? null;
+				if ( $value === null ) {
+					$typedRowValues[] = 'NULL';
+				} elseif ( $type !== null ) {
+					$typedRowValues[] = $this->quoter->addQuotes( $value ) . '::' . $type;
+				} else {
+					$typedRowValues[] = $this->quoter->addQuotes( $value );
+				}
+			}
+			$valueTuples[] = '(' . implode( ',', $typedRowValues ) . ')';
+		}
+
+		$magicAliasFields = [];
+		foreach ( $tupleColumns as $column ) {
+			$magicAliasFields[] = $aliasPrefix . $column;
+		}
+
+		return [
+			$this->makeList( $tupleColumns, self::LIST_NAMES ),
+			implode( ',', $valueTuples ),
+			$this->makeList( $magicAliasFields, self::LIST_NAMES )
+		];
 	}
 
 	protected function makeInsertNonConflictingVerbAndOptions() {
@@ -172,9 +237,9 @@ class PostgresPlatform extends SQLPlatform {
 		return parent::makeUpdateOptionsArray( $options );
 	}
 
-	public function isTransactableQuery( $sql ) {
+	public function isTransactableQuery( Query $sql ) {
 		return parent::isTransactableQuery( $sql ) &&
-			!preg_match( '/^SELECT\s+pg_(try_|)advisory_\w+\(/', $sql );
+			!preg_match( '/^SELECT\s+pg_(try_|)advisory_\w+\(/', $sql->getSQL() );
 	}
 
 	public function lockSQLText( $lockName, $timeout ) {
@@ -190,7 +255,7 @@ class PostgresPlatform extends SQLPlatform {
 		// http://www.postgresql.org/docs/9.2/static/functions-admin.html#FUNCTIONS-ADVISORY-LOCKS
 		$key = $this->quoter->addQuotes( $this->bigintFromLockName( $lockName ) );
 		return "SELECT (CASE(pg_try_advisory_lock($key))
-			WHEN 'f' THEN 'f' ELSE pg_advisory_unlock($key) END) AS unlocked";
+			WHEN FALSE THEN FALSE ELSE pg_advisory_unlock($key) END) AS unlocked";
 	}
 
 	public function unlockSQLText( $lockName ) {

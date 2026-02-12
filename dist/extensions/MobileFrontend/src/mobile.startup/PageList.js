@@ -1,4 +1,4 @@
-var util = require( './util.js' ),
+const util = require( './util.js' ),
 	mfExtend = require( './mfExtend' ),
 	View = require( './View' ),
 	browser = require( './Browser' ).getSingleton();
@@ -7,7 +7,7 @@ var util = require( './util.js' ),
  * List of items page view
  *
  * @class PageList
- * @extends View
+ * @extends module:mobile.startup/View
  */
 function PageList() {
 	View.apply( this, arguments );
@@ -17,7 +17,7 @@ mfExtend( PageList, View, {
 	/**
 	 * @memberof PageList
 	 * @instance
-	 * @mixes View#defaults
+	 * @mixes module:mobile.startup/View#defaults
 	 * @property {Object} defaults Default options hash.
 	 * @property {Page[]} defaults.pages Array of Page objects. These should match
 	 *                              the Page model and not necessarily the
@@ -47,12 +47,12 @@ mfExtend( PageList, View, {
 	 * @memberof PageList
 	 * @instance
 	 */
-	renderPageImages: function () {
-		var self = this;
+	renderPageImages() {
+		const self = this;
 
-		setTimeout( function () {
+		setTimeout( () => {
 			self.$el.find( '.list-thumb' ).each( function () {
-				var style = self.$el.find( this ).data( 'style' );
+				const style = self.$el.find( this ).data( 'style' );
 				self.$el.find( this ).attr( 'style', style );
 			} );
 			// Delay an unnecessary load of images on mobile (slower?) connections
@@ -64,11 +64,11 @@ mfExtend( PageList, View, {
 	 * @memberof PageList
 	 * @instance
 	 */
-	postRender: function () {
+	postRender() {
 		this.renderPageImages();
 	},
 	template: util.template( `
-<ul class="page-list thumbs actionable">
+<ul class="mw-mf-page-list thumbs actionable">
 	{{#pages}}
 		{{>item}}
 	{{/pages}}
@@ -89,17 +89,15 @@ mfExtend( PageList, View, {
     {{#latitude}}data-latlng="{{latitude}},{{longitude}}"{{/latitude}}
     data-title="{{title}}">
     <div class="list-thumb
-      {{^thumbnail}}list-thumb-none list-thumb-x{{/thumbnail}}
       {{#thumbnail.isLandscape}}list-thumb-y{{/thumbnail.isLandscape}}
       {{^thumbnail.isLandscape}}list-thumb-x{{/thumbnail.isLandscape}}"
-      {{#thumbnail}}data-style="background-image: url( {{thumbnail.source}} )"{{/thumbnail}}></div>
+      {{#thumbnail}}data-style="background-image: url( {{thumbnail.source}} )"{{/thumbnail}}>
+      {{^thumbnail}}<span class="mf-icon-image"></span>{{/thumbnail}}
+	</div>
     <h3>{{{displayTitle}}}</h3>
     {{#wikidataDescription}}
     <div class="wikidata-description">{{wikidataDescription}}</div>
     {{/wikidataDescription}}
-    {{#lastModified}}
-    <div class="info">{{lastModified}}</div>
-    {{/lastModified}}
     {{#proximity}}
     <div class="info proximity">{{proximity}}</div>
     {{/proximity}}

@@ -1,4 +1,4 @@
-# 18) Keep Wikibase master compatible with last stable Mediawiki Core {#adr_0018}
+# 18) Keep Wikibase master compatible with last stable MediaWiki Core {#adr_0018}
 
 Date: 2021-04-28
 
@@ -8,7 +8,7 @@ Date: 2021-04-28
 
 ## Context
 
-Wikibase is currently only tested to be compatible with Mediawiki core and other MediaWiki extensions for:
+Wikibase is currently only tested to be compatible with MediaWiki core and other MediaWiki extensions for:
 - sets of commits that are the HEAD of the master branch at one point in time
 - cut releases: either for the alpha, weekly train releases (i.e. releases delivered on WMF wikis), or the twice-yearly(ish) official MediaWiki releases
 
@@ -29,7 +29,7 @@ To ensure this compatibility there are two options:
 
 Doing the backporting results in leaving a possibly unknown amount of work for whoever is to make the release and adds lots of uncertainty.
 The additional backporting effort will need to be repeated for all upcoming Wikibase releases.
-This approach also means maintaing two different (even if only in the sense of git history) versions of the same functionality.
+This approach also means maintaining two different (even if only in the sense of git history) versions of the same functionality.
 
 Keeping Wikibase compatible with last stable MediaWiki adds to every developer's workload.
 It may result in having to delay using new features in MediaWiki or having to write a compatibility layer in order to use them.
@@ -42,7 +42,7 @@ The overhead of the additional development effort will possibly be increasingly 
 the more code has been written that way, and the more Wikibase releases have been published following this approach.
 
 Keeping Wikibase compatible with last stable MediaWiki would likely mean avoiding the "double work" effort
-of developing the feature against the master branch, and "backporting" it to be compatible with the last stable version of Mediawiki
+of developing the feature against the master branch, and "backporting" it to be compatible with the last stable version of MediaWiki
 needed for the Wikibase release for non-WMF users.
 
 ## Decision

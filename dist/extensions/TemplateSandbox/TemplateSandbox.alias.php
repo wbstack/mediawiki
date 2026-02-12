@@ -163,12 +163,12 @@ $specialPageAliases['sk'] = [
 	'TemplateSandbox' => [ 'ŠablónovéPieskovisko' ],
 ];
 
-/** Serbian (Cyrillic script) (српски (ћирилица)‎) */
+/** Serbian (Cyrillic script) (српски (ћирилица)) */
 $specialPageAliases['sr-ec'] = [
 	'TemplateSandbox' => [ 'Песак_за_шаблоне' ],
 ];
 
-/** Serbian (Latin script) (srpski (latinica)‎) */
+/** Serbian (Latin script) (srpski (latinica)) */
 $specialPageAliases['sr-el'] = [
 	'TemplateSandbox' => [ 'Pesak_za_šablone' ],
 ];
@@ -198,12 +198,12 @@ $specialPageAliases['yi'] = [
 	'TemplateSandbox' => [ 'מוסטער־זאמדקאסטן' ],
 ];
 
-/** Simplified Chinese (中文（简体）‎) */
+/** Simplified Chinese (中文（简体）) */
 $specialPageAliases['zh-hans'] = [
 	'TemplateSandbox' => [ '模板沙盒' ],
 ];
 
-/** Traditional Chinese (中文（繁體）‎) */
+/** Traditional Chinese (中文（繁體）) */
 $specialPageAliases['zh-hant'] = [
 	'TemplateSandbox' => [ '模板沙盒' ],
 ];

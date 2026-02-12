@@ -36,6 +36,9 @@
 				$text: '.wikibase-labelview-text'
 			},
 			value: null,
+			allLanguages: function () {
+				return {};
+			},
 			inputNodeName: 'TEXTAREA',
 			helpMessage: mw.msg( 'wikibase-label-input-help-message' ),
 			showEntityId: false
@@ -98,6 +101,42 @@
 			}
 		},
 
+		_getPlaceholderLabel: function ( languageCode ) {
+			if ( !wb.fallbackChains || wb.fallbackChains.length !== undefined ) {
+				return null;
+			}
+			var chain = wb.fallbackChains[ languageCode ];
+
+			if ( !chain ) {
+				// If language is unknown, e.g. ?uselang=qqx,
+				return null;
+			}
+
+			if ( chain[ chain.length - 1 ] === 'en' ) {
+				// Remove implicit fallback to English. This only works if `mul` is enabled and in the chain.
+				chain = chain.slice( 0, -1 );
+			}
+
+			// TODO: should be a for-of loop as soon as we can use #ES6
+			for ( var i = 0; i < chain.length; i++ ) {
+				var langCode = chain[ i ];
+				if ( this.options.allLanguages().hasItemForKey( langCode ) ) {
+					return this.options.allLanguages().getItemByKey( langCode );
+				}
+			}
+			return null;
+		},
+
+		_getLanguageAwareInputPlaceholder: function ( languageCode ) {
+			if ( languageCode === 'mul' ) {
+				return mw.msg( 'wikibase-label-edit-placeholder-mul' );
+			}
+			return mw.msg(
+				'wikibase-label-edit-placeholder-language-aware',
+				wb.getLanguageNameByCodeForTerms( languageCode )
+			);
+		},
+
 		/**
 		 * @inheritdoc
 		 */
@@ -114,13 +153,20 @@
 			this.element.toggleClass( 'wb-empty', !labelText );
 
 			if ( !this.isInEditMode() && !labelText ) {
-				this.$text.text( mw.msg( 'wikibase-label-empty' ) );
-				// Apply lang and dir of UI language
-				// instead language of that row
-				var userLanguage = mw.config.get( 'wgUserLanguage' );
+				var placeholderTerm = self._getPlaceholderLabel( languageCode );
+				var text;
+				var textLanguage;
+				if ( placeholderTerm === null ) {
+					text = mw.msg( 'wikibase-label-empty' );
+					textLanguage = mw.config.get( 'wgUserLanguage' );
+				} else {
+					text = placeholderTerm.getText();
+					textLanguage = placeholderTerm.getLanguageCode();
+				}
+				this.$text.text( text );
 				this.element
-				.attr( 'lang', userLanguage )
-				.attr( 'dir', $.util.getDirectionality( userLanguage ) );
+					.attr( 'lang', textLanguage )
+					.attr( 'dir', $.util.getDirectionality( textLanguage ) );
 				return deferred.resolve().promise();
 			}
 
@@ -134,14 +180,15 @@
 			}
 
 			var $input = $( document.createElement( this.options.inputNodeName ) );
+			var inputPlaceholder = this._getLanguageAwareInputPlaceholder( languageCode );
+			if ( !labelText && this._getPlaceholderLabel( languageCode ) !== null ) {
+				inputPlaceholder = this._getPlaceholderLabel( languageCode ).getText();
+			}
 
 			$input
 			.addClass( this.widgetFullName + '-input' )
 			// TODO: Inject correct placeholder via options
-			.attr( 'placeholder', mw.msg(
-				'wikibase-label-edit-placeholder-language-aware',
-				wb.getLanguageNameByCode( languageCode )
-			) )
+			.attr( 'placeholder', inputPlaceholder )
 			.attr( 'lang', languageCode )
 			.attr( 'dir', $.util.getDirectionality( languageCode ) )
 			.on( 'keydown.' + this.widgetName, function ( event ) {

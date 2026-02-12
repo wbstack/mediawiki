@@ -1,8 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
+			"Kimberli Mäkäräinen (WMNO)",
 			"Yupik"
 		]
 	},
-	"twocolconflict-split-reset-warning-cancel": "Šluhtte"
+	"twocolconflictprovidesubmittedtext": "Ovttaáigásaš rievdadeapmi:",
+	"twocolconflict-split-tour-popup-btn-text": "Ok, ipmirdin.",
+	"twocolconflict-split-reset-warning-cancel": "Gaskkalduhte"
 }

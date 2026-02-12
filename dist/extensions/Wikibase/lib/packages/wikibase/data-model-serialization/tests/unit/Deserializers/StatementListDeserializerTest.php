@@ -28,12 +28,12 @@ class StatementListDeserializerTest extends TestCase {
 			->with( $this->equalTo( [
 				'mainsnak' => [
 					'snaktype' => 'novalue',
-					'property' => 'P42'
+					'property' => 'P42',
 				],
 				'type' => 'statement',
-				'rank' => 'normal'
+				'rank' => 'normal',
 			] ) )
-			->will( $this->returnValue( $statement ) );
+			->willReturn( $statement );
 
 		return new StatementListDeserializer( $statementDeserializerMock );
 	}
@@ -48,20 +48,20 @@ class StatementListDeserializerTest extends TestCase {
 		$deserializer->deserialize( $nonDeserializable );
 	}
 
-	public function nonDeserializableProvider() {
+	public static function nonDeserializableProvider() {
 		return [
 			[
-				42
+				42,
 			],
 			[
 				[
-					'id' => 'P10'
-				]
+					'id' => 'P10',
+				],
 			],
 			[
 				[
-					'type' => '42'
-				]
+					'type' => '42',
+				],
 			],
 		];
 	}
@@ -73,14 +73,14 @@ class StatementListDeserializerTest extends TestCase {
 		$this->assertEquals( $object, $this->buildDeserializer()->deserialize( $serialization ) );
 	}
 
-	public function deserializationProvider() {
+	public static function deserializationProvider() {
 		$statement = new Statement( new PropertyNoValueSnak( 42 ) );
 		$statement->setGuid( 'test' );
 
 		return [
 			[
 				new StatementList(),
-				[]
+				[],
 			],
 			[
 				new StatementList( $statement ),
@@ -89,13 +89,13 @@ class StatementListDeserializerTest extends TestCase {
 						[
 							'mainsnak' => [
 								'snaktype' => 'novalue',
-								'property' => 'P42'
+								'property' => 'P42',
 							],
 							'type' => 'statement',
-							'rank' => 'normal'
-						]
-					]
-				]
+							'rank' => 'normal',
+						],
+					],
+				],
 			],
 		];
 	}

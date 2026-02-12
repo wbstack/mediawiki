@@ -1,5 +1,11 @@
 <?php
 
+use MediaWiki\Extension\ConfirmEdit\CaptchaTriggers;
+use MediaWiki\Extension\ConfirmEdit\Hooks as CaptchaHooks;
+use MediaWiki\Html\Html;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\Request\WebRequestUpload;
+use MediaWiki\Title\Title;
 use MediaWiki\User\UserFactory;
 
 class RequestAccountPage extends SpecialPage {
@@ -110,7 +116,7 @@ class RequestAccountPage extends SpecialPage {
 		$out->setPageTitle( $this->msg( "requestaccount" )->escaped() );
 		# Output failure message if any
 		if ( $msg ) {
-			$out->addHTML( '<div class="errorbox">' . $msg . '</div><div class="visualClear"></div>' );
+			$out->addHTML( Html::errorBox( $msg ) );
 		}
 		# Give notice to users that are logged in
 		if ( $reqUser->getID() ) {
@@ -194,6 +200,7 @@ class RequestAccountPage extends SpecialPage {
 			$form .= '<fieldset>';
 			$form .= '<legend>' . $this->msg( 'requestaccount-leg-person' )->escaped() . '</legend>';
 			if ( $this->hasItem( 'RealName' ) ) {
+				$form .= $this->msg( 'requestaccount-real-i' )->parseAsBlock() . "\n";
 				$form .= '<table style="padding:4px;">';
 				$form .= "<tr><td>" . Xml::label(
 					$this->msg( 'requestaccount-real' )->text(), 'wpRealName'
@@ -250,23 +257,27 @@ class RequestAccountPage extends SpecialPage {
 			$form .= '</fieldset>';
 		}
 
-		# FIXME: do this better...
-		global $wgConfirmAccountCaptchas, $wgCaptchaClass, $wgCaptchaTriggers;
-		if ( $wgConfirmAccountCaptchas && isset( $wgCaptchaClass )
-			&& $wgCaptchaTriggers['createaccount'] && !$reqUser->isAllowed( 'skipcaptcha' ) ) {
-			/** @var SimpleCaptcha $captcha */
-			$captcha = new $wgCaptchaClass;
+		$config = $this->getConfig();
+		if (
+			$config->get( 'ConfirmAccountCaptchas' ) &&
+			ExtensionRegistry::getInstance()->isLoaded( 'ConfirmEdit' )
+		) {
+			$captcha = CaptchaHooks::getInstance( CaptchaTriggers::CREATE_ACCOUNT );
+			if (
+				!$captcha->canSkipCaptcha( $reqUser, $config ) &&
+				$captcha->triggersCaptcha( CaptchaTriggers::CREATE_ACCOUNT )
+			) {
+				$formInformation = $captcha->getFormInformation();
+				$formMetainfo = $formInformation;
+				unset( $formMetainfo['html'] );
+				$captcha->addFormInformationToOutput( $out, $formMetainfo );
 
-			$formInformation = $captcha->getFormInformation();
-			$formMetainfo = $formInformation;
-			unset( $formMetainfo['html'] );
-			$captcha->addFormInformationToOutput( $out, $formMetainfo );
-
-			# Hook point to add captchas
-			$form .= '<fieldset>';
-			$form .= $this->msg( 'captcha-createaccount' )->parseAsBlock();
-			$form .= $formInformation['html'];
-			$form .= '</fieldset>';
+				# Hook point to add captchas
+				$form .= '<fieldset>';
+				$form .= $this->msg( 'captcha-createaccount' )->parseAsBlock();
+				$form .= $formInformation['html'];
+				$form .= '</fieldset>';
+			}
 		}
 		$form .= Html::hidden( 'title', $this->getPageTitle()->getPrefixedDBKey() ) . "\n";
 		$form .= Html::hidden( 'wpEditToken', $reqUser->getEditToken() ) . "\n";
@@ -305,7 +316,7 @@ class RequestAccountPage extends SpecialPage {
 			$wgCaptchaTriggers['createaccount'] = false;
 		}
 		$abortError = '';
-		if ( !Hooks::run( 'AbortNewAccount', [ $u, &$abortError ] ) ) {
+		if ( !$this->getHookContainer()->run( 'AbortNewAccount', [ $u, &$abortError ] ) ) {
 			// Hook point to add extra creation throttles and blocks
 			wfDebug( "RequestAccount::doSubmit: a hook blocked creation\n" );
 			$this->showForm( $abortError );
@@ -349,7 +360,7 @@ class RequestAccountPage extends SpecialPage {
 		);
 
 		# Actually submit!
-		list( $status, $msg ) = $submission->submit( $this->getContext() );
+		[ $status, $msg ] = $submission->submit( $this->getContext() );
 		# Account for state changes
 		$this->mForgotAttachment = $submission->getAttachmentDidNotForget();
 		$this->mPrevAttachment = $submission->getAttachtmentPrevName();
@@ -393,8 +404,8 @@ class RequestAccountPage extends SpecialPage {
 		$reqUser = $this->getUser();
 		$out = $this->getOutput();
 		# Confirm if this token is in the pending requests
-		list( $bodyArguments, $name,
-			$email_authenticated ) = ConfirmAccount::requestInfoFromEmailToken( $code );
+		[ $bodyArguments, $name,
+			$email_authenticated ] = ConfirmAccount::requestInfoFromEmailToken( $code );
 		if ( $name && $email_authenticated === null ) {
 			# Send confirmation email to prospective user
 			ConfirmAccount::confirmEmail( $name );
@@ -429,7 +440,7 @@ class RequestAccountPage extends SpecialPage {
 			$out->returnToMain();
 		} else {
 			# Maybe the user confirmed after account was created...
-			$user = $this->userFactory->newFromConfirmationCode( $code, UserFactory::READ_LATEST );
+			$user = $this->userFactory->newFromConfirmationCode( $code, IDBAccessObject::READ_LATEST );
 			if ( is_object( $user ) ) {
 				$user->confirmEmail();
 				$user->saveSettings();

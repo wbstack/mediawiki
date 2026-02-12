@@ -7,12 +7,13 @@ module.exports = function ( grunt ) {
 	grunt.loadNpmTasks( 'grunt-karma' );
 
 	grunt.initConfig( {
-		eslint: {
-			options: {
-				cache: true
-			},
-			all: '.'
-		},
+                eslint: {
+                        options: {
+                                fix: grunt.option( 'fix' ),
+                                cache: true
+                        },
+                        all: '.'
+                },
 		banana: {
 			options: {
 				requireCompleteMessageDocumentation: false,
@@ -39,6 +40,7 @@ module.exports = function ( grunt ) {
 
 					'lib/jquery/jquery.PurposedCallbacks.js',
 					'lib/jquery/*.js',
+					'lib/jquery/*.css',
 					'lib/jquery.event/*.js',
 					'lib/jquery.util/*.js',
 					'lib/util/*.js',

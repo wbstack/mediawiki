@@ -1,5 +1,5 @@
+@import 'mediawiki.skin.variables.less';
 @import 'mediawiki.mixins.less';
-@import 'mediawiki.ui/variables.less';
 
 .mw-rcfilters-ui-filterTagMultiselectWidget-mobile {
 
@@ -15,7 +15,7 @@
 			background-color: @background-color-base;
 			font-weight: bold;
 			cursor: pointer;
-			.mixin-placeholder( { color: @color-base--emphasized; } );
+			.mixin-placeholder( { color: @color-emphasized; } );
 		}
 	}
 
@@ -28,7 +28,6 @@
 
 			& .oo-ui-buttonElement-button {
 				width: 100%;
-				/* stylelint-disable-next-line plugin/no-unsupported-browser-features */
 				text-align: initial;
 			}
 		}

@@ -2,25 +2,30 @@
 
 namespace MediaWiki\Extension\WikibaseManifest;
 
+use Config;
 use MediaWiki\Extension\OAuth\Backend\Utils;
 use MediaWiki\Extension\OAuth\Frontend\SpecialPages\SpecialMWOAuthConsumerRegistration;
 use WikiMap;
 
 class SpecialPageOAuthUrl implements OAuthUrl {
 
+	private Config $config;
 	private $specialPage;
 
-	public function __construct( SpecialMWOAuthConsumerRegistration $specialPage = null ) {
+	public function __construct(
+		Config $config,
+		?SpecialMWOAuthConsumerRegistration $specialPage = null
+	) {
+		$this->config = $config;
 		$this->specialPage = $specialPage;
 	}
 
 	public function getValue(): string {
-		global $wgMWOAuthCentralWiki;
 		if ( Utils::isCentralWiki() ) {
 				$url = $this->specialPage->getPageTitle()->getFullURL();
 		} else {
 				$url = WikiMap::getForeignURL(
-					$wgMWOAuthCentralWiki,
+					$this->config->get( 'MWOAuthCentralWiki' ),
 					'Special:OAuthConsumerRegistration'
 				);
 		}

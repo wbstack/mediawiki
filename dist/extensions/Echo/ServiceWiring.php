@@ -1,14 +1,22 @@
 <?php
 
+use MediaWiki\Extension\Notifications\AttributeManager;
+use MediaWiki\Extension\Notifications\Cache\RevisionLocalCache;
+use MediaWiki\Extension\Notifications\Cache\TitleLocalCache;
 use MediaWiki\Extension\Notifications\Push\NotificationServiceClient;
 use MediaWiki\Extension\Notifications\Push\SubscriptionManager;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Storage\NameTableStore;
 
+// PHP unit does not understand code coverage for this file
+// as the @covers annotation cannot cover a specific file.
+// Whether the services return without error is checked in ServiceWiringTest.php
+// @codeCoverageIgnoreStart
+
 return [
 
-	'EchoAttributeManager' => static function ( MediaWikiServices $services ): EchoAttributeManager {
+	'EchoAttributeManager' => static function ( MediaWikiServices $services ): AttributeManager {
 		$userGroupManager = $services->getUserGroupManager();
 		$echoConfig = $services->getConfigFactory()->makeConfig( 'Echo' );
 		$notifications = $echoConfig->get( 'EchoNotifications' );
@@ -16,7 +24,7 @@ return [
 		$typeAvailability = $echoConfig->get( 'DefaultNotifyTypeAvailability' );
 		$typeAvailabilityByCategory = $echoConfig->get( 'NotifyTypeAvailabilityByCategory' );
 
-		return new EchoAttributeManager(
+		return new AttributeManager(
 			$notifications,
 			$categories,
 			$typeAvailability,
@@ -46,8 +54,8 @@ return [
 		$loadBalancer = $cluster
 			? $loadBalancerFactory->getExternalLB( $cluster )
 			: $loadBalancerFactory->getMainLB( $database );
-		$dbw = $loadBalancer->getConnectionRef( DB_PRIMARY, [], $database );
-		$dbr = $loadBalancer->getConnectionRef( DB_REPLICA, [], $database );
+		$dbw = $loadBalancer->getConnection( DB_PRIMARY, [], $database );
+		$dbr = $loadBalancer->getConnection( DB_REPLICA, [], $database );
 
 		$pushProviderStore = new NameTableStore(
 			$loadBalancer,
@@ -80,6 +88,22 @@ return [
 			$pushTopicStore,
 			$maxSubscriptionsPerUser
 		);
+	},
+
+	'EchoTitleLocalCache' => static function ( MediaWikiServices $services ): TitleLocalCache {
+		return new TitleLocalCache(
+			$services->getPageStore(),
+			$services->getTitleFactory()
+		);
+	},
+
+	'EchoRevisionLocalCache' => static function ( MediaWikiServices $services ): RevisionLocalCache {
+		return new RevisionLocalCache(
+			$services->getConnectionProvider(),
+			$services->getRevisionStore()
+		);
 	}
 
 ];
+
+// @codeCoverageIgnoreEnd

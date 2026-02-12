@@ -10,7 +10,8 @@
 			"SeoJeongHo",
 			"Ykhwong",
 			"렌즈",
-			"밝은소년"
+			"밝은소년",
+			"아라"
 		]
 	},
 	"twocolconflict": "단락 기반 편집 충돌",
@@ -27,7 +28,7 @@
 	"twocolconflict-core-ui-hint-close": "다시는 보지 않기",
 	"twocolconflict-preference-enabled": "[[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|단락 기반 편집 충돌 인터페이스]]를 사용하여 편집 충돌 해결",
 	"twocolconflict-special-footer-hint": "편집 충돌 인터페이스로 돌아가려면 현재 페이지를 닫습니다.",
-	"twocolconflict-special-header-overview": "편집하는 동안 다른 사용자가 같은 페이지를 편집하여 당신보다 먼저 게시했습니다. 아래에 당신의 판의 보기 전용 복사본이 보존되어 있습니다. 편집 충돌 인터페이스의 변경 사항은 반영되지 않습니다. 편집 충돌 인터페이스를 사용하여 변경 사항을 병합하고 문제를 해결하려면 이전 탭으로 돌아가십시오.",
+	"twocolconflict-special-header-overview": "편집하는 동안 다른 사용자가 같은 페이지를 편집하여 당신보다 먼저 게시했습니다. 아래에 당신의 판의 보기 전용 복사본이 보존되어 있습니다. 편집 충돌 인터페이스의 변경사항은 반영되지 않습니다. 편집 충돌 인터페이스를 사용하여 변경사항을 병합하고 문제를 해결하려면 이전 탭으로 돌아가십시오.",
 	"twocolconflict-special-not-saved": "게시되지 않음",
 	"twocolconflict-special-textarea-hint": "당신의 판의 원본을 보고 복사할 수 있습니다:",
 	"twocolconflict-special-malformed-title": "존재하지 않거나 유효하지 않은 제목입니다.",
@@ -52,9 +53,9 @@
 	"twocolconflict-split-tour-popup3-header": "강조 표시된 텍스트",
 	"twocolconflict-split-tour-popup3-message": "두 버전의 줄에서 변경된 텍스트가 강조 표시됩니다. 텍스트를 편집하면 강조 표시가 사라집니다.",
 	"twocolconflict-split-edit-tooltip": "이 텍스트를 편집하려면 클릭",
-	"twocolconflict-split-save-tooltip": "이 텍스트의 변경 사항을 적용",
-	"twocolconflict-split-reset-tooltip": "이 텍스트의 모든 변경 사항 버림",
-	"twocolconflict-split-reset-warning": "변경 사항을 버리시겠습니까? 이 상자의 텍스트는 편집 충돌이 발생했던 시점으로 초기화됩니다.",
+	"twocolconflict-split-save-tooltip": "이 텍스트의 변경사항을 적용",
+	"twocolconflict-split-reset-tooltip": "이 텍스트의 모든 변경사항을 버림",
+	"twocolconflict-split-reset-warning": "변경사항을 버리시겠습니까? 이 상자의 텍스트는 편집 충돌이 발생했던 시점으로 초기화됩니다.",
 	"twocolconflict-split-reset-warning-cancel": "취소",
 	"twocolconflict-split-reset-warning-accept": "버리기",
 	"twocolconflict-split-collapse-tooltip": "바뀌지 않은 텍스트 접기",

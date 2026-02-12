@@ -1,20 +1,31 @@
 <?php
 
+namespace MediaWiki\Extension\Notifications;
+
+use CentralAuthSessionProvider;
+use Exception;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Request\FauxRequest;
+use MediaWiki\Request\WebRequest;
 use MediaWiki\Session\SessionManager;
+use MediaWiki\User\CentralId\CentralIdLookup;
+use MediaWiki\User\User;
 use MediaWiki\User\UserIdentity;
+use MediaWiki\WikiMap\WikiMap;
+use MWExceptionHandler;
 
-class EchoForeignWikiRequest {
+class ForeignWikiRequest {
 
 	/** @var User */
 	protected $user;
 
-	/** @var array */
-	protected $params;
+	protected array $params;
 
-	/** @var array */
-	protected $wikis;
+	/** @var string[] */
+	protected array $wikis;
 
 	/** @var string|null */
 	protected $wikiParam;
@@ -31,7 +42,7 @@ class EchoForeignWikiRequest {
 	/**
 	 * @param User $user
 	 * @param array $params Request parameters
-	 * @param array $wikis Wikis to send the request to
+	 * @param string[] $wikis Wikis to send the request to
 	 * @param string|null $wikiParam Parameter name to set to the name of the wiki
 	 * @param string|null $postToken If set, use POST requests and inject a token of this type;
 	 *  if null, use GET requests.
@@ -129,19 +140,23 @@ class EchoForeignWikiRequest {
 	 *
 	 * @param string $wiki Name of the wiki to get a token for
 	 * @param WebRequest|null $originalRequest Original request data to be sent with these requests
-	 * @suppress PhanTypeInvalidCallableArraySize getRequestParams can take an array, too (phan bug)
 	 * @return string Token, or empty string if an unable to retrieve the token.
 	 */
 	protected function getCsrfToken( $wiki, ?WebRequest $originalRequest ) {
 		if ( $this->csrfTokens === null ) {
 			$this->csrfTokens = [];
-			$reqs = $this->getRequestParams( 'GET', [
-				'action' => 'query',
-				'meta' => 'tokens',
-				'type' => $this->tokenType,
-				'format' => 'json',
-				'centralauthtoken' => $this->getCentralAuthToken( $this->user ),
-			], $originalRequest );
+			$reqs = $this->getRequestParams( 'GET', function ( string $wiki ) {
+				// This doesn't depend on the wiki, but 'centralauthtoken' must be different every time
+				return [
+					'action' => 'query',
+					'meta' => 'tokens',
+					'type' => $this->tokenType,
+					'format' => 'json',
+					'formatversion' => '1',
+					'errorformat' => 'bc',
+					'centralauthtoken' => $this->getCentralAuthToken( $this->user ),
+				];
+			}, $originalRequest );
 			$responses = $this->doRequests( $reqs );
 			foreach ( $responses as $w => $response ) {
 				if ( isset( $response['query']['tokens']['csrftoken'] ) ) {
@@ -162,13 +177,13 @@ class EchoForeignWikiRequest {
 
 	/**
 	 * @param string $method 'GET' or 'POST'
-	 * @param array|callable $params Associative array of query string / POST parameters,
-	 *  or a callback that takes a wiki name and returns such an array
+	 * @param callable $makeParams Callback that takes a wiki name and returns an associative array of
+	 *  query string / POST parameters
 	 * @param WebRequest|null $originalRequest Original request data to be sent with these requests
 	 * @return array[] Array of request parameters to pass to doRequests(), keyed by wiki name
 	 */
-	protected function getRequestParams( $method, $params, ?WebRequest $originalRequest ) {
-		$apis = EchoForeignNotifications::getApiEndpoints( $this->wikis );
+	protected function getRequestParams( $method, $makeParams, ?WebRequest $originalRequest ) {
+		$apis = ForeignNotifications::getApiEndpoints( $this->wikis );
 		if ( !$apis ) {
 			return [];
 		}
@@ -179,7 +194,7 @@ class EchoForeignWikiRequest {
 			$reqs[$wiki] = [
 				'method' => $method,
 				'url' => $api['url'],
-				$queryKey => is_callable( $params ) ? $params( $wiki ) : $params
+				$queryKey => $makeParams( $wiki )
 			];
 
 			if ( $originalRequest ) {
@@ -187,7 +202,7 @@ class EchoForeignWikiRequest {
 					'X-Forwarded-For' => $originalRequest->getIP(),
 					'User-Agent' => (
 						$originalRequest->getHeader( 'User-Agent' )
-						. ' (via EchoForeignWikiRequest MediaWiki/' . MW_VERSION . ')'
+						. ' (via ForeignWikiRequest MediaWiki/' . MW_VERSION . ')'
 					),
 				];
 			}
@@ -220,6 +235,8 @@ class EchoForeignWikiRequest {
 			// results in the format the user requested but in a fixed format that
 			// we can interpret here
 			'format' => 'json',
+			'formatversion' => '1',
+			'errorformat' => 'bc',
 		] + $extraParams + $this->params;
 	}
 
@@ -245,9 +262,11 @@ class EchoForeignWikiRequest {
 
 			if ( !isset( $results[$wiki] ) ) {
 				LoggerFactory::getInstance( 'Echo' )->warning(
-					'Failed to fetch API response from {wiki}. Error code {code}',
+					'Failed to fetch API response from {wiki}. Error: {error}',
 					[
 						'wiki' => $wiki,
+						'error' => $response['response']['error'] ?? 'unknown',
+						'statusCode' => $statusCode,
 						'response' => $response['response'],
 						'request' => $reqs[$wiki],
 					]

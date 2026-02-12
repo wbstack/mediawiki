@@ -88,12 +88,6 @@ $languageNames = [
 	 */
 	// 'de-formal' => 'German (formal address)',
 
-	/* Not in CLDR 27.0.1. Swedish language
-	 * https://www.ethnologue.com/language/dlc
-	 * Added 2008-02-16.
-	 */
-	// 'dlc' => 'Dalecarlian',
-
 	/* Not in CLDR 27.0.1. Central Dusun language
 	 * https://www.ethnologue.com/language/dtp
 	 * Added 2011-04-16.
@@ -290,7 +284,6 @@ $languageNames = [
 	 */
 	'ruq' => 'مگلنو رومانی',
 	'ruq-cyrl' => 'مگلنو رومانی (خط سرلیک)',
-	'ruq-grek' => 'مگلنو رومانی (خط یونانی)',
 	'ruq-latn' => 'مگلنو رومانی (خط لاتین)',
 
 	/* Not in CLDR 27.0.1.
@@ -312,8 +305,10 @@ $languageNames = [
 
 	/* Not in CLDR 27.0.1. Used for MediaWiki localisation
 	 */
+	'sr-cyrl' => 'صربی (خط سرلیک)',
 	'sr-ec' => 'صربی (خط سرلیک)',
 	'sr-el' => 'صربی (خط لاتین)',
+	'sr-latn' => 'صربی (خط لاتین)',
 
 	/* Not in CLDR 27.0.1. Tulu language
 	 * https://iso639-3.sil.org/code/tcy

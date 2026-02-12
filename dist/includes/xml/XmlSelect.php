@@ -20,13 +20,21 @@
  * @file
  */
 
+namespace MediaWiki\Xml;
+
+use MediaWiki\Html\Html;
+
 /**
  * Class for generating HTML <select> or <datalist> elements.
  */
 class XmlSelect {
+	/** @var array[] */
 	protected $options = [];
+	/** @var string|array|false */
 	protected $default = false;
+	/** @var string|array */
 	protected $tagName = 'select';
+	/** @var (string|int)[] */
 	protected $attributes = [];
 
 	public function __construct( $name = false, $id = false, $default = false ) {
@@ -151,9 +159,11 @@ class XmlSelect {
 				$option = "$option:$option";
 			}
 			// Extract the two parts.
-			list( $label, $value ) = explode( ':', $option );
+			[ $label, $value ] = explode( ':', $option );
 			$options[ trim( $label ) ] = trim( $value );
 		}
 		return $options;
 	}
 }
+/** @deprecated class alias since 1.43 */
+class_alias( XmlSelect::class, 'XmlSelect' );

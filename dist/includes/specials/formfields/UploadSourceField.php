@@ -18,6 +18,9 @@
  * @file
  */
 
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\Field\HTMLTextField;
+
 /**
  * A form field that contains a radio box in the label
  */

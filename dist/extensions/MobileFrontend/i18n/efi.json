@@ -1,8 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
+			"Emmikweok",
+			"Maryeren",
 			"Samatics"
 		]
 	},
-	"mobile-frontend-terms-text": "Nte Ẹkpedade Ikpehe Intanet Emi Ẹnam N̄kpọ"
+	"mobile-frontend-copyright": "Okpoyom ndikụt se idọñọde, se $1 ibọhọke ẹsiak ke ụsụñ eñwen",
+	"mobile-frontend-terms-text": "Nte Ẹkpedade Ikpehe Intanet Emi Ẹnam N̄kpọ",
+	"mobile-frontend-view": "Nte ewutde ke Fon",
+	"mobile-frontend-view-desktop": "N̄kpọ udọn̄etop"
 }

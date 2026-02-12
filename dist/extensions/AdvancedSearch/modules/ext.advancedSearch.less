@@ -1,4 +1,4 @@
-@import 'mediawiki.ui/variables';
+@import 'mediawiki.skin.variables.less';
 
 .mw-advancedSearch-container {
 	textarea,
@@ -8,32 +8,59 @@
 	}
 }
 
+.mw-advancedSearch-searchPreview-tagList {
+	display: inline-flex;
+	flex-flow: row wrap;
+	gap: 4px;
+	margin: 0;
+	vertical-align: middle;
+
+	.oo-ui-tagItemWidget {
+		margin: 0;
+	}
+}
+
 .mw-advancedSearch-searchPreview-label {
 	font-weight: bold;
 	margin-right: 0.3125em;
+	vertical-align: middle;
 }
 
-.advancedsearch-namespacesPreview-label {
+.mw-advancedSearch-namespacesPreview {
+	.oo-ui-tagItemWidget {
+		margin: 0;
+	}
+}
+
+.mw-advancedsearch-namespacesPreview-label {
 	font-weight: bold;
 	margin-right: 0.3125em;
+	vertical-align: middle;
 }
 
-.mw-advancedSearch-searchPreview-previewPill > .oo-ui-labelElement-label > .mw-advancedSearch-searchPreview-content {
-	display: inline-block;
-	text-overflow: ellipsis;
-	overflow: hidden;
-	max-width: 5em;
-	padding-left: 0.3em;
-	vertical-align: bottom;
-}
+.mw-advancedSearch-searchPreview-previewPill {
+	> .oo-ui-labelElement-label {
+		> span {
+			vertical-align: top;
+		}
 
-.mw-advancedSearch-searchPreview-previewPill.mw-advancedSearch-searchPreview-preview-sort > .oo-ui-labelElement-label > .mw-advancedSearch-searchPreview-content {
-	max-width: none;
+		> .mw-advancedSearch-searchPreview-content {
+			display: inline-block;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			max-width: 5em;
+		}
+	}
+
+	&.mw-advancedSearch-searchPreview-preview-sort > .oo-ui-labelElement-label > .mw-advancedSearch-searchPreview-content {
+		max-width: none;
+	}
 }
 
 .mw-advancedSearch-fieldContainer {
-	background: linear-gradient( rgba( 0, 0, 0, 0.1 ), #fff 0.5em );
-	border: solid 1px #c8ccd1;
+	// FIXME: This is a non-standard styling, which should be unified with Codex.
+	background: linear-gradient( rgba( 0, 0, 0, 0.1 ), @background-color-base 0.5em );
+	border: @border-subtle;
 	border-top: 0;
 	box-sizing: border-box;
 	margin: 0;
@@ -42,15 +69,15 @@
 	padding: 1em;
 
 	fieldset {
-		border-top: solid 1px #c8ccd1;
+		border-top: @border-subtle;
 		margin-top: 1em;
 	}
 
 	/* FIXME: Why does this try to mimic a <fieldset><legend> element instead of being an actual one? */
 	/* See https://phabricator.wikimedia.org/T151061 and https://gerrit.wikimedia.org/r/#/c/325243/  */
 	.oo-ui-labelElement > .oo-ui-fieldsetLayout-header > .oo-ui-labelElement-label {
-		background: #fff;
-		color: #54595d;
+		background: @background-color-base;
+		color: @color-subtle;
 		font-weight: normal;
 		font-size: 1em;
 		left: 1em;
@@ -82,12 +109,12 @@
 
 	&.oo-ui-widget-enabled.oo-ui-buttonWidget {
 		&.oo-ui-buttonElement-pressed > .oo-ui-buttonElement-button {
-			background-color: #f8f9fa;
+			background-color: @background-color-interactive-subtle;
 		}
 
 		> .oo-ui-buttonElement-button:hover {
-			background-color: #f8f9fa;
-			color: #202122;
+			background-color: @background-color-interactive-subtle;
+			color: @color-base;
 		}
 	}
 }
@@ -128,11 +155,11 @@
 			padding: 0;
 		}
 	}
-}
 
-.mw-advancedSearch-namespacePresets .oo-ui-multiselectWidget-group {
-	margin-left: 0.5em;
-	padding-top: 0.5em;
+	.oo-ui-multiselectWidget-group {
+		margin-left: 0.5em;
+		padding-top: 0.5em;
+	}
 }
 
 .mw-advancedSearch-namespace-selection-header {
@@ -151,8 +178,9 @@
 }
 
 .mw-advancedSearch-namespace-selection {
-	background: linear-gradient( rgba( 0, 0, 0, 0.1 ), #f8f9fa 0.5em );
-	border: solid 1px #a2a9b1;
+	// FIXME: This is a non-standard styling, which should be unified with Codex.
+	background: linear-gradient( rgba( 0, 0, 0, 0.1 ), @background-color-interactive-subtle 0.5em );
+	border: @border-base;
 	box-sizing: border-box;
 	max-width: 50em;
 	position: relative;
@@ -161,32 +189,38 @@
 }
 
 .mw-advancedSearch-namespace-border {
-	border-top: 4px solid #c8ccd1;
-	border-bottom: 1px solid #c8ccd1;
+	border: @border-subtle;
+	border-width: 4px 0 1px 0;
+
+	&:first-child {
+		border-top: 0;
+	}
 }
 
-.mw-advancedSearch-namespaceFilter .oo-ui-tagMultiselectWidget-handle {
-	border-top: 0;
-	border-left: 0;
-	border-right: 0;
-	border-radius: 0 0 2px 2px;
-}
+.mw-advancedSearch-namespaceFilter {
+	.oo-ui-tagMultiselectWidget-handle {
+		border-top: 0;
+		border-left: 0;
+		border-right: 0;
+		border-radius: 0 0 @border-radius-base @border-radius-base;
+	}
 
-.mw-advancedSearch-namespaceFilter .oo-ui-tagMultiselectWidget-input .oo-ui-inputWidget-input {
-	border-left: 0;
-	border-right: 0;
+	.oo-ui-tagMultiselectWidget-input .oo-ui-inputWidget-input {
+		border-left: 0;
+		border-right: 0;
+	}
 }
 
 // that's how nested the background-color property of a tagWidget is
 .oo-ui-tagMultiselectWidget.oo-ui-widget-enabled.oo-ui-tagMultiselectWidget-outlined .oo-ui-tagItemWidget.oo-ui-widget-enabled {
 	&.selected {
-		background-color: #eaf3ff;
-		border-color: @colorProgressive;
+		background-color: @background-color-progressive-subtle;
+		border-color: @border-color-progressive;
 	}
 }
 
 .oo-ui-popupWidget-popup .mw-advancedSearch-tooltip-head {
-	color: #72777d;
+	color: @color-subtle;
 	// Override MW core's h1-h6 top padding.
 	padding-top: 0;
 	font-size: 110%;

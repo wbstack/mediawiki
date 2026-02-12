@@ -3,6 +3,7 @@
 namespace Wikibase\View\Tests;
 
 use DataValues\StringValue;
+use MediaWikiTestCaseTrait;
 use ValueFormatters\BasicNumberLocalizer;
 use Wikibase\DataModel\Reference;
 use Wikibase\DataModel\ReferenceList;
@@ -28,6 +29,7 @@ use Wikibase\View\Template\TemplateFactory;
  * @author H. Snater < mediawiki@snater.com >
  */
 class StatementHtmlGeneratorTest extends \PHPUnit\Framework\TestCase {
+	use MediaWikiTestCaseTrait;
 
 	/**
 	 * @return SnakHtmlGenerator
@@ -49,10 +51,10 @@ class StatementHtmlGeneratorTest extends \PHPUnit\Framework\TestCase {
 	 * @uses Wikibase\View\Template\TemplateRegistry
 	 */
 	public function testGetHtmlForStatement(
-		SnakHtmlGenerator $snakHtmlGenerator,
 		Statement $statement,
 		$patterns
 	) {
+		$snakHtmlGenerator = $this->getSnakHtmlGeneratorMock();
 		$templateFactory = TemplateFactory::getDefaultInstance();
 		$statementHtmlGenerator = new StatementHtmlGenerator(
 			$templateFactory,
@@ -64,25 +66,21 @@ class StatementHtmlGeneratorTest extends \PHPUnit\Framework\TestCase {
 		$html = $statementHtmlGenerator->getHtmlForStatement( $statement, 'edit' );
 
 		foreach ( $patterns as $message => $pattern ) {
-			$this->assertRegExp( $pattern, $html, $message );
+			$this->assertMatchesRegularExpression( $pattern, $html, $message );
 		}
 	}
 
-	public function getHtmlForStatementProvider() {
-		$snakHtmlGenerator = $this->getSnakHtmlGeneratorMock();
-
+	public static function getHtmlForStatementProvider(): iterable {
 		$testCases = [];
 
 		$testCases[] = [
-			$snakHtmlGenerator,
 			new Statement( new PropertySomeValueSnak( 42 ) ),
 			[
 				'snak html' => '/SNAK HTML/',
-			]
+			],
 		];
 
 		$testCases[] = [
-			$snakHtmlGenerator,
 			new Statement(
 				new PropertySomeValueSnak( 42 ),
 				new SnakList( [
@@ -91,21 +89,20 @@ class StatementHtmlGeneratorTest extends \PHPUnit\Framework\TestCase {
 			),
 			[
 				'snak html' => '/SNAK HTML.*SNAK HTML/s',
-			]
+			],
 		];
 
 		$testCases[] = [
-			$snakHtmlGenerator,
 			new Statement(
 				new PropertyValueSnak( 50, new StringValue( 'chocolate!' ) ),
 				new SnakList(),
 				new ReferenceList( [ new Reference( new SnakList( [
-					new PropertyValueSnak( 50, new StringValue( 'second snak' ) )
+					new PropertyValueSnak( 50, new StringValue( 'second snak' ) ),
 				] ) ) ] )
 			),
 			[
 				'snak html' => '/SNAK HTML.*SNAK HTML/s',
-			]
+			],
 		];
 
 		return $testCases;
@@ -131,7 +128,7 @@ class StatementHtmlGeneratorTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function referencesProvider() {
+	public static function referencesProvider(): iterable {
 		$snak = new PropertyNoValueSnak( 1 );
 		$statement = new Statement( $snak );
 		$referencedStatement = clone $statement;

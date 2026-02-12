@@ -2,10 +2,10 @@
 
 namespace Wikibase\Repo;
 
-use Babel;
-use ExtensionRegistry;
+use MediaWiki\Babel\Babel;
 use MediaWiki\MediaWikiServices;
-use User;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\User\User;
 use Wikibase\Lib\UserLanguageLookup;
 
 /**
@@ -90,9 +90,9 @@ class BabelUserLanguageLookup implements UserLanguageLookup {
 		}
 
 		$userSpecifiedLanguages = $this->getUserSpecifiedLanguages( $user );
-		if ( !empty( $userSpecifiedLanguages ) ) {
+		if ( $userSpecifiedLanguages ) {
 			$languages = array_merge( $languages, $userSpecifiedLanguages );
-			$languages = array_unique( $languages );
+			$languages = array_values( array_unique( $languages ) );
 		}
 
 		return $languages;

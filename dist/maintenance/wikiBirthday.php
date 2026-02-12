@@ -24,9 +24,12 @@
  * @since 1.39
  */
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Maintenance\Maintenance;
+use MediaWiki\Utils\MWTimestamp;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * @ingroup Maintenance
@@ -44,13 +47,13 @@ class WikiBirthday extends Maintenance {
 	 */
 	private function computeAge( string $wikiCreatedAt ) {
 		return date_diff(
-			date_create(),
+			date_create( MWTimestamp::now() ),
 			date_create( $wikiCreatedAt )
 		);
 	}
 
 	public function execute() {
-		$dbr = $this->getDB( DB_REPLICA );
+		$dbr = $this->getReplicaDB();
 
 		$revId = $dbr->newSelectQueryBuilder()
 			->table( 'revision' )
@@ -64,7 +67,7 @@ class WikiBirthday extends Maintenance {
 			->caller( __METHOD__ )
 			->fetchField();
 
-		if ( $archiveRevId && $archiveRevId < $revId ) {
+		if ( $archiveRevId && ( $archiveRevId < $revId || !$revId ) ) {
 			$timestamp = $dbr->newSelectQueryBuilder()
 				->table( 'archive' )
 				->field( 'ar_timestamp' )
@@ -80,7 +83,7 @@ class WikiBirthday extends Maintenance {
 				->fetchField();
 		}
 
-		$birthDay = MediaWikiServices::getInstance()->getContentLanguage()
+		$birthDay = $this->getServiceContainer()->getContentLanguage()
 			->getHumanTimestamp( MWTimestamp::getInstance( $timestamp ) );
 
 		$text = "Wiki was created on: " . $birthDay . " <age: " .
@@ -92,5 +95,7 @@ class WikiBirthday extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = WikiBirthday::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

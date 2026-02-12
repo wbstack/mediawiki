@@ -8,7 +8,7 @@
 		]
 	},
 	"skinname-modern": "{{name}}\n{{Identical|Modern}}",
-	"modern.css": "{{optional}}",
-	"modern.js": "{{optional}}",
+	"modern.css": "{{optional}}\n{{related/css}}",
+	"modern.js": "{{optional}}\n{{related/js}}",
 	"modern-desc": "{{desc|what=skin|name=Modern|url=https://www.mediawiki.org/wiki/Skin:Modern}}"
 }

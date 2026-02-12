@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Es Krim 5 Juta Rasa"
+		]
+	},
+	"wikibase-dataitem": "Butir di {{WBREPONAME}}",
+	"wikibase-editlinks": "Dandani kahikan",
+	"wikibase-addlinkstitle": "Tambahko kahikan interwiki",
+	"wikibase-linkitem-addlinks": "Tambahko kahikan",
+	"wikibase-linkitem-title": "Kahikko rik halaman",
+	"wikibase-linkitem-linkpage": "Kahikko rik halaman",
+	"wikibase-linkitem-selectlink": "Payu pilih situs rik halaman say haga tikahikko rik halaman sija.",
+	"wikibase-linkitem-input-site": "Basa:",
+	"wikibase-linkitem-input-page": "Halaman:",
+	"wikibase-rc-hide-wikidata-hide": "Jamotko",
+	"wikibase-rc-hide-wikidata-show": "Jajakko",
+	"wikibase-otherprojects": "Dilom proyek barih"
+}

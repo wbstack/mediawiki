@@ -3,9 +3,9 @@
 		"authors": [
 			"AnakngAraw",
 			"GinawaSaHapon",
+			"Jojit fb",
 			"LR Guanzon",
-			"Sky Harbor",
-			"Jojit fb"
+			"Sky Harbor"
 		]
 	},
 	"thanks-desc": "Nagdadagdag ng mga link para pasalamatan ang mga tagagamit para sa kanilang binago, komento, atbp.",
@@ -13,9 +13,6 @@
 	"thanks-thanked": "{{GENDER:$1|{{GENDER:$2|pinasalamatan}}}}",
 	"thanks-button-thank": "{{GENDER:$1|{{GENDER:$2|Pasalamatan}}}}",
 	"thanks-button-thanked": "{{GENDER:$1|{{GENDER:$2|Pinasalamatan}}}}",
-	"thanks-button-action-queued": "{{GENDER:$1|{{GENDER:$2|Pinapasalamatan}}}} si $1…",
-	"thanks-button-action-cancel": "Ikansela",
-	"thanks-button-action-completed": "{{GENDER:$1|{{GENDER:$2|Pinasalamatan}}}} mo si $1",
 	"thanks-error-undefined": "Pumalya ang pagpapasalamat (error code: $1). Pakiulit po uli.",
 	"thanks-error-invalid-log-id": "Di nakita ang entry ng tala",
 	"thanks-error-invalid-log-type": "Wala sa talaan ng mga pinapayagang uri ng tala ang '$1'.",
@@ -39,7 +36,6 @@
 	"echo-pref-subscription-edit-thank": "Pinasalamatan ako sa pagbabagong ginawa ko",
 	"echo-pref-tooltip-edit-thank": "Abisuhan ako kapag may nagpasalamat sa akin para sa pagbabagong ginawa ko.",
 	"echo-category-title-edit-thank": "Pasasalamat",
-	"notification-thanks-diff-link": "pagbabago mo",
 	"notification-header-rev-thank": "{{GENDER:$2|Pinasalamatan}} {{GENDER:$4|ka}} ni $1 para sa pagbabagong ginawa mo sa <strong>$3</strong>.",
 	"notification-header-creation-thank": "{{GENDER:$2|Pinasalamatan}} {{GENDER:$4|ka}} ni $1 para sa paggawa mo sa <strong>$3</strong>.",
 	"notification-header-log-thank": "{{GENDER:$2|Pinasalamatan}} {{GENDER:$4|ka}} ni $1 para sa ginawa mong may kinalaman sa <strong>$3</strong>.",
@@ -58,7 +54,6 @@
 	"thanks-error-invalidpostid": "Di valid ang ID ng post.",
 	"flow-thanks-confirmation-special": "Gusto mo ba talagang magpadala ng pasasalamat para sa komentong ito?",
 	"flow-thanks-thanked-notice": "Pinasalamatan {{GENDER:$3|mo}} si $1 para sa {{GENDER:$2|kanyang}} komento.",
-	"notification-flow-thanks-post-link": "komento mo",
 	"notification-header-flow-thank": "{{GENDER:$2|Pinasalamatan}} {{GENDER:$5|ka}} ni $1 para sa komento mo sa \"<strong>$3</strong>\".",
 	"notification-compact-header-flow-thank": "{{GENDER:$2|Pinasalamatan}} {{GENDER:$3|ka}} ni $1",
 	"notification-bundle-header-flow-thank": "Nagpasalamat ang {{PLURAL:$1|isang tao|$1 (na) tago|100=99+ na tao}} {{GENDER:$3|sa'yo}} para sa komento mo sa \"<strong>$2</strong>\"."

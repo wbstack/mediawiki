@@ -1,8 +1,6 @@
 <?php
 /** Esperanto (Esperanto)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -117,6 +115,7 @@ $specialPageAliases = [
 	'Randomredirect'            => [ 'Hazarda_alidirektilo', 'Hazarda_alidirekto' ],
 	'Recentchanges'             => [ 'Lastaj_ŝanĝoj' ],
 	'Recentchangeslinked'       => [ 'Rilataj_ŝanĝoj' ],
+	'Renameuser'                => [ 'Alinomigi_uzanton' ],
 	'Revisiondelete'            => [ 'Forigi_revizion' ],
 	'Search'                    => [ 'Serĉi' ],
 	'Shortpages'                => [ 'Mallongaj_paĝoj' ],
@@ -203,7 +202,7 @@ $magicWords = [
 	'img_width'                 => [ '1', '$1ra', '$1px' ],
 	'index'                     => [ '1', '__INDEKSU__', '__INDEKSI__', '__INDEX__' ],
 	'int'                       => [ '0', 'ENE:', 'INT:' ],
-	'language'                  => [ '0', '#LINGVO:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#LINGVO', '#LANGUAGE' ],
 	'lc'                        => [ '0', 'MALMAJUSKLE:', 'MINUSKLE:', 'LC:' ],
 	'lcfirst'                   => [ '0', 'MALMAJUSKLEUNUA:', 'MINUSKLEUNUA:', 'MMU:', 'LCFIRST:' ],
 	'localday'                  => [ '1', 'LOKATAGO', 'LOCALDAY' ],

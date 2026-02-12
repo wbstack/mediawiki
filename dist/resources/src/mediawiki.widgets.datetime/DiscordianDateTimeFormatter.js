@@ -1,23 +1,25 @@
 ( function () {
 
 	/**
+	 * @classdesc DateTimeFormatter for the Discordian calendar.
+	 *
 	 * Provides various methods needed for formatting dates and times. This
-	 * implementation implements the [Discordian calendar][1], mainly for testing with
-	 * something very different from the usual Gregorian calendar.
+	 * implementation implements the [Discordian calendar](https://en.wikipedia.org/wiki/Discordian_calendar),
+	 * mainly for testing with something very different from the usual Gregorian
+	 * calendar.
 	 *
 	 * Being intended mainly for testing, niceties like i18n and better
 	 * configurability have been omitted.
-	 *
-	 * [1]: https://en.wikipedia.org/wiki/Discordian_calendar
 	 *
 	 * @class
 	 * @extends mw.widgets.datetime.DateTimeFormatter
 	 *
 	 * @constructor
+	 * @description Create an instance of `mw.widgets.datetime.DiscordianDateTimeFormatter`.
 	 * @param {Object} [config] Configuration options
 	 */
 	mw.widgets.datetime.DiscordianDateTimeFormatter = function MwWidgetsDatetimeDiscordianDateTimeFormatter( config ) {
-		config = $.extend( {}, config );
+		config = Object.assign( {}, config );
 
 		// Parent constructor
 		mw.widgets.datetime.DiscordianDateTimeFormatter.super.call( this, config );
@@ -30,7 +32,13 @@
 	/* Static */
 
 	/**
-	 * @inheritdoc
+	 * Default format specifications.
+	 *
+	 * See the `format` parameter in {@link mw.widgets.datetime.DateTimeFormatter}.
+	 *
+	 * @memberof mw.widgets.datetime.DiscordianDateTimeFormatter
+	 * @type {Object.<string,string>}
+	 * @name formats
 	 */
 	mw.widgets.datetime.DiscordianDateTimeFormatter.static.formats = {
 		'@time': '${hour|0}:${minute|0}:${second|0}',
@@ -42,7 +50,7 @@
 	/* Methods */
 
 	/**
-	 * @inheritdoc
+	 * Turn a tag into a field specification object.
 	 *
 	 * Additional fields implemented here are:
 	 * - ${year|#}: Year as a number
@@ -59,9 +67,14 @@
 	 * - ${second|0}: Second as a number with leading 0
 	 * - ${millisecond|#}: Millisecond as a number
 	 * - ${millisecond|0}: Millisecond as a number, zero-padded to 3 digits
+	 *
+	 * @protected
+	 * @param {string} tag
+	 * @param {string[]} params
+	 * @return {FieldSpecificationObject} Field specification object, or null if the tag+params are unrecognized.
 	 */
 	mw.widgets.datetime.DiscordianDateTimeFormatter.prototype.getFieldForTag = function ( tag, params ) {
-		var spec = null;
+		let spec = null;
 
 		switch ( tag + '|' + params[ 0 ] ) {
 			case 'year|#':
@@ -135,6 +148,7 @@
 						return mw.widgets.datetime.DateTimeFormatter.prototype.formatSpecValue.call( this, v );
 					},
 					parseValue: function ( v ) {
+
 						if ( /^\s*(st.?\s*)?tib('?s)?(\s*day)?\s*$/i.test( v ) ) {
 							return 'tib';
 						}
@@ -184,7 +198,7 @@
 			if ( spec.values ) {
 				spec.size = Math.max.apply(
 					// eslint-disable-next-line no-jquery/no-map-util
-					null, $.map( spec.values, function ( v ) { return v.length; } )
+					null, $.map( spec.values, ( v ) => v.length )
 				);
 			}
 		}
@@ -193,7 +207,7 @@
 	};
 
 	/**
-	 * Get components from a Date object
+	 * Get components from a Date object.
 	 *
 	 * Components are:
 	 * - Year {number}
@@ -210,8 +224,9 @@
 	 * @return {Object} Components
 	 */
 	mw.widgets.datetime.DiscordianDateTimeFormatter.prototype.getComponentsFromDate = function ( date ) {
-		var ret, day, month,
-			monthDays = [ 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 ];
+		let ret, day, month;
+
+		const monthDays = [ 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 ];
 
 		if ( !( date instanceof Date ) ) {
 			date = this.defaultDate;
@@ -269,7 +284,7 @@
 	};
 
 	/**
-	 * Adjust the components directly
+	 * Adjust the components directly.
 	 *
 	 * @private
 	 * @param {Object} components Modified in place
@@ -279,7 +294,7 @@
 	 * @return {Object} components
 	 */
 	mw.widgets.datetime.DiscordianDateTimeFormatter.prototype.adjustComponentInternal = function ( components, component, delta, mode ) {
-		var i, min, max, range, next, preTib, postTib, wasTib;
+		let i, min, max, range, next, preTib, postTib, wasTib;
 
 		if ( delta === 0 ) {
 			return components;
@@ -452,16 +467,18 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.datetime.DiscordianDateTimeFormatter.prototype.getDateFromComponents = function ( components ) {
-		var month, day, days,
+		let month, day;
+
+		const
 			date = new Date(),
 			monthDays = [ 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 ];
 
-		components = $.extend( {}, this.getComponentsFromDate( null ), components );
+		components = Object.assign( {}, this.getComponentsFromDate( null ), components );
 		if ( components.Day === 'tib' ) {
 			month = 1;
 			day = 29;
 		} else {
-			days = components.Season * 73 + components.Day - 74;
+			const days = components.Season * 73 + components.Day - 74;
 			month = 0;
 			while ( days >= monthDays[ month + 1 ] ) {
 				month++;
@@ -483,7 +500,7 @@
 	};
 
 	/**
-	 * Get whether the year is a leap year
+	 * Get whether the year is a leap year.
 	 *
 	 * @private
 	 * @param {number} year
@@ -510,7 +527,7 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.datetime.DiscordianDateTimeFormatter.prototype.sameCalendarGrid = function ( date1, date2 ) {
-		var components1 = this.getComponentsFromDate( date1 ),
+		const components1 = this.getComponentsFromDate( date1 ),
 			components2 = this.getComponentsFromDate( date2 );
 
 		return components1.Year === components2.Year && components1.Season === components2.Season;
@@ -520,7 +537,7 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.datetime.DiscordianDateTimeFormatter.prototype.getCalendarData = function ( date ) {
-		var dt, components, season, i, row,
+		const
 			ret = {
 				dayComponent: 'Day',
 				weekComponent: 'Week',
@@ -533,9 +550,9 @@
 			date = this.defaultDate;
 		}
 
-		components = this.getComponentsFromDate( date );
+		const components = this.getComponentsFromDate( date );
 		components.Day = 1;
-		season = components.Season;
+		const season = components.Season;
 
 		ret.header = seasons[ season - 1 ] + ' ' + components.Year;
 
@@ -545,9 +562,9 @@
 
 		ret.rows = [];
 		do {
-			row = [];
-			for ( i = 0; i < 6; i++ ) {
-				dt = this.getDateFromComponents( components );
+			const row = [];
+			for ( let i = 0; i < 6; i++ ) {
+				const dt = this.getDateFromComponents( components );
 				row[ i ] = {
 					display: components.Day === 'tib' ? 'Tib' : String( components.Day ),
 					date: dt,

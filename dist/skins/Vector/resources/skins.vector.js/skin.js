@@ -1,8 +1,19 @@
-var languageButton = require( './languageButton.js' ),
+const languageButton = require( './languageButton.js' ),
+	pinnableElement = require( './pinnableElement.js' ),
+	searchToggle = require( './searchToggle.js' ),
+	echo = require( './echo.js' ),
+	initExperiment = require( './AB.js' ),
+	ABTestConfig = require( /** @type {string} */ ( './activeABTest.json' ) ),
 	initSearchLoader = require( './searchLoader.js' ).initSearchLoader,
+	portletsManager = require( './portlets.js' ),
 	dropdownMenus = require( './dropdownMenus.js' ).dropdownMenus,
-	sidebarPersistence = require( './sidebarPersistence.js' ),
-	checkbox = require( './checkbox.js' );
+	tables = require( './tables.js' ).init,
+	watchstar = require( './watchstar.js' ).init,
+	setupIntersectionObservers = require( './setupIntersectionObservers.js' ),
+	menuTabs = require( './menuTabs.js' ),
+	userPreferences = require( './userPreferences.js' ),
+	{ isNightModeGadgetEnabled, disableNightModeForGadget, alterExclusionMessage, removeBetaNotice } = require( './disableNightModeIfGadget.js' ),
+	teleportTarget = /** @type {HTMLElement} */require( /** @type {string} */ ( 'mediawiki.page.ready' ) ).teleportTarget;
 
 /**
  * Wait for first paint before calling this function. That's its whole purpose.
@@ -37,43 +48,67 @@ function enableCssAnimations( document ) {
 }
 
 /**
- * In https://phabricator.wikimedia.org/T313409 #p-namespaces was renamed to #p-associatedPages
- * This code maps items added by gadgets to the new menu.
- * This code can be removed in MediaWiki 1.40.
- */
-function addNamespacesGadgetSupport() {
-	// Set up hidden dummy portlet.
-	var dummyPortlet = document.createElement( 'div' );
-	dummyPortlet.setAttribute( 'id', 'p-namespaces' );
-	dummyPortlet.setAttribute( 'style', 'display: none;' );
-	dummyPortlet.appendChild( document.createElement( 'ul' ) );
-	document.body.appendChild( dummyPortlet );
-	mw.hook( 'util.addPortletLink' ).add( function ( /** @type {Element} */ node ) {
-		// If it was added to p-namespaces, show warning and move.
-		// eslint-disable-next-line no-jquery/no-global-selector
-		if ( $( '#p-namespaces' ).find( node ).length ) {
-			// eslint-disable-next-line no-jquery/no-global-selector
-			$( '#p-associated-pages ul' ).append( node );
-			// @ts-ignore
-			mw.log.warn( 'Please update call to mw.util.addPortletLink with ID p-namespaces. Use p-associatedPages instead.' );
-			// in case it was empty before:
-			mw.util.showPortlet( 'p-associated-pages' );
-		}
-	} );
-}
-
-/**
  * @param {Window} window
  * @return {void}
  */
 function main( window ) {
 	enableCssAnimations( window.document );
-	sidebarPersistence.init();
-	checkbox.init( window.document );
 	initSearchLoader( document );
 	languageButton();
+	echo();
+	portletsManager.main();
+	watchstar();
+	// Initialize the search toggle for the main header only. The sticky header
+	// toggle is initialized after Codex search loads.
+	const searchToggleElement = document.querySelector( '.mw-header .search-toggle' );
+	if ( searchToggleElement ) {
+		searchToggle( searchToggleElement );
+	}
+	pinnableElement.initPinnableElement();
+	// Initializes the TOC and sticky header, behaviour of which depend on scroll behaviour.
+	setupIntersectionObservers.main();
+	// Apply body styles to teleported elements
+	teleportTarget.classList.add( 'vector-body' );
+
+	// Load client preferences
+	const appearanceMenuSelector = '#vector-appearance';
+	const appearanceMenuExists = document.querySelectorAll( appearanceMenuSelector ).length > 0;
+	if ( appearanceMenuExists ) {
+		mw.loader.using( [
+			'skins.vector.clientPreferences',
+			'skins.vector.search.codex.styles',
+			'skins.vector.search.codex.scripts'
+		] ).then( () => {
+			const clientPreferences = require( /** @type {string} */ ( 'skins.vector.clientPreferences' ) );
+			const clientPreferenceConfig = ( require( './clientPreferences.json' ) );
+			// Can be removed once wgVectorNightMode is removed.
+			if ( document.documentElement.classList.contains( 'vector-feature-night-mode-disabled' ) ) {
+				// @ts-ignore issues relating to delete operator are not relevant here.
+				delete clientPreferenceConfig[ 'skin-theme' ];
+			}
+
+			// while we're in beta, temporarily check if the night mode gadget is installed and
+			// disable our night mode if so
+			if ( isNightModeGadgetEnabled() ) {
+				disableNightModeForGadget();
+				clientPreferences.render(
+					appearanceMenuSelector, clientPreferenceConfig, userPreferences
+				);
+				alterExclusionMessage();
+				removeBetaNotice();
+			} else {
+				clientPreferences.render(
+					appearanceMenuSelector, clientPreferenceConfig, userPreferences
+				);
+			}
+		} );
+	}
+
 	dropdownMenus();
-	addNamespacesGadgetSupport();
+	// menuTabs should follow `dropdownMenus` as that can move menu items from a
+	// tab menu to a dropdown.
+	menuTabs();
+	tables();
 }
 
 /**
@@ -81,7 +116,7 @@ function main( window ) {
  * @return {void}
  */
 function init( window ) {
-	var now = mw.now();
+	const now = mw.now();
 	// This is the earliest time we can run JS for users (and bucket anonymous
 	// users for A/B tests).
 	// Where the browser supports it, for a 10% sample of users
@@ -91,7 +126,7 @@ function init( window ) {
 	// When EventLogging is not available this will reject.
 	// This code can be removed by the end of the Desktop improvements project.
 	// https://www.mediawiki.org/wiki/Desktop_improvements
-	mw.loader.using( 'ext.eventLogging' ).then( function () {
+	mw.loader.using( 'ext.eventLogging' ).then( () => {
 		if (
 			mw.eventLog &&
 			mw.eventLog.eventInSample( 100 /* 1 in 100 */ ) &&
@@ -105,35 +140,22 @@ function init( window ) {
 }
 
 init( window );
-
-/**
- * Because stickyHeader.js clones the user menu, it must initialize before
- * dropdownMenus.js initializes in order for the sticky header's user menu to
- * bind the necessary checkboxHack event listeners. This is solved by using
- * mw.loader.using to ensure that the skins.vector.es6 module initializes first
- * followed by initializing this module. If the es6 module loading fails (which
- * can happen in browsers that don't support es6), continue to initialize this
- * module.
- */
-function initAfterEs6Module() {
-	mw.loader.using( 'skins.vector.es6' ).then( function () {
-		// Loading of the 'skins.vector.es6' module has succeeded. Initialize the
-		// `skins.vector.es6` module first.
-		require( /** @type {string} */ ( 'skins.vector.es6' ) ).main();
-		// Initialize this module second.
-		main( window );
-	}, function () {
-		// Loading of the 'skins.vector.es6' has failed (e.g. this will fail in
-		// browsers that don't support ES6) so only initialize this module.
-		main( window );
-	} );
+if ( ABTestConfig.enabled && !mw.user.isAnon() ) {
+	initExperiment( ABTestConfig, String( mw.user.getId() ) );
 }
-
 if ( document.readyState === 'interactive' || document.readyState === 'complete' ) {
-	initAfterEs6Module();
+	main( window );
 } else {
 	// This is needed when document.readyState === 'loading'.
-	document.addEventListener( 'DOMContentLoaded', function () {
-		initAfterEs6Module();
+	document.addEventListener( 'DOMContentLoaded', () => {
+		main( window );
 	} );
 }
+
+// Provider of skins.vector.js module:
+/**
+ * skins.vector.js
+ *
+ * @stable for use inside WikimediaEvents ONLY.
+ */
+module.exports = { pinnableElement };

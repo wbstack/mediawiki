@@ -21,12 +21,26 @@
  * @ingroup FileBackend
  */
 
+namespace MediaWiki\FileBackend;
+
+use InvalidArgumentException;
+use LogicException;
 use MediaWiki\Config\ServiceOptions;
 use MediaWiki\FileBackend\FSFile\TempFSFileFactory;
 use MediaWiki\FileBackend\LockManager\LockManagerGroupFactory;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MainConfigNames;
+use MediaWiki\Output\StreamFile;
+use MediaWiki\Status\Status;
+use Profiler;
+use Wikimedia\FileBackend\FileBackend;
+use Wikimedia\FileBackend\FileBackendMultiWrite;
+use Wikimedia\FileBackend\FSFileBackend;
+use Wikimedia\Mime\MimeAnalyzer;
+use Wikimedia\ObjectCache\BagOStuff;
+use Wikimedia\ObjectCache\WANObjectCache;
 use Wikimedia\ObjectFactory\ObjectFactory;
+use Wikimedia\Rdbms\ReadOnlyMode;
 
 /**
  * Class to handle file backend registration
@@ -75,7 +89,7 @@ class FileBackendGroup {
 
 	/**
 	 * @param ServiceOptions $options
-	 * @param ConfiguredReadOnlyMode $configuredReadOnlyMode
+	 * @param ReadOnlyMode $readOnlyMode
 	 * @param BagOStuff $srvCache
 	 * @param WANObjectCache $wanCache
 	 * @param MimeAnalyzer $mimeAnalyzer
@@ -85,7 +99,7 @@ class FileBackendGroup {
 	 */
 	public function __construct(
 		ServiceOptions $options,
-		ConfiguredReadOnlyMode $configuredReadOnlyMode,
+		ReadOnlyMode $readOnlyMode,
 		BagOStuff $srvCache,
 		WANObjectCache $wanCache,
 		MimeAnalyzer $mimeAnalyzer,
@@ -102,7 +116,7 @@ class FileBackendGroup {
 		$this->objectFactory = $objectFactory;
 
 		// Register explicitly defined backends
-		$this->register( $options->get( MainConfigNames::FileBackends ), $configuredReadOnlyMode->getReason() );
+		$this->register( $options->get( MainConfigNames::FileBackends ), $readOnlyMode->getConfiguredReason() );
 
 		$autoBackends = [];
 		// Automatically create b/c backends for file repos...
@@ -138,7 +152,7 @@ class FileBackendGroup {
 		}
 
 		// Register implicitly defined backends
-		$this->register( $autoBackends, $configuredReadOnlyMode->getReason() );
+		$this->register( $autoBackends, $readOnlyMode->getConfiguredReason() );
 	}
 
 	/**
@@ -146,7 +160,6 @@ class FileBackendGroup {
 	 *
 	 * @param array[] $configs
 	 * @param string|null $readOnlyReason
-	 * @throws InvalidArgumentException
 	 */
 	protected function register( array $configs, $readOnlyReason = null ) {
 		foreach ( $configs as $config ) {
@@ -161,9 +174,8 @@ class FileBackendGroup {
 			}
 			$class = $config['class'];
 
-			$config['domainId'] =
-				$config['domainId'] ?? $config['wikiId'] ?? $this->options->get( 'fallbackWikiId' );
-			$config['readOnly'] = $config['readOnly'] ?? $readOnlyReason;
+			$config['domainId'] ??= $config['wikiId'] ?? $this->options->get( 'fallbackWikiId' );
+			$config['readOnly'] ??= $readOnlyReason;
 
 			unset( $config['class'] ); // backend won't need this
 			$this->backends[$name] = [
@@ -179,7 +191,6 @@ class FileBackendGroup {
 	 *
 	 * @param string $name
 	 * @return FileBackend
-	 * @throws InvalidArgumentException
 	 */
 	public function get( $name ) {
 		// Lazy-load the actual backend instance
@@ -187,7 +198,8 @@ class FileBackendGroup {
 			$config = $this->config( $name );
 
 			$class = $config['class'];
-			if ( $class === FileBackendMultiWrite::class ) {
+			// Checking old alias for compatibility with unchanged config
+			if ( $class === FileBackendMultiWrite::class || $class === \FileBackendMultiWrite::class ) {
 				// @todo How can we test this? What's the intended use-case?
 				foreach ( $config['backends'] as $index => $beConfig ) {
 					if ( isset( $beConfig['template'] ) ) {
@@ -209,7 +221,6 @@ class FileBackendGroup {
 	 *
 	 * @param string $name
 	 * @return array Parameters to FileBackend::__construct()
-	 * @throws InvalidArgumentException
 	 */
 	public function config( $name ) {
 		if ( !isset( $this->backends[$name] ) ) {
@@ -252,7 +263,7 @@ class FileBackendGroup {
 	 * @return FileBackend|null Backend or null on failure
 	 */
 	public function backendFromPath( $storagePath ) {
-		list( $backend, , ) = FileBackend::splitStoragePath( $storagePath );
+		[ $backend, , ] = FileBackend::splitStoragePath( $storagePath );
 		if ( $backend !== null && isset( $this->backends[$backend] ) ) {
 			return $this->get( $backend );
 		}
@@ -282,3 +293,5 @@ class FileBackendGroup {
 		return $type ?: 'unknown/unknown';
 	}
 }
+/** @deprecated class alias since 1.43 */
+class_alias( FileBackendGroup::class, 'FileBackendGroup' );

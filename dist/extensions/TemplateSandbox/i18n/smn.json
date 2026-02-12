@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Seipinne"
+			"Seipinne",
+			"Yupik"
 		]
 	},
 	"templatesandbox-suffix": "čunoiloová",
@@ -9,8 +10,9 @@
 	"templatesandbox-submit": "Čääiti",
 	"templatesandbox-title-output": "Myensterčunoiloová: $1",
 	"templatesandbox-editform-legend": "Keejâ muuneeld siijđo tain myensteráin",
-	"templatesandbox-editform-page-label": "Siijđo nommâ",
+	"templatesandbox-editform-page-label": "Sijđonommâ",
 	"templatesandbox-editform-view-label": "Keejâ muuneeld",
 	"templatesandbox-preview": "Siijđo $2 munekeččâm",
-	"templatesandbox-previewnote": "'''Mušte, ete taat lii siijđo [[:$1]] munekeččâm.'''\nNubástusah iä lah vyerkkejum!"
+	"templatesandbox-previewnote": "'''Mušte, ete taat lii siijđo [[:$1]] munekeččâm.'''\nNubástusah iä lah vyerkkejum!",
+	"templatesandbox-editform-title-not-exists": "Munekejâdem várás adelum paječalluu ij lah."
 }

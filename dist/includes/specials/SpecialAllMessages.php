@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:Allmessages
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,51 +16,50 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
 
+namespace MediaWiki\Specials;
+
+use LocalisationCache;
+use MediaWiki\Html\FormOptions;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
 use MediaWiki\Languages\LanguageFactory;
 use MediaWiki\Languages\LanguageNameUtils;
 use MediaWiki\MainConfigNames;
-use Wikimedia\Rdbms\ILoadBalancer;
+use MediaWiki\Pager\AllMessagesTablePager;
+use MediaWiki\SpecialPage\SpecialPage;
+use Wikimedia\Rdbms\IConnectionProvider;
 
 /**
- * Use this special page to get a list of the MediaWiki system messages.
+ * List of the MediaWiki interface messages.
  *
- * @file
  * @ingroup SpecialPage
  */
 class SpecialAllMessages extends SpecialPage {
 
-	/** @var LanguageFactory */
-	private $languageFactory;
-
-	/** @var LanguageNameUtils */
-	private $languageNameUtils;
-
-	/** @var ILoadBalancer */
-	private $loadBalancer;
-
-	/** @var LocalisationCache */
-	private $localisationCache;
+	private LanguageFactory $languageFactory;
+	private LanguageNameUtils $languageNameUtils;
+	private IConnectionProvider $dbProvider;
+	private LocalisationCache $localisationCache;
 
 	/**
 	 * @param LanguageFactory $languageFactory
 	 * @param LanguageNameUtils $languageNameUtils
 	 * @param LocalisationCache $localisationCache
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 */
 	public function __construct(
 		LanguageFactory $languageFactory,
 		LanguageNameUtils $languageNameUtils,
 		LocalisationCache $localisationCache,
-		ILoadBalancer $loadBalancer
+		IConnectionProvider $dbProvider
 	) {
 		parent::__construct( 'Allmessages' );
 		$this->languageFactory = $languageFactory;
 		$this->languageNameUtils = $languageNameUtils;
 		$this->localisationCache = $localisationCache;
-		$this->loadBalancer = $loadBalancer;
+		$this->dbProvider = $dbProvider;
 	}
 
 	/**
@@ -95,13 +92,24 @@ class SpecialAllMessages extends SpecialPage {
 		$opts->fetchValuesFromRequest( $this->getRequest() );
 		$opts->validateIntBounds( 'limit', 0, 5000 );
 
+		if ( !$this->languageNameUtils->isKnownLanguageTag( $opts->getValue( 'lang' ) ) ) {
+			// Show a warning message and fallback to content language
+			$out->addHTML(
+				Html::warningBox(
+					$this->msg( 'allmessages-unknown-language' )
+						->plaintextParams( $opts->getValue( 'lang' ) )
+						->parse()
+				)
+			);
+			$opts->setValue( 'lang', $contLangCode );
+		}
+
 		$pager = new AllMessagesTablePager(
 			$this->getContext(),
 			$this->getContentLanguage(),
 			$this->languageFactory,
-			$this->languageNameUtils,
 			$this->getLinkRenderer(),
-			$this->loadBalancer,
+			$this->dbProvider,
 			$this->localisationCache,
 			$opts
 		);
@@ -152,7 +160,7 @@ class SpecialAllMessages extends SpecialPage {
 		$htmlForm = HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() );
 		$htmlForm
 			->setMethod( 'get' )
-			->setIntro( $this->msg( 'allmessagestext' ) )
+			->setPreHtml( $this->msg( 'allmessagestext' )->parse() )
 			->setWrapperLegendMsg( 'allmessages' )
 			->setSubmitTextMsg( 'allmessages-filter-submit' )
 			->prepareForm()
@@ -165,3 +173,6 @@ class SpecialAllMessages extends SpecialPage {
 		return 'wiki';
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( SpecialAllMessages::class, 'SpecialAllMessages' );

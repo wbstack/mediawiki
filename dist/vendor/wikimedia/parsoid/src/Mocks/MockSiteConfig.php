@@ -3,18 +3,23 @@ declare( strict_types = 1 );
 
 namespace Wikimedia\Parsoid\Mocks;
 
+use Liuggio\StatsdClient\Factory\StatsdDataFactoryInterface;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
+use Wikimedia\Bcp47Code\Bcp47Code;
+use Wikimedia\Bcp47Code\Bcp47CodeValue;
 use Wikimedia\Parsoid\Config\SiteConfig;
 use Wikimedia\Parsoid\Config\StubMetadataCollector;
 use Wikimedia\Parsoid\Core\ContentMetadataCollector;
+use Wikimedia\Parsoid\Core\LinkTarget;
 use Wikimedia\Parsoid\DOM\Document;
+use Wikimedia\Parsoid\Utils\Title;
 use Wikimedia\Parsoid\Utils\Utils;
 
 class MockSiteConfig extends SiteConfig {
 
-	/** @var int Unix timestamp */
+	/** @var ?int Unix timestamp */
 	private $fakeTimestamp = 946782245; // 2000-01-02T03:04:05Z
 
 	/** @var int */
@@ -23,10 +28,10 @@ class MockSiteConfig extends SiteConfig {
 	/** @var bool */
 	private $interwikiMagic = true;
 
-	/** @var int|null */
-	private $tidyWhitespaceBugMaxLength = null;
+	/** @var array */
+	private $linterOverrides = [];
 
-	protected $namespaceMap = [
+	private const NAMESPACE_MAP = [
 		'media' => -2,
 		'special' => -1,
 		'' => 0,
@@ -38,6 +43,9 @@ class MockSiteConfig extends SiteConfig {
 		'project_talk' => 5, 'wt' => 5, 'wikipedia_talk' => 5,
 		'file' => 6,
 		'file_talk' => 7,
+		'template' => 10,
+		'template_talk' => 11,
+		'help' => 12,
 		'category' => 14,
 		'category_talk' => 15,
 	];
@@ -57,9 +65,6 @@ class MockSiteConfig extends SiteConfig {
 	/** @var string|bool */
 	private $externalLinkTarget;
 
-	/**
-	 * @param array $opts
-	 */
 	public function __construct( array $opts ) {
 		parent::__construct();
 
@@ -69,7 +74,9 @@ class MockSiteConfig extends SiteConfig {
 		if ( isset( $opts['maxDepth'] ) ) {
 			$this->maxDepth = $opts['maxDepth'];
 		}
-		$this->tidyWhitespaceBugMaxLength = $opts['tidyWhitespaceBugMaxLength'] ?? null;
+		if ( isset( $opts['linterOverrides'] ) ) {
+			$this->linterOverrides = $opts['linterOverrides'];
+		}
 		$this->linkPrefixRegex = $opts['linkPrefixRegex'] ?? null;
 		$this->linkTrailRegex = $opts['linkTrailRegex'] ?? '/^([a-z]+)/sD'; // enwiki default
 		$this->externalLinkTarget = $opts['externallinktarget'] ?? false;
@@ -82,8 +89,8 @@ class MockSiteConfig extends SiteConfig {
 		$this->setLogger( $logger );
 	}
 
-	public function tidyWhitespaceBugMaxLength(): int {
-		return $this->tidyWhitespaceBugMaxLength ?? parent::tidyWhitespaceBugMaxLength();
+	public function getLinterSiteConfig(): array {
+		return $this->linterOverrides + parent::getLinterSiteConfig();
 	}
 
 	public function allowedExternalImagePrefixes(): array {
@@ -97,11 +104,11 @@ class MockSiteConfig extends SiteConfig {
 	/**
 	 * @inheritDoc
 	 */
-	public function exportMetadataToHead(
+	public function exportMetadataToHeadBcp47(
 		Document $document,
 		ContentMetadataCollector $metadata,
 		string $defaultTitle,
-		string $lang
+		Bcp47Code $lang
 	): void {
 		'@phan-var StubMetadataCollector $metadata'; // @var StubMetadataCollector $metadata
 		$moduleLoadURI = $this->server() . $this->scriptpath() . '/load.php';
@@ -139,20 +146,20 @@ class MockSiteConfig extends SiteConfig {
 
 	/** @inheritDoc */
 	public function canonicalNamespaceId( string $name ): ?int {
-		return $this->namespaceMap[$name] ?? null;
+		return self::NAMESPACE_MAP[$name] ?? null;
 	}
 
 	/** @inheritDoc */
 	public function namespaceId( string $name ): ?int {
 		$name = Utils::normalizeNamespaceName( $name );
-		return $this->namespaceMap[$name] ?? null;
+		return self::NAMESPACE_MAP[$name] ?? null;
 	}
 
 	/** @inheritDoc */
 	public function namespaceName( int $ns ): ?string {
 		static $map = null;
 		if ( $map === null ) {
-			$map = array_flip( $this->namespaceMap );
+			$map = array_flip( self::NAMESPACE_MAP );
 		}
 		if ( !isset( $map[$ns] ) ) {
 			return null;
@@ -175,9 +182,6 @@ class MockSiteConfig extends SiteConfig {
 		return null;
 	}
 
-	/**
-	 * @param bool $val
-	 */
 	public function setInterwikiMagic( bool $val ): void {
 		$this->interwikiMagic = $val;
 	}
@@ -212,19 +216,24 @@ class MockSiteConfig extends SiteConfig {
 		return $this->linkTrailRegex;
 	}
 
-	public function lang(): string {
-		return 'en';
+	public function langBcp47(): Bcp47Code {
+		return new Bcp47CodeValue( 'en' );
 	}
 
-	public function mainpage(): string {
-		return 'Main Page';
+	public function mainPageLinkTarget(): LinkTarget {
+		return Title::newFromText( 'Main Page', $this );
 	}
 
-	public function responsiveReferences(): array {
-		return [
-			'enabled' => true,
-			'threshold' => 10,
-		];
+	/** @inheritDoc */
+	public function getMWConfigValue( string $key ) {
+		switch ( $key ) {
+			case 'CiteResponsiveReferences':
+				return true;
+			case 'CiteResponsiveReferencesThreshold':
+				return 10;
+			default:
+				return null;
+		}
 	}
 
 	public function rtl(): bool {
@@ -232,8 +241,8 @@ class MockSiteConfig extends SiteConfig {
 	}
 
 	/** @inheritDoc */
-	public function langConverterEnabled( string $lang ): bool {
-		return $lang === 'sr';
+	public function langConverterEnabledBcp47( Bcp47Code $lang ): bool {
+		return $lang->toBcp47Code() === 'sr';
 	}
 
 	public function script(): string {
@@ -252,27 +261,33 @@ class MockSiteConfig extends SiteConfig {
 		return $this->timezoneOffset;
 	}
 
-	public function variants(): array {
-		return [
-			'sr' => [
-				'base' => 'sr',
+	/** @inheritDoc */
+	public function variantsFor( Bcp47Code $lang ): ?array {
+		switch ( $lang->toBcp47Code() ) {
+			case 'sr':
+				return [
+				'base' => new Bcp47CodeValue( 'sr' ),
 				'fallbacks' => [
-					'sr-ec'
+					new Bcp47CodeValue( 'sr-Cyrl' )
 				]
-			],
-			'sr-ec' => [
-				'base' => 'sr',
+			];
+			case 'sr-Cyrl':
+				return [
+				'base' => new Bcp47CodeValue( 'sr' ),
 				'fallbacks' => [
-					'sr'
+					new Bcp47CodeValue( 'sr' )
 				]
-			],
-			'sr-el' => [
-				'base' => 'sr',
+			];
+			case 'sr-Latn':
+				return [
+				'base' => new Bcp47CodeValue( 'sr' ),
 				'fallbacks' => [
-					'sr'
+					new Bcp47CodeValue( 'sr' )
 				]
-			]
-		];
+			];
+			default:
+				return null;
+		}
 	}
 
 	public function widthOption(): int {
@@ -303,6 +318,11 @@ class MockSiteConfig extends SiteConfig {
 			'img_frameless'   => [ 1, 'frameless' ],
 			'img_manualthumb' => [ 1, 'thumbnail=$1', 'thumb=$1' ],
 			'img_none'        => [ 1, 'none' ],
+			'img_left'        => [ 1, 'left' ],
+			'img_right'       => [ 1, 'right' ],
+			// T345026: 'sub' should follow 'img_sub' to match dewikivoyage
+			'img_sub'         => [ 1, 'sub' ],
+			'sub'             => [ 0, 'sub' ],
 			'notoc'           => [ 0, '__NOTOC__' ],
 			'timedmedia_loop' => [ 0, 'loop' ],
 			'timedmedia_muted' => [ 0, 'muted' ],
@@ -443,5 +463,40 @@ class MockSiteConfig extends SiteConfig {
 	/** @inheritDoc */
 	public function getExternalLinkTarget() {
 		return $this->externalLinkTarget;
+	}
+
+	/** @var ?MockMetrics */
+	private $metrics;
+
+	/** @inheritDoc */
+	public function metrics(): ?StatsdDataFactoryInterface {
+		if ( $this->metrics === null ) {
+			$this->metrics = new MockMetrics();
+		}
+		return $this->metrics;
+	}
+
+	/**
+	 * Increment a counter metric
+	 * @param string $name
+	 * @param array $labels
+	 * @param float $amount
+	 * @return void
+	 */
+	public function incrementCounter( string $name, array $labels, float $amount = 1 ): void {
+		// We don't use the labels for now, using MockMetrics instead
+		$this->metrics->increment( $name );
+	}
+
+	/**
+	 * Record a timing metric
+	 * @param string $name
+	 * @param float $value
+	 * @param array $labels
+	 * @return void
+	 */
+	public function observeTiming( string $name, float $value, array $labels ): void {
+		// We don't use the labels for now, using MockMetrics instead
+		$this->metrics->timing( $name, $value );
 	}
 }

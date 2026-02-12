@@ -7,6 +7,7 @@
 	"advancedsearch-desc": "Easy access to advanced search capabilities on [[Special:Search]]",
 
 	"advancedsearch-options-pane-head": "Advanced search:",
+	"advancedsearch-options-pane-preview-list": "Currently used search terms",
 	"advancedsearch-optgroup-text": "Search in page text",
 	"advancedsearch-optgroup-structure": "Structure",
 	"advancedsearch-optgroup-files": "Files and images",
@@ -27,8 +28,9 @@
 	"advancedsearch-field-sort": "Sorting order",
 	"advancedsearch-field-preview-sort": "Sort by $1",
 
+	"advancedsearch-help-general-instruction": "Detailed instructions for $1",
 	"advancedsearch-help-plain": ";Description\n:Searches for these words in the title or text.\n;Be aware of the following\n:* Multiple words can be entered here.\n:* Punctuation marks and other non-alphanumeric characters (with exception of the colon and comma) will be ignored.\n:* There may be results that do not contain one or more of your search terms.\n:* Word stemming is applied. Example: If ''car'' is entered, the search will also consider ''cars''. The word stemming is language specific.\n;Help page\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Full text search]\n;Syntax-equivalent in the normal search\n:<code>sesame street car</code>",
-	"advancedsearch-help-phrase": ";Description\n:Searches for a specific sequence of characters. Punctuation marks are ignored.\n;Be aware of the following \n:(only valid when using quotation marks, see example below) \n:* Separate the search phrases by comma or space e.g. <code>\"good morning\"</code>, <code>\"hello friend!\"</code>.\n:* Punctuation marks and other non-alphanumeric characters (with exception of the colon and comma) will be ignored.\n:* Search is not case-sensitive.\n:* Word stemming is not applied.\n;Help page\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Words, phrases, and modifiers]\n;Syntax-equivalent in the normal search\n:Words in quotation marks, for example <code>\"Begin at the beginning\"</code>.",
+	"advancedsearch-help-phrase": ";Description\n:Searches for a specific sequence of characters. Punctuation marks are ignored.\n;Be aware of the following\n:(only valid when using quotation marks, see example below)\n:* Separate the search phrases by comma or space e.g. <code>\"good morning\"</code>, <code>\"hello friend!\"</code>.\n:* Punctuation marks and other non-alphanumeric characters (with exception of the colon and comma) will be ignored.\n:* Search is not case-sensitive.\n:* Word stemming is not applied.\n;Help page\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Words, phrases, and modifiers]\n;Syntax-equivalent in the normal search\n:Words in quotation marks, for example <code>\"Begin at the beginning\"</code>.",
 	"advancedsearch-help-or": ";Description\n:At least one of the search terms has to be included in the page.\n;Help page\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Words, phrases, and modifiers]\n;Syntax-equivalent in the normal search\n:Words with <code>OR</code> in between them like <code>Laptop OR Notebook</code>.",
 	"advancedsearch-help-not": ";Description\n:Excludes pages containing these words from the search.\n;Be aware of the following\n:* Word stemming is applied. Example: If ''car'' is entered, the search will also consider ''cars''. The word stemming is language specific.\n;Help page\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Words, phrases, and modifiers]\n;Syntax-equivalent in the normal search\n:Words with <code>-</code> before them, for example <code>-elephant</code>.",
 	"advancedsearch-help-intitle": ";Description\n:Searches for pages with titles that contain this word\n;Be aware of the following\n:* The search includes redirects.\n:* Word stemming is applied. Example: If ''car'' is entered, the search will also consider ''cars''. The word stemming is language specific.\n;Help page\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Intitle_and_incategory Intitle and incategory]\n;Syntax-equivalent in the normal search\n:Words with <code>intitle:</code> before them like <code>intitle:queen</code>.",
@@ -57,11 +59,8 @@
 	"advancedsearch-filetype-video": "Video",
 	"advancedsearch-filetype-office": "Office",
 	"advancedsearch-filesize-equals": "equal to",
-	"advancedsearch-filesize-equals-symbol": "=",
 	"advancedsearch-filesize-greater-than": "greater than",
-	"advancedsearch-filesize-greater-than-symbol": ">",
 	"advancedsearch-filesize-smaller-than": "lower than",
-	"advancedsearch-filesize-smaller-than-symbol": "<",
 
 	"advancedsearch-sort-relevance": "Relevance",
 	"advancedsearch-sort-last-edit-asc": "Edit date – oldest on top",
@@ -76,6 +75,7 @@
 
 	"advancedsearch-namespaces-search-in": "Search in:",
 	"advancedsearch-namespaces-remember": "Remember selection for future searches",
+	"advancedsearch-namespaces-pane-preview-list": "Currently active namespace filters",
 	"advancedsearch-namespaces-preset-all": "All",
 	"advancedsearch-namespaces-preset-default": "Default",
 	"advancedsearch-namespaces-preset-general-help": "General Help",

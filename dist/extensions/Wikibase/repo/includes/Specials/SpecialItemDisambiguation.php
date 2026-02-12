@@ -1,19 +1,18 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Specials;
 
-use Html;
-use HTMLForm;
-use RequestContext;
-use WebRequest;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Request\WebRequest;
 use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\Interactors\TermSearchResult;
-use Wikibase\Lib\LanguageNameLookup;
-use Wikibase\Lib\Store\EntityTitleLookup;
+use Wikibase\Lib\LanguageNameLookupFactory;
 use Wikibase\Repo\Api\EntitySearchException;
 use Wikibase\Repo\Api\EntitySearchHelper;
-use Wikibase\Repo\Api\TypeDispatchingEntitySearchHelper;
-use Wikibase\Repo\ItemDisambiguation;
+use Wikibase\Repo\ItemDisambiguationFactory;
 
 /**
  * Enables accessing items by providing the label of the item and the language of the label.
@@ -23,77 +22,25 @@ use Wikibase\Repo\ItemDisambiguation;
  */
 class SpecialItemDisambiguation extends SpecialWikibasePage {
 
-	/**
-	 * @var ContentLanguages
-	 */
-	private $contentLanguages;
+	private const LIMIT = 100;
 
-	/**
-	 * @var LanguageNameLookup
-	 */
-	private $languageNameLookup;
+	private EntitySearchHelper $entitySearchHelper;
+	private ItemDisambiguationFactory $itemDisambiguationFactory;
+	private LanguageNameLookupFactory $languageNameLookupFactory;
+	private ContentLanguages $contentLanguages;
 
-	/**
-	 * @var ItemDisambiguation
-	 */
-	private $itemDisambiguation;
-
-	/**
-	 * @var EntitySearchHelper
-	 */
-	private $entitySearchHelper;
-
-	/**
-	 * @var int
-	 */
-	private $limit;
-
-	/**
-	 * @param ContentLanguages $contentLanguages
-	 * @param LanguageNameLookup $languageNameLookup
-	 * @param ItemDisambiguation $itemDisambiguation
-	 * @param EntitySearchHelper $entitySearchHelper
-	 * @param int $limit
-	 */
 	public function __construct(
-		ContentLanguages $contentLanguages,
-		LanguageNameLookup $languageNameLookup,
-		ItemDisambiguation $itemDisambiguation,
 		EntitySearchHelper $entitySearchHelper,
-		$limit = 100
+		ItemDisambiguationFactory $itemDisambiguationFactory,
+		LanguageNameLookupFactory $languageNameLookupFactory,
+		ContentLanguages $contentLanguages
 	) {
 		parent::__construct( 'ItemDisambiguation' );
 
-		$this->contentLanguages = $contentLanguages;
-		$this->languageNameLookup = $languageNameLookup;
-		$this->itemDisambiguation = $itemDisambiguation;
 		$this->entitySearchHelper = $entitySearchHelper;
-		$this->limit = $limit;
-	}
-
-	public static function factory(
-		array $entitySearchHelperCallbacks,
-		EntityTitleLookup $entityTitleLookup,
-		ContentLanguages $termsLanguages
-	): self {
-		global $wgLang;
-
-		$languageCode = $wgLang->getCode();
-		$languageNameLookup = new LanguageNameLookup( $languageCode );
-		$itemDisambiguation = new ItemDisambiguation(
-			$entityTitleLookup,
-			$languageNameLookup,
-			$languageCode
-		);
-		return new self(
-			$termsLanguages,
-			$languageNameLookup,
-			$itemDisambiguation,
-			new TypeDispatchingEntitySearchHelper(
-				$entitySearchHelperCallbacks,
-				RequestContext::getMain()->getRequest()
-			)
-		);
+		$this->itemDisambiguationFactory = $itemDisambiguationFactory;
+		$this->languageNameLookupFactory = $languageNameLookupFactory;
+		$this->contentLanguages = $contentLanguages;
 	}
 
 	/**
@@ -105,7 +52,7 @@ class SpecialItemDisambiguation extends SpecialWikibasePage {
 		parent::execute( $subPage );
 
 		$request = $this->getRequest();
-		$subPageParts = $subPage === '' ? [] : explode( '/', $subPage, 2 );
+		$subPageParts = $subPage ? explode( '/', $subPage, 2 ) : [];
 
 		$languageCode = $this->extractLanguageCode( $request, $subPageParts );
 		$label = $this->extractLabel( $request, $subPageParts );
@@ -113,7 +60,7 @@ class SpecialItemDisambiguation extends SpecialWikibasePage {
 		$this->switchForm( $languageCode, $label );
 
 		// Display the result set
-		if ( isset( $languageCode ) && isset( $label ) && $label !== '' ) {
+		if ( $label !== '' ) {
 			// @todo We could have a LanguageCodeValidator or something and handle this
 			// in the search interactor or some place else.
 			if ( !$this->contentLanguages->hasLanguage( $languageCode ) ) {
@@ -124,7 +71,7 @@ class SpecialItemDisambiguation extends SpecialWikibasePage {
 				try {
 					$searchResults = $this->getSearchResults( $label, $languageCode );
 
-					if ( !empty( $searchResults ) ) {
+					if ( $searchResults ) {
 						$this->displaySearchResults( $searchResults, $label );
 					} else {
 						$this->showNothingFound( $languageCode, $label );
@@ -136,17 +83,8 @@ class SpecialItemDisambiguation extends SpecialWikibasePage {
 		}
 	}
 
-	/**
-	 * @param WebRequest $request
-	 * @param array $subPageParts
-	 *
-	 * @return string
-	 */
-	private function extractLanguageCode( WebRequest $request, array $subPageParts ) {
-		$languageCode = $request->getRawVal(
-			'language',
-			$subPageParts[0] ?? ''
-		);
+	private function extractLanguageCode( WebRequest $request, array $subPageParts ): string {
+		$languageCode = $request->getRawVal( 'language' ) ?? $subPageParts[0] ?? '';
 
 		if ( $languageCode === '' ) {
 			$languageCode = $this->getLanguage()->getCode();
@@ -155,13 +93,7 @@ class SpecialItemDisambiguation extends SpecialWikibasePage {
 		return $languageCode;
 	}
 
-	/**
-	 * @param WebRequest $request
-	 * @param array $subPageParts
-	 *
-	 * @return string
-	 */
-	private function extractLabel( WebRequest $request, array $subPageParts ) {
+	private function extractLabel( WebRequest $request, array $subPageParts ): string {
 		if ( $request->getCheck( 'label' ) ) {
 			return $request->getText( 'label' );
 		}
@@ -173,9 +105,9 @@ class SpecialItemDisambiguation extends SpecialWikibasePage {
 	 * @param TermSearchResult[] $searchResults
 	 * @param string $label
 	 */
-	private function displaySearchResults( array $searchResults, $label ) {
-		$this->getOutput()->setPageTitle(
-			$this->msg( 'wikibase-disambiguation-title', $label )->escaped()
+	private function displaySearchResults( array $searchResults, string $label ) {
+		$this->getOutput()->setPageTitleMsg(
+			$this->msg( 'wikibase-disambiguation-title' )->plaintextParams( $label )
 		);
 
 		$this->displayDisambiguationPage( $searchResults );
@@ -188,12 +120,12 @@ class SpecialItemDisambiguation extends SpecialWikibasePage {
 	 * @return TermSearchResult[]
 	 * @throws EntitySearchException
 	 */
-	private function getSearchResults( $label, $languageCode ) {
+	private function getSearchResults( string $label, string $languageCode ): array {
 		return $this->entitySearchHelper->getRankedSearchResults(
 			$label,
 			$languageCode,
 			'item',
-			$this->limit,
+			self::LIMIT,
 			false,
 			null
 		);
@@ -201,11 +133,8 @@ class SpecialItemDisambiguation extends SpecialWikibasePage {
 
 	/**
 	 * Shows information, assuming no results were found.
-	 *
-	 * @param string $languageCode
-	 * @param string $label
 	 */
-	private function showNothingFound( $languageCode, $label ) {
+	private function showNothingFound( string $languageCode, string $label ): void {
 		$this->getOutput()->addWikiMsg( 'wikibase-itemdisambiguation-nothing-found' );
 
 		if ( $languageCode === $this->getLanguage()->getCode() ) {
@@ -227,20 +156,22 @@ class SpecialItemDisambiguation extends SpecialWikibasePage {
 	 *
 	 * @param TermSearchResult[] $searchResults
 	 */
-	private function displayDisambiguationPage( array $searchResults ) {
-		$html = $this->itemDisambiguation->getHTML( $searchResults );
+	private function displayDisambiguationPage( array $searchResults ): void {
+		$itemDisambiguation = $this->itemDisambiguationFactory
+			->getForLanguage( $this->getLanguage() );
+		$html = $itemDisambiguation->getHTML( $searchResults );
 		$this->getOutput()->addHTML( $html );
 	}
 
 	/**
 	 * Return options for the language input field.
-	 *
-	 * @return array
 	 */
-	private function getLanguageOptions() {
+	private function getLanguageOptions(): array {
+		$languageNameLookup = $this->languageNameLookupFactory
+			->getForLanguage( $this->getLanguage() );
 		$options = [];
 		foreach ( $this->contentLanguages->getLanguages() as $languageCode ) {
-			$languageName = $this->languageNameLookup->getName( $languageCode );
+			$languageName = $languageNameLookup->getNameForTerms( $languageCode );
 			$options["$languageName ($languageCode)"] = $languageCode;
 		}
 		return $options;
@@ -248,11 +179,8 @@ class SpecialItemDisambiguation extends SpecialWikibasePage {
 
 	/**
 	 * Output a form to allow searching for labels
-	 *
-	 * @param string|null $languageCode
-	 * @param string|null $label
 	 */
-	private function switchForm( $languageCode, $label ) {
+	private function switchForm( ?string $languageCode, ?string $label ): void {
 		$formDescriptor = [
 			'language' => [
 				'name' => 'language',
@@ -262,7 +190,7 @@ class SpecialItemDisambiguation extends SpecialWikibasePage {
 				'id' => 'wb-itemdisambiguation-languagename',
 				'size' => 12,
 				'cssclass' => 'wb-language-suggester',
-				'label-message' => 'wikibase-itemdisambiguation-lookup-language'
+				'label-message' => 'wikibase-itemdisambiguation-lookup-language',
 			],
 			'label' => [
 				'name' => 'label',
@@ -271,24 +199,24 @@ class SpecialItemDisambiguation extends SpecialWikibasePage {
 				'id' => 'labelname',
 				'size' => 36,
 				'autofocus',
-				'label-message' => 'wikibase-itemdisambiguation-lookup-label'
+				'label-message' => 'wikibase-itemdisambiguation-lookup-label',
 			],
 			'submit' => [
 				'name' => '',
 				'default' => $this->msg( 'wikibase-itemdisambiguation-submit' )->text(),
 				'type' => 'submit',
 				'id' => 'wb-itembytitle-submit',
-			]
+			],
 		];
 
 		HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )
 			->setId( 'wb-itemdisambiguation-form1' )
 			->setMethod( 'get' )
-			->setFooterText( Html::element(
+			->setFooterHtml( Html::element(
 				'p',
 				[],
 				$this->msg( 'wikibase-itemdisambiguation-form-hints' )->numParams(
-					$this->limit
+					self::LIMIT
 				)->text()
 			) )
 			->setWrapperLegendMsg( 'wikibase-itemdisambiguation-lookup-fieldset' )

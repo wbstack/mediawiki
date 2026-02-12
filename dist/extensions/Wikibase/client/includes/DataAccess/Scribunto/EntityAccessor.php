@@ -3,7 +3,7 @@
 namespace Wikibase\Client\DataAccess\Scribunto;
 
 use InvalidArgumentException;
-use Language;
+use MediaWiki\Language\Language;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Serializers\Serializer;
@@ -97,7 +97,7 @@ class EntityAccessor {
 		TermLanguageFallbackChain $termFallbackChain,
 		Language $language,
 		ContentLanguages $termsLanguages,
-		LoggerInterface $logger = null
+		?LoggerInterface $logger = null
 	) {
 		$this->entityIdParser = $entityIdParser;
 		$this->entityLookup = $entityLookup;
@@ -251,12 +251,12 @@ class EntityAccessor {
 
 	/**
 	 * @see UnresolvedEntityRedirectException
-	 * @param $prefixedEntityId
+	 * @param string $prefixedEntityId
 	 */
 	private function logPossibleDoubleRedirect( $prefixedEntityId ) {
 		$this->logger->info( 'Unresolved redirect encountered loading {prefixedEntityId}. This is typically cleaned up asynchronously.',
 			[
-				'prefixedEntityId' => $prefixedEntityId
+				'prefixedEntityId' => $prefixedEntityId,
 			]
 		);
 	}

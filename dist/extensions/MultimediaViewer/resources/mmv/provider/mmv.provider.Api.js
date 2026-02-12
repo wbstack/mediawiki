@@ -15,19 +15,19 @@
  * along with MultimediaViewer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function () {
+/**
+ * Base class for API-based data providers.
+ *
+ * @abstract
+ */
+class Api {
 	/**
-	 * Base class for API-based data providers.
-	 *
-	 * @class mw.mmv.provider.Api
-	 * @abstract
-	 * @constructor
 	 * @param {mw.Api} api
 	 * @param {Object} [options]
-	 * @cfg {number} [maxage] cache expiration time, in seconds
+	 * @param {number} [options.maxage] cache expiration time, in seconds
 	 *  Will be used for both client-side cache (maxage) and reverse proxies (s-maxage)
 	 */
-	function Api( api, options ) {
+	constructor( api, options ) {
 		/**
 		 * API object for dependency injection.
 		 *
@@ -67,18 +67,16 @@
 	 * @param {function(): jQuery.Promise} getPromise a function to get the promise on cache miss
 	 * @return {jQuery.Promise}
 	 */
-	Api.prototype.getCachedPromise = function ( key, getPromise ) {
-		var provider = this;
-
+	getCachedPromise( key, getPromise ) {
 		if ( !this.cache[ key ] ) {
 			this.cache[ key ] = getPromise();
-			this.cache[ key ].fail( function ( error ) {
+			this.cache[ key ].fail( ( error ) => {
 				// constructor.name is usually not reliable in inherited classes, but OOjs fixes that
-				mw.log( provider.constructor.name + ' provider failed to load: ', error );
+				mw.log( `${ this.constructor.name } provider failed to load: `, error );
 			} );
 		}
 		return this.cache[ key ];
-	};
+	}
 
 	/**
 	 * Calls mw.Api.get, with caching parameters.
@@ -90,7 +88,7 @@
 	 *  Null means no caching. Undefined means the default caching period is used.
 	 * @return {jQuery.Promise} the return value from mw.Api.get
 	 */
-	Api.prototype.apiGetWithMaxAge = function ( params, ajaxOptions, maxage ) {
+	apiGetWithMaxAge( params, ajaxOptions, maxage ) {
 		if ( maxage === undefined ) {
 			maxage = this.options.maxage;
 		}
@@ -99,7 +97,7 @@
 		}
 
 		return this.api.get( params, ajaxOptions );
-	};
+	}
 
 	/**
 	 * Pulls an error message out of an API response.
@@ -110,94 +108,39 @@
 	 * @param {string} data.error.info
 	 * @return {string} From data.error.code + ': ' + data.error.info, or 'unknown error'
 	 */
-	Api.prototype.getErrorMessage = function ( data ) {
-		var errorCode, errorMessage;
-		errorCode = data.error && data.error.code;
-		errorMessage = data.error && data.error.info || 'unknown error';
+	getErrorMessage( data ) {
+		const errorCode = data.error && data.error.code;
+		let errorMessage = data.error && data.error.info || 'unknown error';
 		if ( errorCode ) {
-			errorMessage = errorCode + ': ' + errorMessage;
+			errorMessage = `${ errorCode }: ${ errorMessage }`;
 		}
 		return errorMessage;
-	};
-
-	/**
-	 * Returns a fixed a title based on the API response.
-	 * The title of the returned file might be different from the requested title, e.g.
-	 * if we used a namespace alias. If that happens the old and new title will be set in
-	 * data.query.normalized; this method creates an updated title based on that.
-	 *
-	 * @param {mw.Title} title
-	 * @param {Object} data
-	 * @return {mw.Title}
-	 */
-	Api.prototype.getNormalizedTitle = function ( title, data ) {
-		var i, normalized, length;
-		if ( data && data.query && data.query.normalized ) {
-			for ( normalized = data.query.normalized, length = normalized.length, i = 0; i < length; i++ ) {
-				if ( normalized[ i ].from === title.getPrefixedText() ) {
-					title = new mw.Title( normalized[ i ].to );
-					break;
-				}
-			}
-		}
-		return title;
-	};
-
-	/**
-	 * Returns a promise with the specified field from the API result.
-	 * This is intended to be used as a .then() callback for action=query APIs.
-	 *
-	 * @param {string} field
-	 * @param {Object} data
-	 * @return {jQuery.Promise} when successful, the first argument will be the field data,
-	 *     when unsuccessful, it will be an error message. The second argument is always
-	 *     the full API response.
-	 */
-	Api.prototype.getQueryField = function ( field, data ) {
-		if ( data && data.query && data.query[ field ] ) {
-			return $.Deferred().resolve( data.query[ field ], data );
-		} else {
-			return $.Deferred().reject( this.getErrorMessage( data ), data );
-		}
-	};
+	}
 
 	/**
 	 * Returns a promise with the specified page from the API result.
 	 * This is intended to be used as a .then() callback for action=query&prop=(...) APIs.
 	 *
-	 * @param {mw.Title} title
 	 * @param {Object} data
 	 * @return {jQuery.Promise} when successful, the first argument will be the page data,
 	 *     when unsuccessful, it will be an error message. The second argument is always
 	 *     the full API response.
 	 */
-	Api.prototype.getQueryPage = function ( title, data ) {
-		var pageName, pageData = null;
-		if ( data && data.query && data.query.pages ) {
-			title = this.getNormalizedTitle( title, data );
-			pageName = title.getPrefixedText();
-
-			// pages is an associative array indexed by pageid,
-			// we need to iterate through to find the right page
-			// eslint-disable-next-line no-jquery/no-each-util
-			$.each( data.query.pages, function ( id, page ) {
-				if ( page.title === pageName ) {
-					pageData = page;
-					return false;
-				}
-			} );
-
-			if ( pageData ) {
-				return $.Deferred().resolve( pageData, data );
-			}
+	getQueryPage( data ) {
+		if ( data &&
+			data.query &&
+			Array.isArray( data.query.pages ) &&
+			data.query.pages.length === 1
+		) {
+			// pages is an array and the first element is always the requested title
+			return $.Deferred().resolve( data.query.pages[ 0 ], data );
 		}
 
-		// If we got to this point either the pages array is missing completely, or we iterated
-		// through it and the requested page was not found. Neither is supposed to happen
+		// If we got to this point either the pages array is missing completely, or the
+		// first element is not the requested page. Neither is supposed to happen
 		// (if the page simply did not exist, there would still be a record for it).
 		return $.Deferred().reject( this.getErrorMessage( data ), data );
-	};
+	}
+}
 
-	mw.mmv.provider = {};
-	mw.mmv.provider.Api = Api;
-}() );
+module.exports = Api;

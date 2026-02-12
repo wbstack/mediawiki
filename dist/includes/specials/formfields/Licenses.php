@@ -23,24 +23,18 @@
  * @copyright Copyright © 2005, Ævar Arnfjörð Bjarmason
  */
 
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLFormField;
 use MediaWiki\MediaWikiServices;
 
 /**
  * A License class for use on Special:Upload
  */
 class Licenses extends HTMLFormField {
-	/** @var string */
-	protected $msg;
-
-	/** @var array */
-	protected $lines = [];
-
-	/** @var string */
-	protected $html;
-
-	/** @var string|null */
-	protected $selected;
-	/** #@- */
+	protected string $msg;
+	protected array $lines = [];
+	protected string $html;
+	protected ?string $selected;
 
 	/**
 	 * @param array $params
@@ -95,12 +89,12 @@ class Licenses extends HTMLFormField {
 		$lines = explode( "\n", $this->msg );
 
 		foreach ( $lines as $line ) {
-			if ( strpos( $line, '*' ) !== 0 ) {
+			if ( !str_starts_with( $line, '*' ) ) {
 				continue;
 			}
-			list( $level, $line ) = $this->trimStars( $line );
+			[ $level, $line ] = $this->trimStars( $line );
 
-			if ( strpos( $line, '|' ) !== false ) {
+			if ( str_contains( $line, '|' ) ) {
 				$obj = $this->buildLine( $line );
 				$this->stackItem( $this->lines, $levels, $obj );
 			} else {
@@ -153,8 +147,7 @@ class Licenses extends HTMLFormField {
 				$html .= $this->outputOption(
 					$key, '',
 					[
-						'disabled' => 'disabled',
-						'style' => 'color: GrayText', // for MSIE
+						'disabled' => 'disabled'
 					],
 					$depth
 				);
@@ -182,15 +175,13 @@ class Licenses extends HTMLFormField {
 		$msgObj = $this->msg( $message );
 		$text = $msgObj->exists() ? $msgObj->text() : $message;
 		$attribs['value'] = $value;
-		if ( $value === $this->selected ) {
+		if ( $value === $this->selected && !isset( $attribs['disabled'] ) ) {
 			$attribs['selected'] = 'selected';
 		}
 
 		$val = str_repeat( /* &nbsp */ "\u{00A0}", $depth * 2 ) . $text;
-		return str_repeat( "\t", $depth ) . Xml::element( 'option', $attribs, $val ) . "\n";
+		return str_repeat( "\t", $depth ) . Html::element( 'option', $attribs, $val ) . "\n";
 	}
-
-	/** #@- */
 
 	/**
 	 * Accessor for $this->lines

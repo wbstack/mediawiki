@@ -2,23 +2,36 @@
 
 namespace MediaWiki\Extension\OAuth;
 
-use ApiMessage;
+use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
+use InvalidArgumentException;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiMessage;
+use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\Extension\OAuth\Backend\Consumer;
 use MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance;
 use MediaWiki\Extension\OAuth\Backend\MWOAuthException;
 use MediaWiki\Extension\OAuth\Backend\MWOAuthRequest;
 use MediaWiki\Extension\OAuth\Backend\Utils;
 use MediaWiki\Extension\OAuth\Repository\AccessTokenRepository;
+use MediaWiki\Hook\MarkPatrolledHook;
+use MediaWiki\Hook\RecentChange_saveHook;
+use MediaWiki\Linker\Linker;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Message\Message;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Session\ImmutableSessionProviderWithCookie;
 use MediaWiki\Session\SessionBackend;
 use MediaWiki\Session\SessionInfo;
 use MediaWiki\Session\SessionManager;
 use MediaWiki\Session\UserInfo;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use MediaWiki\User\UserIdentity;
-use User;
-use WebRequest;
-use WikiMap;
+use MediaWiki\WikiMap\WikiMap;
+use MWRestrictions;
+use RecentChange;
 use Wikimedia\Rdbms\DBError;
 
 /**
@@ -35,57 +48,49 @@ use Wikimedia\Rdbms\DBError;
  * purposes (limiting the rights to those included in the grant), and
  * registers some hooks to tag actions made via the provider.
  */
-class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCookie {
+class SessionProvider
+	extends ImmutableSessionProviderWithCookie
+	implements ApiCheckCanExecuteHook, RecentChange_saveHook, MarkPatrolledHook
+{
 
 	public function __construct( array $params = [] ) {
-		global $wgHooks;
-
 		parent::__construct( $params );
-
-		$wgHooks['ApiCheckCanExecute'][] = $this;
-		$wgHooks['RecentChange_save'][] = $this;
-		$wgHooks['MarkPatrolled'][] = $this;
 	}
 
-	/**
-	 * Throw an exception, later
-	 *
-	 * @param string $key Key for the error message
-	 * @param mixed ...$params Parameters as strings.
-	 * @return SessionInfo
-	 */
-	private function makeException( $key, ...$params ) {
-		global $wgHooks;
+	protected function postInitSetup() {
+		$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
 
-		// First, schedule the throwing of the exception for later when the API
-		// is ready to catch it
-		$msg = wfMessage( $key, $params );
-		$exception = \ApiUsageException::newWithMessage( null, $msg );
-		// @phan-suppress-next-line PhanPluginNeverReturnFunction Closures should not get doc
-		$wgHooks['ApiBeforeMain'][] = static function () use ( $exception ) {
-			throw $exception;
-		};
-
-		// Then return an appropriate SessionInfo
-		$id = $this->hashToSessionId( 'bogus' );
-		return new SessionInfo( SessionInfo::MAX_PRIORITY, [
-			'provider' => $this,
-			'id' => $id,
-			'userInfo' => UserInfo::newAnonymous(),
-			'persisted' => false,
-		] );
+		$hookContainer->register( 'ApiCheckCanExecute', $this );
+		$hookContainer->register( 'RecentChange_save', $this );
+		$hookContainer->register( 'MarkPatrolled', $this );
 	}
 
 	public function provideSessionInfo( WebRequest $request ) {
-		// For some reason MWOAuth is restricted to be API-only.
-		if ( !defined( 'MW_API' ) && !defined( 'MW_REST_API' ) ) {
-			return null;
-		}
-
 		$oauthVersion = $this->getOAuthVersionFromRequest( $request );
 		if ( $oauthVersion === null ) {
 			// Not an OAuth request
 			return null;
+		}
+
+		// OAuth is restricted to be API-only.
+		if ( !defined( 'MW_API' ) && !defined( 'MW_REST_API' ) ) {
+			$globalRequest = RequestContext::getMain()->getRequest();
+			if ( $request !== $globalRequest ) {
+				// We are looking at something other than the global request. No easy way to
+				// find out the title, and showing an error should be handled in the global
+				// request anyway. Bail out.
+				return null;
+			}
+			// The global Title object is not set up yet.
+			$title = Title::newFromText( $request->getText( 'title' ) );
+			if ( $title && $title->isSpecial( 'OAuth' ) ) {
+				// Some Special:OAuth subpages expect an OAuth request header, but process it
+				// manually, not via SessionManager. We mustn't break those.
+				// TODO: this can probably be limited to /token and /identify
+				return null;
+			}
+
+			return $this->makeException( 'mwoauth-not-api' );
 		}
 
 		$logData = [
@@ -128,6 +133,7 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 					);
 				}
 				if ( !$access ) {
+					$logData['consumer'] = $resourceServer->getClient()->getConsumerKey();
 					throw new MWOAuthException( 'mwoauth-oauth2-error-create-at-no-user-approval' );
 				}
 
@@ -137,11 +143,11 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 				$server = Utils::newMWOAuthServer();
 				$oauthRequest = MWOAuthRequest::fromRequest( $request );
 				$logData['consumer'] = $oauthRequest->getConsumerKey();
-				list( , $accessToken ) = $server->verify_request( $oauthRequest );
+				[ , $accessToken ] = $server->verify_request( $oauthRequest );
 				$accessTokenKey = $accessToken->key;
 				$access = ConsumerAcceptance::newFromToken( $dbr, $accessTokenKey );
 			}
-		} catch ( \Exception $ex ) {
+		} catch ( Exception $ex ) {
 			$this->logger->info( 'Bad OAuth request from {ip}', $logData + [ 'exception' => $ex ] );
 			return $this->makeException( 'mwoauth-invalid-authorization', $ex->getMessage() );
 		}
@@ -164,18 +170,24 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 		if ( $access->getId() > 0 && $localUser->getId() === 0 ) {
 			$this->logger->debug( 'OAuth request for invalid or non-local user {user}', $logData );
 			return $this->makeException( 'mwoauth-invalid-authorization-invalid-user',
-				\Message::rawParam( \Linker::makeExternalLink(
+				Message::rawParam( Linker::makeExternalLink(
 					'https://www.mediawiki.org/wiki/Help:OAuth/Errors#E008',
 					'E008',
 					true
 				) )
 			);
 		}
-		if ( $localUser->isLocked() ||
-			( $this->config->get( 'BlockDisablesLogin' ) && $localUser->getBlock() )
-		) {
-			$this->logger->debug( 'OAuth request for blocked user {user}', $logData );
+		if ( $localUser->isLocked() ) {
+			$this->logger->debug( 'OAuth request for locked user {user}', $logData );
 			return $this->makeException( 'mwoauth-invalid-authorization-blocked-user' );
+		}
+		if ( $this->config->get( 'BlockDisablesLogin' ) ) {
+			$block = MediaWikiServices::getInstance()->getBlockManager()
+				->getBlock( $localUser, null );
+			if ( $block && $block->isSitewide() ) {
+				$this->logger->debug( 'OAuth request for blocked user {user}', $logData );
+				return $this->makeException( 'mwoauth-invalid-authorization-blocked-user' );
+			}
 		}
 
 		// The consumer is approved or owned by $localUser, and is for this wiki.
@@ -227,6 +239,7 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 				'rights' => MediaWikiServices::getInstance()
 					->getGrantsInfo()
 					->getGrantRights( $access->getGrants() ),
+				'restrictions' => $consumer->getRestrictions()->toJson(),
 			],
 		] );
 	}
@@ -292,18 +305,18 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 				[ 'oarc_user_id' => $id ],
 				__METHOD__
 			);
-			$dbw->delete(
-				'oauth_registered_consumer',
-				[ 'oarc_user_id' => $id ],
-				__METHOD__
-			);
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( 'oauth_registered_consumer' )
+				->where( [ 'oarc_user_id' => $id ] )
+				->caller( __METHOD__ )
+				->execute();
 
 			// Remove any approvals by this user, too
-			$dbw->delete(
-				'oauth_accepted_consumer',
-				[ 'oaac_user_id' => $id ],
-				__METHOD__
-			);
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( 'oauth_accepted_consumer' )
+				->where( [ 'oaac_user_id' => $id ] )
+				->caller( __METHOD__ )
+				->execute();
 		} catch ( DBError $e ) {
 			$dbw->rollback( __METHOD__ );
 			throw $e;
@@ -322,7 +335,7 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 	 * @param UserIdentity|null $userIdentity
 	 * @return array|null
 	 */
-	private function getSessionData( UserIdentity $userIdentity = null ) {
+	private function getSessionData( ?UserIdentity $userIdentity = null ) {
 		if ( $userIdentity ) {
 			$user = User::newFromIdentity( $userIdentity );
 			$session = $user->getRequest()->getSession();
@@ -343,7 +356,7 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 
 	public function getAllowedUserRights( SessionBackend $backend ) {
 		if ( $backend->getProvider() !== $this ) {
-			throw new \InvalidArgumentException( 'Backend\'s provider isn\'t $this' );
+			throw new InvalidArgumentException( 'Backend\'s provider isn\'t $this' );
 		}
 		$data = $backend->getProviderMetadata();
 		if ( $data ) {
@@ -355,15 +368,29 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 		return [];
 	}
 
+	public function getRestrictions( ?array $data ): ?MWRestrictions {
+		if ( $data && isset( $data['restrictions'] ) && is_string( $data['restrictions'] ) ) {
+			try {
+				return MWRestrictions::newFromJson( $data['restrictions'] );
+			} catch ( \InvalidArgumentException $e ) {
+				$this->logger->warning( __METHOD__ . ': Failed to parse restrictions: {restrictions}', [
+					'restrictions' => $data['restrictions']
+				] );
+				return null;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Disable certain API modules when used with OAuth
 	 *
-	 * @param \ApiBase $module
+	 * @param ApiBase $module
 	 * @param UserIdentity $userIdentity
 	 * @param string|array &$message
 	 * @return bool
 	 */
-	public function onApiCheckCanExecute( \ApiBase $module, UserIdentity $userIdentity, &$message ) {
+	public function onApiCheckCanExecute( $module, $userIdentity, &$message ) {
 		global $wgMWOauthDisabledApiModules;
 		if ( !$this->getSessionData( $userIdentity ) ) {
 			return true;
@@ -385,7 +412,7 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 	/**
 	 * Record the fact that OAuth was used for anything added to RecentChanges.
 	 *
-	 * @param \RecentChange $rc
+	 * @param RecentChange $rc
 	 * @return bool true
 	 */
 	public function onRecentChange_save( $rc ) {
@@ -401,7 +428,7 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 	 * @param UserIdentity|null $userIdentity
 	 * @return int|null
 	 */
-	protected function getPublicConsumerId( UserIdentity $userIdentity = null ) {
+	protected function getPublicConsumerId( ?UserIdentity $userIdentity = null ) {
 		$data = $this->getSessionData( $userIdentity );
 		if ( $data && isset( $data['consumerId'] ) ) {
 			return $data['consumerId'];
@@ -424,10 +451,10 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 	 */
 	public function onMarkPatrolled(
 		$rcid,
-		User $user,
+		$user,
 		$wcOnlySysopsCanPatrol,
 		$auto,
-		array &$tags
+		&$tags
 	) {
 		$consumerId = $this->getPublicConsumerId( $user );
 		if ( $consumerId !== null ) {

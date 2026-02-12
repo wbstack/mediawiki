@@ -2,12 +2,12 @@
 
 namespace CirrusSearch;
 
-use BagOStuff;
-use ExtensionRegistry;
 use MediaWiki\Extension\SiteMatrix\SiteMatrix;
-use MediaWiki\MediaWikiServices;
-use WANObjectCache;
-use WikiMap;
+use MediaWiki\Interwiki\InterwikiLookup;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\WikiMap\WikiMap;
+use Wikimedia\Http\MultiHttpClient;
+use Wikimedia\ObjectCache\WANObjectCache;
 
 /**
  * InterwikiResolver suited for WMF context and uses SiteMatrix.
@@ -16,44 +16,34 @@ class SiteMatrixInterwikiResolver extends BaseInterwikiResolver {
 
 	private const MATRIX_CACHE_TTL = 600;
 
-	/**
-	 * @var WANObjectCache
-	 */
-	private $cache;
-
 	public function __construct(
 		SearchConfig $config,
-		\MultiHttpClient $client = null,
-		WANObjectCache $wanCache = null,
-		BagOStuff $srvCache = null
+		MultiHttpClient $client,
+		WANObjectCache $wanCache,
+		InterwikiLookup $iwLookup
 	) {
-		parent::__construct( $config, $client, $wanCache, $srvCache );
-		$this->cache = $wanCache ?: MediaWikiServices::getInstance()->getMainWANObjectCache();
+		parent::__construct( $config, $client, $wanCache, $iwLookup );
 		if ( $config->getWikiId() !== WikiMap::getCurrentWikiId() ) {
 			throw new \RuntimeException( "This resolver cannot with an external wiki config. (config: " .
 				$config->getWikiId() . ", global: " . WikiMap::getCurrentWikiId() );
-		}
-		if ( !ExtensionRegistry::getInstance()->isLoaded( 'SiteMatrix' ) ) {
-			throw new \RuntimeException( "SiteMatrix is required" );
-		}
-		if ( !$this->config->has( 'SiteMatrixSites' ) ) {
-			throw new \RuntimeException( '$wgSiteMatrixSites must be set.' );
 		}
 	}
 
 	/**
 	 * @param SearchConfig $config
+	 * @param ExtensionRegistry|null $extensionRegistry
 	 * @return bool true if this resolver can run with the specified config
 	 */
-	public static function accepts( SearchConfig $config ) {
+	public static function accepts( SearchConfig $config, ?ExtensionRegistry $extensionRegistry = null ) {
+		$extensionRegistry = $extensionRegistry ?: ExtensionRegistry::getInstance();
 		return $config->getWikiId() === WikiMap::getCurrentWikiId()
-			&& ExtensionRegistry::getInstance()->isLoaded( 'SiteMatrix' )
+			&& $extensionRegistry->isLoaded( 'SiteMatrix' )
 			&& $config->has( 'SiteMatrixSites' );
 	}
 
 	protected function loadMatrix() {
-		$cacheKey = $this->cache->makeKey( 'cirrussearch-interwiki-matrix', 'v1' );
-		$matrix = $this->cache->getWithSetCallback(
+		$cacheKey = $this->wanCache->makeKey( 'cirrussearch-interwiki-matrix', 'v1' );
+		$matrix = $this->wanCache->getWithSetCallback(
 			$cacheKey,
 			self::MATRIX_CACHE_TTL,
 			$this->siteMatrixLoader()
@@ -73,9 +63,8 @@ class SiteMatrixInterwikiResolver extends BaseInterwikiResolver {
 			global $wgConf;
 
 			$matrix = new SiteMatrix;
-			$iwLookup = MediaWikiServices::getInstance()->getInterwikiLookup();
 			$wikiDBname = $this->config->get( 'DBname' );
-			list( , $myLang ) = $wgConf->siteFromDB( $wikiDBname );
+			[ , $myLang ] = $wgConf->siteFromDB( $wikiDBname );
 			$siteConf = $this->config->get( 'SiteMatrixSites' );
 			$prefixOverrides = $this->config->get( 'CirrusSearchInterwikiPrefixOverrides' );
 			$sisterProjects = [];
@@ -140,7 +129,7 @@ class SiteMatrixInterwikiResolver extends BaseInterwikiResolver {
 				}
 				// Bold assumption that the interwiki prefix is equal
 				// to the language.
-				$iw = $iwLookup->fetch( $lang );
+				$iw = $this->interwikiLookup->fetch( $lang );
 				// Not a valid interwiki prefix...
 				if ( !$iw ) {
 					continue;

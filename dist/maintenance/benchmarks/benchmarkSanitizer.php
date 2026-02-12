@@ -20,8 +20,11 @@
  */
 
 use MediaWiki\MainConfigNames;
+use MediaWiki\Parser\Sanitizer;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/../includes/Benchmarker.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script that benchmarks Sanitizer methods.
@@ -139,5 +142,7 @@ class BenchmarkSanitizer extends Benchmarker {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = BenchmarkSanitizer::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

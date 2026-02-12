@@ -4,10 +4,10 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiUsageException;
 use LogicException;
+use MediaWiki\Api\ApiUsageException;
 use MediaWiki\Revision\RevisionLookup;
-use TitleFactory;
+use MediaWiki\Title\TitleFactory;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -180,7 +180,7 @@ class EntityLoadingHelper {
 	 *
 	 * @return EntityDocument
 	 */
-	public function loadEntity( array $requestParams, EntityId $entityId = null ) {
+	public function loadEntity( array $requestParams, ?EntityId $entityId = null ) {
 		if ( !$entityId ) {
 			$entityId = $this->getEntityIdFromParams( $requestParams );
 		}
@@ -228,14 +228,12 @@ class EntityLoadingHelper {
 	 * @throws ApiUsageException
 	 * @return EntityId
 	 */
-	private function getEntityIdFromString( $id ) {
+	private function getEntityIdFromString( $id ): EntityId {
 		try {
 			return $this->idParser->parse( $id );
 		} catch ( EntityIdParsingException $ex ) {
 			$this->errorReporter->dieException( $ex, 'invalid-entity-id' );
 		}
-
-		return null;
 	}
 
 	/**
@@ -260,6 +258,7 @@ class EntityLoadingHelper {
 			);
 		}
 
+		// @phan-suppress-next-line PhanTypeMismatchReturnNullable entity id is not-null here
 		return $entityId;
 	}
 

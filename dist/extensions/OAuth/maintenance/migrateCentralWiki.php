@@ -28,9 +28,10 @@ require_once "$IP/maintenance/Maintenance.php";
 use MediaWiki\Extension\OAuth\Backend\Consumer;
 use MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance;
 use MediaWiki\Extension\OAuth\Backend\MWOAuthDAO;
+use MediaWiki\Maintenance\Maintenance;
 use MediaWiki\MediaWikiServices;
 
-class MigrateCentralWiki extends \Maintenance {
+class MigrateCentralWiki extends Maintenance {
 	public function __construct() {
 		parent::__construct();
 		$this->addDescription( "Migrate central wiki from one wiki to another. " .
@@ -62,24 +63,21 @@ class MigrateCentralWiki extends \Maintenance {
 		}
 
 		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
-		$oldDb = $lbFactory->getMainLB( $oldWiki )->getConnectionRef( DB_PRIMARY, [], $oldWiki );
+		$oldDb = $lbFactory->getMainLB( $oldWiki )->getConnection( DB_PRIMARY, [], $oldWiki );
 		$targetDb = $lbFactory->getMainLB( $targetWiki )
-			->getConnectionRef( DB_PRIMARY, [], $targetWiki );
-		$targetDb->daoReadOnly = false;
+			->getConnection( DB_PRIMARY, [], $targetWiki );
 
-		$newMax = $targetDb->selectField(
-			$table,
-			"MAX($idKey)",
-			[],
-			__METHOD__
-		);
+		$newMax = $targetDb->newSelectQueryBuilder()
+			->select( "MAX($idKey)" )
+			->from( $table )
+			->caller( __METHOD__ )
+			->fetchField();
 
-		$oldMax = $oldDb->selectField(
-			$table,
-			"MAX($idKey)",
-			[],
-			__METHOD__
-		);
+		$oldMax = $oldDb->newSelectQueryBuilder()
+			->select( "MAX($idKey)" )
+			->from( $table )
+			->caller( __METHOD__ )
+			->fetchField();
 
 		if ( $newMax >= $oldMax ) {
 			$this->output( "No new rows.\n" );

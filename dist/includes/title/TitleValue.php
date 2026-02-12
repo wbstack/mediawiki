@@ -20,24 +20,32 @@
  * @file
  * @author Daniel Kinzler
  */
+
+namespace MediaWiki\Title;
+
+use InvalidArgumentException;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\Page\PageReference;
+use Stringable;
 use Wikimedia\Assert\Assert;
 use Wikimedia\Assert\ParameterAssertionException;
 use Wikimedia\Assert\ParameterTypeException;
+use Wikimedia\Parsoid\Core\LinkTarget as ParsoidLinkTarget;
+use Wikimedia\Parsoid\Core\LinkTargetTrait;
 
 /**
- * Represents a page (or page fragment) title within MediaWiki.
+ * Represents the target of a wiki link.
  *
  * @note In contrast to Title, this is designed to be a plain value object. That is,
  * it is immutable, does not use global state, and causes no side effects.
  *
  * @newable
  *
- * @see https://www.mediawiki.org/wiki/Requests_for_comment/TitleValue
+ * @see https://www.mediawiki.org/wiki/Manual:Modeling_pages
  * @since 1.23
  */
-class TitleValue implements LinkTarget {
+class TitleValue implements Stringable, LinkTarget {
+	use LinkTargetTrait;
 
 	/** @var int */
 	private $namespace;
@@ -75,7 +83,6 @@ class TitleValue implements LinkTarget {
 	 * @param string $interwiki The interwiki component.
 	 *   No validation or normalization is applied.
 	 * @return TitleValue|null
-	 * @throws InvalidArgumentException
 	 */
 	public static function tryNew( $namespace, $title, $fragment = '', $interwiki = '' ) {
 		if ( !is_int( $namespace ) ) {
@@ -102,6 +109,24 @@ class TitleValue implements LinkTarget {
 	 */
 	public static function newFromPage( PageReference $page ): TitleValue {
 		return new TitleValue( $page->getNamespace(), $page->getDBkey() );
+	}
+
+	/**
+	 * Create a TitleValue from a LinkTarget
+	 * @param ParsoidLinkTarget $linkTarget
+	 * @return TitleValue
+	 * @since 1.42
+	 */
+	public static function newFromLinkTarget( ParsoidLinkTarget $linkTarget ): TitleValue {
+		if ( $linkTarget instanceof TitleValue ) {
+			return $linkTarget;
+		}
+		return new TitleValue(
+			$linkTarget->getNamespace(),
+			$linkTarget->getDBkey(),
+			$linkTarget->getFragment(),
+			$linkTarget->getInterwiki()
+		);
 	}
 
 	/**
@@ -138,7 +163,6 @@ class TitleValue implements LinkTarget {
 	 *   No validation or normalization is applied.
 	 * @param string $interwiki The interwiki component.
 	 *   No validation or normalization is applied.
-	 * @throws InvalidArgumentException
 	 */
 	public function __construct( $namespace, $title, $fragment = '', $interwiki = '' ) {
 		self::assertValidSpec( $namespace, $title, $fragment, $interwiki );
@@ -195,24 +219,12 @@ class TitleValue implements LinkTarget {
 		return $this->namespace;
 	}
 
-	public function inNamespace( int $ns ): bool {
-		return $this->namespace == $ns;
-	}
-
 	public function getFragment(): string {
 		return $this->fragment;
 	}
 
-	public function hasFragment(): bool {
-		return $this->fragment !== '';
-	}
-
 	public function getDBkey(): string {
 		return $this->dbkey;
-	}
-
-	public function getText(): string {
-		return str_replace( '_', ' ', $this->dbkey );
 	}
 
 	public function createFragmentTarget( string $fragment ): self {
@@ -222,10 +234,6 @@ class TitleValue implements LinkTarget {
 			$fragment,
 			$this->interwiki
 		);
-	}
-
-	public function isExternal(): bool {
-		return $this->interwiki !== '';
 	}
 
 	public function getInterwiki(): string {
@@ -253,12 +261,7 @@ class TitleValue implements LinkTarget {
 
 		return $name;
 	}
-
-	public function isSameLinkAs( LinkTarget $other ): bool {
-		// NOTE: keep in sync with Title::isSameLinkAs()!
-		return ( $other->getInterwiki() === $this->getInterwiki() )
-			&& ( $other->getDBkey() === $this->getDBkey() )
-			&& ( $other->getNamespace() === $this->getNamespace() )
-			&& ( $other->getFragment() === $this->getFragment() );
-	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( TitleValue::class, 'TitleValue' );

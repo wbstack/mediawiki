@@ -1,4 +1,4 @@
-var util = require( './../mobile.startup/util' ),
+const util = require( './../mobile.startup/util' ),
 	mfExtend = require( './../mobile.startup/mfExtend' ),
 	icons = require( './../mobile.startup/icons' ),
 	View = require( './../mobile.startup/View' );
@@ -6,12 +6,12 @@ var util = require( './../mobile.startup/util' ),
 /**
  * Shows the user a load failure message
  *
- * @class LoadErrorMessage
- * @extends View
+ * @extends module:mobile.startup/View
  * @fires LoadErrorMessage#retry
  *
  * @param {Object} options Configuration options
  * @param {string} options.retryPath path of URL to try again
+ * @private
  */
 function LoadErrorMessage( options ) {
 	View.call(

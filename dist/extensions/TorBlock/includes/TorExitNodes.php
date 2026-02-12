@@ -28,12 +28,11 @@
 
 namespace MediaWiki\Extension\TorBlock;
 
-use CachedBagOStuff;
-use FormatJson;
-use Http;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Json\FormatJson;
 use MediaWiki\MediaWikiServices;
-use RequestContext;
 use Wikimedia\IPUtils;
+use Wikimedia\ObjectCache\CachedBagOStuff;
 
 /**
  * Collection of functions maintaining the list of Tor exit nodes.
@@ -114,7 +113,8 @@ class TorExitNodes {
 	private static function fetchExitNodes() {
 		wfDebugLog( 'torblock', "Loading Tor exit node list cold." );
 
-		if ( defined( 'MW_PHPUNIT_TEST' ) ) {
+		if ( defined( 'MW_PHPUNIT_TEST' ) || defined( 'MW_QUIBBLE_CI' ) ) {
+			// Avoid HTTP requests, see T265628 & T390865
 			// TEST-NET-1, RFC 5737
 			return [ '192.0.2.111', '192.0.2.222' ];
 		}
@@ -137,10 +137,17 @@ class TorExitNodes {
 			$options['proxy'] = $wgTorBlockProxy;
 		}
 
+		$httpRequestFactory = MediaWikiServices::getInstance()->getHttpRequestFactory();
 		$nodes = [];
 		foreach ( $wgTorIPs as $ip ) {
 			$url = 'https://check.torproject.org/torbulkexitlist?ip=' . $ip;
-			$data = Http::get( $url, $options, __METHOD__ );
+			$data = $httpRequestFactory->get( $url, $options, __METHOD__ );
+
+			if ( $data === null ) {
+				wfDebugLog( 'torblock', "Got no reply or an invalid reply from $url.\n" );
+				continue;
+			}
+
 			$lines = explode( "\n", $data );
 
 			foreach ( $lines as $line ) {
@@ -162,15 +169,23 @@ class TorExitNodes {
 	private static function fetchExitNodesFromOnionooServer() {
 		global $wgTorOnionooServer, $wgTorOnionooCA, $wgTorBlockProxy;
 
-		$url = wfExpandUrl( "$wgTorOnionooServer/details?type=relay&running=true&flag=Exit",
-			PROTO_HTTPS );
+		$url = wfExpandUrl(
+			"$wgTorOnionooServer/details?type=relay&running=true&flag=Exit&fields=or_addresses,exit_addresses",
+			PROTO_HTTPS
+		);
 		$options = [
 			'caInfo' => is_readable( $wgTorOnionooCA ) ? $wgTorOnionooCA : null
 		];
 		if ( $wgTorBlockProxy ) {
 			$options['proxy'] = $wgTorBlockProxy;
 		}
-		$raw = Http::get( $url, $options, __METHOD__ );
+		$raw = MediaWikiServices::getInstance()->getHttpRequestFactory()->get( $url, $options, __METHOD__ );
+
+		if ( $raw === null ) {
+			wfDebugLog( 'torblock', "Got no reply or an invalid reply from $url.\n" );
+			return [];
+		}
+
 		$data = FormatJson::decode( $raw, true );
 
 		if ( !isset( $data['relays'] ) ) {

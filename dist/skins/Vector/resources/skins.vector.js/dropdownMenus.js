@@ -1,21 +1,23 @@
 /** @interface CheckboxHack */
 
-var
+const
 	checkboxHack = /** @type {CheckboxHack} */ require( /** @type {string} */( 'mediawiki.page.ready' ) ).checkboxHack,
-	CHECKBOX_HACK_CONTAINER_SELECTOR = '.vector-menu-dropdown',
-	CHECKBOX_HACK_CHECKBOX_SELECTOR = '.vector-menu-checkbox',
-	CHECKBOX_HACK_BUTTON_SELECTOR = '.vector-menu-heading',
-	CHECKBOX_HACK_TARGET_SELECTOR = '.vector-menu-content';
+	CHECKBOX_HACK_CONTAINER_SELECTOR = '.vector-dropdown',
+	CHECKBOX_HACK_CHECKBOX_SELECTOR = '.vector-dropdown-checkbox',
+	CHECKBOX_HACK_BUTTON_SELECTOR = '.vector-dropdown-label',
+	CHECKBOX_HACK_TARGET_SELECTOR = '.vector-dropdown-content';
 
 /**
  * Enhance dropdownMenu functionality and accessibility using core's checkboxHack.
+ *
+ * @param {HTMLElement[]|NodeList} [containers]
  */
-function bind() {
+function dropdownMenus( containers ) {
 	// Search for all dropdown containers using the CHECKBOX_HACK_CONTAINER_SELECTOR.
-	var containers = document.querySelectorAll( CHECKBOX_HACK_CONTAINER_SELECTOR );
+	containers = containers || document.querySelectorAll( CHECKBOX_HACK_CONTAINER_SELECTOR );
 
-	Array.prototype.forEach.call( containers, function ( container ) {
-		var
+	Array.prototype.forEach.call( containers, ( container ) => {
+		const
 			checkbox = container.querySelector( CHECKBOX_HACK_CHECKBOX_SELECTOR ),
 			button = container.querySelector( CHECKBOX_HACK_BUTTON_SELECTOR ),
 			target = container.querySelector( CHECKBOX_HACK_TARGET_SELECTOR );
@@ -38,17 +40,19 @@ function bind() {
  * @return {HTMLElement|undefined}
  */
 function createIconElement( menuElement, parentElement, id ) {
-	// Dropdowns which do not have the noicon class are icon capable.
-	var isIconCapable = menuElement &&
-		menuElement.classList.contains( 'vector-menu-dropdown' ) &&
-		!menuElement.classList.contains( 'vector-menu-dropdown-noicon' );
+	// Only the p-personal menu in the user links dropdown supports icons
+	const isIconCapable = menuElement &&
+		[
+			'p-personal',
+			'p-personal-sticky-header'
+		].indexOf( menuElement.getAttribute( 'id' ) || 'p-unknown' ) > -1;
 
 	if ( !isIconCapable || !parentElement ) {
 		return;
 	}
 
-	var iconElement = document.createElement( 'span' );
-	iconElement.classList.add( 'mw-ui-icon' );
+	const iconElement = document.createElement( 'span' );
+	iconElement.classList.add( 'vector-icon' );
 
 	if ( id ) {
 		// The following class allows gadgets developers to style or hide an icon.
@@ -62,6 +66,44 @@ function createIconElement( menuElement, parentElement, id ) {
 }
 
 /**
+ * Calculate the available width for adding links in the veiws menu,
+ * i.e. the remaining space in the toolbar between the right-navigation
+ * and left-navigation elements.
+ *
+ * @return {number} remaining available pixels in page toolbar or Zero
+ *                  if remaining space is negative.
+ */
+function getAvailableViewMenuWidth() {
+	const
+		// Vector toolbar containing namespace, views, more menu etc.
+		toolbar = document.querySelector( '.vector-page-toolbar-container' ),
+		// Assumes all left-side menus are wrapped in a single nav element.
+		// Need to get child width since this node is flex-grow: 1;
+		leftToolbarItems = document.querySelector( '#left-navigation > nav' ),
+		// Right side elements are flex-grow:0 so top-level width is sufficient.
+		rightToolbarItems = document.getElementById( 'right-navigation' );
+
+	// Views menu collapses into "more" menu at this resolution.
+	// Move the link from views to actions menu in this situation.
+	if ( window.innerWidth < 720 ) {
+		return 0;
+	}
+
+	// If any of our assumption about the DOM are wrong, return 0
+	// in order to place the link in a known menu instead.
+	if ( !( toolbar && leftToolbarItems && rightToolbarItems ) ) {
+		return 0;
+	}
+
+	// returning zero instead of negative number makes boolean conversion easier.
+	return Math.max( 0,
+		toolbar.clientWidth - leftToolbarItems.clientWidth - rightToolbarItems.clientWidth
+	);
+}
+
+const /** @type {Array<HTMLElement>} */handledLinks = [];
+
+/**
  * Adds icon placeholder for gadgets to use.
  *
  * @typedef {Object} PortletLinkData
@@ -72,24 +114,35 @@ function createIconElement( menuElement, parentElement, id ) {
  * @param {PortletLinkData} data
  */
 function addPortletLinkHandler( item, data ) {
-	var link = item.querySelector( 'a' );
-	var $menu = $( item ).parents( '.vector-menu' );
-	var menuElement = $menu.length && $menu.get( 0 ) || null;
-	var iconElement = createIconElement( menuElement, link, data.id );
+	const linkIsHandled = handledLinks.indexOf( item );
+	let iconElement;
+
+	if ( linkIsHandled >= 0 ) {
+		return;
+	} else {
+		handledLinks.push( item );
+	}
+
+	// assign variables after early return.
+	const link = item.querySelector( 'a' );
+	const menuElement = /** @type {HTMLElement} */(
+		item.closest( '.vector-menu' )
+	);
+	if ( !menuElement ) {
+		return;
+	}
+
+	if ( data.id ) {
+		iconElement = createIconElement( menuElement, link, data.id );
+	}
 
 	// The views menu has limited space so we need to decide whether there is space
-	// to accomodate the new item and if not to redirect to the more dropdown.
-	/* eslint-disable no-jquery/no-global-selector */
-	if ( $menu.prop( 'id' ) === 'p-views' ) {
-		// @ts-ignore if undefined as NaN will be ignored
-		var availableWidth = $( '.mw-article-toolbar-container' ).width() -
-			// @ts-ignore
-			$( '#p-namespaces' ).width() - $( '#p-variants' ).width() -
-			// @ts-ignore
-			$( '#p-views' ).width() - $( '#p-cactions' ).width();
-		var moreDropdown = document.querySelector( '#p-cactions ul' );
-		// If the screen width is less than 720px then the views menu is hidden
-		if ( moreDropdown && ( availableWidth < 0 || window.innerWidth < 720 ) ) {
+	// to accommodate the new item and if not to redirect to the more dropdown.
+	if ( menuElement.id === 'p-views' ) {
+		const availableWidth = getAvailableViewMenuWidth();
+		const moreDropdown = document.querySelector( '#p-cactions ul' );
+
+		if ( moreDropdown && !availableWidth ) {
 			moreDropdown.appendChild( item );
 			// reveal if hidden
 			mw.util.showPortlet( 'p-cactions' );
@@ -104,7 +157,7 @@ function addPortletLinkHandler( item, data ) {
 // Enhance previously added items.
 Array.prototype.forEach.call(
 	document.querySelectorAll( '.mw-list-item-js' ),
-	function ( item ) {
+	( item ) => {
 		addPortletLinkHandler( item, {
 			id: item.getAttribute( 'id' )
 		} );
@@ -114,6 +167,6 @@ Array.prototype.forEach.call(
 mw.hook( 'util.addPortletLink' ).add( addPortletLinkHandler );
 
 module.exports = {
-	dropdownMenus: function dropdownMenus() { bind(); },
+	dropdownMenus,
 	addPortletLinkHandler: addPortletLinkHandler
 };

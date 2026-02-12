@@ -1,10 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"ToJack"
+			"ToJack",
+			"Farorud"
 		]
 	},
 	"wikibasecirrus-entitieswithoutlabel-label-language": "Рамзи забон:",
 	"wikibasecirrus-entitieswithoutlabel-label-type": "Навъ:",
-	"wikibasecirrus-entitieswithoutlabel-submit": "Ёфтан"
+	"wikibasecirrus-entitieswithoutlabel-submit": "Ёфтан",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" рамзи нодурусти забон аст.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "«$1» — навъи мавҷудияти нодуруст аст."
 }

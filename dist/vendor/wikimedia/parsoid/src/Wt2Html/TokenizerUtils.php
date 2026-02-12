@@ -50,7 +50,7 @@ class TokenizerUtils {
 					$res[] = $v;
 				}
 			} else {
-				throw new \Exception( __METHOD__ . ": found falsy element $i" );
+				throw new \RuntimeException( __METHOD__ . ": found falsy element $i" );
 			}
 		}
 
@@ -85,15 +85,14 @@ class TokenizerUtils {
 
 	/**
 	 * FIXME: document
-	 * @param mixed $c
-	 * @return mixed
+	 * @param array $c
+	 * @return array
 	 */
-	public static function flattenStringlist( $c ) {
+	public static function flattenStringlist( array $c ): array {
 		$out = [];
 		$text = '';
-		// c will always be an array
 		$c = self::flattenIfArray( $c );
-		for ( $i = 0,  $l = count( $c );  $i < $l;  $i++ ) {
+		for ( $i = 0, $l = count( $c );  $i < $l;  $i++ ) {
 			$ci = $c[$i];
 			if ( is_string( $ci ) ) {
 				if ( $ci !== '' ) {
@@ -140,24 +139,46 @@ class TokenizerUtils {
 		string $tagName, string $wtChar, $attrInfo, SourceRange $tsr,
 		int $endPos, $content, bool $addEndTag = false
 	): array {
-		$a = null;
 		$dp = new DataParsoid;
 		$dp->tsr = $tsr;
 
-		if ( !$attrInfo ) {
-			$a = [];
-			if ( $tagName === 'td' || $tagName === 'th' ) {
+		if ( $tagName === 'td' ) {
+			if ( !$attrInfo ) {
 				// Add a flag that indicates that the tokenizer didn't
 				// encounter a "|...|" attribute box. This is useful when
 				// deciding which <td>/<th> cells need attribute fixups.
 				$dp->setTempFlag( TempData::NO_ATTRS );
+			} elseif ( !$attrInfo[0] && $attrInfo[1] === "" ) {
+				// FIXME: Skip comments between the two "|" chars
+				// [ [], "", "|"] => "||" syntax for first <td> on line
+				$dp->setTempFlag( TempData::NON_MERGEABLE_TABLE_CELL );
+				$dp->setTempFlag( TempData::NO_ATTRS );
 			}
-		} else {
+		} elseif ( $tagName === 'th' ) {
+			if ( !$attrInfo ) {
+				// Add a flag that indicates that the tokenizer didn't
+				// encounter a "|...|" attribute box. This is useful when
+				// deciding which <td>/<th> cells need attribute fixups.
+				$dp->setTempFlag( TempData::NO_ATTRS );
+
+				// FIXME: Skip comments between the two "!" chars
+				// "!!foo" in sol context parses as <th>!foo</th>
+				if (
+					is_string( $content[0][0] ?? null ) &&
+					str_starts_with( $content[0][0], "!" )
+				) {
+					$dp->setTempFlag( TempData::NON_MERGEABLE_TABLE_CELL );
+				}
+			}
+		}
+
+		$a = [];
+		if ( $attrInfo ) {
 			$a = $attrInfo[0];
-			if ( count( $a ) === 0 ) {
+			if ( !$a ) {
 				$dp->startTagSrc = $wtChar . $attrInfo[1];
 			}
-			if ( ( count( $a ) === 0 && $attrInfo[2] ) || $attrInfo[2] !== '|' ) {
+			if ( ( !$a && $attrInfo[2] ) || $attrInfo[2] !== '|' ) {
 				// Variation from default
 				// 1. Separator present with an empty attribute block
 				// 2. Not "|"
@@ -169,9 +190,9 @@ class TokenizerUtils {
 		PHPUtils::pushArray( $tokens, $content );
 
 		if ( $addEndTag ) {
-			$dataAttribs = new DataParsoid;
-			$dataAttribs->tsr = new SourceRange( $endPos, $endPos );
-			$tokens[] = new EndTagTk( $tagName, [], $dataAttribs );
+			$dataParsoid = new DataParsoid;
+			$dataParsoid->tsr = new SourceRange( $endPos, $endPos );
+			$tokens[] = new EndTagTk( $tagName, [], $dataParsoid );
 		} else {
 			// We rely on our tree builder to close the table cell (td/th) as needed.
 			// We cannot close the cell here because cell content can come from
@@ -354,7 +375,7 @@ class TokenizerUtils {
 					&& $c2 === ']';
 
 			default:
-				throw new \Exception( 'Unhandled case!' );
+				throw new \RuntimeException( 'Unhandled case!' );
 		}
 	}
 
@@ -383,12 +404,12 @@ class TokenizerUtils {
 			}
 		}
 		// ensure we found a comment
-		while ( count( $buf ) && !( $buf[0] instanceof CommentTk ) ) {
+		while ( $buf && !( $buf[0] instanceof CommentTk ) ) {
 			array_shift( $buf );
 		}
-		if ( count( $buf ) ) {
+		if ( $buf ) {
 			array_splice( $attrs, -count( $buf ), count( $buf ) );
-			return [ 'buf' => $buf, 'commentStartPos' => $buf[0]->dataAttribs->tsr->start ];
+			return [ 'buf' => $buf, 'commentStartPos' => $buf[0]->dataParsoid->tsr->start ];
 		} else {
 			return null;
 		}

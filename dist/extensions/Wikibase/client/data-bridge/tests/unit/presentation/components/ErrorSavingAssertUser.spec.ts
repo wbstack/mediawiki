@@ -6,9 +6,15 @@ import {
 } from '@vue/test-utils';
 import { createTestStore } from '../../../util/store';
 import { BridgeConfig } from '@/store/Application';
-import { nextTick } from 'vue';
+import { ComponentOptions, nextTick } from 'vue';
 
-config.renderStubDefaultSlot = true;
+beforeAll( () => {
+	config.global.renderStubDefaultSlot = true;
+} );
+
+afterAll( () => {
+	config.global.renderStubDefaultSlot = false;
+} );
 
 describe( 'ErrorSavingAssertUser', () => {
 	const stopAssertingUserWhenSaving = jest.fn();
@@ -60,7 +66,7 @@ describe( 'ErrorSavingAssertUser', () => {
 			},
 		} );
 
-		const button = wrapper.findComponent( '.wb-db-error-saving-assertuser__proceed' );
+		const button = wrapper.findComponent<ComponentOptions>( '.wb-db-error-saving-assertuser__proceed' );
 		await button.vm.$emit( 'click' );
 		await nextTick();
 
@@ -87,8 +93,8 @@ describe( 'ErrorSavingAssertUser', () => {
 				plugins: [ store ],
 			},
 		} );
-		// @ts-ignore
-		const button = wrapper.findComponent( `.wb-db-error-saving-assertuser__${buttonName}` );
+
+		const button = wrapper.findComponent<ComponentOptions>( `.wb-db-error-saving-assertuser__${buttonName}` );
 		button.vm.$emit( 'click' );
 
 		expect( goBackFromErrorToReady ).toHaveBeenCalledTimes( 1 );
@@ -121,8 +127,8 @@ describe( 'ErrorSavingAssertUser', () => {
 				plugins: [ store ],
 			},
 		} );
-		// @ts-ignore
-		const button = wrapper.findComponent( '.wb-db-error-saving-assertuser__proceed' );
+
+		const button = wrapper.findComponent<ComponentOptions>( '.wb-db-error-saving-assertuser__proceed' );
 
 		expect( messageGet ).toHaveBeenCalledWith( MessageKeys.SAVING_ERROR_ASSERTUSER_SAVE );
 		expect( button.props( 'message' ) ).toBe( saveMessage );
@@ -164,8 +170,8 @@ describe( 'ErrorSavingAssertUser', () => {
 				plugins: [ localStore ],
 			},
 		} );
-		// @ts-ignore
-		const button = wrapper.findComponent( '.wb-db-error-saving-assertuser__proceed' );
+
+		const button = wrapper.findComponent<ComponentOptions>( '.wb-db-error-saving-assertuser__proceed' );
 
 		expect( messageGet ).toHaveBeenCalledWith( MessageKeys.SAVING_ERROR_ASSERTUSER_PUBLISH );
 		expect( button.props( 'message' ) ).toBe( publishMessage );

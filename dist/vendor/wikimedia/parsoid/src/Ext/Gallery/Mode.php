@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Wikimedia\Parsoid\Ext\Gallery;
 
 use Wikimedia\Parsoid\DOM\DocumentFragment;
-
 use Wikimedia\Parsoid\Ext\ParsoidExtensionAPI;
 
 abstract class Mode {
@@ -22,24 +21,16 @@ abstract class Mode {
 		$this->mode = $name;
 	}
 
-	/**
-	 * @return array
-	 */
 	public function getModules(): array {
 		return [];
 	}
 
-	/**
-	 * @return array
-	 */
 	public function getModuleStyles(): array {
 		return [];
 	}
 
 	/**
 	 * Format the dimensions as a string.
-	 * @param Opts $opts
-	 * @return string
 	 */
 	abstract public function dimensions( Opts $opts ): string;
 

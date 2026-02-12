@@ -2,17 +2,18 @@
 
 namespace Wikibase\Repo\Specials;
 
-use Html;
-use HTMLForm;
-use Message;
-use OutputPage;
-use Status;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Message\Message;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Status\Status;
 use UserBlockedError;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Summary;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\EditEntityStatus;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\SummaryFormatter;
 
 /**
@@ -23,7 +24,7 @@ use Wikibase\Repo\SummaryFormatter;
 abstract class SpecialNewEntity extends SpecialWikibaseRepoPage {
 
 	/**
-	 * Contains pieces of the sub-page name of this special page if a subpage was called.
+	 * Contains pieces of the subpage name of this special page if a subpage was called.
 	 * E.g. [ 'a', 'b' ] in case of 'Special:NewEntity/a/b'
 	 * @var string[]|null
 	 */
@@ -34,6 +35,8 @@ abstract class SpecialNewEntity extends SpecialWikibaseRepoPage {
 	 */
 	protected $entityNamespaceLookup;
 
+	private bool $isMobileView;
+
 	/**
 	 * @param string $name Name of the special page, as seen in links and URLs.
 	 * @param string $restriction User right required,
@@ -42,7 +45,7 @@ abstract class SpecialNewEntity extends SpecialWikibaseRepoPage {
 	 * @param EntityNamespaceLookup $entityNamespaceLookup
 	 * @param SummaryFormatter $summaryFormatter
 	 * @param EntityTitleLookup $entityTitleLookup
-	 * @param MediawikiEditEntityFactory $editEntityFactory
+	 * @param MediaWikiEditEntityFactory $editEntityFactory
 	 */
 	public function __construct(
 		$name,
@@ -52,7 +55,8 @@ abstract class SpecialNewEntity extends SpecialWikibaseRepoPage {
 		EntityNamespaceLookup $entityNamespaceLookup,
 		SummaryFormatter $summaryFormatter,
 		EntityTitleLookup $entityTitleLookup,
-		MediawikiEditEntityFactory $editEntityFactory
+		MediaWikiEditEntityFactory $editEntityFactory,
+		bool $isMobileView
 	) {
 		parent::__construct(
 			$name,
@@ -65,6 +69,7 @@ abstract class SpecialNewEntity extends SpecialWikibaseRepoPage {
 		);
 
 		$this->entityNamespaceLookup = $entityNamespaceLookup;
+		$this->isMobileView = $isMobileView;
 	}
 
 	/**
@@ -101,7 +106,7 @@ abstract class SpecialNewEntity extends SpecialWikibaseRepoPage {
 		$this->checkBlockedOnNamespace();
 		$this->checkReadOnly();
 
-		$this->parts = ( $subPage === '' ? [] : explode( '/', $subPage ) );
+		$this->parts = $subPage ? explode( '/', $subPage ) : [];
 
 		$form = $this->createForm();
 
@@ -111,7 +116,9 @@ abstract class SpecialNewEntity extends SpecialWikibaseRepoPage {
 		$submitStatus = $form->tryAuthorizedSubmit();
 
 		if ( $submitStatus && $submitStatus->isGood() ) {
-			$this->redirectToEntityPage( $submitStatus->getValue() );
+			// wrap it, in case HTMLForm turned it into a generic Status
+			$submitStatus = EditEntityStatus::wrap( $submitStatus );
+			$this->redirectToEntityPage( $submitStatus );
 
 			return;
 		}
@@ -160,18 +167,12 @@ abstract class SpecialNewEntity extends SpecialWikibaseRepoPage {
 					$summary = $this->createSummary( $entity );
 
 					$this->prepareEditEntity();
-					$saveStatus = $this->saveEntity(
+					return $this->saveEntity(
 						$entity,
 						$summary,
-						$form->getRequest()->getRawVal( 'wpEditToken' ),
+						$form->getRequest()->getRawVal( 'wpEditToken' ) ?? '',
 						EDIT_NEW
 					);
-
-					if ( !$saveStatus->isGood() ) {
-						return $saveStatus;
-					}
-
-					return Status::newGood( $entity );
 				}
 			);
 	}
@@ -198,7 +199,10 @@ abstract class SpecialNewEntity extends SpecialWikibaseRepoPage {
 	abstract protected function createSummary( EntityDocument $entity );
 
 	protected function displayBeforeForm( OutputPage $output ) {
-		$output->addModules( 'wikibase.special.newEntity' );
+		// T324991
+		if ( !$this->isMobileView ) {
+			$output->addModules( 'wikibase.special.newEntity' );
+		}
 
 		$output->addHTML( $this->getCopyrightHTML() );
 
@@ -214,12 +218,6 @@ abstract class SpecialNewEntity extends SpecialWikibaseRepoPage {
 	 */
 	protected function getCopyrightHTML( $messageKey = null ) {
 		return parent::getCopyrightHTML( 'wikibase-newentity-submit' );
-	}
-
-	private function redirectToEntityPage( EntityDocument $entity ) {
-		$title = $this->getEntityTitle( $entity->getId() );
-		$entityUrl = $title->getFullURL();
-		$this->getOutput()->redirect( $entityUrl );
 	}
 
 	/**

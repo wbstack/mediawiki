@@ -2,9 +2,9 @@
 
 namespace Wikibase\Repo\Specials;
 
-use Html;
-use HTMLForm;
 use LogicException;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Term\TermTypes;
@@ -41,7 +41,7 @@ class SpecialListProperties extends SpecialWikibaseQueryPage {
 	private $propertyInfoLookup;
 
 	/**
-	 * @var string
+	 * @var string|null
 	 */
 	private $dataType;
 
@@ -106,7 +106,7 @@ class SpecialListProperties extends SpecialWikibaseQueryPage {
 	private function prepareArguments( $subPage ) {
 		$request = $this->getRequest();
 
-		$this->dataType = $request->getText( 'datatype', $subPage );
+		$this->dataType = $request->getText( 'datatype', $subPage ?: '' );
 		if ( $this->dataType !== '' && !in_array( $this->dataType, $this->dataTypeFactory->getTypeIds() ) ) {
 			$this->showErrorHTML( $this->msg( 'wikibase-listproperties-invalid-datatype', $this->dataType )->escaped() );
 			$this->dataType = null;
@@ -120,7 +120,7 @@ class SpecialListProperties extends SpecialWikibaseQueryPage {
 		);
 
 		$options = [
-			$this->msg( 'wikibase-listproperties-all' )->text() => ''
+			$this->msg( 'wikibase-listproperties-all' )->text() => '',
 		];
 		$options = array_merge( $options, $dataTypeSelect->getOptionsArray() );
 
@@ -131,14 +131,14 @@ class SpecialListProperties extends SpecialWikibaseQueryPage {
 				'id' => 'wb-listproperties-datatype',
 				'label-message' => 'wikibase-listproperties-datatype',
 				'options' => $options,
-				'default' => $this->dataType
+				'default' => $this->dataType,
 			],
 			'submit' => [
 				'name' => '',
 				'type' => 'submit',
 				'id' => 'wikibase-listproperties-submit',
-				'default' => $this->msg( 'wikibase-listproperties-submit' )->text()
-			]
+				'default' => $this->msg( 'wikibase-listproperties-submit' )->text(),
+			],
 		];
 
 		HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )
@@ -176,7 +176,7 @@ class SpecialListProperties extends SpecialWikibaseQueryPage {
 			'a',
 			[
 				'title' => $title ? $title->getPrefixedText() : $propertyId->getSerialization(),
-				'href' => $title ? $title->getLocalURL() : ''
+				'href' => $title ? $title->getLocalURL() : '',
 			],
 			Html::rawElement(
 				'span',
@@ -202,8 +202,8 @@ class SpecialListProperties extends SpecialWikibaseQueryPage {
 	}
 
 	/**
-	 * @param integer $offset Start to include at number of entries from the start title
-	 * @param integer $limit Stop at number of entries after start of inclusion
+	 * @param int $offset Start to include at number of entries from the start title
+	 * @param int $limit Stop at number of entries after start of inclusion
 	 *
 	 * @return NumericPropertyId[]
 	 */

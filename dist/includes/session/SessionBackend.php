@@ -23,15 +23,18 @@
 
 namespace MediaWiki\Session;
 
-use CachedBagOStuff;
+use InvalidArgumentException;
+use MediaWiki\Deferred\DeferredUpdates;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\User\User;
+use MWRestrictions;
 use Psr\Log\LoggerInterface;
-use User;
-use WebRequest;
 use Wikimedia\AtEase\AtEase;
+use Wikimedia\ObjectCache\CachedBagOStuff;
 
 /**
  * This is the actual workhorse for Session.
@@ -156,19 +159,21 @@ final class SessionBackend {
 		$this->usePhpSessionHandling = $phpSessionHandling !== 'disable';
 
 		if ( $info->getUserInfo() && !$info->getUserInfo()->isVerified() ) {
-			throw new \InvalidArgumentException(
+			throw new InvalidArgumentException(
 				"Refusing to create session for unverified user {$info->getUserInfo()}"
 			);
 		}
 		if ( $info->getProvider() === null ) {
-			throw new \InvalidArgumentException( 'Cannot create session without a provider' );
+			throw new InvalidArgumentException( 'Cannot create session without a provider' );
 		}
 		if ( $info->getId() !== $id->getId() ) {
-			throw new \InvalidArgumentException( 'SessionId and SessionInfo don\'t match' );
+			throw new InvalidArgumentException( 'SessionId and SessionInfo don\'t match' );
 		}
 
 		$this->id = $id;
-		$this->user = $info->getUserInfo() ? $info->getUserInfo()->getUser() : new User;
+		$this->user = $info->getUserInfo()
+			? $info->getUserInfo()->getUser()
+			: MediaWikiServices::getInstance()->getUserFactory()->newAnonymous();
 		$this->store = $store;
 		$this->logger = $logger;
 		$this->hookRunner = new HookRunner( $hookContainer );
@@ -192,7 +197,7 @@ final class SessionBackend {
 				'SessionBackend "{session}" is unsaved, marking dirty in constructor',
 				[
 					'session' => $this->id->__toString(),
-			] );
+				] );
 		} else {
 			$this->data = $blob['data'];
 			if ( isset( $blob['metadata']['loggedOut'] ) ) {
@@ -205,9 +210,9 @@ final class SessionBackend {
 				$this->persistenceChangeType = 'no-expiry';
 				$this->logger->debug(
 					'SessionBackend "{session}" metadata dirty due to missing expiration timestamp',
-				[
-					'session' => $this->id->__toString(),
-				] );
+					[
+						'session' => $this->id->__toString(),
+					] );
 			}
 		}
 		$this->dataHash = md5( serialize( $this->data ) );
@@ -288,7 +293,7 @@ final class SessionBackend {
 				[
 					'session' => $this->id->__toString(),
 					'oldId' => $oldId,
-			] );
+				] );
 
 			if ( $restart ) {
 				session_id( (string)$this->id );
@@ -301,7 +306,7 @@ final class SessionBackend {
 			$this->store->delete( $this->store->makeKey( 'MWSession', $oldId ) );
 		}
 
-		return $this->id;
+		return (string)$this->id;
 	}
 
 	/**
@@ -338,7 +343,7 @@ final class SessionBackend {
 				'SessionBackend "{session}" force-persist due to persist()',
 				[
 					'session' => $this->id->__toString(),
-			] );
+				] );
 			$this->autosave();
 		} else {
 			$this->renew();
@@ -396,7 +401,7 @@ final class SessionBackend {
 				'SessionBackend "{session}" metadata dirty due to remember-user change',
 				[
 					'session' => $this->id->__toString(),
-			] );
+				] );
 			$this->autosave();
 		}
 	}
@@ -408,7 +413,7 @@ final class SessionBackend {
 	 */
 	public function getRequest( $index ) {
 		if ( !isset( $this->requests[$index] ) ) {
-			throw new \InvalidArgumentException( 'Invalid session index' );
+			throw new InvalidArgumentException( 'Invalid session index' );
 		}
 		return $this->requests[$index];
 	}
@@ -417,7 +422,7 @@ final class SessionBackend {
 	 * Returns the authenticated user for this session
 	 * @return User
 	 */
-	public function getUser() {
+	public function getUser(): User {
 		return $this->user;
 	}
 
@@ -427,6 +432,15 @@ final class SessionBackend {
 	 */
 	public function getAllowedUserRights() {
 		return $this->provider->getAllowedUserRights( $this );
+	}
+
+	/**
+	 * Fetch any restrictions imposed on logins or actions when this
+	 * session is active.
+	 * @return MWRestrictions|null
+	 */
+	public function getRestrictions(): ?MWRestrictions {
+		return $this->provider->getRestrictions( $this->providerMetadata );
 	}
 
 	/**
@@ -457,7 +471,7 @@ final class SessionBackend {
 			'SessionBackend "{session}" metadata dirty due to user change',
 			[
 				'session' => $this->id->__toString(),
-		] );
+			] );
 		$this->autosave();
 	}
 
@@ -468,7 +482,7 @@ final class SessionBackend {
 	 */
 	public function suggestLoginUsername( $index ) {
 		if ( !isset( $this->requests[$index] ) ) {
-			throw new \InvalidArgumentException( 'Invalid session index' );
+			throw new InvalidArgumentException( 'Invalid session index' );
 		}
 		return $this->provider->suggestLoginUsername( $this->requests[$index] );
 	}
@@ -493,7 +507,7 @@ final class SessionBackend {
 				'SessionBackend "{session}" metadata dirty due to force-HTTPS change',
 				[
 					'session' => $this->id->__toString(),
-			] );
+				] );
 			$this->autosave();
 		}
 	}
@@ -518,7 +532,7 @@ final class SessionBackend {
 				'SessionBackend "{session}" metadata dirty due to logged-out-timestamp change',
 				[
 					'session' => $this->id->__toString(),
-			] );
+				] );
 			$this->autosave();
 		}
 	}
@@ -538,7 +552,7 @@ final class SessionBackend {
 	 */
 	public function setProviderMetadata( $metadata ) {
 		if ( $metadata !== null && !is_array( $metadata ) ) {
-			throw new \InvalidArgumentException( '$metadata must be an array or null' );
+			throw new InvalidArgumentException( '$metadata must be an array or null' );
 		}
 		if ( $this->providerMetadata !== $metadata ) {
 			$this->providerMetadata = $metadata;
@@ -547,7 +561,7 @@ final class SessionBackend {
 				'SessionBackend "{session}" metadata dirty due to provider metadata change',
 				[
 					'session' => $this->id->__toString(),
-			] );
+				] );
 			$this->autosave();
 		}
 	}
@@ -583,7 +597,7 @@ final class SessionBackend {
 					[
 						'session' => $this->id->__toString(),
 						'callers' => wfGetAllCallers( 5 ),
-				] );
+					] );
 			}
 		}
 	}
@@ -599,7 +613,7 @@ final class SessionBackend {
 			[
 				'session' => $this->id->__toString(),
 				'callers' => wfGetAllCallers( 5 ),
-		] );
+			] );
 	}
 
 	/**
@@ -616,7 +630,7 @@ final class SessionBackend {
 				[
 					'session' => $this->id->__toString(),
 					'callers' => wfGetAllCallers( 5 ),
-			] );
+				] );
 			if ( $this->persist ) {
 				$this->persistenceChangeType = 'renew';
 				$this->forcePersist = true;
@@ -625,7 +639,7 @@ final class SessionBackend {
 					[
 						'session' => $this->id->__toString(),
 						'callers' => wfGetAllCallers( 5 ),
-				] );
+					] );
 			}
 		}
 		$this->autosave();
@@ -677,24 +691,29 @@ final class SessionBackend {
 				[
 					'session' => $this->id->__toString(),
 					'user' => $this->user->__toString(),
-			] );
+				] );
 			return;
 		}
 
 		// Ensure the user has a token
 		// @codeCoverageIgnoreStart
+		if ( !$anon && defined( 'MW_PHPUNIT_TEST' ) && MediaWikiServices::getInstance()->isStorageDisabled() ) {
+			// Avoid making DB queries in non-database tests. We don't need to save the token when using
+			// fake users, and it would probably be ignored anyway.
+			return;
+		}
 		if ( !$anon && !$this->user->getToken( false ) ) {
 			$this->logger->debug(
 				'SessionBackend "{session}" creating token for user {user} on save',
 				[
 					'session' => $this->id->__toString(),
 					'user' => $this->user->__toString(),
-			] );
+				] );
 			$this->user->setToken();
 			if ( !MediaWikiServices::getInstance()->getReadOnlyMode()->isReadOnly() ) {
 				// Promise that the token set here will be valid; save it at end of request
 				$user = $this->user;
-				\DeferredUpdates::addCallableUpdate( static function () use ( $user ) {
+				DeferredUpdates::addCallableUpdate( static function () use ( $user ) {
 					$user->saveSettings();
 				} );
 			}
@@ -711,7 +730,7 @@ final class SessionBackend {
 					'session' => $this->id->__toString(),
 					'expected' => $this->dataHash,
 					'got' => md5( serialize( $this->data ) ),
-			] );
+				] );
 			$this->dataDirty = true;
 		}
 
@@ -727,7 +746,7 @@ final class SessionBackend {
 				'dataDirty' => (int)$this->dataDirty,
 				'metaDirty' => (int)$this->metaDirty,
 				'forcePersist' => (int)$this->forcePersist,
-		] );
+			] );
 
 		// Persist or unpersist to the provider, if necessary
 		if ( $this->metaDirty || $this->forcePersist ) {
@@ -815,7 +834,7 @@ final class SessionBackend {
 					'SessionBackend "{session}" Taking over PHP session',
 					[
 						'session' => $this->id->__toString(),
-				] );
+					] );
 				session_id( (string)$this->id );
 				AtEase::quietCall( 'session_start' );
 			}

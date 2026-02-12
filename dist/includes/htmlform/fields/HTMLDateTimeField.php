@@ -1,5 +1,11 @@
 <?php
 
+namespace MediaWiki\HTMLForm\Field;
+
+use DateTime;
+use DateTimeZone;
+use Exception;
+use InvalidArgumentException;
 use Wikimedia\RequestTimeout\TimeoutException;
 
 /**
@@ -20,12 +26,14 @@ use Wikimedia\RequestTimeout\TimeoutException;
  * @note This widget is not likely to work well in non-OOUI forms.
  */
 class HTMLDateTimeField extends HTMLTextField {
+	/** @var string[] */
 	protected static $patterns = [
 		'date' => '[0-9]{4}-[01][0-9]-[0-3][0-9]',
 		'time' => '[0-2][0-9]:[0-5][0-9]:[0-5][0-9](?:\.[0-9]+)?',
 		'datetime' => '[0-9]{4}-[01][0-9]-[0-3][0-9][T ][0-2][0-9]:[0-5][0-9]:[0-5][0-9](?:\.[0-9]+)?Z?',
 	];
 
+	/** @var string */
 	protected $mType = 'datetime';
 
 	/**
@@ -165,15 +173,15 @@ class HTMLDateTimeField extends HTMLTextField {
 			'id' => $this->mID,
 		];
 
-		$params += OOUI\Element::configFromHtmlAttributes(
+		$params += \OOUI\Element::configFromHtmlAttributes(
 			$this->getAttributes( [ 'disabled', 'readonly', 'min', 'max' ] )
 		);
 
 		if ( $this->mType === 'date' ) {
 			$this->mParent->getOutput()->addModuleStyles( 'mediawiki.widgets.DateInputWidget.styles' );
-			return new MediaWiki\Widget\DateInputWidget( $params );
+			return new \MediaWiki\Widget\DateInputWidget( $params );
 		} else {
-			return new MediaWiki\Widget\DateTimeInputWidget( $params );
+			return new \MediaWiki\Widget\DateTimeInputWidget( $params );
 		}
 	}
 
@@ -190,3 +198,6 @@ class HTMLDateTimeField extends HTMLTextField {
 	}
 
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( HTMLDateTimeField::class, 'HTMLDateTimeField' );

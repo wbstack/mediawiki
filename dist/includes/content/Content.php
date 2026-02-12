@@ -1,8 +1,5 @@
 <?php
 /**
- * A content object represents page content, e.g. the text to show on a page.
- * Content objects have no knowledge about how they relate to wiki pages.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,19 +15,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  * http://www.gnu.org/copyleft/gpl.html
  *
- * @since 1.21
- *
  * @file
- * @ingroup Content
- *
- * @author Daniel Kinzler
  */
 
+namespace MediaWiki\Content;
+
+use MediaWiki\Parser\MagicWord;
+use MediaWiki\Title\Title;
+
 /**
- * Base interface for content objects.
+ * Base interface for representing page content.
  *
+ * A content object represents page content, e.g. the text to show on a page.
+ * Content objects have no knowledge about how they relate to wiki pages.
+ *
+ * Must not be implemented directly by extensions, extend AbstractContent instead.
+ *
+ * @stable to type
+ * @since 1.21
  * @ingroup Content
- * @unstable for implementation, extensions should extend AbstractContent instead.
+ * @author Daniel Kinzler
  */
 interface Content {
 
@@ -49,7 +53,7 @@ interface Content {
 	/**
 	 * @since 1.21
 	 *
-	 * @return string|bool The wikitext to include when another page includes this
+	 * @return string|false The wikitext to include when another page includes this
 	 * content, or false if the content is not includable in a wikitext page.
 	 *
 	 * @todo Allow native handling, bypassing wikitext representation, like
@@ -221,7 +225,7 @@ interface Content {
 	 *
 	 * @return bool True if this Content object is equal to $that, false otherwise.
 	 */
-	public function equals( Content $that = null );
+	public function equals( ?Content $that = null );
 
 	/**
 	 * Return a copy of this Content object. The following must be true for the
@@ -259,34 +263,6 @@ interface Content {
 	 * @return bool
 	 */
 	public function isCountable( $hasLinks = null );
-
-	/**
-	 * Parse the Content object and generate a ParserOutput from the result.
-	 * $result->getText() can be used to obtain the generated HTML. If no HTML
-	 * is needed, $generateHtml can be set to false; in that case,
-	 * $result->getText() may return null.
-	 *
-	 * @note To control which options are used in the cache key for the
-	 *       generated parser output, implementations of this method
-	 *       may call ParserOutput::recordOption() on the output object.
-	 * @deprecated since 1.38. Hard-deprecated since 1.38. Use ContentRenderer::getParserOutput
-	 * and override ContentHandler::fillParserOutput.
-	 * @param Title $title The page title to use as a context for rendering.
-	 * @param int|null $revId ID of the revision being rendered.
-	 *  See Parser::parse() for the ramifications. (default: null)
-	 * @param ParserOptions|null $options Any parser options.
-	 * @param bool $generateHtml Whether to generate HTML (default: true). If false,
-	 *        the result of calling getText() on the ParserOutput object returned by
-	 *        this method is undefined.
-	 *
-	 * @since 1.21
-	 *
-	 * @return ParserOutput
-	 */
-	public function getParserOutput( Title $title, $revId = null,
-		ParserOptions $options = null, $generateHtml = true );
-
-	// TODO: make RenderOutput and RenderOptions base classes
 
 	/**
 	 * Construct the redirect destination from this content and return a Title,
@@ -332,7 +308,7 @@ interface Content {
 	 * (e.g. 0, 1 or 'T-1'). The ID "0" retrieves the section before the first heading, "1" the
 	 * text between the first heading (included) and the second heading (excluded), etc.
 	 *
-	 * @return Content|bool|null The section, or false if no such section
+	 * @return Content|false|null The section, or false if no such section
 	 *    exist, or null if sections are not supported.
 	 */
 	public function getSection( $sectionId );
@@ -343,7 +319,7 @@ interface Content {
 	 *
 	 * @since 1.21
 	 *
-	 * @param string|int|null|bool $sectionId Section identifier as a number or string
+	 * @param string|int|null|false $sectionId Section identifier as a number or string
 	 * (e.g. 0, 1 or 'T-1'), null/false or an empty string for the whole page
 	 * or 'new' for a new section.
 	 * @param Content $with New content of the section
@@ -352,21 +328,6 @@ interface Content {
 	 * @return Content|null New content of the entire page, or null if error
 	 */
 	public function replaceSection( $sectionId, Content $with, $sectionTitle = '' );
-
-	/**
-	 * Returns a Content object with pre-save transformations applied (or this
-	 * object if no transformations apply).
-	 *
-	 * @since 1.21
-	 * @deprecated since 1.37. Hard-deprecated since 1.37. Use ContentTransformer::preSaveTransform
-	 * and override ContentHandler::preSaveTransform.
-	 * @param Title $title
-	 * @param User $user
-	 * @param ParserOptions $parserOptions
-	 *
-	 * @return Content
-	 */
-	public function preSaveTransform( Title $title, User $user, ParserOptions $parserOptions );
 
 	/**
 	 * Returns a new WikitextContent object with the given section heading
@@ -380,50 +341,6 @@ interface Content {
 	 * @return Content
 	 */
 	public function addSectionHeader( $header );
-
-	/**
-	 * Returns a Content object with preload transformations applied (or this
-	 * object if no transformations apply).
-	 *
-	 * @since 1.21
-	 * @deprecated since 1.37. Hard-deprecated since 1.37. Use ContentTransformer::preloadTransform
-	 * and override ContentHandler::preloadTransform.
-	 * @param Title $title
-	 * @param ParserOptions $parserOptions
-	 * @param array $params
-	 *
-	 * @return Content
-	 */
-	public function preloadTransform( Title $title, ParserOptions $parserOptions, $params = [] );
-
-	/**
-	 * Prepare Content for saving. Called before Content is saved by WikiPage::doUserEditContent() and in
-	 * similar places.
-	 *
-	 * This may be used to check the content's consistency with global state. This function should
-	 * NOT write any information to the database.
-	 *
-	 * Note that this method will usually be called inside the same transaction
-	 * bracket that will be used to save the new revision.
-	 *
-	 * Note that this method is called before any update to the page table is
-	 * performed. This means that $page may not yet know a page ID.
-	 *
-	 * @since 1.21
-	 * @deprecated since 1.38. Hard-deprecated since 1.38. Use ContentHandler::validateSave instead.
-	 *
-	 * @param WikiPage $page The page to be saved.
-	 * @param int $flags Bitfield for use with EDIT_XXX constants, see WikiPage::doUserEditContent()
-	 * @param int $parentRevId The ID of the current revision
-	 * @param User $user
-	 *
-	 * @return Status A status object indicating whether the content was
-	 *   successfully prepared for saving. If the returned status indicates
-	 *   an error, a rollback will be performed and the transaction aborted.
-	 *
-	 * @see WikiPage::doUserEditContent()
-	 */
-	public function prepareSave( WikiPage $page, $flags, $parentRevId, User $user );
 
 	/**
 	 * Returns true if this Content object matches the given magic word.
@@ -445,7 +362,7 @@ interface Content {
 	 * conversion is not allowed, full round-trip conversion is expected to work without losing
 	 * information.
 	 *
-	 * @return Content|bool A content object with the content model $toModel, or false if
+	 * @return Content|false A content object with the content model $toModel, or false if
 	 * that conversion is not supported.
 	 */
 	public function convert( $toModel, $lossy = '' );
@@ -457,3 +374,6 @@ interface Content {
 	//   [12:00] <vvv> And default it to a DummyHighlighter
 
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( Content::class, 'Content' );

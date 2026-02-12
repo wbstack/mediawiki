@@ -6,6 +6,8 @@
  * @ingroup Extensions
  */
 
+@import 'mediawiki.skin.variables.less';
+
 .mw-jsonconfig {
 	border-collapse: collapse;
 	border-spacing: 0;
@@ -15,29 +17,29 @@
 
 .mw-jsonconfig th,
 .mw-jsonconfig td {
-	border: 1px solid #808080;
+	border: 1px solid @border-color-interactive;
 	padding: 0.5em 1em;
 }
 
 .mw-jsonconfig td {
-	background-color: #eee;
+	background-color: @border-color-muted;
 	font-style: italic;
 }
 
 .mw-jsonconfig .mw-jsonconfig-value {
 	font-family: 'Bitstream Vera Sans Mono', 'DejaVu Sans Mono', 'Monaco', 'Courier', monospace;
-	background-color: #dcfae3;
+	background-color: @background-color-success-subtle;
 }
 
 .mw-jsonconfig .mw-jsonconfig-value-null {
-	background-color: #eaecf0;
+	background-color: @background-color-neutral;
 }
 
 .mw-jsonconfig-value-info {
 	float: right;
 	font-weight: bold;
 	font-size: 80%;
-	color: #800080;
+	color: @color-progressive;
 }
 
 .mw-jsonconfig-description,
@@ -51,7 +53,7 @@
 }
 
 .mw-jsonconfig th {
-	background-color: #fff;
+	background-color: @color-inverted;
 	font-weight: normal;
 }
 
@@ -60,17 +62,17 @@
 }
 
 .mw-jsonconfig-same {
-	color: #800080;
+	color: @color-progressive;
 	font-weight: bold;
 }
 
 .mw-jsonconfig-error {
-	color: #f00;
+	color: @color-error;
 	font-weight: bold;
 }
 
 .mw-jsonconfig-unknown {
-	color: #ffa100;
+	color: @color-warning;
 	font-weight: bold;
 }
 
@@ -80,7 +82,7 @@
 }
 
 .mw-jsonconfig table caption {
-	color: #808080;
+	color: @color-base--subtle;
 	display: inline-block;
 	font-size: 10px;
 	font-style: italic;
@@ -89,11 +91,11 @@
 }
 
 .mw-jsonconfig-editnotice {
-	color: #000;
-	border: solid 1px #a8a8a8;
+	color: @color-emphasized;
+	border: solid 1px @border-color-base;
 	padding: 0.5em;
 	margin: 0.5em 0;
-	background-color: #fff;
+	background-color: @color-inverted;
 	font-size: 95%;
 	vertical-align: middle;
 	min-height: 30px;

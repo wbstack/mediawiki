@@ -2,7 +2,8 @@
 
 namespace CirrusSearch\Query;
 
-use Title;
+use MediaWiki\Category\Category;
+use MediaWiki\Title\Title;
 
 /**
  * helpers for building queries
@@ -42,7 +43,7 @@ class QueryHelper {
 	 * @return \Elastica\Query\MatchQuery For matching $title to $field
 	 */
 	public static function matchCategory( $field, $name ): \Elastica\Query\MatchQuery {
-		$c = \Category::newFromName( $name );
+		$c = Category::newFromName( $name );
 		if ( $c ) {
 			$name = $c->getName();
 		}

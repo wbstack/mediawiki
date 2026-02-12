@@ -43,12 +43,6 @@ class TokenTransformManager extends PipelineStage {
 	/** @var bool */
 	private $hasShuttleTokens = false;
 
-	/**
-	 * @param Env $env
-	 * @param array $options
-	 * @param string $stageId
-	 * @param ?PipelineStage $prevStage
-	 */
 	public function __construct(
 		Env $env, array $options, string $stageId,
 		?PipelineStage $prevStage = null
@@ -60,9 +54,6 @@ class TokenTransformManager extends PipelineStage {
 		$this->traceEnabled = $env->hasTraceFlags();
 	}
 
-	/**
-	 * @param int $id
-	 */
 	public function setPipelineId( int $id ): void {
 		parent::setPipelineId( $id );
 		foreach ( $this->transformers as $transformer ) {
@@ -70,16 +61,10 @@ class TokenTransformManager extends PipelineStage {
 		}
 	}
 
-	/**
-	 * @return Frame
-	 */
 	public function getFrame(): Frame {
 		return $this->frame;
 	}
 
-	/**
-	 * @return array
-	 */
 	public function getOptions(): array {
 		return $this->options;
 	}
@@ -95,14 +80,10 @@ class TokenTransformManager extends PipelineStage {
 		}
 	}
 
-	/**
-	 * @param array $toks
-	 * @return array
-	 */
 	public function shuttleTokensToEndOfStage( array $toks ): array {
 		$this->hasShuttleTokens = true;
 		$ttmEnd = new SelfclosingTagTk( 'mw:ttm-end' );
-		$ttmEnd->dataAttribs->getTemp()->shuttleTokens = $toks;
+		$ttmEnd->dataParsoid->getTemp()->shuttleTokens = $toks;
 		return [ $ttmEnd ];
 	}
 
@@ -112,7 +93,7 @@ class TokenTransformManager extends PipelineStage {
 	 */
 	public function processChunk( array $tokens ): ?array {
 		// Trivial case
-		if ( count( $tokens ) === 0 ) {
+		if ( !$tokens ) {
 			return $tokens;
 		}
 
@@ -126,7 +107,7 @@ class TokenTransformManager extends PipelineStage {
 
 		foreach ( $this->transformers as $transformer ) {
 			if ( !$transformer->isDisabled() ) {
-				if ( count( $tokens ) === 0 ) {
+				if ( !$tokens ) {
 					break;
 				}
 				$tokens = $transformer->process( $tokens );
@@ -142,7 +123,7 @@ class TokenTransformManager extends PipelineStage {
 			$accum = [];
 			foreach ( $tokens as $i => $t ) {
 				if ( $t instanceof SelfclosingTagTk && $t->getName() === 'mw:ttm-end' ) {
-					$toks = $t->dataAttribs->getTemp()->shuttleTokens;
+					$toks = $t->dataParsoid->getTemp()->shuttleTokens;
 					PHPUtils::pushArray( $accum, $toks );
 				} else {
 					$accum[] = $t;
@@ -178,17 +159,17 @@ class TokenTransformManager extends PipelineStage {
 	 * Process a chunk of tokens.
 	 *
 	 * @param array $tokens Array of tokens to process
-	 * @param ?array $opts
+	 * @param array $opts
 	 * @return array Returns the array of processed tokens
 	 */
-	public function process( $tokens, ?array $opts = null ): array {
+	public function process( $tokens, array $opts ): array {
 		return $this->processChunk( $tokens );
 	}
 
 	/**
 	 * @inheritDoc
 	 */
-	public function processChunkily( $input, array $opts = null ): Generator {
+	public function processChunkily( $input, array $opts ): Generator {
 		if ( $this->prevStage ) {
 			foreach ( $this->prevStage->processChunkily( $input, $opts ) as $chunk ) {
 				'@phan-var array $chunk'; // @var array $chunk

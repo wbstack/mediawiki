@@ -2,12 +2,10 @@
 
 namespace Wikibase\DataModel\Entity;
 
-use Serializable;
-
 /**
  * @license GPL-2.0-or-later
  */
-interface EntityId extends Serializable {
+interface EntityId {
 
 	/**
 	 * @return string
@@ -33,19 +31,23 @@ interface EntityId extends Serializable {
 	public function equals( $target );
 
 	/**
-	 * TODO: This method shouldn't exist on this interface as it doesn't make sense for certain types of IDs. It should be moved to a
-	 *       separate interface, or removed altogether.
+	 * This method replaces {@link Serializable::serialize()}.
+	 * Do not call it manually.
+	 * Also, consider using {@link getSerialization()} and an {@link EntityIdParser}
+	 * instead of PHP serialization.
 	 *
-	 * @return string
+	 * @see https://www.php.net/manual/en/language.oop5.magic.php#object.serialize
 	 */
-	public function getLocalPart();
+	public function __serialize(): array;
 
 	/**
-	 * TODO: This method shouldn't exist on this interface as it doesn't make sense for certain types of IDs. It should be moved to a
-	 *       separate interface, or removed altogether.
+	 * This method replaces {@link Serializable::unserialize()}.
+	 * Do not call it manually.
+	 * Also, consider using {@link getSerialization()} and an {@link EntityIdParser}
+	 * instead of PHP serialization.
 	 *
-	 * @return string
+	 * @see https://www.php.net/manual/en/language.oop5.magic.php#object.unserialize
 	 */
-	public function getRepositoryName();
+	public function __unserialize( array $data );
 
 }

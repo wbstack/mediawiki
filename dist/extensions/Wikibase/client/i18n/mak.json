@@ -4,6 +4,16 @@
 			"Han4299"
 		]
 	},
+	"wikibase-dataitem": "Barang-barang ri {{WBREPONAME}}",
+	"wikibase-editlinks": "Pakabajiki sambungangna",
+	"wikibase-addlinkstitle": "Tambahkan pranala interwiki",
+	"wikibase-linkitem-addlinks": "Tamba sambungang",
+	"wikibase-linkitem-title": "Pasepaki siagang barambang",
+	"wikibase-linkitem-linkpage": "Pasambungi siagang barambang",
+	"wikibase-linkitem-selectlink": "Maekik pilei situs siagang barambang nikaerokai Katte pasambungang siagang anne barambanga.",
+	"wikibase-linkitem-input-site": "Basa:",
 	"wikibase-linkitem-input-page": "Barambang:",
-	"wikibase-rc-hide-wikidata-show": "Pacinikang"
+	"wikibase-rc-hide-wikidata-hide": "Pacokkoi",
+	"wikibase-rc-hide-wikidata-show": "Pacinikang",
+	"wikibase-otherprojects": "Ilalang bala-bala maraenga"
 }

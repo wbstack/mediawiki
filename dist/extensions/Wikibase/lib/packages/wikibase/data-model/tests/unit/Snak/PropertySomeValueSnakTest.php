@@ -30,7 +30,7 @@ class PropertySomeValueSnakTest extends \PHPUnit\Framework\TestCase {
 		$this->assertInstanceOf( PropertySomeValueSnak::class, $snak );
 	}
 
-	public function validConstructorArgumentsProvider() {
+	public static function validConstructorArgumentsProvider() {
 		return [
 			[ 1 ],
 			[ new NumericPropertyId( 'P1' ) ],
@@ -46,7 +46,7 @@ class PropertySomeValueSnakTest extends \PHPUnit\Framework\TestCase {
 		new PropertySomeValueSnak( $propertyId );
 	}
 
-	public function invalidConstructorArgumentsProvider() {
+	public static function invalidConstructorArgumentsProvider() {
 		return [
 			[ null ],
 			[ 0.1 ],
@@ -94,33 +94,28 @@ class PropertySomeValueSnakTest extends \PHPUnit\Framework\TestCase {
 		$this->assertFalse( $snak2->equals( $snak1 ) );
 	}
 
-	public function notEqualsProvider() {
+	public static function notEqualsProvider() {
 		$p1 = new NumericPropertyId( 'P1' );
 
 		return [
 			[
 				new PropertySomeValueSnak( $p1 ),
-				new PropertySomeValueSnak( new NumericPropertyId( 'P2' ) )
+				new PropertySomeValueSnak( new NumericPropertyId( 'P2' ) ),
 			],
 			[
 				new PropertySomeValueSnak( $p1 ),
-				new PropertyNoValueSnak( $p1 )
+				new PropertyNoValueSnak( $p1 ),
 			],
 		];
 	}
 
-	public function provideDataToSerialize() {
+	public static function provideDataToSerialize() {
 		$p2 = new NumericPropertyId( 'P2' );
-		$p2foo = new NumericPropertyId( 'foo:P2' );
 
 		return [
 			'string' => [
 				'P2',
 				new PropertySomeValueSnak( $p2 ),
-			],
-			'foreign' => [
-				'foo:P2',
-				new PropertySomeValueSnak( $p2foo ),
 			],
 		];
 	}
@@ -137,14 +132,12 @@ class PropertySomeValueSnakTest extends \PHPUnit\Framework\TestCase {
 		$this->assertTrue( $snak->equals( $snak2 ), 'round trip' );
 	}
 
-	public function provideDataToUnserialize() {
+	public static function provideDataToUnserialize() {
 		$p2 = new NumericPropertyId( 'P2' );
-		$p2foo = new NumericPropertyId( 'foo:P2' );
 
 		return [
 			'legacy' => [ new PropertySomeValueSnak( $p2 ), 'i:2;' ],
 			'current' => [ new PropertySomeValueSnak( $p2 ), 'P2' ],
-			'foreign' => [ new PropertySomeValueSnak( $p2foo ), 'foo:P2' ],
 		];
 	}
 

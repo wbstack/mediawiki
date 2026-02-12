@@ -79,7 +79,7 @@ class ChangeOpDescription extends ChangeOpBase {
 	 * @param Term|null $newDescription
 	 * @return ChangeOpDescriptionResult
 	 */
-	private function buildResult( EntityId $entityId = null, Term $oldDescription = null, Term $newDescription = null ) {
+	private function buildResult( ?EntityId $entityId, ?Term $oldDescription, ?Term $newDescription ) {
 
 		$isEntityChanged = false;
 		$oldDescriptionText = $oldDescription ? $oldDescription->getText() : '';
@@ -95,16 +95,8 @@ class ChangeOpDescription extends ChangeOpBase {
 		return new ChangeOpDescriptionResult( $entityId, $this->languageCode, $oldDescriptionText, $newDescriptionText, $isEntityChanged );
 	}
 
-	/**
-	 * @see ChangeOp::apply()
-	 *
-	 * @param EntityDocument $entity
-	 * @param Summary|null $summary
-	 *
-	 * @throws InvalidArgumentException
-	 * @throws ChangeOpException
-	 */
-	public function apply( EntityDocument $entity, Summary $summary = null ) {
+	/** @inheritDoc */
+	public function apply( EntityDocument $entity, ?Summary $summary = null ) {
 		if ( !( $entity instanceof DescriptionsProvider ) ) {
 			throw new InvalidArgumentException( '$entity must be a DescriptionsProvider' );
 		}
@@ -149,7 +141,7 @@ class ChangeOpDescription extends ChangeOpBase {
 			throw new InvalidArgumentException( '$entity must be a DescriptionsProvider' );
 		}
 
-		$languageValidator = $this->termValidatorFactory->getLanguageValidator();
+		$languageValidator = $this->termValidatorFactory->getDescriptionLanguageValidator();
 		$termValidator = $this->termValidatorFactory->getDescriptionValidator();
 
 		// check that the language is valid

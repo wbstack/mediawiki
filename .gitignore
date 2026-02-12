@@ -2,3 +2,6 @@
 /vendor
 /composer.lock
 /.tmp
+/.vscode
+/.idea
+/.env

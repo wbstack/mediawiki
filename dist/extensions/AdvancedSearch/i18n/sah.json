@@ -1,13 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"HalanTul"
+			"HalanTul",
+			"MARKSDNW"
 		]
 	},
 	"advancedsearch-optgroup-text": "Сирэй тиэксигэр көрдөө",
 	"advancedsearch-optgroup-structure": "Тутула",
 	"advancedsearch-optgroup-files": "Билэлэр уонна ойуулар",
-	"advancedsearch-field-plain": "Бу тыллар:",
+	"advancedsearch-field-plain": "Бу тыллар",
 	"advancedsearch-field-phrase": "Чопчу бу тиэкис:",
 	"advancedsearch-field-or": "Бу тыллартан биирдэстэрэ:",
 	"advancedsearch-field-not": "Балартан ураты:",
@@ -15,7 +16,7 @@
 	"advancedsearch-field-intitle": "Сирэй аатыгар баар:",
 	"advancedsearch-field-deepcategory": "Бу категория сирэйэ:",
 	"advancedsearch-field-hastemplate": "Маннык халыыптаах сирэйдэри эрэ:",
-	"advancedsearch-field-filetype": "Билэ көрүҥэ:",
+	"advancedsearch-field-filetype": "Билэ көрүҥэ",
 	"advancedsearch-field-filew": "Билэ кэтитэ пикселинэн:",
 	"advancedsearch-field-fileh": "Билэ үрдүгэ пикселинэн:",
 	"advancedsearch-inlanguage-default": "Тылы талыы",

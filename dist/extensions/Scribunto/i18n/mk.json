@@ -5,6 +5,7 @@
 			"Vlad5250"
 		]
 	},
+	"content-model-scribunto": "Модул на Scribunto",
 	"scribunto-desc": "Рамка за вметнување на скриптни јазици во страница на МедијаВики",
 	"scribunto-line": "во редот $1",
 	"scribunto-module-line": "во $1, ред $2",
@@ -30,7 +31,7 @@
 	"scribunto-common-timeout": "Зададеното време за работа на скриптите истече.",
 	"scribunto-common-oom": "Надминат е дозволениот складишен простор за работа на скрипти.",
 	"scribunto-common-backtrace": "Проследување на текот:",
-	"scribunto-common-no-details": "Нема повеќе подробности.",
+	"scribunto-common-no-details": "Нема повеќе поединости.",
 	"scribunto-lua-in-function": "во функцијата „$1“",
 	"scribunto-lua-in-main": "во главниот дел",
 	"scribunto-lua-in-function-at": "во функцијата, кај $1:$2",
@@ -61,5 +62,7 @@
 	"scribunto-limitreport-profile-ms": "$1 мс",
 	"scribunto-limitreport-logs": "Днавници на Lua",
 	"nstab-module": "Модул",
-	"tooltip-ca-nstab-module": "Преглед на модулната страница"
+	"tooltip-ca-nstab-module": "Преглед на модулната страница",
+	"namespaceinfo-description-ns828": "Именски простор за модулите со Lua-код, кој може да се повика од викистраници и нивните документациски страници",
+	"namespaceinfo-description-ns829": "Разговорни страници за модулите и документацијата"
 }

@@ -1,7 +1,6 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Kambai Akau"
 		]
 	},
@@ -24,7 +23,7 @@
 	"echo-learn-more": "Myiam nkyang njhyang",
 	"echo-log": "Ri̱jista konyan ma̱ng konyan",
 	"echo-new-messages": "A byia̱ ta̱m wat A̱lyiat swai",
-	"echo-category-title-edit-user-talk": "{{PLURAL:$1|Edit|Njhyuk}} ma̱ wat a̱lyiat a̱tyunta̱m nung hu",
+	"echo-category-title-edit-user-talk": "{{PLURAL:$1|Jhyuk|Njhyuk}} tazwa wat a̱lyiat nung ka",
 	"echo-category-title-article-linked": "Page {{PLURAL:$1|a̱fwuop|a̱ka̱fwuop}}",
 	"echo-category-title-other": "{{PLURAL:$1|A̱ghyang}}",
 	"tooltip-pt-notifications-alert": "A̱yaalama {{GENDER:|ang ba}}",
@@ -61,7 +60,7 @@
 	"notification-inbox-filter-unread": "Á̱ ka̱n fang bah",
 	"notification-inbox-filter-all": "A̱mgba̱m",
 	"echo-notification-alert-text-only": "A̱yaalama",
-	"echo-mark-wiki-as-read": "Cak a̱mgba̱m nang á̱si̱ nang á̱ ka̱n fang a̱ni mi̱ wuki nang á̱ khai a̱ni: $1",
+	"echo-mark-wiki-as-read": "Cak {{PLURAL:$2|a̱mgba̱m}} nang si̱ nji nang á̱ ku fang a̱ni di̱ ngwuki na nang á̱ khai a̱ni: $1",
 	"echo-displaysnippet-title": "Shei li̱lak fai",
 	"echo-date-today": "A̱fwun",
 	"echo-date-yesterday": "Lyuo",

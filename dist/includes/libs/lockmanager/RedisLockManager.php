@@ -1,7 +1,5 @@
 <?php
 /**
- * Version of LockManager based on using redis servers.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,13 +16,13 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup LockManager
  */
+
+use Wikimedia\ObjectCache\RedisConnectionPool;
 
 /**
  * Manage locks using redis servers.
  *
- * Version of LockManager based on using redis servers.
  * This is meant for multi-wiki systems that may share files.
  * All locks are non-blocking, which avoids deadlocks.
  *
@@ -266,13 +264,13 @@ LUA;
 	 * Make sure remaining locks get cleared
 	 */
 	public function __destruct() {
-		while ( count( $this->locksHeld ) ) {
-			$pathsByType = [];
-			foreach ( $this->locksHeld as $path => $locks ) {
-				foreach ( $locks as $type => $count ) {
-					$pathsByType[$type][] = $path;
-				}
+		$pathsByType = [];
+		foreach ( $this->locksHeld as $path => $locks ) {
+			foreach ( $locks as $type => $count ) {
+				$pathsByType[$type][] = $path;
 			}
+		}
+		if ( $pathsByType ) {
 			$this->unlockByType( $pathsByType );
 		}
 	}

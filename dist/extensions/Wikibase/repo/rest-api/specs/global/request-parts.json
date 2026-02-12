@@ -1,63 +1,8 @@
 {
-	"StatementRequest": {
+	"PatchRequest": {
 		"allOf": [
-			{
-				"type": "object",
-				"properties": {
-					"statement": {
-						"allOf": [
-							{ "$ref": "./schemas.json#/Statement" },
-							{ "$ref": "#/StatementRequestRequired" }
-						]
-					}
-				},
-				"required": [ "statement" ]
-			},
-			{ "$ref": "./request-parts.json#/MediawikiEdit" }
-		]
-	},
-	"StatementPatchRequest": {
-		"allOf": [
-			{
-				"type": "object",
-				"properties": {
-					"patch": {
-						"description": "A JSON Patch document as defined by RFC 6902",
-						"type": "array",
-						"items": {
-							"properties": {
-								"op": {
-									"description": "The operation to perform",
-									"type": "string",
-									"enum": [
-										"add",
-										"copy",
-										"move",
-										"remove",
-										"replace",
-										"test"
-									]
-								},
-								"path": {
-									"description": "A JSON-Pointer for the property to manipulate",
-									"type": "string",
-									"example": "/mainsnak/datavalue/value"
-								},
-								"value": {
-									"description": "The value to be used within the operation",
-									"type": "string",
-									"example": "patched value"
-								}
-							},
-							"required": [
-								"op",
-								"path"
-							]
-						}
-					}
-				}
-			},
-			{ "$ref": "./request-parts.json#/MediawikiEdit" }
+			{ "$ref": "#/PatchDocument" },
+			{ "$ref": "#/MediawikiEdit" }
 		]
 	},
 	"MediawikiEdit": {
@@ -72,39 +17,46 @@
 				"type": "boolean",
 				"default": false
 			},
-			"comment": {
-				"type": "string"
-			}
+			"comment": { "type": "string" }
 		}
 	},
-	"QualifiersRequestRequired": {
-		"additionalProperties": {
-			"items": {
-				"required": [ "snaktype", "property" ]
-			}
-		}
-	},
-	"ReferenceRequestRequired": {
-		"required": [ "snaks", "snaks-order" ],
+	"PatchDocument": {
+		"type": "object",
 		"properties": {
-			"snaks": {
-				"additionalProperties": {
-					"items": {
-						"required": [ "snaktype", "property" ]
-					}
+			"patch": {
+				"description": "A JSON Patch document as defined by RFC 6902",
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+						"op": {
+							"description": "The operation to perform",
+							"type": "string",
+							"enum": [
+								"add",
+								"copy",
+								"move",
+								"remove",
+								"replace",
+								"test"
+							]
+						},
+						"path": {
+							"description": "A JSON Pointer",
+							"type": "string"
+						},
+						"from": {
+							"description": "A JSON Pointer",
+							"type": "string"
+						},
+						"value": {
+							"description": "The value to be used within the operation"
+						}
+					},
+					"required": [ "op", "path" ]
 				}
 			}
-		}
-	},
-	"ReferencesRequestRequired": {
-		"items": { "$ref": "#/ReferenceRequestRequired" }
-	},
-	"StatementRequestRequired": {
-		"required": [ "mainsnak" ],
-		"properties": {
-			"mainsnak": { "required": [ "snaktype", "property" ] },
-			"qualifiers": { "$ref": "#/QualifiersRequestRequired" },
-			"references": { "$ref": "#/ReferencesRequestRequired" }
-		}
+		},
+		"required": [ "patch" ]
 	}
 }

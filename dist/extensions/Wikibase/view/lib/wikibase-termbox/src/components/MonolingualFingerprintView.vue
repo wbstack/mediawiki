@@ -13,6 +13,7 @@
 			<component
 				:is="editMode ? 'LabelEdit' : 'Label'"
 				:label="getLabelByLanguage( languageCode )"
+				:mul-label="getLabelByLanguage( 'mul' )"
 				@input="onEditLabel"
 				:is-primary="isPrimary"
 				:language-code="editMode ? languageCode : null"
@@ -103,8 +104,8 @@ export default defineComponent( {
 
 	&__language {
 		@include fontSize( 13px );
-		color: $wmui-color-base20;
-		font-family: $font-family-sans;
+		color: $color-subtle;
+		font-family: $font-family-base;
 	}
 
 	&__label-wrapper,
@@ -112,7 +113,7 @@ export default defineComponent( {
 	&__aliases-wrapper {
 		min-width: 244px;
 		max-width: 420px;
-		margin-top: $base-font-size / 2;
+		margin-top: math.div( $base-font-size, 2 );
 	}
 
 	&:not( &--editing ) {

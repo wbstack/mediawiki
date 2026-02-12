@@ -4,6 +4,10 @@
  *
  * @ingroup Maintenance
  */
+
+use MediaWiki\Extension\Notifications\DbFactory;
+use MediaWiki\Maintenance\LoggedUpdateMaintenance;
+
 require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
 	: __DIR__ . '/../../../maintenance/Maintenance.php';
@@ -32,17 +36,18 @@ class RemoveOrphanedEvents extends LoggedUpdateMaintenance {
 
 	public function doDBUpdates() {
 		$startId = 0;
-		$dbFactory = MWEchoDbFactory::newFromDefault();
+		$dbFactory = DbFactory::newFromDefault();
 		$dbr = $dbFactory->getEchoDb( DB_REPLICA );
 		$maxId = (int)$dbr->newSelectQueryBuilder()
 			->select( 'MAX(event_id)' )
 			->from( 'echo_event' )
+			->caller( __METHOD__ )
 			->fetchField();
 		$eventsProcessedTotal = 0;
 		$targetsProcessedTotal = 0;
 		while ( $startId < $maxId ) {
 			$startId += $this->getBatchSize() * 1000;
-			list( $eventsProcessed, $targetsProcessed ) = $this->doMajorBatch( $startId );
+			[ $eventsProcessed, $targetsProcessed ] = $this->doMajorBatch( $startId );
 			$eventsProcessedTotal += $eventsProcessed;
 			$targetsProcessedTotal += $targetsProcessed;
 		}
@@ -53,7 +58,7 @@ class RemoveOrphanedEvents extends LoggedUpdateMaintenance {
 	}
 
 	private function doMajorBatch( $maxId ) {
-		$dbFactory = MWEchoDbFactory::newFromDefault();
+		$dbFactory = DbFactory::newFromDefault();
 		$dbw = $dbFactory->getEchoDb( DB_PRIMARY );
 		$dbr = $dbFactory->getEchoDb( DB_REPLICA );
 		$iterator = new BatchRowIterator(
@@ -69,7 +74,7 @@ class RemoveOrphanedEvents extends LoggedUpdateMaintenance {
 		$iterator->addConditions( [
 			'notification_user' => null,
 			'eeb_user_id' => null,
-			'event_id < ' . $maxId
+			$dbr->expr( 'event_id', '<', $maxId ),
 		] );
 		$iterator->setCaller( __METHOD__ );
 
@@ -82,12 +87,20 @@ class RemoveOrphanedEvents extends LoggedUpdateMaintenance {
 			foreach ( $batch as $row ) {
 				$ids[] = $row->event_id;
 			}
-			$dbw->delete( 'echo_event', [ 'event_id' => $ids ], __METHOD__ );
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( 'echo_event' )
+				->where( [ 'event_id' => $ids ] )
+				->caller( __METHOD__ )
+				->execute();
 			$eventsProcessed += $dbw->affectedRows();
-			$dbw->delete( 'echo_target_page', [ 'etp_event' => $ids ], __METHOD__ );
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( 'echo_target_page' )
+				->where( [ 'etp_event' => $ids ] )
+				->caller( __METHOD__ )
+				->execute();
 			$targetsProcessed += $dbw->affectedRows();
 			$this->output( "Deleted $eventsProcessed orphaned events and $targetsProcessed target_page rows.\n" );
-			$dbFactory->waitForReplicas();
+			$this->waitForReplication();
 		}
 
 		$this->output( "Removing any remaining orphaned echo_target_page rows with max etp_event of $maxId...\n" );
@@ -101,7 +114,7 @@ class RemoveOrphanedEvents extends LoggedUpdateMaintenance {
 		$iterator->addConditions(
 			[
 				'event_type' => null,
-				'etp_event < ' . $maxId
+				$dbr->expr( 'etp_event', '<', $maxId ),
 			]
 		);
 		$iterator->addOptions( [ 'DISTINCT' ] );
@@ -113,10 +126,14 @@ class RemoveOrphanedEvents extends LoggedUpdateMaintenance {
 			foreach ( $batch as $row ) {
 				$ids[] = $row->etp_event;
 			}
-			$dbw->delete( 'echo_target_page', [ 'etp_event' => $ids ], __METHOD__ );
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( 'echo_target_page' )
+				->where( [ 'etp_event' => $ids ] )
+				->caller( __METHOD__ )
+				->execute();
 			$processed += $dbw->affectedRows();
 			$this->output( "Deleted $processed orphaned target_page rows.\n" );
-			$dbFactory->waitForReplicas();
+			$this->waitForReplication();
 		}
 
 		return [ $eventsProcessed, $targetsProcessed + $processed ];

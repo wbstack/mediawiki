@@ -28,7 +28,10 @@ if ( getenv( 'MW_INSTALL_PATH' ) ) {
 
 require_once "$IP/maintenance/Maintenance.php";
 
+use MediaWiki\Extension\ConfirmEdit\FancyCaptcha\FancyCaptcha;
 use MediaWiki\Extension\ConfirmEdit\Hooks;
+use MediaWiki\Maintenance\Maintenance;
+use MediaWiki\Status\Status;
 
 /**
  * Maintenance script that deletes old fancy captchas from storage
@@ -45,6 +48,12 @@ class DeleteOldFancyCaptchas extends Maintenance {
 			true,
 			true
 		);
+		$this->addOption(
+			'captchastoragedir',
+			'Overrides the value of $wgCaptchaStorageDirectory',
+			false,
+			true
+		);
 		$this->requireExtension( "FancyCaptcha" );
 	}
 
@@ -54,11 +63,17 @@ class DeleteOldFancyCaptchas extends Maintenance {
 			$this->fatalError( "\$wgCaptchaClass is not FancyCaptcha.\n", 1 );
 		}
 
+		// Overrides $wgCaptchaStorageDirectory for this script run
+		if ( $this->hasOption( 'captchastoragedir' ) ) {
+			global $wgCaptchaStorageDirectory;
+			$wgCaptchaStorageDirectory = $this->getOption( 'captchastoragedir' );
+		}
+
 		$countAct = $instance->getCaptchaCount();
 		$this->output( "Current number of captchas is $countAct.\n" );
 
 		$backend = $instance->getBackend();
-		$dir = $backend->getRootStoragePath() . '/captcha-render';
+		$dir = $backend->getRootStoragePath() . '/' . $instance->getStorageDir();
 
 		$filesToDelete = [];
 		$deleteDate = $this->getOption( 'date' );

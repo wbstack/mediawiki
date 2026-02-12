@@ -1,19 +1,19 @@
 {
 	"name": "Math",
-	"version": "3.0.0",
 	"author": [
 		"Tomasz Wegrzanowski",
 		"Brion Vibber",
 		"Moritz Schubotz",
 		"Derk-Jan Hartman",
-		"André Greiner-Petter"
+		"André Greiner-Petter",
+		"Johannes Stegmüller"
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:Math",
 	"descriptionmsg": "math-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\Math\\": "src/"
@@ -21,21 +21,30 @@
 	"TestAutoloadClasses": {
 		"DummyPropertyDataTypeLookup": "tests/phpunit/DummyPropertyDataTypeLookup.php",
 		"MediaWiki\\Extension\\Math\\Tests\\MathWikibaseConnectorTestFactory": "tests/phpunit/unit/MathWikibaseConnectorTestFactory.php",
-		"MediaWiki\\Extension\\Math\\Tests\\MathMockHttpTrait": "tests/phpunit/MathMockHttpTrait.php"
+		"MediaWiki\\Extension\\Math\\Tests\\MathMockHttpTrait": "tests/phpunit/MathMockHttpTrait.php",
+		"MediaWiki\\Extension\\Math\\WikiTexVC\\MMLmappings\\Util\\MMLTestUtilHTML": "tests/phpunit/unit/WikiTexVC/MMLTestUtilHTML.php",
+		"MediaWiki\\Extension\\Math\\WikiTexVC\\MMLmappings\\Util\\MMLTestUtil": "tests/phpunit/unit/WikiTexVC/MMLTestUtil.php",
+		"MediaWiki\\Extension\\Math\\WikiTexVC\\MMLmappings\\Util\\MMLComparator": "tests/phpunit/unit/WikiTexVC/MMLComparator.php"
 	},
 	"DefaultUserOptions": {
-		"math": "mathml"
+		"math": "native",
+		"math-popups": "1"
 	},
 	"ExtensionMessagesFiles": {
 		"MathAlias": "Math.alias.php",
 		"MathAliasNoTranslate": "Math.alias.noTranslate.php"
 	},
+	"callback": "MediaWiki\\Extension\\Math\\Hooks::onConfig",
+	"ExtensionFunctions": [
+		"MediaWiki\\Extension\\Math\\Hooks::onExtensionFunctions"
+	],
 	"HookHandlers": {
 		"ParserHooksHandler": {
 			"class": "MediaWiki\\Extension\\Math\\HookHandlers\\ParserHooksHandler",
 			"services": [
 				"Math.RendererFactory",
-				"UserOptionsLookup"
+				"UserOptionsLookup",
+				"HookContainer"
 			]
 		},
 		"PreferencesHooksHandler": {
@@ -49,6 +58,15 @@
 			"services": [
 				"Math.Config"
 			]
+		},
+		"main": {
+			"class": "MediaWiki\\Extension\\Math\\Hooks",
+			"services": [
+				"UserOptionsManager"
+			]
+		},
+		"schema": {
+			"class": "MediaWiki\\Extension\\Math\\HookHandlers\\SchemaHooksHandler"
 		}
 	},
 	"Hooks": {
@@ -57,11 +75,11 @@
 		"ParserOptionsRegister": "ParserHooksHandler",
 		"GetPreferences": "PreferencesHooksHandler",
 		"UserGetDefaultOptions": "PreferencesHooksHandler",
-		"LoadExtensionSchemaUpdates": "MediaWiki\\Extension\\Math\\Hooks::onLoadExtensionSchemaUpdates",
+		"LoadExtensionSchemaUpdates": "schema",
 		"WikibaseClientDataTypes": "MediaWiki\\Extension\\Math\\WikibaseHook::onWikibaseClientDataTypes",
 		"WikibaseRepoDataTypes": "MediaWiki\\Extension\\Math\\WikibaseHook::onWikibaseRepoDataTypes",
-		"SpecialPage_initList": "MediaWiki\\Extension\\Math\\Hooks::onSpecialPageInitList",
-		"MaintenanceRefreshLinksInit": "MediaWiki\\Extension\\Math\\Hooks::onMaintenanceRefreshLinksInit",
+		"SpecialPage_initList": "main",
+		"MaintenanceRefreshLinksInit": "main",
 		"ResourceLoaderGetConfigVars": "ResourceLoaderConfigHandler"
 	},
 	"config": {
@@ -102,6 +120,14 @@
 			"description": "Fallback value for wbEntitySelector if wbRepo is not configured. See https://www.mediawiki.org/wiki/Manual:CORS for cross wiki communication.",
 			"value": "https://www.wikidata.org/w/api.php"
 		},
+		"MathTexVCService": {
+			"description": "Determine which TexVC variant is used, currently available: 'mathoid', 'restbase' (default) and 'local'.",
+			"value": "restbase"
+		},
+		"MathSvgRenderer": {
+			"description": "Determine which SVG rendering service is used. Currently available 'mathoid', 'restbase'.",
+			"value": "restbase"
+		},
 		"MathLaTeXMLTimeout": {
 			"value": 240
 		},
@@ -115,9 +141,12 @@
 			"value": "https://mathoid-beta.wmflabs.org"
 		},
 		"MathUseInternalRestbasePath": {
-			"description": "Whether to allow to use of internal RESTBase path instead of $wgMathFullRestbaseURL and $wgVisualEditorFullRestbaseURL. Set false if you want to use external RESTBase in any case.",
+			"description": "Whether to allow to use of internal RESTBase path instead of $wgMathFullRestbaseURL. Set false if you want to use external RESTBase in any case.",
 			"value": true,
 			"public": true
+		},
+		"MathInternalRestbaseURL": {
+			"value": null
 		},
 		"MathFullRestbaseURL": {
 			"value": "https://wikimedia.org/api/rest_"
@@ -132,7 +161,8 @@
 			"description": "To access this at run-time, use MathConfig::getValidRenderingModes(). Do not use the non-normalized configuration directly.",
 			"value": [
 				"source",
-				"mathml"
+				"native",
+				"mathjax"
 			]
 		},
 		"MathEnableWikibaseDataType": {
@@ -163,6 +193,11 @@
 		}
 	},
 	"attributes": {
+		"Popups": {
+			"PluginModules": [
+				"ext.math.popup"
+			]
+		},
 		"VisualEditor": {
 			"PluginModules": [
 				"ext.math.visualEditor"
@@ -186,16 +221,28 @@
 			"test.VisualEditor"
 		]
 	},
+	"ForeignResourcesDir": "modules",
 	"ResourceModules": {
-		"ext.math.styles": {
-			"styles": "ext.math.css",
-			"targets": [
-				"desktop",
-				"mobile"
+		"ext.math.mathjax": {
+			"group": "ext.math",
+			"scripts": [
+				"ext.math.mathjax.js",
+				"mathjax/es5/tex-chtml.js"
 			]
 		},
-		"ext.math.scripts": {
-			"scripts": "ext.math.js"
+		"ext.math.styles": {
+			"styles": "ext.math.css"
+		},
+		"ext.math.popup": {
+			"packageFiles": "ext.math.popup.js",
+			"messages": [
+				"popups-settings-option-math",
+				"popups-settings-option-math-description"
+			],
+			"dependencies": [
+				"mediawiki.user",
+				"mediawiki.ForeignApi"
+			]
 		},
 		"mw.widgets.MathWbEntitySelector": {
 			"scripts": "mw.widgets.MathWbEntitySelector.js",
@@ -214,7 +261,6 @@
 				"ve-math/ve.ce.MWLatexNode.js",
 				"ve-math/ve.ui.MWLatexInspector.js",
 				"ve-math/ve.ui.MWLatexContextItem.js",
-				"ve-math/ve.ui.MWLatexPage.js",
 				"ve-math/ve.ui.MWLatexDialog.js",
 				"ve-math/ve.dm.MWChemNode.js",
 				"ve-math/ve.ce.MWChemNode.js",
@@ -231,11 +277,10 @@
 				"mw.widgets.MathWbEntitySelector.js"
 			],
 			"styles": [
-				"ve-math/ve.ui.MWLatexDialog.css",
+				"ve-math/ve.ui.MWLatexDialog.less",
 				"ve-math/ve.ce.MWLatexNode.css",
 				"ve-math/ve.ui.MWLatexInspector.css",
-				"ve-math/ve.ui.MWLatexContextItem.css",
-				"ve-math/ve.ui.MWLatexPage.css"
+				"ve-math/ve.ui.MWLatexContextItem.css"
 			],
 			"dependencies": [
 				"ext.visualEditor.mwcore",
@@ -292,32 +337,24 @@
 				"math-visualeditor-symbol-group-math-symbols",
 				"math-visualeditor-symbol-group-math-typefaces",
 				"math-visualeditor-symbol-group-math-unsorted"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
 			]
-		},
-		"ext.math.visualEditor.mathSymbolsData": {
-			"class": "MediaWiki\\Extension\\Math\\MathMathSymbolsDataModule"
 		},
 		"ext.math.visualEditor.mathSymbols": {
+			"packageFiles": [
+				"ve-math/mathSymbols.js",
+				"ve-math/mathSymbols.json"
+			],
 			"styles": [
 				"ve-math/ve.ui.MWMathSymbols.css"
-			],
-			"dependencies": [
-				"ext.math.visualEditor.mathSymbolsData"
 			]
 		},
-		"ext.math.visualEditor.chemSymbolsData": {
-			"class": "MediaWiki\\Extension\\Math\\MathChemSymbolsDataModule"
-		},
 		"ext.math.visualEditor.chemSymbols": {
+			"packageFiles": [
+				"ve-math/chemSymbols.js",
+				"ve-math/chemSymbols.json"
+			],
 			"styles": [
 				"ve-math/ve.ui.MWChemSymbols.css"
-			],
-			"dependencies": [
-				"ext.math.visualEditor.chemSymbolsData"
 			]
 		}
 	},
@@ -340,7 +377,12 @@
 				"Math.RendererFactory"
 			]
 		},
-		"MathWikibase": "MediaWiki\\Extension\\Math\\SpecialMathWikibase"
+		"MathWikibase": {
+			"class": "MediaWiki\\Extension\\Math\\SpecialMathWikibase",
+			"services": [
+				"Math.WikibaseConnector"
+			]
+		}
 	},
 	"TrackingCategories": [
 		"math-tracking-category-error",
@@ -350,18 +392,6 @@
 	],
 	"ServiceWiringFiles": [
 		"ServiceWiring.php"
-	],
-	"RestRoutes": [
-		{
-			"path": "/math/v0/popup/html/{qid}",
-			"method": "GET",
-			"class": "MediaWiki\\Extension\\Math\\Rest\\Popup",
-			"services": [
-				"Math.WikibaseConnector",
-				"LanguageFactory",
-				"TitleFactory"
-			]
-		}
 	],
 	"manifest_version": 2
 }

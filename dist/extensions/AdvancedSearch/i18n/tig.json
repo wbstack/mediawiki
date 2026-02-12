@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bbeshir"
+		]
+	},
+	"advancedsearch-filetype-bitmap": "ሱረት",
+	"advancedsearch-filetype-audio": "ሶት",
+	"advancedsearch-filetype-video": "ቪድዮ",
+	"advancedsearch-filetype-office": "መክተብ",
+	"advancedsearch-filesize-greater-than": "ታዓበ ምን",
+	"advancedsearch-filesize-smaller-than": "ትንእሽ ምን",
+	"advancedsearch-namespaces-preset-all": "ኩሉ",
+	"advancedsearch-namespaces-preset-default": "ንቡር",
+	"advancedsearch-namespaces-preset-discussion": "ህድግ"
+}

@@ -1,8 +1,5 @@
 <?php
 /**
- * Copyright © 2003-2004 Brion Vibber <brion@pobox.com>
- * https://www.mediawiki.org/
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -19,29 +16,35 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup Cache
  */
 
 /**
- * @defgroup Cache Cache
+ * @defgroup Cache BagOStuff
+ *
+ * Most important classes are:
+ *
+ * @see ObjectCacheFactory
+ * @see WANObjectCache
+ * @see BagOStuff
  */
 
-use Liuggio\StatsdClient\Factory\StatsdDataFactoryInterface;
+namespace Wikimedia\ObjectCache;
+
+use InvalidArgumentException;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Wikimedia\LightweightObjectStore\ExpirationAwareness;
 use Wikimedia\LightweightObjectStore\StorageAwareness;
 use Wikimedia\ScopedCallback;
+use Wikimedia\Stats\StatsFactory;
 
 /**
- * Class representing a cache/ephemeral data store
- *
- * This interface is intended to be more or less compatible with the PHP memcached client.
+ * Abstract class for any ephemeral data store
  *
  * Class instances should be created with an intended access scope for the dataset, such as:
  *   - a) A single PHP thread on a server (e.g. stored in a PHP variable)
- *   - b) A single application server (e.g. stored in APC or sqlite)
+ *   - b) A single application server (e.g. stored in php-apcu or sqlite)
  *   - c) All application servers in datacenter (e.g. stored in memcached or mysql)
  *   - d) All application servers in all datacenters (e.g. stored via mcrouter or dynomite)
  *
@@ -76,6 +79,7 @@ use Wikimedia\ScopedCallback;
  * @stable to extend
  * @newable
  * @ingroup Cache
+ * @copyright 2003-2004 Brooke Vibber <bvibber@wikimedia.org>
  */
 abstract class BagOStuff implements
 	ExpirationAwareness,
@@ -83,7 +87,7 @@ abstract class BagOStuff implements
 	IStoreKeyEncoder,
 	LoggerAwareInterface
 {
-	/** @var StatsdDataFactoryInterface */
+	/** @var StatsFactory */
 	protected $stats;
 	/** @var LoggerInterface */
 	protected $logger;
@@ -91,11 +95,6 @@ abstract class BagOStuff implements
 	protected $asyncHandler;
 	/** @var int[] Map of (BagOStuff:ATTR_* constant => BagOStuff:QOS_* constant) */
 	protected $attrMap = [];
-	/**
-	 * @var array<string,array> Cache key processing callbacks and info for metrics
-	 * @phan-var array<string,array{0:string,1:callable}>
-	 */
-	protected $wrapperInfoByPrefix = [];
 
 	/** @var string Default keyspace; used by makeKey() */
 	protected $keyspace;
@@ -122,8 +121,11 @@ abstract class BagOStuff implements
 	public const WRITE_CACHE_ONLY = 8;
 	/** Allow partitioning of the value if it is a large string */
 	public const WRITE_ALLOW_SEGMENTS = 16;
-	/** Delete all the segments if the value is partitioned */
-	public const WRITE_PRUNE_SEGMENTS = 32;
+	/**
+	 * Delete all the segments if the value is partitioned
+	 * @deprecated since 1.43 Use WRITE_ALLOW_SEGMENTS instead.
+	 */
+	public const WRITE_PRUNE_SEGMENTS = self::WRITE_ALLOW_SEGMENTS;
 	/**
 	 * If supported, do not block on write operation completion; instead, treat writes as
 	 * succesful based on whether they could be buffered. When using this flag with methods
@@ -154,24 +156,21 @@ abstract class BagOStuff implements
 	/** @var int Item does not involve any keys */
 	protected const RES_NONKEY = 1;
 
-	/** Key to the metric group to use for the relevant cache wrapper */
-	private const WRAPPER_STATS_GROUP = 0;
-	/** Key to the callback that extracts collection names from cache wrapper keys */
-	private const WRAPPER_COLLECTION_CALLBACK = 1;
-
 	/**
 	 * @stable to call
+	 *
 	 * @param array $params Parameters include:
 	 *   - keyspace: Keyspace to use for keys in makeKey(). [Default: "local"]
 	 *   - asyncHandler: Callable to use for scheduling tasks after the web request ends.
 	 *      In CLI mode, it should run the task immediately. [Default: null]
 	 *   - stats: IStatsdDataFactory instance. [optional]
-	 *   - logger: Psr\Log\LoggerInterface instance. [optional]
-	 * @phan-param array{keyspace?:string,logger?:Psr\Log\LoggerInterface,asyncHandler?:callable} $params
+	 *   - logger: \Psr\Log\LoggerInterface instance. [optional]
+	 *
+	 * @phan-param array{keyspace?:string,logger?:\Psr\Log\LoggerInterface,asyncHandler?:callable} $params
 	 */
 	public function __construct( array $params = [] ) {
 		$this->keyspace = $params['keyspace'] ?? 'local';
-		$this->stats = $params['stats'] ?? new NullStatsdDataFactory();
+		$this->stats = $params['stats'] ?? StatsFactory::newNull();
 		$this->setLogger( $params['logger'] ?? new NullLogger() );
 
 		$asyncHandler = $params['asyncHandler'] ?? null;
@@ -182,6 +181,7 @@ abstract class BagOStuff implements
 
 	/**
 	 * @param LoggerInterface $logger
+	 *
 	 * @return void
 	 */
 	public function setLogger( LoggerInterface $logger ) {
@@ -206,6 +206,7 @@ abstract class BagOStuff implements
 	 * @param int $exptime Time-to-live (seconds)
 	 * @param callable $callback Callback that derives the new value
 	 * @param int $flags Bitfield of BagOStuff::READ_* or BagOStuff::WRITE_* constants [optional]
+	 *
 	 * @return mixed The cached value if found or the result of $callback otherwise
 	 * @since 1.27
 	 */
@@ -233,6 +234,7 @@ abstract class BagOStuff implements
 	 *
 	 * @param string $key
 	 * @param int $flags Bitfield of BagOStuff::READ_* constants [optional]
+	 *
 	 * @return mixed Returns false on failure or if the item does not exist
 	 */
 	abstract public function get( $key, $flags = 0 );
@@ -244,6 +246,7 @@ abstract class BagOStuff implements
 	 * @param mixed $value
 	 * @param int $exptime Either an interval in seconds or a unix timestamp for expiry
 	 * @param int $flags Bitfield of BagOStuff::WRITE_* constants
+	 *  If setting WRITE_ALLOW_SEGMENTS, remember to also set it in any delete() calls.
 	 * @return bool Success
 	 */
 	abstract public function set( $key, $value, $exptime = 0, $flags = 0 );
@@ -251,9 +254,14 @@ abstract class BagOStuff implements
 	/**
 	 * Delete an item if it exists
 	 *
-	 * For large values written using WRITE_ALLOW_SEGMENTS, this only deletes the main
-	 * segment list key unless WRITE_PRUNE_SEGMENTS is in the flags. While deleting the segment
-	 * list key has the effect of functionally deleting the key, it leaves unused blobs in cache.
+	 * For large values set with WRITE_ALLOW_SEGMENTS, this only deletes the placeholder
+	 * key with the segment list. To delete the underlying blobs, include WRITE_ALLOW_SEGMENTS
+	 * in the flags for delete() as well. While deleting the segment list key has the effect of
+	 * functionally deleting the key, it leaves unused blobs in storage.
+	 *
+	 * The reason that this is not done automatically, is that to delete underlying blobs,
+	 * requires first fetching the current segment list. Given that 99% of keys don't use
+	 * WRITE_ALLOW_SEGMENTS, this would be wasteful.
 	 *
 	 * @param string $key
 	 * @param int $flags Bitfield of BagOStuff::WRITE_* constants
@@ -268,6 +276,7 @@ abstract class BagOStuff implements
 	 * @param mixed $value
 	 * @param int $exptime
 	 * @param int $flags Bitfield of BagOStuff::WRITE_* constants (since 1.33)
+	 *
 	 * @return bool Success (item created)
 	 */
 	abstract public function add( $key, $value, $exptime = 0, $flags = 0 );
@@ -286,8 +295,8 @@ abstract class BagOStuff implements
 	 * @param int $exptime Either an interval in seconds or a unix timestamp for expiry
 	 * @param int $attempts The amount of times to attempt a merge in case of failure
 	 * @param int $flags Bitfield of BagOStuff::WRITE_* constants
+	 *
 	 * @return bool Success
-	 * @throws InvalidArgumentException
 	 */
 	abstract public function merge(
 		$key,
@@ -311,6 +320,7 @@ abstract class BagOStuff implements
 	 * @param string $key
 	 * @param int $exptime TTL or UNIX timestamp
 	 * @param int $flags Bitfield of BagOStuff::WRITE_* constants (since 1.33)
+	 *
 	 * @return bool Success (item found and updated)
 	 * @since 1.28
 	 */
@@ -326,6 +336,7 @@ abstract class BagOStuff implements
 	 *  using the same value for this parameter, then return true and use reference counting so
 	 *  that only the unlock() call from the outermost lock() caller actually releases the lock
 	 *  (note that only the outermost time-to-live is used) [optional]
+	 *
 	 * @return bool Success
 	 */
 	abstract public function lock( $key, $timeout = 6, $exptime = 6, $rclass = '' );
@@ -334,6 +345,7 @@ abstract class BagOStuff implements
 	 * Release an advisory lock on a key string
 	 *
 	 * @param string $key
+	 *
 	 * @return bool Success
 	 */
 	abstract public function unlock( $key );
@@ -349,19 +361,20 @@ abstract class BagOStuff implements
 	 *
 	 * @param string $key
 	 * @param int $timeout Lock wait timeout; 0 for non-blocking [optional]
-	 * @param int $expiry Lock expiry [optional]; 1 day maximum
+	 * @param int $exptime Lock time-to-live [optional]; 1 day maximum
 	 * @param string $rclass Allow reentry if set and the current lock used this value
+	 *
 	 * @return ScopedCallback|null Returns null on failure
 	 * @since 1.26
 	 */
-	final public function getScopedLock( $key, $timeout = 6, $expiry = 30, $rclass = '' ) {
-		$expiry = min( $expiry ?: INF, self::TTL_DAY );
+	final public function getScopedLock( $key, $timeout = 6, $exptime = 30, $rclass = '' ) {
+		$exptime = min( $exptime ?: INF, self::TTL_DAY );
 
-		if ( !$this->lock( $key, $timeout, $expiry, $rclass ) ) {
+		if ( !$this->lock( $key, $timeout, $exptime, $rclass ) ) {
 			return null;
 		}
 
-		return new ScopedCallback( function () use ( $key, $expiry ) {
+		return new ScopedCallback( function () use ( $key ) {
 			$this->unlock( $key );
 		} );
 	}
@@ -376,13 +389,14 @@ abstract class BagOStuff implements
 	 * @param int|float $limit Maximum number of keys to delete [default: INF]
 	 * @param string|null $tag Tag to purge a single shard only.
 	 *  This is only supported when server tags are used in configuration.
+	 *
 	 * @return bool Success; false if unimplemented
 	 */
 	abstract public function deleteObjectsExpiringBefore(
 		$timestamp,
-		callable $progress = null,
+		?callable $progress = null,
 		$limit = INF,
-		string $tag = null
+		?string $tag = null
 	);
 
 	/**
@@ -390,6 +404,7 @@ abstract class BagOStuff implements
 	 *
 	 * @param string[] $keys List of keys
 	 * @param int $flags Bitfield; supports READ_LATEST [optional]
+	 *
 	 * @return mixed[] Map of (key => value) for existing keys
 	 */
 	abstract public function getMulti( array $keys, $flags = 0 );
@@ -404,6 +419,7 @@ abstract class BagOStuff implements
 	 * @param mixed[] $valueByKey Map of (key => value)
 	 * @param int $exptime Either an interval in seconds or a unix timestamp for expiry
 	 * @param int $flags Bitfield of BagOStuff::WRITE_* constants (since 1.33)
+	 *
 	 * @return bool Success
 	 * @since 1.24
 	 */
@@ -431,32 +447,11 @@ abstract class BagOStuff implements
 	 * @param string[] $keys List of keys
 	 * @param int $exptime TTL or UNIX timestamp
 	 * @param int $flags Bitfield of BagOStuff::WRITE_* constants (since 1.33)
+	 *
 	 * @return bool Success (all items found and updated)
 	 * @since 1.34
 	 */
 	abstract public function changeTTLMulti( array $keys, $exptime, $flags = 0 );
-
-	/**
-	 * Increase stored value of $key by $value while preserving its TTL
-	 *
-	 * @param string $key Key to increase
-	 * @param int $value Value to add to $key (default: 1) [optional]
-	 * @param int $flags Bit field of class WRITE_* constants [optional]
-	 * @return int|bool New value or false on failure
-	 * @deprecated Since 1.38
-	 */
-	abstract public function incr( $key, $value = 1, $flags = 0 );
-
-	/**
-	 * Decrease stored value of $key by $value while preserving its TTL
-	 *
-	 * @param string $key
-	 * @param int $value Value to subtract from $key (default: 1) [optional]
-	 * @param int $flags Bit field of class WRITE_* constants [optional]
-	 * @return int|bool New value or false on failure
-	 * @deprecated Since 1.38
-	 */
-	abstract public function decr( $key, $value = 1, $flags = 0 );
 
 	/**
 	 * Increase the value of the given key (no TTL change) if it exists or create it otherwise
@@ -473,6 +468,7 @@ abstract class BagOStuff implements
 	 * @param int $step Amount to increase the key value by [default: 1]
 	 * @param int|null $init Value to initialize the key to if it does not exist [default: $step]
 	 * @param int $flags Bit field of class WRITE_* constants [optional]
+	 *
 	 * @return int|bool New value (or true if asynchronous) on success; false on failure
 	 * @since 1.24
 	 */
@@ -481,7 +477,7 @@ abstract class BagOStuff implements
 	/**
 	 * Get a "watch point" token that can be used to get the "last error" to occur after now
 	 *
-	 * @return int A token that the current error event
+	 * @return int A token to that can be used with getLastError()
 	 * @since 1.38
 	 */
 	public function watchErrors() {
@@ -502,6 +498,7 @@ abstract class BagOStuff implements
 	 *   - The caller invokes getLastError()
 	 *
 	 * @param int $watchPoint Only consider errors from after this "watch point" [optional]
+	 *
 	 * @return int BagOStuff:ERR_* constant for the "last error" registry
 	 * @note Parameters added in 1.38: $watchPoint
 	 * @since 1.23
@@ -514,9 +511,10 @@ abstract class BagOStuff implements
 	 * Clear the "last error" registry
 	 *
 	 * @since 1.23
-	 * @deprecated Since 1.38
+	 * @deprecated Since 1.38, hard deprecated in 1.43
 	 */
 	public function clearLastError() {
+		wfDeprecated( __METHOD__, '1.38' );
 		$this->lastError = self::ERR_NONE;
 	}
 
@@ -524,6 +522,7 @@ abstract class BagOStuff implements
 	 * Set the "last error" registry due to a problem encountered during an attempted operation
 	 *
 	 * @param int $error BagOStuff:ERR_* constant
+	 *
 	 * @since 1.23
 	 */
 	protected function setLastError( $error ) {
@@ -532,60 +531,61 @@ abstract class BagOStuff implements
 	}
 
 	/**
-	 * Let a callback be run to avoid wasting time on special blocking calls
+	 * Make a cache key from the given components, in the "global" keyspace
 	 *
-	 * This is hard-deprecated and non-functional since 1.39. The callback
-	 * will not be called.
+	 * Global keys are shared with and visible to all sites hosted in the same
+	 * infrastructure (e.g. cross-wiki within the same wiki farm). Others sites
+	 * may read the stored value from their requests, and they must be able to
+	 * correctly compute new values from their own request context.
 	 *
-	 * @param callable $workCallback
-	 * @since 1.28
-	 * @deprecated since 1.39
-	 */
-	abstract public function addBusyCallback( callable $workCallback );
-
-	/**
-	 * Make a cache key for the given keyspace and components
-	 *
-	 * Long components might be converted to respective hashes due to size constraints.
-	 * In extreme cases, all of them might be combined into a single hash component.
-	 *
-	 * @internal This method should not be used outside of BagOStuff (since 1.36)
-	 *
-	 * @param string $keyspace Keyspace component
-	 * @param string[]|int[] $components Key components (key collection name first)
-	 * @return string Keyspace-prepended list of encoded components as a colon-separated value
+	 * @see BagOStuff::makeKeyInternal
 	 * @since 1.27
-	 */
-	abstract public function makeKeyInternal( $keyspace, $components );
-
-	/**
-	 * Make a cache key for the default keyspace and given components
 	 *
-	 * @see IStoreKeyEncoder::makeGlobalKey()
-	 *
-	 * @param string $collection Key collection name component
+	 * @param string $keygroup Key group component, should be under 48 characters.
 	 * @param string|int ...$components Additional, ordered, key components for entity IDs
+	 *
 	 * @return string Colon-separated, keyspace-prepended, ordered list of encoded components
-	 * @since 1.27
 	 */
-	abstract public function makeGlobalKey( $collection, ...$components );
+	public function makeGlobalKey( $keygroup, ...$components ) {
+		return $this->makeKeyInternal( self::GLOBAL_KEYSPACE, func_get_args() );
+	}
 
 	/**
-	 * Make a cache key for the global keyspace and given components
+	 * Make a cache key from the given components, in the default keyspace
 	 *
-	 * @see IStoreKeyEncoder::makeKey()
+	 * The default keyspace is unique to a given site. Subsequent web requests
+	 * to the same site (e.g. local wiki, or same domain name) will interact
+	 * with the same keyspace.
 	 *
-	 * @param string $collection Key collection name component
-	 * @param string|int ...$components Additional, ordered, key components for entity IDs
-	 * @return string Colon-separated, keyspace-prepended, ordered list of encoded components
+	 * Requests to other sites hosted on the same infrastructure (e.g. cross-wiki
+	 * or cross-domain), have their own keyspace that naturally avoids conflicts.
+	 *
+	 * As caller you are responsible for:
+	 * - Limit the key group (first component) to 48 characters
+	 *
+	 * Internally, the colon is used as delimiter (":"), and this is
+	 * automatically escaped in supplied components to avoid ambiguity or
+	 * key conflicts. BagOStuff subclasses are responsible for applying any
+	 * additional escaping or limits as-needed before sending commands over
+	 * the network.
+	 *
+	 * @see BagOStuff::makeKeyInternal
 	 * @since 1.27
+	 *
+	 * @param string $keygroup Key group component, should be under 48 characters.
+	 * @param string|int ...$components Additional, ordered, key components for entity IDs
+	 *
+	 * @return string Colon-separated, keyspace-prepended, ordered list of encoded components
 	 */
-	abstract public function makeKey( $collection, ...$components );
+	public function makeKey( $keygroup, ...$components ) {
+		return $this->makeKeyInternal( $this->keyspace, func_get_args() );
+	}
 
 	/**
 	 * Check whether a cache key is in the global keyspace
 	 *
 	 * @param string $key
+	 *
 	 * @return bool
 	 * @since 1.35
 	 */
@@ -595,6 +595,7 @@ abstract class BagOStuff implements
 
 	/**
 	 * @param int $flag BagOStuff::ATTR_* constant
+	 *
 	 * @return int BagOStuff:QOS_* constant
 	 * @since 1.28
 	 */
@@ -603,24 +604,31 @@ abstract class BagOStuff implements
 	}
 
 	/**
+	 * @deprecated since 1.43, not used anywhere.
 	 * @return int|float The chunk size, in bytes, of segmented objects (INF for no limit)
 	 * @since 1.34
 	 */
 	public function getSegmentationSize() {
+		wfDeprecated( __METHOD__, '1.43' );
+
 		return INF;
 	}
 
 	/**
+	 * @deprecated since 1.43, not used anywhere.
 	 * @return int|float Maximum total segmented object size in bytes (INF for no limit)
 	 * @since 1.34
 	 */
 	public function getSegmentedValueMaxSize() {
+		wfDeprecated( __METHOD__, '1.43' );
+
 		return INF;
 	}
 
 	/**
 	 * @param int $field
 	 * @param int $flags
+	 *
 	 * @return bool
 	 * @since 1.34
 	 */
@@ -632,6 +640,7 @@ abstract class BagOStuff implements
 	 * Merge the flag maps of one or more BagOStuff objects into a "lowest common denominator" map
 	 *
 	 * @param BagOStuff[] $bags
+	 *
 	 * @return int[] Resulting flag map (class ATTR_* constant => class QOS_* constant)
 	 */
 	final protected function mergeFlagMaps( array $bags ) {
@@ -650,122 +659,98 @@ abstract class BagOStuff implements
 	}
 
 	/**
-	 * Stage a set of new key values for storage and estimate the amount of bytes needed
+	 * Make a cache key for the given keyspace and components
 	 *
-	 * All previously prepared values will be cleared. Each of the new prepared values will be
-	 * individually cleared as they get used by write operations for that key. This is done to
-	 * avoid unchecked growth in PHP memory usage.
+	 * Subclasses may override this method in order to apply different escaping,
+	 * or to deal with size constraints (such as MemcachedBagOStuff). For example
+	 * by converting long components into hashes.
 	 *
-	 * Example usage:
-	 * @code
-	 *     $valueByKey = [ $key1 => $value1, $key2 => $value2, $key3 => $value3 ];
-	 *     $cache->setNewPreparedValues( $valueByKey );
-	 *     $cache->set( $key1, $value1, $cache::TTL_HOUR );
-	 *     $cache->setMulti( [ $key2 => $value2, $key3 => $value3 ], $cache::TTL_HOUR );
-	 * @endcode
+	 * If you override this method, you MUST override ::requireConvertGenericKey()
+	 * to return true. This ensures that wrapping classes (e.g. MultiWriteBagOStuff)
+	 * know to re-encode keys before calling read/write methods. See also ::proxyCall().
 	 *
-	 * This is only useful if the caller needs an estimate of the serialized object sizes,
-	 * such as cache wrappers with adaptive write slam avoidance or store wrappers with metrics.
-	 * The caller cannot know the serialization format and even if it did, it could be expensive
-	 * to serialize complex values twice just to get the size information before writing them to
-	 * cache. This method solves both problems by making the cache instance do the serialization
-	 * and having it reuse the result when the cache write happens.
+	 * @see BagOStuff::proxyCall
+	 * @since 1.27
 	 *
-	 * @param array $valueByKey Map of (cache key => PHP variable value to serialize)
-	 * @return int[]|null[] Corresponding list of size estimates (null for invalid values)
-	 * @since 1.35
+	 * @param string $keyspace
+	 * @param string[]|int[] $components Key group and other components
+	 *
+	 * @return string
 	 */
-	abstract public function setNewPreparedValues( array $valueByKey );
-
-	/**
-	 * Register info about a caching layer class that uses BagOStuff as a backing store
-	 *
-	 * Object cache wrappers are classes that implement generic caching/storage functionality,
-	 * use a BagOStuff instance as the backing store, and implement IStoreKeyEncoder with the
-	 * same "generic" style key encoding as BagOStuff. Such wrappers transform keys before
-	 * passing them to BagOStuff methods; a wrapper-specific prefix component will be prepended
-	 * along with other possible additions. Transformed keys still use the "generic" BagOStuff
-	 * encoding.
-	 *
-	 * The provided callback takes a transformed key, having the specified prefix component,
-	 * and extracts the key collection name. The callback must be able to handle
-	 * keys that bear the prefix (by coincidence) but do not originate from the wrapper class.
-	 *
-	 * Calls to this method should be idempotent.
-	 *
-	 * @param string $prefixComponent Key prefix component used by the wrapper
-	 * @param string $statsGroup Stats group to use for metrics from this wrapper
-	 * @param callable $collectionCallback Static callback that gets the key collection name
-	 * @internal For use with BagOStuff and WANObjectCache only
-	 * @since 1.36
-	 */
-	public function registerWrapperInfoForStats(
-		string $prefixComponent,
-		string $statsGroup,
-		callable $collectionCallback
-	) {
-		$this->wrapperInfoByPrefix[$prefixComponent] = [
-			self::WRAPPER_STATS_GROUP => $statsGroup,
-			self::WRAPPER_COLLECTION_CALLBACK => $collectionCallback
-		];
-	}
-
-	/**
-	 * At a minimum, there must be a keyspace and collection name component
-	 *
-	 * @param string|int ...$components Key components for keyspace, collection name, and IDs
-	 * @return string Keyspace-prepended list of encoded components as a colon-separated value
-	 * @since 1.35
-	 */
-	final protected function genericKeyFromComponents( ...$components ) {
-		if ( count( $components ) < 2 ) {
-			throw new InvalidArgumentException( "Missing keyspace or collection name" );
+	protected function makeKeyInternal( $keyspace, $components ) {
+		if ( count( $components ) < 1 ) {
+			throw new InvalidArgumentException( "Missing key group" );
 		}
 
-		$key = '';
-		foreach ( $components as $i => $component ) {
-			if ( $i > 0 ) {
-				$key .= ':';
-			}
+		$key = $keyspace;
+		foreach ( $components as $component ) {
 			// Escape delimiter (":") and escape ("%") characters
-			$key .= strtr( $component, [ '%' => '%25', ':' => '%3A' ] );
+			$key .= ':' . strtr( $component, [ '%' => '%25', ':' => '%3A' ] );
 		}
 
 		return $key;
 	}
 
 	/**
-	 * Extract the components from a "generic" reversible cache key
+	 * Whether ::proxyCall() must re-encode cache keys before calling read/write methods.
 	 *
-	 * @see BagOStuff::genericKeyFromComponents()
-	 *
-	 * @param string $key Keyspace-prepended list of encoded components as a colon-separated value
-	 * @return string[] Key components for keyspace, collection name, and IDs
-	 * @since 1.35
+	 * @stable to override
+	 * @see BagOStuff::makeKeyInternal
+	 * @see BagOStuff::proxyCall
+	 * @since 1.41
+	 * @return bool
 	 */
-	final protected function componentsFromGenericKey( $key ) {
-		// Note that the order of each corresponding search/replace pair matters
-		return str_replace( [ '%3A', '%25' ], [ ':', '%' ], explode( ':', $key ) );
+	protected function requireConvertGenericKey(): bool {
+		return false;
 	}
 
 	/**
-	 * Convert a "generic" reversible cache key into one for this cache
+	 * Convert a key from BagOStuff::makeKeyInternal into one for the current subclass
 	 *
-	 * @see BagOStuff::genericKeyFromComponents()
+	 * @see BagOStuff::proxyCall
 	 *
-	 * @param string $key Keyspace-prepended list of encoded components as a colon-separated value
-	 * @return string Keyspace-prepended list of encoded components as a colon-separated value
+	 * @param string $key Result from BagOStuff::makeKeyInternal
+	 *
+	 * @return string Result from current subclass override of BagOStuff::makeKeyInternal
 	 */
-	abstract protected function convertGenericKey( $key );
+	private function convertGenericKey( $key ) {
+		if ( !$this->requireConvertGenericKey() ) {
+			// If subclass doesn't overwrite makeKeyInternal, no re-encoding is needed.
+			return $key;
+		}
+
+		// Extract the components from a "generic" key formatted by BagOStuff::makeKeyInternal()
+		// Note that the order of each corresponding search/replace pair matters!
+		$components = str_replace( [ '%3A', '%25' ], [ ':', '%' ], explode( ':', $key ) );
+		if ( count( $components ) < 2 ) {
+			// Legacy key, not even formatted by makeKey()/makeGlobalKey(). Keep as-is.
+			return $key;
+		}
+
+		$keyspace = array_shift( $components );
+
+		return $this->makeKeyInternal( $keyspace, $components );
+	}
 
 	/**
-	 * Call a method on behalf of wrapper BagOStuff instance that uses "generic" keys
+	 * Call a method on behalf of wrapper BagOStuff instance
+	 *
+	 * The "wrapper" BagOStuff subclass that calls proxyCall() MUST NOT override
+	 * the default makeKeyInternal() implementation, because proxyCall() needs
+	 * to turn the "generic" key back into an array, and re-format it according
+	 * to the backend-specific BagOStuff::makeKey implementation.
+	 *
+	 * For example, when using MultiWriteBagOStuff with Memcached as a backend,
+	 * writes will go via MemcachedBagOStuff::proxyCall(), which then reformats
+	 * the "generic" result of BagOStuff::makeKey (called as MultiWriteBagOStuff::makeKey)
+	 * using MemcachedBagOStuff::makeKeyInternal.
 	 *
 	 * @param string $method Name of a non-final public method that reads/changes keys
 	 * @param int $arg0Sig BagOStuff::ARG0_* constant describing argument 0
 	 * @param int $resSig BagOStuff::RES_* constant describing the return value
 	 * @param array $genericArgs Method arguments passed to the wrapper instance
 	 * @param BagOStuff $wrapper The wrapper BagOStuff instance using this result
+	 *
 	 * @return mixed Method result with any keys remapped to "generic" keys
 	 */
 	protected function proxyCall(
@@ -819,31 +804,6 @@ abstract class BagOStuff implements
 	}
 
 	/**
-	 * @param string $key Key generated by an IStoreKeyEncoder instance
-	 * @return string A stats prefix to describe this class of key (e.g. "objectcache.file")
-	 */
-	protected function determineKeyPrefixForStats( $key ) {
-		$firstComponent = substr( $key, 0, strcspn( $key, ':' ) );
-
-		$wrapperInfo = $this->wrapperInfoByPrefix[$firstComponent] ?? null;
-		if ( $wrapperInfo ) {
-			// Key has the prefix of a cache wrapper class that wraps BagOStuff
-			$collection = $wrapperInfo[self::WRAPPER_COLLECTION_CALLBACK]( $key );
-			$statsGroup = $wrapperInfo[self::WRAPPER_STATS_GROUP];
-		} else {
-			// Key came directly from BagOStuff::makeKey() or BagOStuff::makeGlobalKey()
-			// and thus has the format of "<scope>:<collection>[:<constant or variable>]..."
-			$components = explode( ':', $key, 3 );
-			// Handle legacy callers that fail to use the key building methods
-			$collection = $components[1] ?? $components[0];
-			$statsGroup = 'objectcache';
-		}
-
-		// Replace dots because they are special in StatsD (T232907)
-		return $statsGroup . '.' . strtr( $collection, '.', '_' );
-	}
-
-	/**
 	 * @internal For testing only
 	 * @return float UNIX timestamp
 	 * @codeCoverageIgnore
@@ -854,10 +814,15 @@ abstract class BagOStuff implements
 
 	/**
 	 * @internal For testing only
+	 *
 	 * @param float|null &$time Mock UNIX timestamp
+	 *
 	 * @codeCoverageIgnore
 	 */
 	public function setMockTime( &$time ) {
 		$this->wallClockOverride =& $time;
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( BagOStuff::class, 'BagOStuff' );

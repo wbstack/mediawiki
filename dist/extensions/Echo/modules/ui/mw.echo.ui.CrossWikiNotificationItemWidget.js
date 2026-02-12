@@ -10,13 +10,13 @@
 	 *
 	 * @class
 	 * @extends mw.echo.ui.NotificationItemWidget
-	 * @mixins OO.ui.mixin.PendingElement
+	 * @mixes OO.ui.mixin.PendingElement
 	 *
 	 * @constructor
 	 * @param {mw.echo.Controller} controller Echo notifications controller
 	 * @param {mw.echo.dm.CrossWikiNotificationItem} model Notification group model
 	 * @param {Object} [config] Configuration object
-	 * @cfg {boolean} [animateSorting=false] Animate the sorting of items
+	 * @param {boolean} [config.animateSorting=false] Animate the sorting of items
 	 */
 	mw.echo.ui.CrossWikiNotificationItemWidget = function MwEchoUiCrossWikiNotificationItemWidget( controller, model, config ) {
 		config = config || {};
@@ -31,7 +31,7 @@
 
 		this.listWidget = new mw.echo.ui.SortedListWidget(
 			// Sorting callback
-			function ( a, b ) {
+			( ( a, b ) => {
 				// Define the sorting order.
 				// This will go by the lists' timestamp, which in turn
 				// take the latest timestamp in their items
@@ -43,7 +43,7 @@
 
 				// Fallback on IDs
 				return b.getSource() - a.getSource();
-			},
+			} ),
 			// Config
 			{
 				classes: [ 'mw-echo-ui-crossWikiNotificationItemWidget-group' ],
@@ -119,7 +119,7 @@
 	 * @param {string} groupName Symbolic name of the group
 	 */
 	mw.echo.ui.CrossWikiNotificationItemWidget.prototype.onModelDiscard = function ( groupName ) {
-		var list = this.getList(),
+		const list = this.getList(),
 			group = list.getItemFromId( groupName );
 
 		list.removeItems( [ group ] );
@@ -132,22 +132,6 @@
 	/**
 	 * @inheritdoc
 	 */
-	mw.echo.ui.CrossWikiNotificationItemWidget.prototype.onMarkAsReadButtonClick = function () {
-		// Log this action
-		mw.echo.logger.logInteraction(
-			mw.echo.Logger.static.actions.markXWikiReadClick,
-			mw.echo.Logger.static.context.popup,
-			null, // Event ID is omitted
-			this.controller.getTypeString() // The type of the list in general
-		);
-
-		// Parent method
-		return mw.echo.ui.CrossWikiNotificationItemWidget.super.prototype.onMarkAsReadButtonClick.call( this );
-	};
-
-	/**
-	 * @inheritdoc
-	 */
 	mw.echo.ui.CrossWikiNotificationItemWidget.prototype.markRead = function () {
 		// Cross wiki notification is always only marked as read, never as
 		// unread. The original parameter is unneeded
@@ -155,32 +139,14 @@
 	};
 
 	/**
-	 * @inheritdoc
-	 */
-	mw.echo.ui.CrossWikiNotificationItemWidget.prototype.onPrimaryLinkClick = function () {
-		// Log notification click
-
-		mw.echo.logger.logInteraction(
-			mw.echo.Logger.static.actions.notificationClick,
-			mw.echo.Logger.static.context.popup,
-			this.getModel().getId(),
-			this.getModel().getCategory(),
-			false,
-			// Source of this notification if it is cross-wiki
-			this.bundle ? this.getModel().getSource() : ''
-		);
-	};
-
-	/**
 	 * Populate the items in this widget according to the data
 	 * in the model
 	 */
 	mw.echo.ui.CrossWikiNotificationItemWidget.prototype.populateFromModel = function () {
-		var i,
-			groupWidgets = [],
+		const groupWidgets = [],
 			groups = this.model.getList().getItems();
 
-		for ( i = 0; i < groups.length; i++ ) {
+		for ( let i = 0; i < groups.length; i++ ) {
 			// Create SubGroup widgets
 			groupWidgets.push(
 				new mw.echo.ui.SubGroupListWidget(
@@ -202,14 +168,13 @@
 	 * @param {boolean} [show] Show titles
 	 */
 	mw.echo.ui.CrossWikiNotificationItemWidget.prototype.toggleTitles = function ( show ) {
-		var i,
-			items = this.getList().getItems();
+		const items = this.getList().getItems();
 
 		show = show === undefined ? !this.showTitles : show;
 
 		if ( this.showTitles !== show ) {
 			this.showTitles = show;
-			for ( i = 0; i < items.length; i++ ) {
+			for ( let i = 0; i < items.length; i++ ) {
 				items[ i ].toggleTitle( show );
 			}
 		}
@@ -251,22 +216,12 @@
 	 * Only fetch the first time we expand.
 	 */
 	mw.echo.ui.CrossWikiNotificationItemWidget.prototype.expand = function () {
-		var widget = this;
-
 		this.toggleExpanded( !this.expanded );
 		this.updateExpandButton();
 
 		if ( !this.expanded ) {
 			return;
 		}
-
-		// Log the expand action
-		mw.echo.logger.logInteraction(
-			mw.echo.Logger.static.actions.notificationBundleExpand,
-			mw.echo.Logger.static.context.popup,
-			widget.getModel().getId(),
-			widget.getModel().getCategory()
-		);
 
 		if ( !this.fetchedOnce ) {
 			// Expand
@@ -275,21 +230,21 @@
 			// Query all sources
 			this.controller.fetchCrossWikiNotifications()
 				.catch(
-					function ( result ) {
-						var loginPageTitle = mw.Title.newFromText( 'Special:UserLogin' );
+					( result ) => {
+						const loginPageTitle = mw.Title.newFromText( 'Special:UserLogin' );
 						// If failure, check if the failure is due to login
 						// so we can display a more comprehensive error
 						// message in that case
 						if ( result.errCode === 'notlogin-required' ) {
 							// Login error
-							widget.showErrorMessage(
+							this.showErrorMessage(
 								mw.message( 'echo-notification-popup-loginrequired' ),
 								// Set the option link to the login page
 								loginPageTitle.getUrl()
 							);
 						} else {
 							// General error
-							widget.showErrorMessage( mw.msg( 'echo-api-failure' ) );
+							this.showErrorMessage( mw.msg( 'echo-api-failure' ) );
 						}
 					}
 				)
@@ -324,7 +279,7 @@
 	 * Update the expand button label
 	 */
 	mw.echo.ui.CrossWikiNotificationItemWidget.prototype.updateExpandButton = function () {
-		var type = this.model.getType();
+		const type = this.model.getType();
 
 		this.toggleExpandButton.setLabel(
 			this.expanded ?

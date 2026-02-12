@@ -1,53 +1,53 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\MediaWiki\Content;
 
-use Config;
 use EntitySchema\MediaWiki\SpecificLanguageMessageLocalizer;
-use EntitySchema\Services\SchemaConverter\FullViewSchemaData;
-use EntitySchema\Services\SchemaConverter\NameBadge;
-use ExtensionRegistry;
-use Html;
-use LanguageCode;
-use Linker;
+use EntitySchema\Services\Converter\FullViewEntitySchemaData;
+use EntitySchema\Services\Converter\NameBadge;
+use MediaWiki\Config\Config;
+use MediaWiki\Html\Html;
+use MediaWiki\Language\LanguageCode;
+use MediaWiki\Linker\Linker;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Message\Message;
 use MediaWiki\Page\PageReference;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\SpecialPage\SpecialPage;
 use MediaWiki\SyntaxHighlight\SyntaxHighlight;
+use MediaWiki\Title\TitleFormatter;
 use MessageLocalizer;
-use ParserOutput;
-use SpecialPage;
-use TitleFormatter;
 
 /**
  * @license GPL-2.0-or-later
  */
 class EntitySchemaSlotViewRenderer {
 
-	/** @var MessageLocalizer */
-	private $messageLocalizer;
+	private MessageLocalizer $messageLocalizer;
 
-	/** @var LinkRenderer */
-	private $linkRenderer;
+	private LinkRenderer $linkRenderer;
 
-	/** @var Config */
-	private $config;
+	private Config $config;
 
-	/** @var TitleFormatter */
-	private $titleFormatter;
+	private TitleFormatter $titleFormatter;
 
-	/** @var bool */
-	private $useSyntaxHighlight;
+	private bool $useSyntaxHighlight;
+
+	private string $dir;
 
 	/**
 	 * @param string $languageCode The language in which to render the view.
 	 */
 	public function __construct(
-		$languageCode,
-		LinkRenderer $linkRenderer = null,
-		Config $config = null,
-		TitleFormatter $titleFormatter = null,
-		bool $useSyntaxHighlight = null
+		string $languageCode,
+		?LinkRenderer $linkRenderer = null,
+		?Config $config = null,
+		?TitleFormatter $titleFormatter = null,
+		?bool $useSyntaxHighlight = null
 	) {
 		$this->messageLocalizer = new SpecificLanguageMessageLocalizer( $languageCode );
 		$this->linkRenderer = $linkRenderer ?: MediaWikiServices::getInstance()->getLinkRenderer();
@@ -57,17 +57,19 @@ class EntitySchemaSlotViewRenderer {
 			$useSyntaxHighlight = ExtensionRegistry::getInstance()->isLoaded( 'SyntaxHighlight' );
 		}
 		$this->useSyntaxHighlight = $useSyntaxHighlight;
+		$this->dir = MediaWikiServices::getInstance()->getLanguageFactory()
+			->getLanguage( $languageCode )->getDir();
 	}
 
-	private function msg( $key ) {
+	private function msg( string $key ): Message {
 		return $this->messageLocalizer->msg( $key );
 	}
 
 	public function fillParserOutput(
-		FullViewSchemaData $schemaData,
+		FullViewEntitySchemaData $schemaData,
 		PageReference $page,
 		ParserOutput $parserOutput
-	) {
+	): void {
 		$parserOutput->addModules( [ 'ext.EntitySchema.action.view.trackclicks' ] );
 		$parserOutput->addModuleStyles( [ 'ext.EntitySchema.view' ] );
 		if ( $this->useSyntaxHighlight ) {
@@ -82,7 +84,7 @@ class EntitySchemaSlotViewRenderer {
 		);
 	}
 
-	private function renderNameBadges( PageReference $page, array $nameBadges ) {
+	private function renderNameBadges( PageReference $page, array $nameBadges ): string {
 		$html = Html::openElement( 'table', [ 'class' => 'wikitable' ] );
 		$html .= $this->renderNameBadgeHeader();
 		$html .= Html::openElement( 'tbody' );
@@ -99,7 +101,7 @@ class EntitySchemaSlotViewRenderer {
 		return $html;
 	}
 
-	private function renderNameBadgeHeader() {
+	private function renderNameBadgeHeader(): string {
 		$tableHeaders = '';
 		// message keys:
 		// entityschema-namebadge-header-language-code
@@ -123,7 +125,7 @@ class EntitySchemaSlotViewRenderer {
 		) );
 	}
 
-	private function renderNameBadge( NameBadge $nameBadge, $languageCode, $schemaId ) {
+	private function renderNameBadge( NameBadge $nameBadge, string $languageCode, string $schemaId ): string {
 		$language = Html::element(
 			'td',
 			[],
@@ -144,7 +146,7 @@ class EntitySchemaSlotViewRenderer {
 			[
 				'class' => 'entityschema-description',
 				'lang' => $bcp47,
-				'dir' => 'auto'
+				'dir' => 'auto',
 			],
 			$nameBadge->description
 		);
@@ -153,7 +155,7 @@ class EntitySchemaSlotViewRenderer {
 			[
 				'class' => 'entityschema-aliases',
 				'lang' => $bcp47,
-				'dir' => 'auto'
+				'dir' => 'auto',
 			],
 			implode( ' | ', $nameBadge->aliases )
 		);
@@ -165,7 +167,7 @@ class EntitySchemaSlotViewRenderer {
 		);
 	}
 
-	private function renderNameBadgeEditLink( $schemaId, $langCode ) {
+	private function renderNameBadgeEditLink( string $schemaId, string $langCode ): string {
 		$specialPageTitleValue = SpecialPage::getTitleValueFor(
 			'SetEntitySchemaLabelDescriptionAliases',
 			$schemaId . '/' . $langCode
@@ -184,23 +186,23 @@ class EntitySchemaSlotViewRenderer {
 		);
 	}
 
-	private function renderSchemaSection( PageReference $page, $schemaText ) {
+	private function renderSchemaSection( PageReference $page, string $schemaText ): string {
 		$schemaSectionContent = $schemaText
 			? $this->renderSchemaTextLinks( $page ) . $this->renderSchemaText( $schemaText )
 			: $this->renderSchemaAddTextLink( $page );
 		return Html::rawElement( 'div', [
 			'id' => 'entityschema-schema-view-section',
 			'class' => 'entityschema-section',
+			'dir' => 'ltr',
 		],
 			$schemaSectionContent
 		);
 	}
 
-	private function renderSchemaText( $schemaText ) {
+	private function renderSchemaText( string $schemaText ): string {
 		$attribs = [
 			'id' => 'entityschema-schema-text',
 			'class' => 'entityschema-schema-text',
-			'dir' => 'ltr',
 		];
 
 		if ( $this->useSyntaxHighlight ) {
@@ -222,18 +224,19 @@ class EntitySchemaSlotViewRenderer {
 		);
 	}
 
-	private function renderSchemaTextLinks( PageReference $page ) {
+	private function renderSchemaTextLinks( PageReference $page ): string {
 		return Html::rawElement(
 			'div',
 			[
 				'class' => 'entityschema-schema-text-links',
+				'dir' => $this->dir,
 			],
 			$this->renderSchemaCheckLink( $page ) .
 			$this->renderSchemaEditLink( $page )
 		);
 	}
 
-	private function renderSchemaCheckLink( PageReference $page ) {
+	private function renderSchemaCheckLink( PageReference $page ): string {
 		$url = $this->config->get( 'EntitySchemaShExSimpleUrl' );
 		if ( !$url ) {
 			return '';
@@ -241,10 +244,9 @@ class EntitySchemaSlotViewRenderer {
 
 		$schemaTextTitle = SpecialPage::getTitleFor( 'EntitySchemaText', $page->getDBkey() );
 		$url = wfAppendQuery( $url, [
-			'schemaURL' => $schemaTextTitle->getFullURL()
+			'schemaURL' => $schemaTextTitle->getFullURL(),
 		] );
 
-		// @phan-suppress-next-line SecurityCheck-DoubleEscaped False positive
 		return $this->makeExternalLink(
 			$url,
 			$this->msg( 'entityschema-check-entities' )->parse(),
@@ -265,7 +267,7 @@ class EntitySchemaSlotViewRenderer {
 		$linktype = '',
 		$attribs = [],
 		$title = null
-	) {
+	): string {
 		return Html::rawElement(
 			'span',
 			[ 'class' => 'mw-parser-output' ],
@@ -273,7 +275,7 @@ class EntitySchemaSlotViewRenderer {
 		);
 	}
 
-	private function renderSchemaAddTextLink( PageReference $page ) {
+	private function renderSchemaAddTextLink( PageReference $page ): string {
 		return Html::rawElement(
 			'span',
 			[
@@ -289,7 +291,7 @@ class EntitySchemaSlotViewRenderer {
 		);
 	}
 
-	private function renderSchemaEditLink( PageReference $page ) {
+	private function renderSchemaEditLink( PageReference $page ): string {
 		return Html::rawElement(
 			'span',
 			[
@@ -305,7 +307,7 @@ class EntitySchemaSlotViewRenderer {
 		);
 	}
 
-	private function renderHeading( NameBadge $nameBadge, PageReference $page ) {
+	private function renderHeading( NameBadge $nameBadge, PageReference $page ): string {
 		if ( $nameBadge->label !== '' ) {
 			$label = Html::element(
 				'span',

@@ -21,11 +21,15 @@ if ( !defined( 'STDERR' ) ) {
     define( 'STDERR', fopen( 'php://stderr', 'w' ) );
 }
 
+require_once __DIR__ . '/Localization.php';
+
 // Define some conditions to switch behaviour on
-$wwDomainSaysLocal = preg_match("/(\w\.localhost)/", $_SERVER['SERVER_NAME']) === 1;
+$wwDomainSaysLocal = isset($_SERVER['SERVER_NAME']) && preg_match("/(\w\.localhost)/", $_SERVER['SERVER_NAME']) === 1;
 $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
 $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
+$wwLocalization = new Localization( $wgExtensionMessagesFiles, $wgMessagesDirs, $wgBaseDirectory, $wwIsLocalisationRebuild );
+$wwDockerCompose = getenv('WBSTACK_DOCKER_COMPOSE') === 'yes';
 
 $wwUseMailgunExtension = true; // default for wbstack
 if (getenv('MW_MAILGUN_DISABLED') === 'yes') {
@@ -90,8 +94,8 @@ if ( getenv('MW_LOG_TO_STDERR') === 'yes' ) {
     ];
 }
 
-if ( $wwDomainSaysLocal ) {
-    $wgServer = "http://" . $wikiInfo->domain;
+if ( $wwDockerCompose ) {
+    $wgServer = "http://" . $wikiInfo->domain . ":" . getenv('MW_LOCAL_HOST_PORT');
 } else {
     $wgServer = "https://" . $wikiInfo->domain;
 }
@@ -134,6 +138,12 @@ if( !$wwDomainIsMaintenance && !empty(getenv('MW_DB_SERVER_REPLICA'))){
     ];
 }
 
+// Disable TransactionProfiler for masterConns on GET (T408101)
+unset( $wgTrxProfilerLimits['GET']['masterConns'] );
+
+// Limit expensive queries (T399804)
+$wgMaxExecutionTimeForExpensiveQueries = 5_000;
+
 // Jobs
 # For now jobs will run in the requests, this obviously isn't the ideal solution and really
 # there should be a job running service deployed...
@@ -153,7 +163,11 @@ $wgEnotifWatchlist = false;
 $wgUseImageMagick = true;
 $wgEnableUploads = false;
 $wgAllowCopyUploads = false;
-$wgUseInstantCommons = false;
+$wgUseInstantCommons = true;
+
+// Workaround for T413870
+$wgTiffThumbnailType = array( 'jpg', 'image/jpeg' );
+
 $wgFileExtensions = array_merge( $wgFileExtensions,
     array( 'doc', 'xls', 'mpp', 'pdf', 'ppt', 'xlsx', 'jpg',
         'tiff', 'odt', 'odg', 'ods', 'odp', 'svg'
@@ -170,7 +184,7 @@ $wgLogos = [
 if( $wgLogos["1x"] === null ) {
     // Fallback to the mediawiki logo without the wgLogo overlay
     $wgLogos = [
-        "1x" => "/w/resources/assets/mediawiki.png",
+        "1x" => "/w/resources/assets/wikibase_cloud.svg",
     ];
 }
 
@@ -193,23 +207,48 @@ $wgFooterIcons = [
         "copyright" => [], // placeholder for the built in copyright icon
     ],
     "poweredby" => [
-        "wbstack" => [
-            "src" => "/w/resources/assets/poweredby_wbstack_88x31.png",
-            "url" => "https://wbstack.com/",
-            "alt" => "Powered by WBStack",
-        ],
-        "wikibase" => [
-            "src" => "/w/resources/assets/poweredby_wikibase_88x31.png",
-            "url" => "https://wikiba.se/",
-            "alt" => "Powered by Wikibase",
-        ],
         "mediawiki" => [
-            "src" => "/w/resources/assets/poweredby_mediawiki_88x31.png",
+            "src" => "/w/resources/assets/poweredby_mediawiki.svg",
             "url" => "https://www.mediawiki.org/",
             "alt" => "Powered by MediaWiki",
-        ]
+        ],
+        "wikibase" => [
+            "src" => "/w/resources/assets/poweredby_wikibase.svg",
+            "url" => "https://wikibase.cloud/",
+            "alt" => "Powered by Wikibase",
+        ],
+        "wbstack" => [
+            "src" => "/w/resources/assets/basedon_wbstack.svg",
+            "url" => "https://wbstack.com/",
+            "alt" => "Based on WBStack",
+        ],
     ],
 ];
+
+$wgHooks['SkinAddFooterLinks'][] = function ( Skin $skin, string $key, array &$footerlinks ) {
+    if ( $key === 'places' ) {
+        $footerlinks['report'] = Html::element(
+            'a',
+            [
+                'href' => 'https://wikibase.cloud/complaint',
+                'target' => '_blank',
+                'rel' => 'noopener noreferrer'
+            ],
+            'Report illegal content'
+        );
+    }
+};
+
+// Custom CSS styling
+$wgResourceModules[ 'wbstack.styling' ] = array(
+    'styles' => [ 'footer-badges.css' ],
+    'localBasePath' => "$IP/wbstack/src/Styling",
+    'remoteBasePath' => "$wgScriptPath/wbstack/src/Styling"
+);
+$wgHooks[ 'BeforePageDisplay' ][] = 'onBeforePageDisplay';
+function onBeforePageDisplay( &$out, &$skin ) {
+    $out->addModuleStyles( [ 'wbstack.styling' ] );
+}
 
 // Language
 // TODO this should be settings from the main platform
@@ -223,8 +262,8 @@ $wgAllowHTMLEmail = true;
 $wgEmailAuthentication = true;
 // require email authentication
 $wgEmailConfirmToEdit = true;
-// TODO make this a real wbstack email address?
-$wgEmergencyContact = "emergency.wbstack@addshore.com";
+
+$wgEmergencyContact = 'noreply@' . getenv('MW_EMAIL_DOMAIN'); //T372617
 $wgPasswordSender = 'noreply@' . getenv('MW_EMAIL_DOMAIN');
 $wgNoReplyAddress = 'noreply@' . getenv('MW_EMAIL_DOMAIN');
 
@@ -243,6 +282,9 @@ if (getenv('MW_SMTP_ENABLED') === 'yes') {
 ## Keys
 $wgSecretKey = $wikiInfo->getSetting('wgSecretKey');
 $wgAuthenticationTokenVersion = "1";
+
+$wgOAuth2PrivateKey = $wikiInfo->getSetting('wgOAuth2PrivateKey');
+$wgOAuth2PublicKey = $wikiInfo->getSetting('wgOAuth2PublicKey');
 
 // So we are uniform, have the project namespace as Project
 $wgMetaNamespace = 'Project';
@@ -287,9 +329,11 @@ unset( $wgGroupsRemoveFromSelf['interface-admin'] );
 # Allow crats to editsitecss
 $wgGroupPermissions['bureaucrat']['editsitecss'] = true;
 
-# Disable user CSS and JS editing for now
-$wgGroupPermissions['user']['editmyusercss'] = false;
-$wgGroupPermissions['user']['editmyuserjs'] = false;
+$wgGroupPermissions['user']['editmyusercss'] = true;
+$wgGroupPermissions['user']['editmyuserjs'] = true;
+
+$wgAllowUserCss = true;
+$wgAllowUserJs = true;
 
 # Allow emailconfirmed to skip captcha
 $wgAutopromote['emailconfirmed'] = APCOND_EMAILCONFIRMED;
@@ -347,7 +391,6 @@ wfLoadExtension( 'CodeMirror' );
 wfLoadExtension( 'SecureLinkFixer' );
 wfLoadExtension( 'Echo' );
 wfLoadExtension( 'Thanks' );
-wfLoadExtension( 'Graph' );
 wfLoadExtension( 'Poem' );
 wfLoadExtension( 'TemplateData' );
 wfLoadExtension( 'AdvancedSearch' );
@@ -363,6 +406,7 @@ if( $wikiInfo->getSetting('wwExtEnableConfirmAccount') ) {
 
     $wgMakeUserPageFromBio = false;
     $wgAutoWelcomeNewUsers = false;
+    $wgConfirmAccountCaptchas = true;
     $wgConfirmAccountRequestFormItems = [
         'UserName'        => [ 'enabled' => true ],
         'RealName'        => [ 'enabled' => false ],
@@ -423,6 +467,14 @@ wfLoadExtension( 'TwoColConflict' );
 // Enable the feature by default
 $wgTwoColConflictBetaFeature = false;
 
+# VisualEditor
+wfLoadExtension( 'VisualEditor' );
+wfLoadExtension( 'Parsoid', "$IP/vendor/wikimedia/parsoid/extension.json" );
+$wgVirtualRestConfig[ 'modules' ][ 'parsoid' ] = array(
+    'url' => $wgServer . $wgScriptPath . '/rest.php'
+);
+$wgDefaultUserOptions[ 'visualeditor-editor' ] = 'visualeditor';
+
 # StopForumSpam
 wfLoadExtension( 'StopForumSpam' );
 
@@ -444,7 +496,7 @@ $wgBlacklistSettings = [
 ];
 
 # Check IPs at https://whatismyipaddress.com/blacklist-check if they are troublesome
-$wgEnableDnsBlacklist = true;
+$wgEnableDnsBlacklist = !$wwDockerCompose;
 $wgDnsBlacklistUrls =
     [
         'combined.abuse.ch.',
@@ -457,11 +509,22 @@ $wgDnsBlacklistUrls =
     ];
 
 # ConfirmEdit
-wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
-$wgCaptchaClass = 'ReCaptchaNoCaptcha';
-$wgReCaptchaSendRemoteIP = true;
-$wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
-$wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
+
+# QuestyCaptcha
+$wwUseQuestyCaptcha = $wikiInfo->getSetting('wwUseQuestyCaptcha');
+if ($wwUseQuestyCaptcha) {
+    $wwLocalization->loadExtension( 'ConfirmEdit/ReCaptchaNoCaptcha' );
+    wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/QuestyCaptcha' ]);
+    $wgCaptchaClass = 'MediaWiki\\Extension\\ConfirmEdit\\QuestyCaptcha\\QuestyCaptcha';
+    $wgCaptchaQuestions = json_decode($wikiInfo->getSetting('wwCaptchaQuestions'), true);
+} else {
+    $wwLocalization->loadExtension( 'ConfirmEdit/QuestyCaptcha' );
+    wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
+    $wgCaptchaClass = 'MediaWiki\\Extension\\ConfirmEdit\\ReCaptchaNoCaptcha\\ReCaptchaNoCaptcha';
+    $wgReCaptchaSendRemoteIP = true;
+    $wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
+    $wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
+}
 
 # Mailgun
 if ($wwUseMailgunExtension) {
@@ -509,6 +572,10 @@ $wgWBClientSettings['thisWikiIsTheRepo'] = true;
 $wgWBClientSettings['repoUrl'] = $GLOBALS['wgServer'];
 $wgWBClientSettings['repoSiteName'] = $GLOBALS['wgSitename'];
 
+$wgWBRepoSettings['localClientDatabases'] = [
+    $wgDBname => $wgDBname."-".$wgDBprefix
+];
+
 $localConceptBaseUri = 'https://' . $wikiInfo->domain . '/entity/';
 
 $wgWBRepoSettings['entitySources'] = [
@@ -555,12 +622,17 @@ $wgWBRepoSettings['dataRightsText'] = '';
 // Until we can scale redis memory we don't want to do this - https://github.com/addshore/wbstack/issues/37
 $wgWBRepoSettings['sharedCacheType'] = CACHE_NONE;
 
+// Enable mul language code
+$wgWBRepoSettings['tmpEnableMulLanguageCode'] = true;
+$wgWBRepoSettings['tmpAlwaysShowMulLanguageCode'] = true;
+
 # WikibaseLexeme, By default not enabled, enabled in WikiInfo-maint.json
 if( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
     wfLoadExtension( 'WikibaseLexeme' );
     $wgLexemeEnableDataTransclusion = true;
 
     $wgWBRepoSettings['entitySources']['local']['entityNamespaces']['lexeme'] = '146/main';
+    $wgWBClientSettings['entitySources']['local']['entityNamespaces']['lexeme'] = '146/main';
 }
 # Federated Properties, By default not enabled, not enabled in maint mode
 if( $wikiInfo->getSetting('wikibaseFedPropsEnable') ) {
@@ -568,21 +640,20 @@ if( $wikiInfo->getSetting('wikibaseFedPropsEnable') ) {
     $wgWBRepoSettings['federatedPropertiesEnabled'] = true;
 }
 
-# Auth_remoteuser, By default not enabled, enabled in WikiInfo-maint.json
-if( $wikiInfo->getSetting('wwSandboxAutoUserLogin') ) {
-    wfLoadExtension( 'Auth_remoteuser' );
-    $wgAuthRemoteuserUserName = "SandboxAdmin";
-    # Allow Auth_remoteuser to create missing accounts
-    $wgGroupPermissions['*']['autocreateaccount'] = true;
-    # Stop users making any additional accounts
-    $wgGroupPermissions['*']['createaccount'] = false;
-
-    # Allow users to act like admins, and pretend they have confirmed emails (so no captchas)
+if ( $wwDockerCompose === true ) {
+    # Grant local users admin-like privileges
     $wgAddGroups['user'][] = 'emailconfirmed';
     $wgAddGroups['user'][] = 'sysop';
 
-    # Do not force people verify their email account, as they can't do that...
+    # Do not force local users to verify their email account
     $wgEmailConfirmToEdit = false;
+
+    # Do not force local users to complete a captcha
+    $wgGroupPermissions['*']['skipcaptcha'] = true;
+
+    # Disable captchas entirely
+    $wgCaptchaTriggers = [];
+    $wgConfirmAccountCaptchas = false;
 }
 
 # WikibaseManifest
@@ -637,7 +708,11 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     }
 
     // prepends indices with database name
-    $wgCirrusSearchIndexBaseName = $wgDBname;
+    $wgCirrusSearchIndexBaseName = getenv( 'MW_CIRRUSSEARCH_INDEX_BASE_NAME' ) ?: $wgDBname;
+
+    if ( getenv( 'MW_CIRRUSSEARCH_PREFIX_IDS' ) === 'yes' ) {
+        $wgCirrusSearchPrefixIds = true;
+    }
 
     $wgSearchType = 'CirrusSearch';
     $wgCirrusSearchDefaultCluster = 'default';
@@ -645,22 +720,21 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     // T308115
     $wgCirrusSearchShardCount = [ 'content' => 1, 'general' => 1 ];
 
+    // T350404
+    $wgCirrusSearchReplicas = "0-1";
+
     // T309379
     $wgCirrusSearchEnableArchive = false;
     $wgCirrusSearchPrivateClusters = [ 'non-existing-cluster' ];
+
+    // T312908
+    $wgEntitySchemaShExSimpleUrl = 'https://shex-simple.toolforge.org/wikidata/packages/shex-webapp/doc/shex-simple.html';
 
     function getElasticClusterConfig( string $prefix ) {
         $config = [
             'host' => getenv( $prefix . 'HOST' ),
             'port' => getenv( $prefix . 'PORT' )
         ];
-
-        if ( getEnv( $prefix . 'ES6' ) === "true" ) {
-            $config[ 'transport' ] = [
-                'type' => \CirrusSearch\Elastica\ES6CompatTransportWrapper::class,
-                'wrapped_transport' => 'Http'
-            ];
-        }
         return [ $config ];
     }
 
@@ -668,10 +742,6 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
         $wgCirrusSearchClusters = [
             'default' => [
                 [
-                    'transport' => [
-                        'type' => \CirrusSearch\Elastica\ES6CompatTransportWrapper::class,
-                        'wrapped_transport' => 'Http'
-                    ],
                     'host' => getenv('MW_ELASTICSEARCH_HOST'),
                     'port' => getenv('MW_ELASTICSEARCH_PORT')
                 ],

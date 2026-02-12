@@ -4,13 +4,11 @@
 		"commonjs": true
 	},
 	"extends": [
-		"wikimedia/client-es5",
+		"wikimedia/client",
 		"wikimedia/jquery",
 		"wikimedia/mediawiki"
 	],
 	"rules": {
-		"max-len": "off",
-		"no-shadow": "warn",
-		"compat/compat": "warn"
+		"max-len": "off"
 	}
 }

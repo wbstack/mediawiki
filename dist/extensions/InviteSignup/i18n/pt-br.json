@@ -3,7 +3,8 @@
 		"authors": [
 			"Eduardo Addad de Oliveira",
 			"Eduardoaddad",
-			"Fúlvio"
+			"Fúlvio",
+			"TheEduGobi"
 		]
 	},
 	"invitesignup": "Convidar pessoas para esta wiki",
@@ -17,7 +18,7 @@
 	"is-delete": "Eliminar",
 	"is-invalidemail": "<b>$1</b> não é um endereço de e-mail válido.",
 	"is-emailsubj": "Você está convidado a juntar-se à wiki {{SITENAME}}",
-	"is-emailbody": "Olá,\n\n{{GENDER:$1|$1}} convidou-o para se registar na wiki {{SITENAME}}.\nVocê pode se inscrever em $2",
+	"is-emailbody": "Olá,\n\n{{GENDER:$1|$1}} convidou-o para se registrar na wiki {{SITENAME}}.\nÉ possivel registrar-se em $2",
 	"right-invitesignup": "Convidar usuários a se inscreverem",
 	"action-invitesignup": "convidar usuários a se inscreverem neste site"
 }

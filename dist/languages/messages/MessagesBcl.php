@@ -1,8 +1,6 @@
 <?php
 /** Bikol Central (Bikol Central)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -55,7 +53,7 @@ $magicWords = [
 	'img_none'                  => [ '1', 'mayò', 'none' ],
 	'img_page'                  => [ '1', 'pahina=$1', 'pahina $1', 'page=$1', 'page $1' ],
 	'img_right'                 => [ '1', 'too', 'right' ],
-	'language'                  => [ '0', '#TATARAMON', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#TATARAMON', '#LANGUAGE' ],
 	'localday'                  => [ '1', 'LOKALALDAW', 'LOCALDAY' ],
 	'localday2'                 => [ '1', 'LOKALALDAW2', 'LOCALDAY2' ],
 	'localdayname'              => [ '1', 'NGARANLOKALALDAW', 'LOCALDAYNAME' ],

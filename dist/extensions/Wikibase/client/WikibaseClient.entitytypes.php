@@ -26,6 +26,7 @@ use Wikibase\Lib\StatsdRecordingSimpleCache;
 use Wikibase\Lib\Store\CachingPrefetchingTermLookup;
 use Wikibase\Lib\Store\Sql\Terms\PrefetchingItemTermLookup;
 use Wikibase\Lib\Store\Sql\Terms\PrefetchingPropertyTermLookup;
+use Wikimedia\ObjectCache\EmptyBagOStuff;
 
 return [
 	'item' => [
@@ -62,7 +63,7 @@ return [
 				$mwServices->getStatsdDataFactory(),
 				[
 					'miss' => 'wikibase.prefetchingPropertyTermLookupCache.miss',
-					'hit' => 'wikibase.prefetchingPropertyTermLookupCache.hit'
+					'hit' => 'wikibase.prefetchingPropertyTermLookupCache.hit',
 				]
 			);
 
@@ -73,5 +74,5 @@ return [
 				WikibaseClient::getTermsLanguages( $mwServices )
 			);
 		},
-	]
+	],
 ];

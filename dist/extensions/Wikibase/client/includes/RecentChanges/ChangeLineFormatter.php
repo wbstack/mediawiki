@@ -4,15 +4,15 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Client\RecentChanges;
 
-use Language;
-use Linker;
+use MediaWiki\CommentFormatter\CommentFormatter;
+use MediaWiki\Language\Language;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use MediaWiki\User\UserIdentity;
 use MediaWiki\User\UserNameUtils;
-use Title;
-use User;
 use Wikibase\Client\RepoLinker;
 use Wikibase\DataModel\Entity\EntityId;
 
@@ -41,10 +41,21 @@ class ChangeLineFormatter {
 	 */
 	private $linkRenderer;
 
-	public function __construct( RepoLinker $repoLinker, UserNameUtils $userNameUtils, LinkRenderer $linkRenderer ) {
+	/**
+	 * @var CommentFormatter
+	 */
+	private $commentFormatter;
+
+	public function __construct(
+		RepoLinker $repoLinker,
+		UserNameUtils $userNameUtils,
+		LinkRenderer $linkRenderer,
+		CommentFormatter $commentFormatter
+	) {
 		$this->repoLinker = $repoLinker;
 		$this->userNameUtils = $userNameUtils;
 		$this->linkRenderer = $linkRenderer;
+		$this->commentFormatter = $commentFormatter;
 	}
 
 	public function format(
@@ -96,7 +107,7 @@ class ChangeLineFormatter {
 
 		$userLinks = $this->formatUserLinksHTML( $rev->getUserName(), $rev->getVisibility(), $lang, $user );
 		if ( count( $userLinks ) > 1 ) {
-			list( $data['userLink'], $data['userTalkLink'] ) = $userLinks;
+			[ $data['userLink'], $data['userTalkLink'] ] = $userLinks;
 		} else {
 			$data['userLink'] = array_pop( $userLinks );
 		}
@@ -178,13 +189,13 @@ class ChangeLineFormatter {
 
 		$commentHtml = $rev->getCommentHtml();
 		if ( $commentHtml === null || $commentHtml === '' ) {
-			$commentHtml = Linker::formatComment( $rev->getComment(), $title, false, $siteId );
+			$commentHtml = $this->commentFormatter->format( $rev->getComment(), $title, false, $siteId );
 		}
 		return $this->wrapCommentBlockHTML( $commentHtml );
 	}
 
 	private function wrapCommentBlockHTML( string $commentHtml ): string {
-		//NOTE: keep in sync with Linker::commentBlock
+		//NOTE: keep in sync with MediaWiki\CommentFormatter\CommentFormatter::formatBlock
 		$formatted = wfMessage( 'parentheses' )->rawParams( $commentHtml )->escaped();
 		return " <span class=\"comment\">$formatted</span>";
 	}
@@ -215,7 +226,7 @@ class ChangeLineFormatter {
 		) {
 			return [
 				' <span class="history-deleted">' .
-				wfMessage( 'rev-deleted-user' )->escaped() . '</span>'
+				wfMessage( 'rev-deleted-user' )->escaped() . '</span>',
 			];
 		}
 
@@ -260,7 +271,7 @@ class ChangeLineFormatter {
 
 		$usertools = [
 			$links['usertalk'],
-			$links['contribs']
+			$links['contribs'],
 		];
 
 		$ret[] = wfMessage( 'word-separator' )->plain()
@@ -302,7 +313,7 @@ class ChangeLineFormatter {
 		$params = [
 			'title' => $this->repoLinker->getEntityTitle( $entityId ),
 			'curid' => $rev->getPageId(),
-			'oldid' => $rev->getRevId()
+			'oldid' => $rev->getRevId(),
 		];
 
 		$url = $this->repoLinker->addQueryParams( $this->repoLinker->getIndexUrl(), $params );
@@ -318,7 +329,7 @@ class ChangeLineFormatter {
 			'title' => $this->repoLinker->getEntityTitle( $entityId ),
 			'curid' => $rev->getPageId(),
 			'diff' => $rev->getRevId(),
-			'oldid' => $rev->getParentId()
+			'oldid' => $rev->getParentId(),
 		];
 
 		$url = $this->repoLinker->addQueryParams( $this->repoLinker->getIndexUrl(), $params );
@@ -327,7 +338,7 @@ class ChangeLineFormatter {
 			$url,
 			wfMessage( 'diff' )->text(),
 			[
-				'tabindex' => $count
+				'tabindex' => $count,
 			]
 		);
 	}
@@ -338,7 +349,7 @@ class ChangeLineFormatter {
 		$params = [
 			'title' => $titleText,
 			'curid' => $rev->getPageId(),
-			'action' => 'history'
+			'action' => 'history',
 		];
 
 		$url = $this->repoLinker->addQueryParams( $this->repoLinker->getIndexUrl(), $params );
@@ -355,7 +366,7 @@ class ChangeLineFormatter {
 			$this->repoLinker->getPageUrl( "User:$userName" ),
 			$userName,
 			[
-				'class' => 'mw-userlink'
+				'class' => 'mw-userlink',
 			]
 		);
 	}

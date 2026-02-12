@@ -2,8 +2,11 @@
 
 namespace JsonConfig;
 
-use FormatJson;
-use Status;
+use MediaWiki\Content\TextContent;
+use MediaWiki\Json\FormatJson;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\Status\Status;
 use stdClass;
 
 /**
@@ -15,7 +18,7 @@ use stdClass;
  * @author Yuri Astrakhan <yurik@wikimedia.org>,
  *   based on Ori Livneh <ori@wikimedia.org> extension schema
  */
-class JCContent extends \TextContent {
+class JCContent extends TextContent {
 	/** @var mixed */
 	private $rawData = null;
 	/** @var stdClass */
@@ -30,15 +33,13 @@ class JCContent extends \TextContent {
 	private $view = null;
 
 	/**
-	 * @param string $text Json configuration. If null, default content will be inserted instead
+	 * @param string|null $text Json configuration. If null, default content will be inserted instead
 	 * @param string $modelId
 	 * @param bool $thorough True if extra validation should be performed
 	 */
 	public function __construct( $text, $modelId, $thorough ) {
 		$this->stripComments = $text !== null;
-		if ( $text === null ) {
-			$text = $this->getView( $modelId )->getDefault( $modelId );
-		}
+		$text ??= $this->getView( $modelId )->getDefault( $modelId );
 		parent::__construct( $text, $modelId );
 		$this->thorough = $thorough;
 		$this->status = new Status();
@@ -159,25 +160,13 @@ class JCContent extends \TextContent {
 	 * @return JCContentView
 	 */
 	public function getView( $modelId ) {
-		global $wgJsonConfigModels;
-		$view = $this->view;
-		if ( $view === null ) {
-			$configModels = \ExtensionRegistry::getInstance()->getAttribute( 'JsonConfigModels' )
-				+ $wgJsonConfigModels;
-			// @phan-suppress-previous-line PhanPossiblyUndeclaredVariable
-			if ( array_key_exists( $modelId, $configModels ) ) {
-				$value = $configModels[$modelId];
-				if ( is_array( $value ) && array_key_exists( 'view', $value ) ) {
-					$class = $value['view'];
-					$view = new $class();
-				}
-			}
-			if ( $view === null ) {
-				$view = $this->createDefaultView();
-			}
-			$this->view = $view;
+		if ( !$this->view ) {
+			$configModels = ExtensionRegistry::getInstance()->getAttribute( 'JsonConfigModels' )
+				+ MediaWikiServices::getInstance()->getMainConfig()->get( 'JsonConfigModels' );
+			$class = $configModels[$modelId]['view'] ?? null;
+			$this->view = $class ? new $class() : $this->createDefaultView();
 		}
-		return $view;
+		return $this->view;
 	}
 
 	/**

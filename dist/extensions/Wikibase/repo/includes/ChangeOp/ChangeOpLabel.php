@@ -79,7 +79,7 @@ class ChangeOpLabel extends ChangeOpBase {
 	 * @param Term|null $newLabel
 	 * @return ChangeOpLabelResult
 	 */
-	private function buildResult( EntityId $entityId = null, Term $oldLabel = null, Term $newLabel = null ) {
+	private function buildResult( ?EntityId $entityId, ?Term $oldLabel, ?Term $newLabel ) {
 		$isEntityChanged = false;
 		$oldLabelText = $oldLabel ? $oldLabel->getText() : '';
 		$newLabelText = $newLabel ? $newLabel->getText() : '';
@@ -94,15 +94,8 @@ class ChangeOpLabel extends ChangeOpBase {
 		return new ChangeOpLabelResult( $entityId, $this->languageCode, $oldLabelText, $newLabelText, $isEntityChanged );
 	}
 
-	/**
-	 * @see ChangeOp::apply()
-	 *
-	 * @param EntityDocument $entity
-	 * @param Summary|null $summary
-	 *
-	 * @throws InvalidArgumentException
-	 */
-	public function apply( EntityDocument $entity, Summary $summary = null ) {
+	/** @inheritDoc */
+	public function apply( EntityDocument $entity, ?Summary $summary = null ) {
 		if ( !( $entity instanceof LabelsProvider ) ) {
 			throw new InvalidArgumentException( '$entity must be a LabelsProvider' );
 		}
@@ -146,7 +139,7 @@ class ChangeOpLabel extends ChangeOpBase {
 			throw new InvalidArgumentException( '$entity must be a LabelsProvider' );
 		}
 
-		$languageValidator = $this->termValidatorFactory->getLanguageValidator();
+		$languageValidator = $this->termValidatorFactory->getLabelLanguageValidator();
 		$termValidator = $this->termValidatorFactory->getLabelValidator( $entity->getType() );
 
 		// check that the language is valid

@@ -4,7 +4,9 @@ namespace Wikibase\Repo\Store\Sql;
 
 use InvalidArgumentException;
 use Wikibase\DataModel\Entity\Item;
+use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Services\EntityId\EntityIdComposer;
+use Wikibase\DataModel\SiteLinkList;
 use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Repo\Store\SiteLinkConflictLookup;
 use Wikimedia\Rdbms\ILoadBalancer;
@@ -36,15 +38,14 @@ class SqlSiteLinkConflictLookup implements SiteLinkConflictLookup {
 	/**
 	 * @see SiteLinkConflictLookup::getConflictsForItem
 	 *
-	 * @param Item $item
+	 * @param ItemId $itemId
+	 * @param SiteLinkList $siteLinkList
 	 * @param int|null $db
 	 *
 	 * @return array[] An array of arrays, each with the keys "siteId", "itemId" and "sitePage".
 	 */
-	public function getConflictsForItem( Item $item, int $db = null ) {
-		$siteLinks = $item->getSiteLinkList();
-
-		if ( $siteLinks->isEmpty() ) {
+	public function getConflictsForItem( ItemId $itemId, SiteLinkList $siteLinkList, ?int $db = null ) {
+		if ( $siteLinkList->isEmpty() ) {
 			return [];
 		}
 
@@ -60,32 +61,28 @@ class SqlSiteLinkConflictLookup implements SiteLinkConflictLookup {
 
 		$linkConds = [];
 
-		foreach ( $siteLinks as $siteLink ) {
-			$linkConds[] = $dbr->makeList( [
+		foreach ( $siteLinkList as $siteLink ) {
+			$linkConds[] = $dbr->andExpr( [
 				'ips_site_id' => $siteLink->getSiteId(),
 				'ips_site_page' => $siteLink->getPageName(),
-			], $dbr::LIST_AND );
+			] );
 		}
 
 		// TODO: $linkConds might get very large and hit some size limit imposed
 		//       by the database. We could chop it up of we know that size limit.
 		//       For MySQL, it's select @@max_allowed_packet.
 
-		$conflictingLinks = $dbr->select(
-			'wb_items_per_site',
-			[
+		$conflictingLinks = $dbr->newSelectQueryBuilder()
+			->select( [
 				'ips_site_id',
 				'ips_site_page',
 				'ips_item_id',
-			],
-			$dbr->makeList( [
-				$dbr->makeList( $linkConds, $dbr::LIST_OR ),
-				'ips_item_id != ' . (int)$item->getId()->getNumericId(),
-			], $dbr::LIST_AND ),
-			__METHOD__
-		);
-
-		$this->db->connections()->releaseConnection( $dbr );
+			] )
+			->from( 'wb_items_per_site' )
+			->where( $dbr->orExpr( $linkConds ) )
+			->andWhere( $dbr->expr( 'ips_item_id', '!=', $itemId->getNumericId() ) )
+			->caller( __METHOD__ )
+			->fetchResultSet();
 
 		$conflicts = [];
 
@@ -93,7 +90,6 @@ class SqlSiteLinkConflictLookup implements SiteLinkConflictLookup {
 			$conflicts[] = [
 				'siteId' => $link->ips_site_id,
 				'itemId' => $this->entityIdComposer->composeEntityId(
-					'',
 					Item::ENTITY_TYPE,
 					$link->ips_item_id
 				),

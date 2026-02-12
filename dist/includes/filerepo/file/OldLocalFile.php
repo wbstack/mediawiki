@@ -18,10 +18,16 @@
  * @file
  */
 
+use MediaWiki\FileRepo\File\FileSelectQueryBuilder;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
+use Wikimedia\Rdbms\IDBAccessObject;
+use Wikimedia\Rdbms\IReadableDatabase;
+use Wikimedia\Rdbms\SelectQueryBuilder;
 
 /**
  * Old file in the oldimage table.
@@ -44,12 +50,11 @@ class OldLocalFile extends LocalFile {
 	 * @param LocalRepo $repo
 	 * @param string|int|null $time
 	 * @return static
-	 * @throws MWException
 	 */
 	public static function newFromTitle( $title, $repo, $time = null ) {
 		# The null default value is only here to avoid an E_STRICT
 		if ( $time === null ) {
-			throw new MWException( __METHOD__ . ' got null for $time parameter' );
+			throw new InvalidArgumentException( __METHOD__ . ' got null for $time parameter' );
 		}
 
 		return new static( $title, $repo, $time, null );
@@ -90,22 +95,20 @@ class OldLocalFile extends LocalFile {
 	 *
 	 * @param string $sha1 Base-36 SHA-1
 	 * @param LocalRepo $repo
-	 * @param string|bool $timestamp MW_timestamp (optional)
+	 * @param string|false $timestamp MW_timestamp (optional)
 	 *
-	 * @return bool|OldLocalFile
+	 * @return static|false
 	 */
 	public static function newFromKey( $sha1, $repo, $timestamp = false ) {
 		$dbr = $repo->getReplicaDB();
+		$queryBuilder = FileSelectQueryBuilder::newForOldFile( $dbr );
 
-		$conds = [ 'oi_sha1' => $sha1 ];
+		$queryBuilder->where( [ 'oi_sha1' => $sha1 ] );
 		if ( $timestamp ) {
-			$conds['oi_timestamp'] = $dbr->timestamp( $timestamp );
+			$queryBuilder->andWhere( [ 'oi_timestamp' => $dbr->timestamp( $timestamp ) ] );
 		}
 
-		$fileQuery = static::getQueryInfo();
-		$row = $dbr->selectRow(
-			$fileQuery['tables'], $fileQuery['fields'], $conds, __METHOD__, [], $fileQuery['joins']
-		);
+		$row = $queryBuilder->caller( __METHOD__ )->fetchRow();
 		if ( $row ) {
 			return static::newFromRow( $row, $repo );
 		} else {
@@ -124,6 +127,7 @@ class OldLocalFile extends LocalFile {
 	 * @since 1.31
 	 * @stable to override
 	 *
+	 * @deprecated since 1.41 use FileSelectQueryBuilder instead
 	 * @param string[] $options
 	 *   - omit-lazy: Omit fields that are lazily cached.
 	 * @return array[] With three keys:
@@ -133,44 +137,13 @@ class OldLocalFile extends LocalFile {
 	 * @phan-return array{tables:string[],fields:string[],joins:array}
 	 */
 	public static function getQueryInfo( array $options = [] ) {
-		$commentQuery = MediaWikiServices::getInstance()->getCommentStore()->getJoin( 'oi_description' );
-		$ret = [
-			'tables' => [
-				'oldimage',
-				'oldimage_actor' => 'actor'
-			] + $commentQuery['tables'],
-			'fields' => [
-				'oi_name',
-				'oi_archive_name',
-				'oi_size',
-				'oi_width',
-				'oi_height',
-				'oi_bits',
-				'oi_media_type',
-				'oi_major_mime',
-				'oi_minor_mime',
-				'oi_timestamp',
-				'oi_deleted',
-				'oi_sha1',
-				'oi_actor',
-				'oi_user' => 'oldimage_actor.actor_user',
-				'oi_user_text' => 'oldimage_actor.actor_name'
-			] + $commentQuery['fields'],
-			'joins' => [
-				'oldimage_actor' => [ 'JOIN', 'actor_id=oi_actor' ]
-			] + $commentQuery['joins'],
+		$dbr = MediaWikiServices::getInstance()->getConnectionProvider()->getReplicaDatabase();
+		$queryInfo = FileSelectQueryBuilder::newForOldFile( $dbr, $options )->getQueryInfo();
+		return [
+			'tables' => $queryInfo['tables'],
+			'fields' => $queryInfo['fields'],
+			'joins' => $queryInfo['join_conds'],
 		];
-
-		if ( in_array( 'omit-nonlazy', $options, true ) ) {
-			// Internal use only for getting only the lazy fields
-			$ret['fields'] = [];
-		}
-		if ( !in_array( 'omit-lazy', $options, true ) ) {
-			// Note: Keep this in sync with self::getLazyCacheFields()
-			$ret['fields'][] = 'oi_metadata';
-		}
-
-		return $ret;
 	}
 
 	/**
@@ -180,14 +153,13 @@ class OldLocalFile extends LocalFile {
 	 * @param LocalRepo $repo
 	 * @param string|int|null $time Timestamp or null to load by archive name
 	 * @param string|null $archiveName Archive name or null to load by timestamp
-	 * @throws MWException
 	 */
 	public function __construct( $title, $repo, $time, $archiveName ) {
 		parent::__construct( $title, $repo );
 		$this->requestedTime = $time;
 		$this->archive_name = $archiveName;
 		if ( $time === null && $archiveName === null ) {
-			throw new MWException( __METHOD__ . ': must specify at least one of $time or $archiveName' );
+			throw new LogicException( __METHOD__ . ': must specify at least one of $time or $archiveName' );
 		}
 	}
 
@@ -241,25 +213,11 @@ class OldLocalFile extends LocalFile {
 	protected function loadFromDB( $flags = 0 ) {
 		$this->dataLoaded = true;
 
-		$dbr = ( $flags & self::READ_LATEST )
+		$dbr = ( $flags & IDBAccessObject::READ_LATEST )
 			? $this->repo->getPrimaryDB()
 			: $this->repo->getReplicaDB();
-
-		$conds = [ 'oi_name' => $this->getName() ];
-		if ( $this->requestedTime === null ) {
-			$conds['oi_archive_name'] = $this->archive_name;
-		} else {
-			$conds['oi_timestamp'] = $dbr->timestamp( $this->requestedTime );
-		}
-		$fileQuery = static::getQueryInfo();
-		$row = $dbr->selectRow(
-			$fileQuery['tables'],
-			$fileQuery['fields'],
-			$conds,
-			__METHOD__,
-			[ 'ORDER BY' => 'oi_timestamp DESC' ],
-			$fileQuery['joins']
-		);
+		$queryBuilder = $this->buildQueryBuilderForLoad( $dbr, [] );
+		$row = $queryBuilder->caller( __METHOD__ )->fetchRow();
 		if ( $row ) {
 			$this->loadFromRow( $row, 'oi_' );
 		} else {
@@ -274,33 +232,15 @@ class OldLocalFile extends LocalFile {
 	protected function loadExtraFromDB() {
 		$this->extraDataLoaded = true;
 		$dbr = $this->repo->getReplicaDB();
-		$conds = [ 'oi_name' => $this->getName() ];
-		if ( $this->requestedTime === null ) {
-			$conds['oi_archive_name'] = $this->archive_name;
-		} else {
-			$conds['oi_timestamp'] = $dbr->timestamp( $this->requestedTime );
-		}
-		$fileQuery = static::getQueryInfo( [ 'omit-nonlazy' ] );
+		$queryBuilder = $this->buildQueryBuilderForLoad( $dbr );
+
 		// In theory the file could have just been renamed/deleted...oh well
-		$row = $dbr->selectRow(
-			$fileQuery['tables'],
-			$fileQuery['fields'],
-			$conds,
-			__METHOD__,
-			[ 'ORDER BY' => 'oi_timestamp DESC' ],
-			$fileQuery['joins']
-		);
+		$row = $queryBuilder->caller( __METHOD__ )->fetchRow();
 
 		if ( !$row ) { // fallback to primary DB
 			$dbr = $this->repo->getPrimaryDB();
-			$row = $dbr->selectRow(
-				$fileQuery['tables'],
-				$fileQuery['fields'],
-				$conds,
-				__METHOD__,
-				[ 'ORDER BY' => 'oi_timestamp DESC' ],
-				$fileQuery['joins']
-			);
+			$queryBuilder = $this->buildQueryBuilderForLoad( $dbr );
+			$row = $queryBuilder->caller( __METHOD__ )->fetchRow();
 		}
 
 		if ( $row ) {
@@ -308,8 +248,20 @@ class OldLocalFile extends LocalFile {
 				$this->$name = $value;
 			}
 		} else {
-			throw new MWException( "Could not find data for image '{$this->archive_name}'." );
+			throw new RuntimeException( "Could not find data for image '{$this->archive_name}'." );
 		}
+	}
+
+	private function buildQueryBuilderForLoad( IReadableDatabase $dbr, $options = [ 'omit-nonlazy' ] ) {
+		$queryBuilder = FileSelectQueryBuilder::newForOldFile( $dbr, $options );
+		$queryBuilder->where( [ 'oi_name' => $this->getName() ] )
+			->orderBy( 'oi_timestamp', SelectQueryBuilder::SORT_DESC );
+		if ( $this->requestedTime === null ) {
+			$queryBuilder->andWhere( [ 'oi_archive_name' => $this->archive_name ] );
+		} else {
+			$queryBuilder->andWhere( [ 'oi_timestamp' => $dbr->timestamp( $this->requestedTime ) ] );
+		}
+		return $queryBuilder;
 	}
 
 	/**
@@ -354,11 +306,12 @@ class OldLocalFile extends LocalFile {
 		}
 
 		$dbw = $this->repo->getPrimaryDB();
-		list( $major, $minor ) = self::splitMime( $this->mime );
+		[ $major, $minor ] = self::splitMime( $this->mime );
 
 		wfDebug( __METHOD__ . ': upgrading ' . $this->archive_name . " to the current schema" );
-		$dbw->update( 'oldimage',
-			[
+		$dbw->newUpdateQueryBuilder()
+			->update( 'oldimage' )
+			->set( [
 				'oi_size' => $this->size,
 				'oi_width' => $this->width,
 				'oi_height' => $this->height,
@@ -368,11 +321,12 @@ class OldLocalFile extends LocalFile {
 				'oi_minor_mime' => $minor,
 				'oi_metadata' => $this->getMetadataForDb( $dbw ),
 				'oi_sha1' => $this->sha1,
-			], [
+			] )
+			->where( [
 				'oi_name' => $this->getName(),
-				'oi_archive_name' => $this->archive_name ],
-			__METHOD__
-		);
+				'oi_archive_name' => $this->archive_name,
+			] )
+			->caller( __METHOD__ )->execute();
 	}
 
 	protected function reserializeMetadata() {
@@ -470,8 +424,9 @@ class OldLocalFile extends LocalFile {
 			->insert( $dbw, 'oi_description', $comment );
 		$actorId = $services->getActorNormalization()
 			->acquireActorId( $user, $dbw );
-		$dbw->insert( 'oldimage',
-			[
+		$dbw->newInsertQueryBuilder()
+			->insertInto( 'oldimage' )
+			->row( [
 				'oi_name' => $this->getName(),
 				'oi_archive_name' => $archiveName,
 				'oi_size' => $props['size'],
@@ -485,8 +440,8 @@ class OldLocalFile extends LocalFile {
 				'oi_major_mime' => $props['major_mime'],
 				'oi_minor_mime' => $props['minor_mime'],
 				'oi_sha1' => $props['sha1'],
-			] + $commentFields, __METHOD__
-		);
+			] + $commentFields )
+			->caller( __METHOD__ )->execute();
 		$dbw->endAtomic( __METHOD__ );
 
 		return true;

@@ -1,13 +1,26 @@
 <?php
 
+namespace MediaWiki\Extension\Notifications;
+
+use BatchRowIterator;
+use MailAddress;
+use MediaWiki\Extension\Notifications\Formatters\EchoHtmlDigestEmailFormatter;
+use MediaWiki\Extension\Notifications\Formatters\EchoPlainTextDigestEmailFormatter;
+use MediaWiki\Extension\Notifications\Mapper\EventMapper;
+use MediaWiki\Extension\Notifications\Model\Event;
+use MediaWiki\Language\Language;
+use MediaWiki\Languages\LanguageFactory;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\User\UserOptionsManager;
+use MediaWiki\User\Options\UserOptionsManager;
+use MediaWiki\User\User;
+use stdClass;
+use UserMailer;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
  * Handle user email batch ( daily/ weekly )
  */
-class MWEchoEmailBatch {
+class EmailBatch {
 
 	/**
 	 * @var User the user to be notified
@@ -25,12 +38,12 @@ class MWEchoEmailBatch {
 	protected $userOptionsManager;
 
 	/**
-	 * @var EchoEvent[] events included in this email
+	 * @var Event[] events included in this email
 	 */
 	protected $events = [];
 
 	/**
-	 * @var EchoEvent the last notification event of this batch
+	 * @var Event the last notification event of this batch
 	 */
 	protected $lastEvent;
 
@@ -45,13 +58,13 @@ class MWEchoEmailBatch {
 	 */
 	protected static $displaySize = 20;
 
-	/**
-	 * @param User $user
-	 * @param UserOptionsManager $userOptionsManager
-	 */
-	public function __construct( User $user, UserOptionsManager $userOptionsManager ) {
+	public function __construct(
+		User $user,
+		UserOptionsManager $userOptionsManager,
+		LanguageFactory $languageFactory
+	) {
 		$this->mUser = $user;
-		$this->language = Language::factory(
+		$this->language = $languageFactory->getLanguage(
 			$userOptionsManager->getOption( $user, 'language' )
 		);
 		$this->userOptionsManager = $userOptionsManager;
@@ -66,24 +79,26 @@ class MWEchoEmailBatch {
 	 *  1 - once everyday
 	 *  7 - once every 7 days
 	 * @param int $userId
-	 * @param bool $enforceFrequency Whether or not email sending frequency should
+	 * @param bool $enforceFrequency Whether email sending frequency should
 	 *  be enforced.
 	 *
 	 *  When true, today's notifications won't be returned if they are
 	 *  configured to go out tonight or at the end of the week.
 	 *
 	 *  When false, all pending notifications will be returned.
-	 * @return MWEchoEmailBatch|false
+	 * @return EmailBatch|false
 	 */
 	public static function newFromUserId( $userId, $enforceFrequency = true ) {
 		$user = User::newFromId( (int)$userId );
-		$userOptionsManager = MediaWikiServices::getInstance()->getUserOptionsManager();
+		$services = MediaWikiServices::getInstance();
+		$userOptionsManager = $services->getUserOptionsManager();
+		$languageFactory = $services->getLanguageFactory();
 
 		$userEmailSetting = (int)$userOptionsManager->getOption( $user, 'echo-email-frequency' );
 
 		// clear all existing events if user decides not to receive emails
 		if ( $userEmailSetting == -1 ) {
-			$emailBatch = new self( $user, $userOptionsManager );
+			$emailBatch = new self( $user, $userOptionsManager, $languageFactory );
 			$emailBatch->clearProcessedEvent();
 
 			return false;
@@ -114,7 +129,7 @@ class MWEchoEmailBatch {
 			}
 		}
 
-		return new self( $user, $userOptionsManager );
+		return new self( $user, $userOptionsManager, $languageFactory );
 	}
 
 	/**
@@ -135,7 +150,7 @@ class MWEchoEmailBatch {
 				if ( $this->count > self::$displaySize ) {
 					break;
 				}
-				$event = EchoEvent::newFromRow( $row );
+				$event = Event::newFromRow( $row );
 				if ( !$event ) {
 					continue;
 				}
@@ -160,13 +175,13 @@ class MWEchoEmailBatch {
 	 * @return bool true if event exists false otherwise
 	 */
 	protected function setLastEvent() {
-		$dbr = MWEchoDbFactory::newFromDefault()->getEchoDb( DB_REPLICA );
-		$res = $dbr->selectField(
-			[ 'echo_email_batch' ],
-			'MAX( eeb_event_id )',
-			[ 'eeb_user_id' => $this->mUser->getId() ],
-			__METHOD__
-		);
+		$dbr = DbFactory::newFromDefault()->getEchoDb( DB_REPLICA );
+		$res = $dbr->newSelectQueryBuilder()
+			->select( 'MAX( eeb_event_id )' )
+			->from( 'echo_email_batch' )
+			->where( [ 'eeb_user_id' => $this->mUser->getId() ] )
+			->caller( __METHOD__ )
+			->fetchField();
 
 		if ( $res ) {
 			$this->lastEvent = $res;
@@ -206,50 +221,39 @@ class MWEchoEmailBatch {
 		// composite index, favor insert performance, storage space over read
 		// performance in this case
 		if ( $validEvents ) {
-			$dbr = MWEchoDbFactory::newFromDefault()->getEchoDb( DB_REPLICA );
+			$dbr = DbFactory::newFromDefault()->getEchoDb( DB_REPLICA );
+			$queryBuilder = $dbr->newSelectQueryBuilder()
+				->select( array_merge( Event::selectFields(), [
+					'eeb_id',
+					'eeb_user_id',
+					'eeb_event_priority',
+					'eeb_event_id',
+					'eeb_event_hash',
+				] ) )
+				->from( 'echo_email_batch' )
+				->join( 'echo_event', null, 'event_id = eeb_event_id' )
+				->where( [
+					'eeb_user_id' => $this->mUser->getId(),
+					'event_type' => $validEvents
+				] )
+				->orderBy( 'eeb_event_priority' )
+				->limit( self::$displaySize + 1 )
+				->caller( __METHOD__ );
 
-			$conds = [
-				'eeb_user_id' => $this->mUser->getId(),
-				'event_id = eeb_event_id',
-				'event_type' => $validEvents
-			];
-
-			$tables = [ 'echo_email_batch', 'echo_event' ];
 			if ( $this->userOptionsManager->getOption(
 				$this->mUser, 'echo-dont-email-read-notifications'
 			) ) {
-				$conds = array_merge(
-					$conds,
-					[
-						'notification_event = event_id',
-						'notification_read_timestamp IS NULL',
-					]
-				);
-				$tables[] = 'echo_notification';
+				$queryBuilder
+					->join( 'echo_notification', null, 'notification_event = event_id' )
+					->andWhere( [ 'notification_read_timestamp' => null ] );
 			}
 
 			// See setLastEvent() for more detail for this variable
 			if ( $this->lastEvent ) {
-				$conds[] = 'eeb_event_id <= ' . (int)$this->lastEvent;
+				$queryBuilder->andWhere( $dbr->expr( 'eeb_event_id', '<=', (int)$this->lastEvent ) );
 			}
-			$fields = array_merge( EchoEvent::selectFields(), [
-				'eeb_id',
-				'eeb_user_id',
-				'eeb_event_priority',
-				'eeb_event_id',
-				'eeb_event_hash',
-			] );
 
-			$res = $dbr->select(
-				$tables,
-				$fields,
-				$conds,
-				__METHOD__,
-				[
-					'ORDER BY' => 'eeb_event_priority',
-					'LIMIT' => self::$displaySize + 1,
-				]
-			);
+			$res = $queryBuilder->fetchResultSet();
 
 			foreach ( $res as $row ) {
 				// records in the queue inserted before email bundling code
@@ -269,8 +273,8 @@ class MWEchoEmailBatch {
 	 */
 	public function clearProcessedEvent() {
 		global $wgUpdateRowsPerQuery;
-		$eventMapper = new EchoEventMapper();
-		$dbFactory = MWEchoDbFactory::newFromDefault();
+		$eventMapper = new EventMapper();
+		$dbFactory = DbFactory::newFromDefault();
 		$dbw = $dbFactory->getEchoDb( DB_PRIMARY );
 		$dbr = $dbFactory->getEchoDb( DB_REPLICA );
 		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
@@ -281,7 +285,7 @@ class MWEchoEmailBatch {
 		$iterator->addConditions( [ 'eeb_user_id' => $this->mUser->getId() ] );
 		if ( $this->lastEvent ) {
 			// There is a processed cutoff point
-			$iterator->addConditions( [ 'eeb_event_id <= ' . (int)$this->lastEvent ] );
+			$iterator->addConditions( [ $dbr->expr( 'eeb_event_id', '<=', (int)$this->lastEvent ) ] );
 		}
 		$iterator->setCaller( __METHOD__ );
 
@@ -290,10 +294,14 @@ class MWEchoEmailBatch {
 			foreach ( $batch as $row ) {
 				$eventIds[] = $row->eeb_event_id;
 			}
-			$dbw->delete( 'echo_email_batch', [
-				'eeb_user_id' => $this->mUser->getId(),
-				'eeb_event_id' => $eventIds
-			], __METHOD__ );
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( 'echo_email_batch' )
+				->where( [
+					'eeb_user_id' => $this->mUser->getId(),
+					'eeb_event_id' => $eventIds
+				] )
+				->caller( __METHOD__ )
+				->execute();
 
 			// Find out which events are now orphaned, i.e. no longer referenced in echo_email_batch
 			// (besides the rows we just deleted) or in echo_notification, and delete them
@@ -311,7 +319,7 @@ class MWEchoEmailBatch {
 		global $wgPasswordSender, $wgNoReplyAddress;
 
 		if ( $this->userOptionsManager->getOption( $this->mUser, 'echo-email-frequency' )
-			== EchoEmailFrequency::WEEKLY_DIGEST
+			== EmailFrequency::WEEKLY_DIGEST
 		) {
 			$frequency = 'weekly';
 			$emailDeliveryMode = 'weekly_digest';
@@ -328,8 +336,8 @@ class MWEchoEmailBatch {
 			return;
 		}
 
-		$format = MWEchoNotifUser::newFromUser( $this->mUser )->getEmailFormat();
-		if ( $format == EchoEmailFormat::HTML ) {
+		$format = NotifUser::newFromUser( $this->mUser )->getEmailFormat();
+		if ( $format == EmailFormat::HTML ) {
 			$htmlEmailDigestFormatter = new EchoHtmlDigestEmailFormatter( $this->mUser, $this->language, $frequency );
 			$htmlContent = $htmlEmailDigestFormatter->format( $this->events, 'email' );
 
@@ -348,7 +356,6 @@ class MWEchoEmailBatch {
 
 		// @Todo Push the email to job queue or just send it out directly?
 		UserMailer::send( $toAddress, $fromAddress, $content['subject'], $content['body'], [ 'replyTo' => $replyTo ] );
-		MWEchoEventLogging::logSchemaEchoMail( $this->mUser, $emailDeliveryMode );
 	}
 
 	/**
@@ -364,7 +371,7 @@ class MWEchoEmailBatch {
 			return;
 		}
 
-		$dbw = MWEchoDbFactory::newFromDefault()->getEchoDb( DB_PRIMARY );
+		$dbw = DbFactory::newFromDefault()->getEchoDb( DB_PRIMARY );
 
 		$row = [
 			'eeb_user_id' => $userId,
@@ -373,12 +380,12 @@ class MWEchoEmailBatch {
 			'eeb_event_hash' => $hash
 		];
 
-		$dbw->insert(
-			'echo_email_batch',
-			$row,
-			__METHOD__,
-			[ 'IGNORE' ]
-		);
+		$dbw->newInsertQueryBuilder()
+			->insertInto( 'echo_email_batch' )
+			->ignore()
+			->row( $row )
+			->caller( __METHOD__ )
+			->execute();
 	}
 
 	/**
@@ -387,18 +394,17 @@ class MWEchoEmailBatch {
 	 * @param int $startUserId
 	 * @param int $batchSize
 	 *
-	 * @return IResultWrapper|bool
+	 * @return IResultWrapper
 	 */
 	public static function getUsersToNotify( $startUserId, $batchSize ) {
-		$dbr = MWEchoDbFactory::newFromDefault()->getEchoDb( DB_REPLICA );
-		$res = $dbr->select(
-			[ 'echo_email_batch' ],
-			[ 'eeb_user_id' ],
-			[ 'eeb_user_id > ' . (int)$startUserId ],
-			__METHOD__,
-			[ 'ORDER BY' => 'eeb_user_id', 'LIMIT' => $batchSize ]
-		);
-
-		return $res;
+		$dbr = DbFactory::newFromDefault()->getEchoDb( DB_REPLICA );
+		return $dbr->newSelectQueryBuilder()
+			->select( 'eeb_user_id' )
+			->from( 'echo_email_batch' )
+			->where( $dbr->expr( 'eeb_user_id', '>', (int)$startUserId ) )
+			->orderBy( 'eeb_user_id' )
+			->limit( $batchSize )
+			->caller( __METHOD__ )
+			->fetchResultSet();
 	}
 }

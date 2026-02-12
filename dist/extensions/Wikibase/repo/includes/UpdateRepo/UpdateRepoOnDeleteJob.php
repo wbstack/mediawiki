@@ -6,10 +6,10 @@ namespace Wikibase\Repo\UpdateRepo;
 
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Site\SiteLookup;
+use MediaWiki\Title\Title;
 use OutOfBoundsException;
 use Psr\Log\LoggerInterface;
-use SiteLookup;
-use Title;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\DataModel\SiteLink;
@@ -18,7 +18,7 @@ use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityStore;
 use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Summary;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
 use Wikibase\Repo\WikibaseRepo;
@@ -80,7 +80,7 @@ class UpdateRepoOnDeleteJob extends UpdateRepoJob {
 		SummaryFormatter $summaryFormatter,
 		LoggerInterface $logger,
 		SiteLookup $siteLookup,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		SettingsArray $settings
 	): void {
 		$this->initRepoJobServices(

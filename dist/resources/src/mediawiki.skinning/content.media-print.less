@@ -1,41 +1,25 @@
-@import 'variables.less';
+@import 'mediawiki.skin.variables.less';
+@import 'content.variables.less';
 
 figure[ typeof~='mw:File/Thumb' ],
-figure[ typeof~='mw:File/Frame' ],
-/* TODO: Remove "Image|Video|Audio" when version 2.4.0 of the content is no
- * longer supported
- */
-figure[ typeof~='mw:Image/Thumb' ],
-figure[ typeof~='mw:Video/Thumb' ],
-figure[ typeof~='mw:Audio/Thumb' ],
-figure[ typeof~='mw:Image/Frame' ],
-figure[ typeof~='mw:Video/Frame' ],
-figure[ typeof~='mw:Audio/Frame' ] {
-	border: @border-thumbinner-print;
-	border-bottom: 0;  // No border to figcaption
-	background-color: @background-color-thumbinner-print;
+figure[ typeof~='mw:File/Frame' ] {
+	border: @border-width-base-print;
+	border-bottom: 0; // No border to figcaption
+	background-color: @background-color-base-print;
 
-	> a:first-child,
-	> span:first-child {
-		> *:first-child:not( .mw-broken-media ) {
-			border: @border-thumbimage-print;
-		}
+	> :not( figcaption ) .mw-file-element {
+		border: @border-thumbborder-print;
 	}
 
 	> figcaption {
-		border: @border-thumbinner-print;
-		border-top: 0;
-		background-color: @background-color-thumbinner-print;
-		font-size: @font-size-thumbinner-print;
+		background-color: @background-color-base-print;
 		color: @color-thumbinner-print;
+		font-size: @font-size-thumbinner-print;
+		border: @border-width-base-print;
+		border-top: 0;
 	}
 }
 
-.mw-image-border {
-	> a:first-child,
-	> span:first-child {
-		> *:first-child:not( .mw-broken-media ) {
-			border: @border-thumbborder-print;
-		}
-	}
+.mw-image-border .mw-file-element {
+	border: @border-width-base-print;
 }

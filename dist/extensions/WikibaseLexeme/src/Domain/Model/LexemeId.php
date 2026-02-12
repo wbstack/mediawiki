@@ -1,9 +1,10 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lexeme\Domain\Model;
 
 use InvalidArgumentException;
-use RuntimeException;
 use Wikibase\DataModel\Entity\Int32EntityId;
 use Wikibase\DataModel\Entity\SerializableEntityId;
 use Wikimedia\Assert\Assert;
@@ -20,25 +21,17 @@ class LexemeId extends SerializableEntityId implements Int32EntityId {
 	public const PATTERN = '/^L[1-9]\d{0,9}\z/i';
 
 	/**
-	 * @param string $serialization
-	 *
 	 * @throws InvalidArgumentException
 	 */
-	public function __construct( $serialization ) {
-		$serializationParts = self::splitSerialization( $serialization );
-		$localId = strtoupper( $serializationParts[2] );
-		$this->assertValidIdFormat( $localId );
-		parent::__construct( self::joinSerialization(
-			[ $serializationParts[0], $serializationParts[1], $localId ] )
-		);
+	public function __construct( string $serialization ) {
+		$this->assertValidIdFormat( $serialization );
+		parent::__construct( strtoupper( $serialization ) );
 	}
 
 	/**
-	 * @param string $serialization
-	 *
 	 * @throws InvalidArgumentException
 	 */
-	private function assertValidIdFormat( $serialization ) {
+	private function assertValidIdFormat( string $serialization ): void {
 		Assert::parameterType( 'string', $serialization, '$serialization' );
 		Assert::parameter(
 			preg_match( self::PATTERN, $serialization ),
@@ -52,45 +45,22 @@ class LexemeId extends SerializableEntityId implements Int32EntityId {
 		);
 	}
 
-	/**
-	 * @see Serializable::serialize
-	 *
-	 * @return string
-	 */
-	public function serialize() {
-		return $this->serialization;
+	public function __serialize(): array {
+		return [ 'serialization' => $this->serialization ];
 	}
 
-	/**
-	 * @see Serializable::unserialize
-	 *
-	 * @param string $serialized
-	 */
-	public function unserialize( $serialized ) {
-		$this->serialization = $serialized;
-		list( $this->repositoryName, $this->localPart ) = self::extractRepositoryNameAndLocalPart(
-			$serialized
-		);
+	public function __unserialize( array $data ): void {
+		$this->__construct( $data['serialization'] ?? '' );
+		if ( $this->serialization !== $data['serialization'] ) {
+			throw new InvalidArgumentException( '$data contained invalid serialization' );
+		}
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getEntityType() {
+	public function getEntityType(): string {
 		return 'lexeme';
 	}
 
-	/**
-	 * @see Int32EntityId::getNumericId
-	 *
-	 * @return int
-	 *
-	 * @throws RuntimeException if called on a foreign ID.
-	 */
-	public function getNumericId() {
-		if ( $this->isForeign() ) {
-			throw new RuntimeException( 'getNumericId must not be called on foreign LexemeIds' );
-		}
+	public function getNumericId(): int {
 		return (int)substr( $this->serialization, 1 );
 	}
 

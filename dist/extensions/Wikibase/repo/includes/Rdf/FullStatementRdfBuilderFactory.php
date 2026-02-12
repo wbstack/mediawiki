@@ -12,17 +12,17 @@ use Wikimedia\Purtle\RdfWriter;
  */
 class FullStatementRdfBuilderFactory {
 
-	private $vocabulary;
+	private RdfVocabulary $vocabulary;
 
-	private $writer;
+	private RdfWriter $writer;
 
-	private $mentionedEntityTracker;
+	private EntityMentionListener $mentionedEntityTracker;
 
-	private $dedupe;
+	private DedupeBag $dedupe;
 
-	private $valueSnakRdfBuilderFactory;
+	private ValueSnakRdfBuilderFactory $valueSnakRdfBuilderFactory;
 
-	private $propertyDataLookup;
+	private PropertyDataTypeLookup $propertyDataLookup;
 
 	public function __construct(
 		RdfVocabulary $vocabulary,
@@ -59,7 +59,7 @@ class FullStatementRdfBuilderFactory {
 		$fullStatementRdfBuilder = new FullStatementRdfBuilder( $this->vocabulary,
 			$this->writer,
 			$snakBuilder
- );
+		);
 
 		$fullStatementRdfBuilder->setDedupeBag( $this->dedupe );
 

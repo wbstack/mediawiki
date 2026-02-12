@@ -1,10 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"Numulunj pilgae"
+			"Numulunj pilgae",
+			"Валгриш"
 		]
 	},
-	"mobile-frontend-terms-text": "Тевс нолдамань ётт",
-	"mobile-frontend-view": "Сарксфононь верзие",
-	"mobile-frontend-view-desktop": "Шра лангонь верзие"
+	"mobile-frontend-copyright": "Сёрматфсь ули кода мумс $1-са, кда илякс апак тяштьк.",
+	"mobile-frontend-media-next": "Няфтемс сяда товолдонь уликсть",
+	"mobile-frontend-terms-text": "Латцема тефт",
+	"mobile-frontend-view": "Сарксфононь ваномац",
+	"mobile-frontend-view-desktop": "Компьютеронь ваномац"
 }

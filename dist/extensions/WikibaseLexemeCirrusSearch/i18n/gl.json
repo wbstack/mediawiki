@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Toliño"
+		]
+	},
+	"wikibaselexemecirrus-desc": "Extensión WikibaseLexeme para usar a funcionalidade CirrusSearch",
+	"wikibaselexemecirrus-rescore-profile-prefix": "Perfil de revaloración para a busca mediante prefixos (pescuda de completación)."
+}

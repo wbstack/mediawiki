@@ -2,10 +2,9 @@
 
 namespace Wikibase\Repo\Maintenance;
 
-use ExtensionRegistry;
-use Maintenance;
+use MediaWiki\Maintenance\Maintenance;
+use MediaWiki\Registration\ExtensionRegistry;
 use MediaWiki\Settings\SettingsBuilder;
-use MWException;
 use Onoi\MessageReporter\ObservableMessageReporter;
 use Wikibase\DataModel\Services\EntityId\EntityIdPager;
 use Wikibase\DataModel\Services\Lookup\EntityLookupException;
@@ -135,8 +134,6 @@ abstract class DumpEntities extends Maintenance {
 	 * Opens the given file for use by logMessage().
 	 *
 	 * @param string $file use "-" as a shortcut for "php://stdout"
-	 *
-	 * @throws MWException
 	 */
 	private function openLogFile( $file ) {
 		$this->closeLogFile();
@@ -149,7 +146,7 @@ abstract class DumpEntities extends Maintenance {
 		$this->logFileHandle = fopen( $file, 'a' );
 
 		if ( !$this->logFileHandle ) {
-			throw new MWException( 'Failed to open log file: ' . $file );
+			$this->fatalError( 'Failed to open log file: ' . $file );
 		}
 	}
 
@@ -189,7 +186,7 @@ abstract class DumpEntities extends Maintenance {
 		$output = fopen( $outFile, 'w' ); //TODO: Allow injection of an OutputStream
 
 		if ( !$output ) {
-			throw new MWException( 'Failed to open ' . $outFile . '!' );
+			$this->fatalError( 'Failed to open ' . $outFile . '!' );
 		}
 
 		if ( $this->hasOption( 'list-file' ) ) {
@@ -197,7 +194,7 @@ abstract class DumpEntities extends Maintenance {
 		}
 
 		$entityTypes = $this->getEntityTypes();
-		if ( empty( $entityTypes ) ) {
+		if ( !$entityTypes ) {
 			$this->logMessage( "No entity types to dump" );
 			$this->closeLogFile();
 			return;
@@ -228,6 +225,9 @@ abstract class DumpEntities extends Maintenance {
 		$dumper->setEntityTypesFilter( $entityTypes );
 		$dumper->setBatchSize( $batchSize );
 
+		$db = WikibaseRepo::getRepoDomainDbFactory()->newRepoDb();
+		$dumper->setBatchCallback( [ $db, 'autoReconfigure' ] );
+
 		$idStream = $this->makeIdStream( $entityTypes, $exceptionReporter );
 		AtEase::suppressWarnings();
 		$dumper->generateDump( $idStream );
@@ -244,9 +244,7 @@ abstract class DumpEntities extends Maintenance {
 	/**
 	 * @inheritDoc
 	 */
-	public function finalSetup( SettingsBuilder $settingsBuilder = null ) {
-		global $wgHooks;
-
+	public function finalSetup( SettingsBuilder $settingsBuilder ) {
 		parent::finalSetup( $settingsBuilder );
 
 		if ( $this->hasOption( 'dbgroupdefault' ) ) {
@@ -254,12 +252,13 @@ abstract class DumpEntities extends Maintenance {
 			return;
 		}
 
-		$wgHooks['MediaWikiServices'][] = function() {
+		$settingsBuilder->registerHookHandlers( [ 'MediaWikiServices' => [ function() {
 			global $wgDBDefaultGroup;
 			if ( !ExtensionRegistry::getInstance()->isLoaded( 'WikibaseRepository' ) ) {
 				// Something instantiates the MediaWikiServices before Wikibase
 				// is loaded, nothing we can do here.
 				wfWarn( self::class . ': Can not change default DB group.' );
+
 				return;
 			}
 
@@ -271,7 +270,7 @@ abstract class DumpEntities extends Maintenance {
 			if ( $dumpDBDefaultGroup !== null ) {
 				$wgDBDefaultGroup = $dumpDBDefaultGroup;
 			}
-		};
+		} ] ] );
 	}
 
 	/**
@@ -301,7 +300,7 @@ abstract class DumpEntities extends Maintenance {
 	 *
 	 * @return EntityIdReader|SqlEntityIdPager a stream of EntityId objects
 	 */
-	private function makeIdStream( array $entityTypes, ExceptionHandler $exceptionReporter = null ) {
+	private function makeIdStream( array $entityTypes, ?ExceptionHandler $exceptionReporter ) {
 		$listFile = $this->getOption( 'list-file' );
 
 		if ( $listFile !== null ) {
@@ -359,14 +358,13 @@ abstract class DumpEntities extends Maintenance {
 	 * @param string $listFile
 	 * @param ExceptionHandler|null $exceptionReporter
 	 *
-	 * @throws MWException
 	 * @return EntityIdReader
 	 */
-	private function makeIdFileStream( $listFile, ExceptionHandler $exceptionReporter = null ) {
+	private function makeIdFileStream( $listFile, ?ExceptionHandler $exceptionReporter ) {
 		$input = fopen( $listFile, 'r' );
 
 		if ( !$input ) {
-			throw new MWException( "Failed to open ID file: $listFile" );
+			$this->fatalError( "Failed to open ID file: $listFile" );
 		}
 
 		$stream = new EntityIdReader( new LineReader( $input ), WikibaseRepo::getEntityIdParser() );

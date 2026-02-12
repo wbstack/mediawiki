@@ -2,10 +2,11 @@
 
 namespace Wikibase\Repo\Api;
 
-use ApiResult;
+use MediaWiki\Api\ApiResult;
+use MediaWiki\Site\SiteLookup;
+use MediaWiki\Status\Status;
+use MediaWiki\User\UserIdentity;
 use Serializers\Serializer;
-use SiteLookup;
-use Status;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -304,7 +305,7 @@ class ResultBuilder {
 		$sourceEntityIdSerialization,
 		EntityRevision $entityRevision,
 		$props = 'all',
-		array $filterSiteIds = null,
+		?array $filterSiteIds = null,
 		array $filterLangCodes = [],
 		array $termFallbackChains = []
 	) {
@@ -362,7 +363,7 @@ class ResultBuilder {
 	private function addEntityRedirectInfoToRecord( array $record, $sourceEntityIdSerialization, EntityId $entityId ): array {
 		$record['redirects'] = [
 			'from' => $sourceEntityIdSerialization,
-			'to' => $entityId->getSerialization()
+			'to' => $entityId->getSerialization(),
 		];
 		return $record;
 	}
@@ -401,7 +402,7 @@ class ResultBuilder {
 		$serialization = $this->sortEntitySerializationSiteLinks( $serialization );
 		$serialization = $this->dataTypeInjector->injectEntitySerializationWithDataTypes( $serialization );
 		$serialization = $this->filterEntitySerializationUsingSiteIds( $serialization, $filterSiteIds );
-		if ( !empty( $termFallbackChains ) ) {
+		if ( $termFallbackChains ) {
 			$serialization = $this->addEntitySerializationFallbackInfo( $serialization, $termFallbackChains );
 		}
 		$serialization = $this->filterEntitySerializationUsingLangCodes(
@@ -459,9 +460,9 @@ class ResultBuilder {
 
 	private function filterEntitySerializationUsingSiteIds(
 		array $serialization,
-		array $siteIds = null
+		?array $siteIds
 	) {
-		if ( !empty( $siteIds ) && array_key_exists( 'sitelinks', $serialization ) ) {
+		if ( $siteIds && array_key_exists( 'sitelinks', $serialization ) ) {
 			foreach ( $serialization['sitelinks'] as $siteId => $siteLink ) {
 				if ( is_array( $siteLink ) && !in_array( $siteLink['site'], $siteIds ) ) {
 					unset( $serialization['sitelinks'][$siteId] );
@@ -537,7 +538,7 @@ class ResultBuilder {
 		array $serialization,
 		array $langCodes
 	) {
-		if ( !empty( $langCodes ) ) {
+		if ( $langCodes ) {
 			if ( array_key_exists( 'labels', $serialization ) ) {
 				foreach ( $serialization['labels'] as $langCode => $languageArray ) {
 					if ( !in_array( $langCode, $langCodes ) ) {
@@ -654,7 +655,7 @@ class ResultBuilder {
 	 * Get serialized labels and add them to result
 	 *
 	 * @param TermList $labels the labels to insert in the result
-	 * @param array|string $path where the data is located
+	 * @param array|string|null $path where the data is located
 	 */
 	public function addLabels( TermList $labels, $path ) {
 		$this->addTermList( $labels, 'labels', 'label', $path );
@@ -664,7 +665,7 @@ class ResultBuilder {
 	 * Adds fake serialization to show a label has been removed
 	 *
 	 * @param string $language
-	 * @param array|string $path where the data is located
+	 * @param array|string|null $path where the data is located
 	 */
 	public function addRemovedLabel( $language, $path ) {
 		$this->addRemovedTerm( $language, 'labels', 'label', $path );
@@ -674,7 +675,7 @@ class ResultBuilder {
 	 * Get serialized descriptions and add them to result
 	 *
 	 * @param TermList $descriptions the descriptions to insert in the result
-	 * @param array|string $path where the data is located
+	 * @param array|string|null $path where the data is located
 	 */
 	public function addDescriptions( TermList $descriptions, $path ) {
 		$this->addTermList( $descriptions, 'descriptions', 'description', $path );
@@ -684,7 +685,7 @@ class ResultBuilder {
 	 * Adds fake serialization to show a label has been removed
 	 *
 	 * @param string $language
-	 * @param array|string $path where the data is located
+	 * @param array|string|null $path where the data is located
 	 */
 	public function addRemovedDescription( $language, $path ) {
 		$this->addRemovedTerm( $language, 'descriptions', 'description', $path );
@@ -696,7 +697,7 @@ class ResultBuilder {
 	 * @param TermList $termList
 	 * @param string $name
 	 * @param string $tag
-	 * @param array|string $path where the data is located
+	 * @param array|string|null $path where the data is located
 	 */
 	private function addTermList( TermList $termList, $name, $tag, $path ) {
 		$serializer = $this->serializerFactory->newTermListSerializer();
@@ -714,14 +715,14 @@ class ResultBuilder {
 	 * @param string $language
 	 * @param string $name
 	 * @param string $tag
-	 * @param array|string $path where the data is located
+	 * @param array|string|null $path where the data is located
 	 */
 	private function addRemovedTerm( $language, $name, $tag, $path ) {
 		$value = [
 			$language => [
 				'language' => $language,
 				'removed' => '',
-			]
+			],
 		];
 		if ( $this->addMetaData ) {
 			ApiResult::setArrayType( $value, 'kvp', 'language' );
@@ -734,7 +735,7 @@ class ResultBuilder {
 	 * Get serialized AliasGroupList and add it to result
 	 *
 	 * @param AliasGroupList $aliasGroupList the AliasGroupList to set in the result
-	 * @param array|string $path where the data is located
+	 * @param array|string|null $path where the data is located
 	 */
 	public function addAliasGroupList( AliasGroupList $aliasGroupList, $path ) {
 		$serializer = $this->serializerFactory->newAliasGroupListSerializer();
@@ -760,7 +761,7 @@ class ResultBuilder {
 	 * @todo use a SiteLinkListSerializer when created in DataModelSerialization here
 	 *
 	 * @param SiteLinkList $siteLinkList the site links to insert in the result
-	 * @param array|string $path where the data is located
+	 * @param array|string|null $path where the data is located
 	 * @param bool $addUrl
 	 */
 	public function addSiteLinkList( SiteLinkList $siteLinkList, $path, $addUrl = false ) {
@@ -809,7 +810,7 @@ class ResultBuilder {
 	 * Adds fake serialization to show a sitelink has been removed
 	 *
 	 * @param SiteLinkList $siteLinkList
-	 * @param array|string $path where the data is located
+	 * @param array|string|null $path where the data is located
 	 */
 	public function addRemovedSiteLinks( SiteLinkList $siteLinkList, $path ) {
 		$serializer = $this->serializerFactory->newSiteLinkSerializer();
@@ -833,7 +834,7 @@ class ResultBuilder {
 	 * Get serialized claims and add them to result
 	 *
 	 * @param StatementList $statements the labels to set in the result
-	 * @param array|string $path where the data is located
+	 * @param array|string|null $path where the data is located
 	 * @param array|string $props a list of fields to include, or "all"
 	 */
 	public function addStatements( StatementList $statements, $path, $props = 'all' ) {
@@ -939,7 +940,7 @@ class ResultBuilder {
 				$this->callbackFactory->getCallbackToIndexTags( 'property' ),
 			],
 			$claimPath . 'references/*/snaks-order' => [
-				$this->callbackFactory->getCallbackToIndexTags( 'property' )
+				$this->callbackFactory->getCallbackToIndexTags( 'property' ),
 			],
 			$claimPath . 'references' => [
 				$this->callbackFactory->getCallbackToIndexTags( 'reference' ),
@@ -952,7 +953,7 @@ class ResultBuilder {
 				$this->callbackFactory->getCallbackToIndexTags( 'property' ),
 			],
 			$claimPath . 'qualifiers-order' => [
-				$this->callbackFactory->getCallbackToIndexTags( 'property' )
+				$this->callbackFactory->getCallbackToIndexTags( 'property' ),
 			],
 			$claimPath . 'mainsnak' => [
 				$this->callbackFactory->getCallbackToAddDataTypeToSnak( $this->dataTypeLookup, $this->entityIdParser ),
@@ -1075,7 +1076,7 @@ class ResultBuilder {
 	 * @param int|null $oldRevId The id of the latest revision of the entity before
 	 *        the last (possibly null) edit
 	 */
-	public function addRevisionIdFromStatusToResult( Status $status, $path, $oldRevId = null ) {
+	public function addRevisionIdFromStatusToResult( Status $status, $path, ?int $oldRevId = null ) {
 		$value = $status->getValue();
 
 		if ( isset( $value['revision'] ) ) {
@@ -1092,6 +1093,32 @@ class ResultBuilder {
 				// like core's ApiEditPage
 				$this->setValue( $path, 'nochange', true );
 			}
+		}
+	}
+
+	/**
+	 * Add the temp username if the Status object contains a temp user
+	 *
+	 * @param Status $status As returned by {@link \Wikibase\Repo\EditEntity\EditEntity::attemptSave()}
+	 * @param callable $getTempUserRedirectUrl When called with a temp user, should return a redirect URL;
+	 * callers should use the {@link ApiCreateTempUserTrait} and pass this as
+	 * `fn( $user ) => $this->getTempUserRedirectUrl( $params, $user )`
+	 * @return void
+	 */
+	public function addTempUser(
+		Status $status,
+		callable $getTempUserRedirectUrl
+	) {
+		/** @var ?UserIdentity $savedTempUser */
+		$savedTempUser = $status->getValue()['savedTempUser'];
+		'@phan-var ?UserIdentity $savedTempUser';
+		if ( $savedTempUser ) {
+			$this->setValue( null, 'tempusercreated', $savedTempUser->getName() );
+			$redirectUrl = $getTempUserRedirectUrl( $savedTempUser );
+			if ( $redirectUrl === '' ) {
+				$redirectUrl = null;
+			}
+			$this->setValue( null, 'tempuserredirect', $redirectUrl );
 		}
 	}
 

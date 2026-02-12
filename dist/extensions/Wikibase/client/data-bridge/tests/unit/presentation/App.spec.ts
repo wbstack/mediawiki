@@ -12,6 +12,7 @@ import { nextTick } from 'vue';
 import App from '@/presentation/App.vue';
 import { createStore } from '@/store';
 import Application from '@/store/Application';
+import { entityModule } from '@/store/entity';
 import { initEvents, appEvents } from '@/events';
 import ApplicationStatus from '@/definitions/ApplicationStatus';
 import EditFlow from '@/definitions/EditFlow';
@@ -27,7 +28,13 @@ import License from '@/presentation/components/License.vue';
 import AppHeader from '@/presentation/components/AppHeader.vue';
 import newMockTracker from '../../util/newMockTracker';
 
-config.renderStubDefaultSlot = true;
+beforeAll( () => {
+	config.global.renderStubDefaultSlot = true;
+} );
+
+afterAll( () => {
+	config.global.renderStubDefaultSlot = false;
+} );
 
 describe( 'App.vue', () => {
 	let store: Store<Application>;
@@ -64,6 +71,11 @@ describe( 'App.vue', () => {
 							maxLength: 200,
 						},
 					},
+				} ),
+			},
+			'tempUserConfigRepository': {
+				getTempUserConfiguration: () => Promise.resolve( {
+					enabled: false,
 				} ),
 			},
 			'referencesRenderingRepository': {
@@ -262,6 +274,24 @@ describe( 'App.vue', () => {
 
 		expect( mockEmitter.emit ).toHaveBeenCalledTimes( 1 );
 		expect( mockEmitter.emit ).toHaveBeenCalledWith( initEvents.reload );
+	} );
+
+	it( 'emits redirect event if redirectUrl changes', async () => {
+		const wrapper = shallowMount( App, {
+			global: {
+				plugins: [ store ],
+			},
+			propsData: { emitter: mockEmitter },
+		} );
+
+		const targetUrl = new URL( 'https://www.wikidata.org/?=redirect' );
+		const entityState = entityModule.context( store );
+		entityState.commit( 'updateTempUserRedirectUrl', targetUrl );
+
+		await wrapper.findComponent( AppHeader ).vm.$nextTick();
+
+		expect( mockEmitter.emit ).toHaveBeenCalledTimes( 1 );
+		expect( mockEmitter.emit ).toHaveBeenCalledWith( appEvents.redirect, targetUrl );
 	} );
 
 	describe( 'component switch', () => {

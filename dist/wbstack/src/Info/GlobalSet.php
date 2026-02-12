@@ -2,34 +2,38 @@
 
 namespace WBStack\Info;
 
+class GlobalSetException extends \Exception {}
+
 /**
  * A class for setting a global holding a WBStackInfo object.
  * This includes lookup of the data for the global from cache or API.
  */
+
 class GlobalSet {
 
     /**
      * @param string $requestDomain A request domain, or 'maint' Example: 'addshore-alpha.wiki.opencura.com'
-     * @return bool was the global successfully set?
+     * @return void
      */
-    public static function forDomain( $requestDomain ) {
+    public static function forDomain($requestDomain) {
         // Normalize the domain by setting to lowercase
         $requestDomain = strtolower($requestDomain);
 
         // If the domain is 'maint' then set the maint settings
-        if($requestDomain === 'maint') {
+        if ($requestDomain === 'maint') {
             self::forMaint();
-            return true;
+            return;
         }
 
-        $info = self::getCachedOrFreshInfo( $requestDomain );
-
-        if($info === null) {
-            return false;
+        $info = self::getCachedOrFreshInfo($requestDomain);
+        if ($info instanceof WBStackLookupFailure) {
+            throw new GlobalSetException(
+                "Failure looking up wiki $requestDomain.",
+                $info->statusCode,
+            );
         }
 
-        self::setGlobal( $info );
-        return true;
+        self::setGlobal($info);
     }
 
     /**
@@ -60,7 +64,7 @@ class GlobalSet {
 
     /**
      * @param string $requestDomain
-     * @return WBStackInfo|null
+     * @return WBStackInfo|WBStackLookupFailure
      */
     private static function getCachedOrFreshInfo( $requestDomain ) {
         $info = self::getInfoFromApcCache( $requestDomain );
@@ -70,11 +74,10 @@ class GlobalSet {
 
         // TODO create an APC lock saying this proc is going to get fresh data?
         // TODO in reality all of this needs to change...
-
         $info = self::getInfoFromApi( $requestDomain );
 
-        // Cache positive results for 10 seconds, negative for 2
-        $ttl = $info ? 10 : 2;
+        // Cache positive results for 10 seconds, failures for 2
+        $ttl = $info instanceof WBStackInfo ? 10 : 2;
         self::writeInfoToApcCache( $requestDomain, $info, $ttl );
 
         return $info;
@@ -82,7 +85,7 @@ class GlobalSet {
 
     /**
      * @param string $requestDomain
-     * @return WBStackInfo|null|bool false if no info is cached (should check), null for cached empty data (should not check)
+     * @return WBStackInfo|WBStackLookupFailure|false false if no info is cached (should check)
      */
     private static function getInfoFromApcCache( $requestDomain ) {
         return apcu_fetch( self::cacheKey($requestDomain) );
@@ -90,10 +93,10 @@ class GlobalSet {
 
     /**
      * @param string $requestDomain
-     * @param WBStackInfo|null $info
+     * @param WBStackInfo|WBStackLookupFailure $info
      * @param int $ttl
      */
-    private static function writeInfoToApcCache( $requestDomain, ?WBStackInfo $info, $ttl ) {
+    private static function writeInfoToApcCache( $requestDomain, $info, $ttl ) {
         $result = apcu_store( self::cacheKey($requestDomain), $info, $ttl );
         if(!$result) {
             // TODO log failed stores?!
@@ -106,7 +109,7 @@ class GlobalSet {
 
     /**
      * @param string $requestDomain
-     * @return WBStackInfo|null
+     * @return WBStackInfo|WBStackLookupFailure
      */
     private static function getInfoFromApi( $requestDomain ) {
         // START generic getting of wiki info from domain
@@ -120,16 +123,22 @@ class GlobalSet {
         curl_setopt($client, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($client, CURLOPT_RETURNTRANSFER, true);
         curl_setopt( $client, CURLOPT_USERAGENT, "WBStack - MediaWiki - WBStackInfo::getInfoFromApi" );
-
+        
         $response = curl_exec($client);
-
-        // TODO detect non 200 response here, and pass that out to the user as an error
-
-        $info = WBStackInfo::newFromJsonString($response, $requestDomain);
-        if (!$info) {
-            return null;
+        if ($response === false) {
+            return new WBStackLookupFailure(502);
         }
-        return $info;
+        $responseCode = intval(curl_getinfo($client, CURLINFO_RESPONSE_CODE));
+
+        if ($responseCode > 399) {
+            return new WBStackLookupFailure($responseCode);
+        }
+
+        try {
+            return WBStackInfo::newFromJsonString($response, $requestDomain);
+        } catch (\Exception $ex) {
+            return new WBStackLookupFailure(502);
+        }
     }
 
 }

@@ -15,7 +15,7 @@ class SearchResultThumbnail {
 
 	/**
 	 * Size of the representation in bytes or null if not applicable
-	 * @var int|null
+	 * @var int|callable|null
 	 */
 	private $size;
 
@@ -52,7 +52,8 @@ class SearchResultThumbnail {
 	/**
 	 * @param string $mimeType Internet mime type for the representation,
 	 * like "image/png" or "audio/mp3"
-	 * @param int|null $size Size of the representation in bytes
+	 * @param int|callable|null $size Size of the representation in bytes.
+	 *   This parameter has been deprecated in 1.41 and will be removed.
 	 * @param int|null $width Width of the representation in pixels or null if not applicable
 	 * @param int|null $height Height of the representation in pixels or null if not applicable
 	 * @param int|null $duration Duration of the representation in seconds or
@@ -62,7 +63,7 @@ class SearchResultThumbnail {
 	 */
 	public function __construct(
 		string $mimeType,
-		?int $size,
+		/* int|callable|null */ $size,
 		?int $width,
 		?int $height,
 		?int $duration,
@@ -70,7 +71,12 @@ class SearchResultThumbnail {
 		?string $name
 	) {
 		$this->mimeType = $mimeType;
-		$this->size = $size;
+		if ( $size !== null ) {
+			wfDeprecated(
+				__METHOD__ . ': Passing $size is discouraged for performance reasons.',
+				'1.41'
+			);
+		}
 		$this->width = $width;
 		$this->height = $height;
 		$this->duration = $duration;
@@ -111,10 +117,17 @@ class SearchResultThumbnail {
 	}
 
 	/**
+	 * @deprecated since 1.41, Do not use, resource intensive and thus
+	 *   degrade performance.
+	 *
 	 * Size of the representation in bytes or null if not applicable
 	 * @return int|null
 	 */
 	public function getSize(): ?int {
+		if ( is_callable( $this->size ) ) {
+			$this->size = ( $this->size )();
+		}
+
 		return $this->size;
 	}
 

@@ -19,17 +19,16 @@
 namespace MediaWiki\SecureLinkFixer;
 
 use MediaWiki\Hook\LinkerMakeExternalLinkHook;
+use MediaWiki\Utils\UrlUtils;
 
 class Hooks implements LinkerMakeExternalLinkHook {
 
-	/** @var HSTSPreloadLookup */
-	private $lookup;
+	private HSTSPreloadLookup $lookup;
+	private UrlUtils $urlUtils;
 
-	/**
-	 * @param HSTSPreloadLookup $lookup
-	 */
-	public function __construct( HSTSPreloadLookup $lookup ) {
+	public function __construct( HSTSPreloadLookup $lookup, UrlUtils $urlUtils ) {
 		$this->lookup = $lookup;
+		$this->urlUtils = $urlUtils;
 	}
 
 	/**
@@ -52,7 +51,7 @@ class Hooks implements LinkerMakeExternalLinkHook {
 			return;
 		}
 
-		$parsed = wfParseUrl( $url );
+		$parsed = $this->urlUtils->parse( $url );
 		if ( !$parsed ) {
 			return;
 		}
@@ -65,7 +64,7 @@ class Hooks implements LinkerMakeExternalLinkHook {
 		if ( $this->lookup->isPreloaded( $parsed['host'] ) ) {
 			$parsed['scheme'] = 'https';
 			$parsed['delimiter'] = '://';
-			$url = wfAssembleUrl( $parsed );
+			$url = UrlUtils::assemble( $parsed );
 		}
 	}
 }

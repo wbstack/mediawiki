@@ -2,7 +2,7 @@
 namespace Wikibase\Search\Elastic;
 
 use CirrusSearch\Maintenance\AnalysisConfigBuilder;
-use Config;
+use MediaWiki\Config\Config;
 
 /**
  * Utility class to build analyzer configs for ElasticSearch

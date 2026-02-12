@@ -4,10 +4,10 @@ declare( strict_types=1 );
 
 namespace Wikibase\Repo\Notifications;
 
-use CentralIdLookup;
-use Exception;
+use LogicException;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\User\CentralId\CentralIdLookup;
 use MediaWiki\User\UserIdentity;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\Lib\Changes\ChangeRow;
@@ -22,9 +22,9 @@ use Wikibase\Repo\Content\EntityContent;
  */
 class WikiPageActionEntityChangeFactory {
 
-	private $changeFactory;
+	private EntityChangeFactory $changeFactory;
 
-	private $centralIdLookup;
+	private ?CentralIdLookup $centralIdLookup;
 
 	public function __construct(
 		EntityChangeFactory $changeFactory,
@@ -158,7 +158,7 @@ class WikiPageActionEntityChangeFactory {
 		] );
 
 		if ( !$change->hasField( ChangeRow::OBJECT_ID ) ) {
-			throw new Exception(
+			throw new LogicException(
 				'EntityChange::setRevisionInfo() called without calling setEntityId() first!'
 			);
 		}

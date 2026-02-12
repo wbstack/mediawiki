@@ -4,9 +4,12 @@ declare( strict_types = 1 );
 
 namespace DataValues\Geo\PackagePrivate;
 
+/**
+ * @api
+ */
 class DmPrecisionDetector extends PrecisionDetector {
 
-	private $dmsPrecisionDetector;
+	private DmsPrecisionDetector $dmsPrecisionDetector;
 
 	public function __construct() {
 		$this->dmsPrecisionDetector = new DmsPrecisionDetector();

@@ -2,8 +2,8 @@
 
 namespace Wikibase\Client\RecentChanges;
 
-use ExternalUserNames;
-use Language;
+use MediaWiki\Language\Language;
+use MediaWiki\User\ExternalUserNames;
 use RecentChange;
 use UnexpectedValueException;
 use Wikibase\DataModel\Entity\EntityId;
@@ -152,7 +152,7 @@ class ExternalChangeFactory {
 			throw new UnexpectedValueException( '$type must be a string.' );
 		}
 
-		list( , $changeType ) = explode( '~', $type, 2 );
+		[ , $changeType ] = explode( '~', $type, 2 );
 
 		return $changeType;
 	}
@@ -201,7 +201,7 @@ class ExternalChangeFactory {
 	 */
 	private function parseAutoComment( $comment, $type ) {
 		$newComment = [
-			'key' => 'wikibase-comment-update'
+			'key' => 'wikibase-comment-update',
 		];
 
 		if ( is_array( $comment ) ) {
@@ -255,7 +255,7 @@ class ExternalChangeFactory {
 			return $this->formatComment( $comment );
 		} else {
 			// no override
-			return false;
+			return '';
 		}
 	}
 

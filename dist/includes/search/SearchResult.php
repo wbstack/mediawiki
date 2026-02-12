@@ -21,6 +21,8 @@
  * @ingroup Search
  */
 
+use MediaWiki\Title\Title;
+
 /**
  * NOTE: this class is being refactored into an abstract base class.
  * If you extend this class directly, please implement all the methods declared
@@ -52,7 +54,7 @@ class SearchResult {
 	 * @param ISearchResultSet|null $parentSet
 	 * @return SearchResult
 	 */
-	public static function newFromTitle( $title, ISearchResultSet $parentSet = null ) {
+	public static function newFromTitle( $title, ?ISearchResultSet $parentSet = null ) {
 		$result = new RevisionSearchResult( $title );
 		if ( $parentSet ) {
 			$parentSet->augmentResult( $result );

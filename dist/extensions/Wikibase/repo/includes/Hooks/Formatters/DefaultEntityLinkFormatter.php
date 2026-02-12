@@ -3,7 +3,8 @@
 namespace Wikibase\Repo\Hooks\Formatters;
 
 use HtmlArmor;
-use Language;
+use MediaWiki\Language\Language;
+use MediaWiki\Languages\LanguageFactory;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\Store\EntityTitleTextLookup;
 
@@ -23,17 +24,27 @@ class DefaultEntityLinkFormatter implements EntityLinkFormatter {
 	 */
 	private $entityTitleTextLookup;
 
-	public function __construct( Language $pageLanguage, EntityTitleTextLookup $entityTitleTextLookup ) {
+	/**
+	 * @var LanguageFactory
+	 */
+	private $languageFactory;
+
+	public function __construct(
+		Language $pageLanguage,
+		EntityTitleTextLookup $entityTitleTextLookup,
+		LanguageFactory $languageFactory
+	) {
 		$this->pageLanguage = $pageLanguage;
 		$this->entityTitleTextLookup = $entityTitleTextLookup;
+		$this->languageFactory = $languageFactory;
 	}
 
 	/**
 	 * @inheritDoc
 	 */
-	public function getHtml( EntityId $entityId, array $labelData = null ) {
+	public function getHtml( EntityId $entityId, ?array $labelData = null ) {
 		/** @var Language $labelLang */
-		list( $labelText, $labelLang ) = $this->extractTextAndLanguage( $labelData );
+		[ $labelText, $labelLang ] = $this->extractTextAndLanguage( $labelData );
 
 		$idHtml = '<span class="wb-itemlink-id">'
 				  . wfMessage(
@@ -66,16 +77,16 @@ class DefaultEntityLinkFormatter implements EntityLinkFormatter {
 	 *
 	 * @return array list( string $text, Language $language )
 	 */
-	private function extractTextAndLanguage( array $termData = null ) {
+	private function extractTextAndLanguage( ?array $termData ) {
 		if ( $termData ) {
 			return [
 				$termData['value'],
-				Language::factory( $termData['language'] )
+				$this->languageFactory->getLanguage( $termData['language'] ),
 			];
 		} else {
 			return [
 				'',
-				$this->pageLanguage
+				$this->pageLanguage,
 			];
 		}
 	}
@@ -85,14 +96,14 @@ class DefaultEntityLinkFormatter implements EntityLinkFormatter {
 	 */
 	public function getTitleAttribute(
 		EntityId $entityId,
-		array $labelData = null,
-		array $descriptionData = null
+		?array $labelData = null,
+		?array $descriptionData = null
 	) {
 		/** @var Language $labelLang */
 		/** @var Language $descriptionLang */
 
-		list( $labelText, $labelLang ) = $this->extractTextAndLanguage( $labelData );
-		list( $descriptionText, $descriptionLang ) = $this->extractTextAndLanguage( $descriptionData );
+		[ $labelText, $labelLang ] = $this->extractTextAndLanguage( $labelData );
+		[ $descriptionText, $descriptionLang ] = $this->extractTextAndLanguage( $descriptionData );
 
 		// Set title attribute for constructed link, and make tricks with the directionality to get it right
 		$titleText = ( $labelText !== '' )

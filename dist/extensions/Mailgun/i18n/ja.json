@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Sujiniku"
+			"Sujiniku",
+			"Shirayuki"
 		]
 	},
-	"mailgun-desc": "MediaWikiから Mailgun API service を経由してEメールを送る"
+	"mailgun-desc": "MediaWiki から Mailgun API service を経由してメールを送信する"
 }

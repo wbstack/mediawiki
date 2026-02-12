@@ -5,5 +5,9 @@
 		]
 	},
 	"jsonconfig-edit-action-cancel": "Nuligar",
+	"jsonconfig-err-bool": "Parametro \"$1\" mustas sive ajustesar kom <code>true</code> o <code>false</code>",
+	"jsonconfig-err-integer": "Parametro \"$1\" mustas esar integra nombro",
+	"jsonconfig-err-string": "Parametro \"$1\" mustas esar ''string'' (texto o texto + cifro)",
+	"jsonconfig-optional-field": "(fakultativa)",
 	"jsonconfig-type-name-number": "nombro"
 }

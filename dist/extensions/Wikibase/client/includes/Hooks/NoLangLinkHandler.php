@@ -2,8 +2,8 @@
 
 namespace Wikibase\Client\Hooks;
 
-use Parser;
-use ParserOutput;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\ParserOutput;
 use Wikibase\Client\NamespaceChecker;
 use Wikibase\Client\WikibaseClient;
 

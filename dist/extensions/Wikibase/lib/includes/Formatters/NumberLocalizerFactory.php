@@ -4,9 +4,8 @@ declare( strict_types=1 );
 
 namespace Wikibase\Lib\Formatters;
 
-use Language;
+use MediaWiki\Language\Language;
 use MediaWiki\Languages\LanguageFactory;
-use MWException;
 use ValueFormatters\NumberLocalizer;
 
 /**
@@ -32,9 +31,6 @@ class NumberLocalizerFactory {
 		return new MediaWikiNumberLocalizer( $language );
 	}
 
-	/**
-	 * @throws MWException
-	 */
 	public function getForLanguageCode( string $langCode ): NumberLocalizer {
 		$language = $this->languageFactory->getLanguage( $langCode );
 		return $this->getForLanguage( $language );

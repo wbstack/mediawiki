@@ -4,29 +4,36 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
-use ApiMain;
-use ApiUsageException;
 use DataValues\DataValue;
 use DataValues\IllegalValueException;
 use DataValues\StringValue;
-use IBufferingStatsdDataFactory;
+use DataValues\TimeValue;
+use Deserializers\Exceptions\DeserializationException;
 use InvalidArgumentException;
 use LogicException;
-use NullStatsdDataFactory;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiUsageException;
 use ValueFormatters\FormatterOptions;
 use ValueFormatters\FormattingException;
 use ValueFormatters\ValueFormatter;
+use Wikibase\DataModel\Deserializers\SnakValueDeserializer;
 use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
+use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookupException;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\Lib\DataTypeFactory;
 use Wikibase\Lib\DataValueFactory;
 use Wikibase\Lib\Formatters\OutputFormatSnakFormatterFactory;
 use Wikibase\Lib\Formatters\OutputFormatValueFormatterFactory;
+use Wikibase\Lib\Formatters\ShowCalendarModelDecider;
 use Wikibase\Lib\Formatters\SnakFormatter;
 use Wikibase\Lib\Formatters\TypedValueFormatter;
 use Wikibase\Repo\FederatedProperties\FederatedPropertiesException;
 use Wikimedia\ParamValidator\ParamValidator;
+use Wikimedia\Stats\IBufferingStatsdDataFactory;
+use Wikimedia\Stats\NullStatsdDataFactory;
 
 /**
  * API module for using value formatters.
@@ -38,49 +45,18 @@ use Wikimedia\ParamValidator\ParamValidator;
  */
 class FormatSnakValue extends ApiBase {
 
-	/**
-	 * @var OutputFormatValueFormatterFactory
-	 */
-	private $valueFormatterFactory;
-
-	/**
-	 * @var OutputFormatSnakFormatterFactory
-	 */
-	private $snakFormatterFactory;
-
-	/** @var DataTypeFactory */
-	private $dataTypeFactory;
-
-	/**
-	 * @var DataValueFactory
-	 */
-	private $dataValueFactory;
-
-	/**
-	 * @var ApiErrorReporter
-	 */
-	private $errorReporter;
-
-	/** @var IBufferingStatsdDataFactory */
-	private $stats;
-
-	/**
-	 * @var EntityIdParser
-	 */
-	private $entityIdParser;
+	private OutputFormatValueFormatterFactory $valueFormatterFactory;
+	private OutputFormatSnakFormatterFactory $snakFormatterFactory;
+	private DataTypeFactory $dataTypeFactory;
+	private DataValueFactory $dataValueFactory;
+	private ApiErrorReporter $errorReporter;
+	private IBufferingStatsdDataFactory $stats;
+	private EntityIdParser $entityIdParser;
+	private PropertyDataTypeLookup $dataTypeLookup;
+	private SnakValueDeserializer $snakValueDeserializer;
 
 	/**
 	 * @see ApiBase::__construct
-	 *
-	 * @param ApiMain $mainModule
-	 * @param string $moduleName
-	 * @param OutputFormatValueFormatterFactory $valueFormatterFactory
-	 * @param OutputFormatSnakFormatterFactory $snakFormatterFactory
-	 * @param DataTypeFactory $dataTypeFactory
-	 * @param DataValueFactory $dataValueFactory
-	 * @param ApiErrorReporter $apiErrorReporter
-	 * @param IBufferingStatsdDataFactory|null $stats
-	 * @param EntityIdParser $entityIdParser
 	 */
 	public function __construct(
 		ApiMain $mainModule,
@@ -91,7 +67,9 @@ class FormatSnakValue extends ApiBase {
 		DataValueFactory $dataValueFactory,
 		ApiErrorReporter $apiErrorReporter,
 		?IBufferingStatsdDataFactory $stats,
-		EntityIdParser $entityIdParser
+		EntityIdParser $entityIdParser,
+		PropertyDataTypeLookup $dataTypeLookup,
+		SnakValueDeserializer $snakValueDeserializer
 	) {
 		parent::__construct( $mainModule, $moduleName );
 
@@ -102,6 +80,8 @@ class FormatSnakValue extends ApiBase {
 		$this->errorReporter = $apiErrorReporter;
 		$this->stats = $stats ?: new NullStatsdDataFactory();
 		$this->entityIdParser = $entityIdParser;
+		$this->dataTypeLookup = $dataTypeLookup;
+		$this->snakValueDeserializer = $snakValueDeserializer;
 	}
 
 	public static function factory(
@@ -112,7 +92,9 @@ class FormatSnakValue extends ApiBase {
 		DataTypeFactory $dataTypeFactory,
 		DataValueFactory $dataValueFactory,
 		EntityIdParser $entityIdParser,
+		PropertyDataTypeLookup $dataTypeLookup,
 		OutputFormatSnakFormatterFactory $snakFormatterFactory,
+		SnakValueDeserializer $snakValueDeserializer,
 		OutputFormatValueFormatterFactory $valueFormatterFactory
 	): self {
 		return new self(
@@ -124,7 +106,9 @@ class FormatSnakValue extends ApiBase {
 			$dataValueFactory,
 			$apiHelperFactory->getErrorReporter( $mainModule ),
 			$stats,
-			$entityIdParser
+			$entityIdParser,
+			$dataTypeLookup,
+			$snakValueDeserializer
 		);
 	}
 
@@ -138,7 +122,7 @@ class FormatSnakValue extends ApiBase {
 		$this->requireMaxOneParameter( $params, 'property', 'datatype' );
 
 		try {
-			$value = $this->decodeDataValue( $params['datavalue'] );
+			$value = $this->decodeDataValue( $params );
 			$dataTypeId = $this->getDataTypeId( $params );
 			$formattedValue = $this->formatValue( $params, $value, $dataTypeId );
 		} catch ( FederatedPropertiesException $ex ) {
@@ -167,7 +151,7 @@ class FormatSnakValue extends ApiBase {
 	private function formatValue( array $params, DataValue $value, ?string $dataTypeId ): string {
 		$snak = null;
 		if ( isset( $params['property'] ) ) {
-			$snak = $this->decodeSnak( $params['property'], $value );
+			$snak = new PropertyValueSnak( $this->parsePropertyId( $params['property'] ), $value );
 		}
 
 		if ( $snak ) {
@@ -218,34 +202,25 @@ class FormatSnakValue extends ApiBase {
 		return $formatter;
 	}
 
-	private function decodeSnak( string $propertyIdSerialization, DataValue $dataValue ): PropertyValueSnak {
-		try {
-			$propertyId = $this->entityIdParser->parse( $propertyIdSerialization );
-		} catch ( InvalidArgumentException $ex ) {
-			$this->errorReporter->dieException( $ex, 'badpropertyid' );
-		}
-
-		return new PropertyValueSnak( $propertyId, $dataValue );
-	}
-
 	/**
-	 * @param string $json A JSON-encoded DataValue
-	 *
 	 * @throws ApiUsageException
 	 * @throws LogicException
-	 * @return DataValue
 	 */
-	private function decodeDataValue( string $json ): DataValue {
-		$data = json_decode( $json, true );
+	private function decodeDataValue( array $params ): DataValue {
+		$data = json_decode( $params['datavalue'], true );
 
 		if ( !is_array( $data ) ) {
 			$this->errorReporter->dieError( 'Failed to decode datavalue', 'baddatavalue' );
 		}
+		'@phan-var array $data';
+
+		$dataType = $this->getDataTypeId( $params );
 
 		try {
-			$value = $this->dataValueFactory->newFromArray( $data );
-			return $value;
-		} catch ( IllegalValueException $ex ) {
+			return $dataType
+				? $this->snakValueDeserializer->deserialize( $dataType, $data )
+				: $this->dataValueFactory->newFromArray( $data );
+		} catch ( IllegalValueException | DeserializationException $ex ) {
 			$this->errorReporter->dieException( $ex, 'baddatavalue' );
 		}
 
@@ -278,8 +253,33 @@ class FormatSnakValue extends ApiBase {
 	 * @return string|null
 	 */
 	private function getDataTypeId( array $params ): ?string {
-		//TODO: could be looked up based on a property ID
-		return $params['datatype'];
+		if ( isset( $params['datatype'] ) ) {
+			return $params['datatype'];
+		}
+		if ( isset( $params['property'] ) ) {
+			return $this->lookUpPropertyDataType( $params['property'] );
+		}
+
+		return null;
+	}
+
+	private function parsePropertyId( string $propertyIdSerialization ): PropertyId {
+		try {
+			/** @var PropertyId $propertyId */
+			$propertyId = $this->entityIdParser->parse( $propertyIdSerialization );
+			'@phan-var PropertyId $propertyId';
+			return $propertyId;
+		} catch ( InvalidArgumentException $ex ) {
+			$this->errorReporter->dieException( $ex, 'badpropertyid' );
+		}
+	}
+
+	private function lookUpPropertyDataType( string $id ): ?string {
+		try {
+			return $this->dataTypeLookup->getDataTypeIdForProperty( $this->parsePropertyId( $id ) );
+		} catch ( PropertyDataTypeLookupException $e ) {
+			return null; // property not found will be handled by the snak formatter later
+		}
 	}
 
 	/**
@@ -324,6 +324,12 @@ class FormatSnakValue extends ApiBase {
 		$query = 'action=' . $this->getModuleName();
 		$hello = new StringValue( 'hello' );
 		$acme = new StringValue( 'http://acme.org' );
+		$einsteinDob = new TimeValue(
+			'+1879-03-14T00:00:00Z',
+			0, 0, 0,
+			TimeValue::PRECISION_DAY,
+			TimeValue::CALENDAR_GREGORIAN
+		);
 
 		return [
 			$query . '&' . wfArrayToCgi( [
@@ -336,7 +342,14 @@ class FormatSnakValue extends ApiBase {
 				'generate' => 'text/html',
 			] ) => 'apihelp-wbformatvalue-example-2',
 
-			//TODO: example for the options parameter, once we have something sensible to show there.
+			$query . '&' . wfArrayToCgi( [
+				'datavalue' => json_encode( $einsteinDob->toArray() ),
+				'datatype' => 'time',
+				'generate' => 'text/plain',
+				'options' => json_encode( [
+					ShowCalendarModelDecider::OPT_SHOW_CALENDAR => 'auto',
+				] ),
+			] ) => 'apihelp-wbformatvalue-example-3',
 		];
 	}
 

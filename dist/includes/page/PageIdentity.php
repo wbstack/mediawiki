@@ -20,6 +20,7 @@
 
 namespace MediaWiki\Page;
 
+use MediaWiki\Title\Title;
 use RuntimeException;
 use Wikimedia\Assert\PreconditionException;
 
@@ -57,9 +58,11 @@ use Wikimedia\Assert\PreconditionException;
  *   meaning of the "local" Wiki ID is preserved if the PageIdentity originated on
  *   another wiki.
  *
- * @stable to type
+ * @see https://www.mediawiki.org/wiki/Manual:Modeling_pages
  *
+ * @stable to type
  * @since 1.36
+ * @ingroup Page
  */
 interface PageIdentity extends PageReference {
 

@@ -2,9 +2,9 @@
 
 namespace Wikibase\Repo\Maintenance;
 
-use Maintenance;
-use MWException;
-use OrderedStreamingForkController;
+use InvalidArgumentException;
+use MediaWiki\Maintenance\Maintenance;
+use MediaWiki\Maintenance\OrderedStreamingForkController;
 use Wikibase\Repo\Api\EntitySearchHelper;
 use Wikibase\Repo\WikibaseRepo;
 
@@ -108,7 +108,7 @@ class SearchEntities extends Maintenance {
 		$out = [
 			'query' => $query,
 			'totalHits' => count( $results ),
-			'rows' => []
+			'rows' => [],
 		];
 
 		foreach ( $results as $match ) {
@@ -127,7 +127,7 @@ class SearchEntities extends Maintenance {
 					'title' => $displayLabel ? $match->getDisplayLabel()->getText() : "",
 					'titleLanguage' => $displayLabel ? $match->getDisplayLabel()->getLanguageCode() : "",
 					'text' => $match->getDisplayDescription() ? $match->getDisplayDescription()->getText() : "",
-				]
+				],
 			];
 		}
 		return json_encode( $out );
@@ -137,17 +137,16 @@ class SearchEntities extends Maintenance {
 	 * Get appropriate searcher.
 	 * @param string $engine
 	 * @return EntitySearchHelper
-	 * @throws MWException
 	 */
 	private function getSearchHelper( $engine ) {
 		$engines = [
 			'sql' => function() {
 				return WikibaseRepo::getEntitySearchHelper();
-			}
+			},
 		];
 
 		if ( !isset( $engines[$engine] ) ) {
-			throw new MWException( "Unknown engine: $engine, valid values: "
+			throw new InvalidArgumentException( "Unknown engine: $engine, valid values: "
 				. implode( ", ", array_keys( $engines ) ) );
 		}
 

@@ -1,50 +1,55 @@
+'use strict';
+
 /**
- * @file Temporary tracking to evaluate the impact of Reference Previews on users' interaction with references.
+ * Temporary tracking to evaluate the impact of Reference Previews on
+ * users' interaction with references.
  *
- * The baseline metrics are for a sample of users who don't have ReferencePreviews enabled.
- *
- * Users with the feature enabled are not sampled, and events are logged using the ReferencePreviewsCite schema.
- *
+ * @memberof module:ext.cite.ux-enhancements
  * @see https://phabricator.wikimedia.org/T214493
  * @see https://phabricator.wikimedia.org/T231529
+ * @see https://phabricator.wikimedia.org/T353798
  * @see https://meta.wikimedia.org/wiki/Schema:ReferencePreviewsBaseline
  * @see https://meta.wikimedia.org/wiki/Schema:ReferencePreviewsCite
  */
 
+const CITE_BASELINE_LOGGING_SCHEMA = 'ext.cite.baseline';
+// Same as in the Popups extension
+// FIXME: Could be an extension wide constant when Reference Previews is merged into this code base
+const REFERENCE_PREVIEWS_LOGGING_SCHEMA = 'event.ReferencePreviewsPopups';
+
 // EventLogging may not be installed
-mw.loader.using( 'ext.eventLogging' ).then( function () {
-	'use strict';
-
-	$( function () {
-		var isReferencePreviewsEnabled = mw.config.get( 'wgPopupsReferencePreviews', false ),
-			samplingRate = isReferencePreviewsEnabled ? 1 : 1000;
-
+mw.loader.using( 'ext.eventLogging' ).then( () => {
+	$( () => {
 		if ( !navigator.sendBeacon ||
-			!mw.config.get( 'wgIsArticle' ) ||
-			!mw.eventLog ||
-			!mw.eventLog.eventInSample( samplingRate )
+			!mw.config.get( 'wgIsArticle' )
 		) {
 			return;
 		}
 
-		var loggingTopic = isReferencePreviewsEnabled ?
-			'event.ReferencePreviewsCite' :
-			'event.ReferencePreviewsBaseline';
+		// FIXME: This might be obsolete when the code moves to the this extension
+		mw.trackSubscribe( REFERENCE_PREVIEWS_LOGGING_SCHEMA, ( type, data ) => {
+			if ( data.action.indexOf( 'anonymous' ) !== -1 ) {
+				mw.config.set( 'wgCiteReferencePreviewsVisible', data.action === 'anonymousEnabled' );
+			}
+		} );
+
 		// eslint-disable-next-line no-jquery/no-global-selector
 		$( '#mw-content-text' ).on(
 			'click',
 			// Footnote links, references block in VisualEditor, and reference content links.
 			'.reference a[ href*="#" ], .mw-reference-text a, .reference-text a',
 			function () {
-				var isInReferenceBlock = $( this ).parents( '.references' ).length > 0;
-				mw.track( loggingTopic, {
+				const isInReferenceBlock = $( this ).parents( '.references' ).length > 0;
+				mw.eventLog.dispatch( CITE_BASELINE_LOGGING_SCHEMA, {
 					action: ( isInReferenceBlock ?
 						'clickedReferenceContentLink' :
-						'clickedFootnote' )
+						'clickedFootnote' ),
+					// FIXME: This might be obsolete when the code moves to the this extension and
+					//  we get state directly.
+					// eslint-disable-next-line camelcase
+					with_ref_previews: mw.config.get( 'wgCiteReferencePreviewsVisible' )
 				} );
 			}
 		);
-
-		mw.track( loggingTopic, { action: 'pageview' } );
 	} );
 } );

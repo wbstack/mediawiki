@@ -1,4 +1,4 @@
-var
+const
 	mfExtend = require( '../mfExtend' ),
 	Overlay = require( '../Overlay' ),
 	util = require( '../util' ),
@@ -12,9 +12,10 @@ var
  * Overlay displaying search results
  *
  * @class SearchOverlay
+ * @memberof module:mobile.startup/search
  * @extends Overlay
  * @uses SearchGateway
- * @uses Icon
+ * @uses IconButton
  *
  * @param {Object} params Configuration options
  * @param {string} params.placeholderMsg Search input placeholder text.
@@ -23,13 +24,12 @@ var
  * @param {SearchGateway} [params.gateway]
  */
 function SearchOverlay( params ) {
-	var header = searchHeader(
+	const header = searchHeader(
 			params.placeholderMsg,
 			params.action || mw.config.get( 'wgScript' ),
-			function ( query ) {
-				this.performSearch( query );
-			}.bind( this ),
-			params.defaultSearchPage || ''
+			( query ) => this.performSearch( query ),
+			params.defaultSearchPage || '',
+			params.autocapitalize
 		),
 		options = util.extend( true, {
 			headerChrome: true,
@@ -69,10 +69,10 @@ mfExtend( SearchOverlay, Overlay, {
 	 * @memberof SearchOverlay
 	 * @instance
 	 */
-	onClickSearchContent: function () {
-		var
+	onClickSearchContent() {
+		const
 			$form = this.$el.find( 'form' ),
-			$el = $form[ 0 ].parentNode;
+			$el = $form[0].parentNode;
 
 		// Add fulltext input to force fulltext search
 		this.parseHTML( '<input>' )
@@ -84,10 +84,10 @@ mfExtend( SearchOverlay, Overlay, {
 			.appendTo( $form );
 		// history.back queues a task so might run after this call. Thus we use setTimeout
 		// http://www.w3.org/TR/2011/WD-html5-20110113/webappapis.html#queue-a-task
-		setTimeout( function () {
+		setTimeout( () => {
 			// Firefox doesn't allow submission of a form not in the DOM
 			// so temporarily re-add it if it's gone.
-			if ( !$form[ 0 ].parentNode ) {
+			if ( !$form[0].parentNode ) {
 				$form.appendTo( $el );
 			}
 			$form.trigger( 'submit' );
@@ -100,7 +100,7 @@ mfExtend( SearchOverlay, Overlay, {
 	 * @memberof SearchOverlay
 	 * @instance
 	 */
-	onClickOverlayContent: function () {
+	onClickOverlayContent() {
 		this.$el.find( '.cancel' ).trigger( 'click' );
 	},
 
@@ -111,7 +111,7 @@ mfExtend( SearchOverlay, Overlay, {
 	 * @memberof SearchOverlay
 	 * @instance
 	 */
-	hideKeyboardOnScroll: function () {
+	hideKeyboardOnScroll() {
 		this.$input.trigger( 'blur' );
 	},
 
@@ -122,8 +122,8 @@ mfExtend( SearchOverlay, Overlay, {
 	 * @instance
 	 * @param {jQuery.Event} ev
 	 */
-	onClickResult: function ( ev ) {
-		var
+	onClickResult( ev ) {
+		const
 			self = this,
 			$link = this.$el.find( ev.currentTarget );
 		/**
@@ -142,10 +142,10 @@ mfExtend( SearchOverlay, Overlay, {
 		this.router.back().then( function () {
 			// T308288: Appends the current search id as a url param on clickthroughs
 			if ( this.currentSearchId ) {
-				var clickUri = new mw.Uri( location.href );
-				clickUri.query.searchToken = this.currentSearchId;
+				const clickUrl = new URL( location.href );
+				clickUrl.searchParams.set( 'searchToken', this.currentSearchId );
 				self.router.navigateTo( document.title, {
-					path: clickUri.toString(),
+					path: clickUrl.toString(),
 					useReplaceState: true
 				} );
 				this.currentSearchId = null;
@@ -162,14 +162,14 @@ mfExtend( SearchOverlay, Overlay, {
 	 * @memberof SearchOverlay
 	 * @instance
 	 */
-	postRender: function () {
-		var self = this,
+	postRender() {
+		const self = this,
 			searchResults = new SearchResultsView( {
 				searchContentLabel: mw.msg( 'mobile-frontend-search-content' ),
 				noResultsMsg: mw.msg( 'mobile-frontend-search-no-results' ),
 				searchContentNoResultsMsg: mw.message( 'mobile-frontend-search-content-no-results' ).parse()
-			} ),
-			timer;
+			} );
+		let timer;
 
 		this.$el.find( '.overlay-content' ).append( searchResults.$el );
 		Overlay.prototype.postRender.call( this );
@@ -185,7 +185,7 @@ mfExtend( SearchOverlay, Overlay, {
 		// leading to an accidental click (T299846)
 		// Stopping propagation when the input is focused will prevent scrolling while
 		// the keyboard is collapsed.
-		this.$resultContainer[ 0 ].addEventListener( 'touchstart', ( ev ) => {
+		this.$resultContainer[0].addEventListener( 'touchstart', ( ev ) => {
 			if ( document.activeElement === this.$input[0] ) {
 				ev.stopPropagation();
 			}
@@ -203,13 +203,12 @@ mfExtend( SearchOverlay, Overlay, {
 		// Show a spinner on top of search results
 		// FIXME: Given this manipulates SearchResultsView this should be moved into that class
 		this.$spinner = searchResults.$el.find( '.spinner-container' );
-		this.on( 'search-start', function ( searchData ) {
+		this.on( 'search-start', ( searchData ) => {
 			if ( timer ) {
 				clearSearch();
 			}
-			timer = setTimeout( function () {
-				self.$spinner.show();
-			}, SEARCH_SPINNER_DELAY - searchData.delay );
+			timer = setTimeout( () => self.$spinner.show(),
+				SEARCH_SPINNER_DELAY - searchData.delay );
 		} );
 		this.on( 'search-results', clearSearch );
 	},
@@ -221,8 +220,8 @@ mfExtend( SearchOverlay, Overlay, {
 	 * @memberof SearchOverlay
 	 * @instance
 	 */
-	showKeyboard: function () {
-		var len = this.$input.val().length;
+	showKeyboard() {
+		const len = this.$input.val().length;
 		this.$input.trigger( 'focus' );
 		// Cursor to the end of the input
 		if ( this.$input[0].setSelectionRange ) {
@@ -235,7 +234,7 @@ mfExtend( SearchOverlay, Overlay, {
 	 * @memberof SearchOverlay
 	 * @instance
 	 */
-	show: function () {
+	show() {
 		// Overlay#show defines the actual overlay visibility.
 		Overlay.prototype.show.apply( this, arguments );
 
@@ -251,8 +250,8 @@ mfExtend( SearchOverlay, Overlay, {
 	 * @instance
 	 * @param {string} query
 	 */
-	performSearch: function ( query ) {
-		var
+	performSearch( query ) {
+		const
 			self = this,
 			api = this.api,
 			delay = this.gateway.isCached( query ) ? 0 : SEARCH_DELAY;
@@ -266,9 +265,8 @@ mfExtend( SearchOverlay, Overlay, {
 			clearTimeout( this.timer );
 
 			if ( query.length ) {
-				this.timer = setTimeout( function () {
-					var xhr;
-					xhr = self.gateway.search( query );
+				this.timer = setTimeout( () => {
+					const xhr = self.gateway.search( query );
 					self._pendingQuery = xhr.then( function ( data ) {
 						this.currentSearchId = data.searchId;
 						// FIXME: Given this manipulates SearchResultsView
@@ -286,7 +284,7 @@ mfExtend( SearchOverlay, Overlay, {
 
 							// eslint-disable-next-line no-new
 							new WatchstarPageList( {
-								api: api,
+								api,
 								funnel: 'search',
 								pages: data.results,
 								el: self.$resultContainer
@@ -294,7 +292,11 @@ mfExtend( SearchOverlay, Overlay, {
 
 							self.$results = self.$resultContainer.find( 'li' );
 						}
-					} ).promise( { abort: function () { xhr.abort(); } } );
+					} ).promise( {
+						abort() {
+							xhr.abort();
+						}
+					} );
 				}, delay );
 			} else {
 				self.resetSearch();
@@ -308,7 +310,7 @@ mfExtend( SearchOverlay, Overlay, {
 	 *
 	 * @private
 	 */
-	resetSearch: function () {
+	resetSearch() {
 		this.$el.find( '.overlay-content' ).children().hide();
 	}
 } );

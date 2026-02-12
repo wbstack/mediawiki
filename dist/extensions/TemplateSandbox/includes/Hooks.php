@@ -2,39 +2,80 @@
 
 namespace MediaWiki\Extension\TemplateSandbox;
 
-use ApiBase;
-use ApiExpandTemplates;
-use ApiParse;
-use Config;
-use Content;
-use ContentHandler;
-use EditPage;
-use ExtensionRegistry;
-use Html;
-use IContextSource;
-use MediaWiki\MediaWikiServices;
+// phpcs:disable MediaWiki.NamingConventions.LowerCamelFunctionsName.FunctionName
+
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiExpandTemplates;
+use MediaWiki\Api\ApiParse;
+use MediaWiki\Api\Hook\APIGetAllowedParamsHook;
+use MediaWiki\Api\Hook\ApiMakeParserOptionsHook;
+use MediaWiki\Config\Config;
+use MediaWiki\Content\Content;
+use MediaWiki\Content\IContentHandlerFactory;
+use MediaWiki\Content\Renderer\ContentRenderer;
+use MediaWiki\Content\Transform\ContentTransformer;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\EditPage\EditPage;
+use MediaWiki\Hook\AlternateEditPreviewHook;
+use MediaWiki\Hook\EditPage__importFormDataHook;
+use MediaWiki\Hook\EditPage__showStandardInputs_optionsHook;
+use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\Html\Html;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Page\WikiPageFactory;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\Request\WebRequest;
 use MediaWiki\ResourceLoader as RL;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\Title\Title;
+use MediaWiki\User\Options\UserOptionsLookup;
 use MediaWiki\Widget\TitleInputWidget;
+use MediaWiki\Xml\Xml;
 use MWContentSerializationException;
 use OOUI\ActionFieldLayout;
 use OOUI\ButtonInputWidget;
 use OOUI\FieldsetLayout;
 use OOUI\HtmlSnippet;
 use OOUI\Layout;
-use OutputPage;
-use ParserOptions;
-use ParserOutput;
-use RequestContext;
-use Title;
-use WebRequest;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ScopedCallback;
-use Xml;
 
-class Hooks {
+class Hooks implements
+	EditPage__importFormDataHook,
+	EditPage__showStandardInputs_optionsHook,
+	AlternateEditPreviewHook,
+	APIGetAllowedParamsHook,
+	ApiMakeParserOptionsHook
+{
+	/** @var int */
 	private static $counter = 0;
+
+	private IContentHandlerFactory $contentHandlerFactory;
+	private ContentRenderer $contentRenderer;
+	private ContentTransformer $contentTransformer;
+	private HookContainer $hookContainer;
+	private UserOptionsLookup $userOptionsLookup;
+	private WikiPageFactory $wikiPageFactory;
+
+	public function __construct(
+		IContentHandlerFactory $contentHandlerFactory,
+		ContentRenderer $contentRenderer,
+		ContentTransformer $contentTransformer,
+		HookContainer $hookContainer,
+		UserOptionsLookup $userOptionsLookup,
+		WikiPageFactory $wikiPageFactory
+	) {
+		$this->contentHandlerFactory = $contentHandlerFactory;
+		$this->contentRenderer = $contentRenderer;
+		$this->contentTransformer = $contentTransformer;
+		$this->hookContainer = $hookContainer;
+		$this->userOptionsLookup = $userOptionsLookup;
+		$this->wikiPageFactory = $wikiPageFactory;
+	}
 
 	/**
 	 * Hook for EditPage::importFormData to parse our new form fields, and if
@@ -45,9 +86,8 @@ class Hooks {
 	 *
 	 * @param EditPage $editpage
 	 * @param WebRequest $request
-	 * @return bool
 	 */
-	public static function importFormData( $editpage, $request ) {
+	public function onEditPage__importFormData( $editpage, $request ) {
 		$editpage->templatesandbox_template = $request->getText(
 			'wpTemplateSandboxTemplate', $editpage->getTitle()->getPrefixedText()
 		);
@@ -61,8 +101,6 @@ class Hooks {
 				$editpage->live = false;
 			}
 		}
-
-		return true;
 	}
 
 	/**
@@ -86,10 +124,10 @@ class Hooks {
 	 * @param ParserOutput &$parserOutput
 	 * @return bool
 	 */
-	public static function templateSandboxPreview( EditPage $editpage, &$content, &$out,
+	public function onAlternateEditPreview( $editpage, &$content, &$out,
 		&$parserOutput
 	) {
-		if ( empty( $editpage->templatesandbox_preview ) ) {
+		if ( !isset( $editpage->templatesandbox_preview ) ) {
 			return true;
 		}
 
@@ -160,11 +198,9 @@ class Hooks {
 			$popts = $editpage->getArticle()->getPage()->makeParserOptions(
 				$context
 			);
-			$services = MediaWikiServices::getInstance();
 			$popts->setIsPreview( true );
 			$popts->setIsSectionPreview( false );
-			$contentTransformer = $services->getContentTransformer();
-			$content = $contentTransformer->preSaveTransform(
+			$content = $this->contentTransformer->preSaveTransform(
 				$content,
 				$templatetitle,
 				$user,
@@ -175,13 +211,12 @@ class Hooks {
 				' [[#' . EditPage::EDITFORM_ID . '|' . $lang->getArrow() . ' ' .
 				$context->msg( 'continue-editing' )->text() . ']]';
 
-			$page = $services->getWikiPageFactory()->newFromTitle( $title );
+			$page = $this->wikiPageFactory->newFromTitle( $title );
 			$popts = $page->makeParserOptions( $context );
 			$popts->setIsPreview( true );
 			$popts->setIsSectionPreview( false );
 			$logic = new Logic( [], $templatetitle, $content );
 			$reset = $logic->setupForParse( $popts );
-			$popts->enableLimitReport();
 
 			$revRecord = call_user_func_array(
 				$popts->getCurrentRevisionRecordCallback(),
@@ -193,8 +228,7 @@ class Hooks {
 				RevisionRecord::FOR_THIS_USER,
 				$user
 			);
-			$contentRenderer = $services->getContentRenderer();
-			$parserOutput = $contentRenderer->getParserOutput( $pageContent, $title, $revRecord->getId(), $popts );
+			$parserOutput = $this->contentRenderer->getParserOutput( $pageContent, $title, $revRecord, $popts );
 
 			$output->addParserOutputMetadata( $parserOutput );
 			if ( $output->userCanPreview() ) {
@@ -203,8 +237,11 @@ class Hooks {
 
 			$dtitle = $parserOutput->getDisplayTitle();
 			$parserOutput->setTitleText( '' );
+			$skinOptions = $output->getSkin()->getOptions();
 			$out = $parserOutput->getText( [
+				'injectTOC' => $skinOptions['toc'],
 				'enableSectionEditLinks' => false,
+				'includeDebugInfo' => true,
 			] );
 
 			if ( count( $parserOutput->getWarnings() ) ) {
@@ -230,11 +267,6 @@ class Hooks {
 			)
 		);
 
-		$pageLang = $title->getPageViewLanguage();
-		$attribs = [ 'lang' => $pageLang->getHtmlCode(), 'dir' => $pageLang->getDir(),
-			'class' => 'mw-content-' . $pageLang->getDir() ];
-		$out = Html::rawElement( 'div', $attribs, $out );
-
 		$out = $previewhead . $out . $editpage->previewTextAfterContent;
 
 		return false;
@@ -247,13 +279,10 @@ class Hooks {
 	 * @param EditPage $editpage
 	 * @param OutputPage $output
 	 * @param int &$tabindex
-	 * @return bool
 	 */
-	public static function injectOptions( $editpage, $output, &$tabindex ) {
-		global $wgTemplateSandboxEditNamespaces;
-
+	public function onEditPage__showStandardInputs_options( $editpage, $output, &$tabindex ) {
 		$namespaces = array_merge(
-			$wgTemplateSandboxEditNamespaces,
+			$output->getConfig()->get( 'TemplateSandboxEditNamespaces' ),
 			ExtensionRegistry::getInstance()->getAttribute( 'TemplateSandboxEditNamespaces' )
 		);
 
@@ -284,7 +313,7 @@ class Hooks {
 
 			$output->addHTML( $html . "\n" );
 
-			return true;
+			return;
 		}
 
 		$output->addModuleStyles( 'ext.TemplateSandbox.top' );
@@ -365,7 +394,9 @@ class Hooks {
 		}
 		$output->addHTML( $fieldsetLayout );
 
-		return true;
+		if ( $this->userOptionsLookup->getOption( $context->getUser(), 'uselivepreview' ) ) {
+			$output->addModules( 'ext.TemplateSandbox.preview' );
+		}
 	}
 
 	/**
@@ -384,11 +415,10 @@ class Hooks {
 	 * @param ApiBase $module
 	 * @param array &$params
 	 * @param int $flags
-	 * @return bool
 	 */
-	public static function onAPIGetAllowedParams( $module, &$params, $flags ) {
+	public function onAPIGetAllowedParams( $module, &$params, $flags ) {
 		if ( !self::isUsableApiModule( $module ) ) {
-			return true;
+			return;
 		}
 
 		$params += [
@@ -406,15 +436,14 @@ class Hooks {
 				ApiBase::PARAM_HELP_MSG => 'templatesandbox-apihelp-text',
 			],
 			'templatesandboxcontentmodel' => [
-				ParamValidator::PARAM_TYPE => ContentHandler::getContentModels(),
+				ParamValidator::PARAM_TYPE => $this->contentHandlerFactory->getContentModels(),
 				ApiBase::PARAM_HELP_MSG => 'templatesandbox-apihelp-contentmodel',
 			],
 			'templatesandboxcontentformat' => [
-				ParamValidator::PARAM_TYPE => ContentHandler::getAllContentFormats(),
+				ParamValidator::PARAM_TYPE => $this->contentHandlerFactory->getAllContentFormats(),
 				ApiBase::PARAM_HELP_MSG => 'templatesandbox-apihelp-contentformat',
 			],
 		];
-		return true;
 	}
 
 	/**
@@ -427,16 +456,13 @@ class Hooks {
 	 * @param ApiBase $module
 	 * @param null &$reset Set to a ScopedCallback used to reset any hooks set.
 	 * @param bool &$suppressCache
-	 * @return bool
 	 */
-	public static function onApiMakeParserOptions(
+	public function onApiMakeParserOptions(
 		$options, $title, $params, $module, &$reset, &$suppressCache
 	) {
-		global $wgHooks;
-
 		// Shouldn't happen, but...
 		if ( !self::isUsableApiModule( $module ) ) {
-			return true;
+			return;
 		}
 
 		$params += [
@@ -479,7 +505,9 @@ class Hooks {
 			if ( $params['contentmodel'] == '' ) {
 				$contentHandler = $page->getContentHandler();
 			} else {
-				$contentHandler = ContentHandler::getForModelID( $params['contentmodel'] );
+				$contentHandler = $this->contentHandlerFactory
+					// @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+					->getContentHandler( $params['contentmodel'] );
 			}
 
 			$escName = wfEscapeWikiText( $page->getTitle()->getPrefixedDBkey() );
@@ -503,8 +531,7 @@ class Hooks {
 			$popts->setIsPreview( true );
 			$popts->setIsSectionPreview( false );
 			$user = RequestContext::getMain()->getUser();
-			$contentTransformer = MediaWikiServices::getInstance()->getContentTransformer();
-			$content = $contentTransformer->preSaveTransform(
+			$content = $this->contentTransformer->preSaveTransform(
 				$content,
 				$templatetitle,
 				$user,
@@ -520,26 +547,38 @@ class Hooks {
 			$resetLogic = $logic->setupForParse( $options );
 			$suppressCache = true;
 
-			$id = 'TemplateSandboxHooks.' . ++self::$counter;
-			$wgHooks['ApiParseMakeOutputPage'][$id] = static function ( $module, $output )
-				use ( $prefixes, $templatetitle, $content )
-			{
-				if ( $prefixes ) {
-					Logic::addSubpageHandlerToOutput( $prefixes, $output );
+			$resetHook = $this->hookContainer->scopedRegister(
+				'ApiParseMakeOutputPage',
+				static function ( $module, $output )
+					use ( $prefixes, $templatetitle, $content )
+				{
+					if ( $prefixes ) {
+						Logic::addSubpageHandlerToOutput( $prefixes, $output );
+					}
+					if ( $templatetitle ) {
+						$output->addContentOverride( $templatetitle, $content );
+					}
 				}
-				if ( $templatetitle ) {
-					$output->addContentOverride( $templatetitle, $content );
-				}
-			};
+			);
 
-			$reset = new ScopedCallback( static function () use ( &$resetLogic, $id ) {
-				global $wgHooks;
-				unset( $wgHooks['ApiParseMakeOutputPage'][$id] );
+			$reset = new ScopedCallback( static function () use ( &$resetLogic, &$resetHook ) {
+				ScopedCallback::consume( $resetHook );
 				ScopedCallback::consume( $resetLogic );
 			} );
 		}
+	}
 
-		return true;
+	/**
+	 * Function that returns an array of parsed messages used in live preview
+	 * for the ResourceLoader
+	 *
+	 * @param RL\Context $context
+	 * @return array
+	 */
+	public static function getParsedMessages( $context ) {
+		return [
+			'templatesandbox-previewnote' => $context->msg( 'templatesandbox-previewnote' )->parse(),
+		];
 	}
 
 	/**
@@ -550,7 +589,7 @@ class Hooks {
 	 * @param Config $config
 	 * @return array
 	 */
-	public static function getResourceLoaderData( $context, $config ) {
+	public static function getTemplateNamespaces( $context, $config ) {
 		return array_merge(
 			$config->get( 'TemplateSandboxEditNamespaces' ),
 			ExtensionRegistry::getInstance()->getAttribute( 'TemplateSandboxEditNamespaces' )
