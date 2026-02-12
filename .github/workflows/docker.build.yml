@@ -57,14 +57,14 @@ jobs:
           labels: ${{ steps.docker_meta.outputs.labels }}
       -
         name: Check out `wmde/wbaas-deploy` repository in staging child directory
-        if: steps.update-check.outputs.match == 'true'
+        if: github.event_name != 'pull_request'
         uses: actions/checkout@v4.1.0
         with:
           repository: wmde/wbaas-deploy
           path: ./repos/wbaas-deploy-staging
       -
         name: Check out `wmde/wbaas-deploy` repository in production child directory
-        if: steps.update-check.outputs.match == 'true'
+        if: github.event_name != 'pull_request'
         uses: actions/checkout@v4.1.0
         with:
           repository: wmde/wbaas-deploy
