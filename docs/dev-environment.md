@@ -1,10 +1,10 @@
 ## Development Environment
 
-There is a [docker-compose file](../docker-compose.yml) in the root directory that allows for serving multiple development sites locally.
+There is a [docker-compose file](https://github.com/wbstack/mediawiki/blob/main/docker-compose.yml) in the root directory that allows for serving multiple development sites locally.
 
-These are currently not using the real API but instead get their settings from the static JSON files included in the data folder.
+These are currently not using the real API but instead get their settings from static JSON files in [docker-compose/fake-api](https://github.com/wbstack/mediawiki/blob/main/docker-compose/fake-api).
 
-The fake API is served by the [server.php](test/server.php) script and reads the corresponding [subdomain](data/WikiInfo-site1.json) from each request.
+The fake API is served by [index.php](https://github.com/wbstack/mediawiki/blob/main/docker-compose/fake-api/index.php) and reads the JSON matching the requested subdomain (for example [WikiInfo-site1.json](https://github.com/wbstack/mediawiki/blob/main/docker-compose/fake-api/WikiInfo-site1.json)).
 
 > [!NOTE]
 > You may find you have to refresh the page a few times before changes are reflected in Elasticsearch. Unlike [wmde/wbaas-deploy](https://github.com/wmde/wbaas-deploy/), this setup doesn't have a dedicated job runner. Jobs queued up, such as ones from CirrusSearch and WikibaseCirrusSearch, are completed as part of web requests (see [wbstack/src/Settings/LocalSettings.php#L147-L151](https://github.com/wbstack/mediawiki/blob/ebac07a4a4096d8fd973ebd43ebe342f34b87803/dist-persist/wbstack/src/Settings/LocalSettings.php#L147-L151)), so refreshing the page ensures that all jobs in the queue are run.
