@@ -6,12 +6,8 @@ These are currently not using the real API but instead get their settings from s
 
 The fake API is served by [index.php](../docker-compose/fake-api/index.php) and reads the JSON matching the requested subdomain (for example [WikiInfo-site1.json](../docker-compose/fake-api/WikiInfo-site1.json)).
 
-In [wmde/wbaas-deploy](https://github.com/wmde/wbaas-deploy/) Elasticsearch is configured so all Wikis share the same indices. In contrast, this docker compose environment is configured so each wiki has its own indices. From Mediawiki's perspective, Elasticsearch does not distunguish between private and shared indices via an alias; the index configuration is invisible to Mediawiki. This keeps the setup simple and light to run. 
-
-The index names are based on the MediaWiki database name (not the domain). This is why indices appear in the format `{db_name}_content_first` and `{db_name}_general_first`, for example `mwdb_somedb1_content_first`.
-
 > [!NOTE]
-> You may find you have to refresh the page a few time before changes are reflected in Elasticsearch. Unlike [wmde/wbaas-deploy](https://github.com/wmde/wbaas-deploy/), this setup doesn't have a dedicated job runner. Jobs queued up, such as ones from CirrusSearch and WikibaseCirrusSearch, are completed as part of web requests (see [wbstack/src/Settings/LocalSettings.php#L147-L151](https://github.com/wbstack/mediawiki/blob/ebac07a4a4096d8fd973ebd43ebe342f34b87803/dist-persist/wbstack/src/Settings/LocalSettings.php#L147-L151)), so refreshing the page ensures that all jobs in the queue are run.
+> You may find you have to refresh the page a few times before changes are reflected in Elasticsearch. Unlike [wmde/wbaas-deploy](https://github.com/wmde/wbaas-deploy/), this setup doesn't have a dedicated job runner. Jobs queued up, such as ones from CirrusSearch and WikibaseCirrusSearch, are completed as part of web requests (see [wbstack/src/Settings/LocalSettings.php#L147-L151](https://github.com/wbstack/mediawiki/blob/ebac07a4a4096d8fd973ebd43ebe342f34b87803/dist-persist/wbstack/src/Settings/LocalSettings.php#L147-L151)), so refreshing the page ensures that all jobs in the queue are run.
 
 ### Start the dev environment
 
@@ -36,12 +32,8 @@ Wait until both sites are accessible:
  Once the sites are accessible you can perform secondary setup (_The request takes a while to execute_):
 
  ```sh
-curl -sS -H "Content-Type: application/json" -X POST -d '{}' "http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
-curl -sS -H "Content-Type: application/json" -X POST -d '{}' "http://site2.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
-
-# You can use `jq` to "pretty-print" the JSON response
-curl -sS -H "Content-Type: application/json" -X POST -d '{}' "http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json" | jq .
-curl -sS -H "Content-Type: application/json" -X POST -d '{}' "http://site2.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json" | jq .
+curl -sS -H "Content-Type: application/json" -X POST -d '{}' "http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json" | jq
+curl -sS -H "Content-Type: application/json" -X POST -d '{}' "http://site2.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json" | jq
 ```
 
 Removing the installation:
@@ -54,11 +46,13 @@ Understanding special configuration for the `docker compose` environment:
 
 When `$wwDockerCompose` is set some special settings are used. It is set from the environment variable `WBSTACK_DOCKER_COMPOSE` and is always true in the `docker compose` environment. Examples of this include disabling captchas, disabling the normally required email confirmation and automatically granting sysop rights to all users.
 
-### Debugging Elastic
-
-#### General overview of the cluster:
+### Elasticsearch
 
 - Overall stats: http://localhost:9200/_stats
 - Indices: http://localhost:9200/_cat/indices
 - Aliases: http://localhost:9200/_aliases
 - Entries in the content index (Items, Lexemes) for `site1.localhost`: http://localhost:9200/mwdb_somedb1_content_first/_search
+
+In [wmde/wbaas-deploy](https://github.com/wmde/wbaas-deploy/) Elasticsearch is configured so all Wikis share the same indices. In contrast, this docker compose environment is configured so each wiki has its own indices. This is how Elasticsearch was configured when this docker composer development environment was created. As MediaWiki isn't creating new indices, whether Elasticsearch uses shared indices via aliases or not is inconsequential. Investing time to change this is likely not worth it and having separate indices is a simpler setup.
+
+The index names are based on the MediaWiki database name (not the domain). This is why indices appear in the format `{db_name}_content_first` and `{db_name}_general_first`, for example `mwdb_somedb1_content_first`.
