@@ -199,7 +199,8 @@
 			"Null the Great",
 			"IJzeren Jan",
 			"Vonavy",
-			"Dolbaeb"
+			"Dolbaeb",
+			"EneshTranslates"
 		]
 	},
 	"sunday": "воскресенье",
@@ -960,6 +961,8 @@
 	"unstrip-size-category-desc": "Эта страница превышает предел размера для unstrip.",
 	"bad-language-code-category": "Страницы с неверными языковыми кодами",
 	"bad-language-code-category-desc": "Страница содержит <code><nowiki>{{#dir}}</nowiki></code> с неверным языковым кодом.",
+	"bad-double-underscore-category": "Страницы с недопустимыми переключателями поведения",
+	"bad-double-underscore-category-desc": "Страница содержит некорректный локализованный [[mw:Special:MyLanguage/Help:Magic_words#Behavior_switches|переключатель поведения]]. Допустимые локализации начинаются и заканчиваются двойными подчёркиваниями.",
 	"double-px-category": "Страницы, размер изображений на которых содержит лишний px",
 	"double-px-category-desc": "Страница содержит изображение, в размере которых есть лишний суффикс <code>px</code>, например <code>100pxpx</code>.",
 	"converter-manual-rule-error": "Ошибка в ручном правиле преобразования языка",
@@ -1165,7 +1168,7 @@
 	"search-result-category-size": "$1 {{PLURAL:$1|вхождение|вхождения|вхождений}} ($2 {{PLURAL:$2|подкатегория|подкатегории|подкатегорий}}, $3 {{PLURAL:$3|файл|файла|файлов}})",
 	"search-redirect": "(перенаправление с $1)",
 	"search-section": "(раздел «$1»)",
-	"search-category": "(категория $1)",
+	"search-category": "(категория «$1»)",
 	"search-file-match": "(совпадает с содержимым файла)",
 	"search-suggest": "Возможно, вы имели в виду «$1».",
 	"search-rewritten": "Показаны результаты для «$1». Для «$2» результаты не найдены.",
@@ -2195,6 +2198,7 @@
 	"apisandbox-request-php-label": "Запросить PHP-массив:",
 	"apisandbox-request-time": "Время запроса: {{PLURAL:$1|$1 мс}}",
 	"apisandbox-request-post": "Этот запрос должен быть отправлен с использованием HTTP-метода POST.",
+	"apisandbox-request-post2": "Из-за размера полезной нагрузки этот запрос был отправлен с использованием HTTP-метода POST.",
 	"apisandbox-request-formdata": "Этот запрос должен быть отправлен как загрузка файла (т.е. с использованием <code>multipart/form-data</code>).",
 	"apisandbox-results-fixtoken": "Исправьте токен и повторите отправку",
 	"apisandbox-results-fixtoken-fail": "Не удалось вызвать токен «$1».",

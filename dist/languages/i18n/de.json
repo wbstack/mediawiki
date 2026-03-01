@@ -133,7 +133,8 @@
 			"Juwan",
 			"Talex42",
 			"IWL04",
-			"NguoiDungKhongDinhDanh"
+			"NguoiDungKhongDinhDanh",
+			"DraconicDark"
 		]
 	},
 	"sunday": "Sonntag",
@@ -579,7 +580,7 @@
 	"createacct-another-realname-tip": "Der bürgerliche Name ist optional.\nWenn du ihn angibst, wird er für die Zuordnung der Beiträge verwendet.",
 	"pt-login": "Anmelden",
 	"pt-login-button": "Anmelden",
-	"pt-login-continue-button": "Anmeldung fortfahren",
+	"pt-login-continue-button": "Mit der Anmeldung fortfahren",
 	"pt-createaccount": "Benutzerkonto erstellen",
 	"pt-userlogout": "Abmelden",
 	"php-mail-error-unknown": "Unbekannter Fehler in der PHP-Funktion mail().",
@@ -893,6 +894,8 @@
 	"unstrip-size-category-desc": "Diese Seite überschreitet das Unstrip-Größen-Limit.",
 	"bad-language-code-category": "Seiten mit ungültigem Sprachcode",
 	"bad-language-code-category-desc": "Die Seite enthält <code><nowiki>{{#dir}}</nowiki></code> mit einem ungültigen Sprachcode.",
+	"bad-double-underscore-category": "Seiten mit ungültigen Verhaltensschaltern",
+	"bad-double-underscore-category-desc": "Die Seite enthält einen ungültigen lokalisierten [[mw:Special:MyLanguage/Help:Magic_words#Behavior_switches|Verhaltensschalter]]. Gültige Lokalisierungen beginnen und enden mit doppelten Unterstrichen.",
 	"double-px-category": "Seiten mit Bildgrößen, die eine zusätzliche px-Angabe enthalten",
 	"double-px-category-desc": "Die Seite enthält ein Bild, dessen Größe ein zusätzliches <code>px</code> enthält, etwa <code>100pxpx</code>.",
 	"converter-manual-rule-error": "Bei der manuellen Sprachkonvertierungsregel wurde ein Fehler entdeckt.",
@@ -2129,6 +2132,7 @@
 	"apisandbox-request-php-label": "PHP-Array anfordern:",
 	"apisandbox-request-time": "Dauer der Anfrage: {{PLURAL:$1|Eine Millisekunde|$1 Millisekunden}}",
 	"apisandbox-request-post": "Diese Anfrage muss mit der HTTP-POST-Methode gesendet werden.",
+	"apisandbox-request-post2": "Aufgrund der Größe der Nutzdaten wurde diese Anfrage mit der HTTP-POST-Methode gesendet.",
 	"apisandbox-request-formdata": "Diese Anfrage muss als Datei-Upload gesendet werden (d.h. unter Verwendung von <code>multipart/form-data</code> ).",
 	"apisandbox-results-fixtoken": "Token korrigieren und erneut übertragen",
 	"apisandbox-results-fixtoken-fail": "Der „$1“-Token konnte nicht abgerufen werden.",

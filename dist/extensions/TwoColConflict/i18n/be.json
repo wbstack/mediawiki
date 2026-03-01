@@ -6,7 +6,8 @@
 			"No Sleep till Krupki",
 			"Plaga med",
 			"Tomato Cream",
-			"Maksim L."
+			"Maksim L.",
+			"Ucukor"
 		]
 	},
 	"twocolconflict": "Канфлікт правак на падставе абзацаў",
@@ -68,7 +69,7 @@
 	"twocolconflict-split-help-tooltip": "Паказаць дапамогу",
 	"twocolconflict-split-tour-dialog-header-single-column-view": "Канфліктныя пасты",
 	"twocolconflict-split-tour-dialog-message-single-column-view": "На жаль, нехта іншы апублікаваў у той жа час, што і вы. Калі ласка, праглядзіце каментары на наступнай старонцы. Пры неабходнасці вы можаце правіць свой і змяніць канчатковы парадак.",
-	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Вырашыць праблему",
+	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Развязаць праблему",
 	"twocolconflict-talk-header-overview": "На жаль, нехта іншы апублікаваў у той жа час, што і вы. Калі ласка, праглядзіце каментары ніжэй і выберыце парадак для публікацыі. Пры неабходнасці вы можаце правіць свой тэкст.",
 	"twocolconflict-talk-your": "Ваш каментар",
 	"twocolconflict-talk-conflicting": "Канфліктны каментар",

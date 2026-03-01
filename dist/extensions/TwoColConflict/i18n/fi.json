@@ -27,7 +27,7 @@
 	"twocolconflict-core-ui-hint-close": "Älä näytä tätä uudelleen",
 	"twocolconflict-preference-enabled": "Ota [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|kappalepohjainen päällekkäisten muokkausten näkymä]] käyttöön ratkaistaksesi päällekkäiset muokkaukset.",
 	"twocolconflict-special-footer-hint": "Sulje nykyinen sivu palataksesi päällekkäisten muokkausten näkymään.",
-	"twocolconflict-special-header-overview": "Valitettavasti muokatessasi myös joku toinen käyttäjä muokkasi samaa sivua ja julkaisi ennen sinua. Katseltavissa oleva kopio versiostasi on saatavilla alempana. Päällekkäisten muokkausten näkymässä tehdyt muokkaukset eivät näy. Yhdistääksesi muutokset ja ratkaistaksesi ongelman käyttäen  muokkausristiriitakäyttöliittymää, palaa edelliselle sivulle.",
+	"twocolconflict-special-header-overview": "Valitettavasti muokatessasi myös joku toinen käyttäjä muokkasi samaa sivua ja julkaisi ennen sinua. Katseltavissa oleva kopio versiostasi on saatavilla alempana. Päällekkäisten muokkausten näkymässä tehdyt muokkaukset eivät näy. Yhdistääksesi muutokset ja ratkaistaksesi ongelman käyttäen muokkausristiriitakäyttöliittymää, palaa edelliselle sivulle.",
 	"twocolconflict-special-not-saved": "Ei julkaistu",
 	"twocolconflict-special-textarea-hint": "Voit katsella ja kopioida versiosi wikitekstiä:",
 	"twocolconflict-special-malformed-title": "Puuttuva tai virheellinen otsikko.",

@@ -1,11 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Winston Sung"
+			"Winston Sung",
+			"Aca"
 		]
 	},
 	"twocolconflictprovidesubmittedtext": "Sukob izmjena:",
-	"twocolconflict-beta-feature-description": "Prikaz sukoba uređivanja u naprednom pasusnom dvostupčanom pregledu.",
+	"twocolconflict-beta-feature-description": "Omogućava pregled sukoba izmjena u naprednijem prikazu podijeljenom na odlomke.",
 	"twocolconflict-copy-action": "kopiraj sav tekst",
 	"twocolconflict-copy-notice": "Cijeli wikitekst Vaše izmjene prekopiran je u međuspremnik (uređivanja ispod nisu uključena).",
 	"twocolconflict-split-your-version-header": "Vaša izmjena",
