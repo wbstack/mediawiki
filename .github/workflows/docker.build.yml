@@ -12,7 +12,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v4.1.0
+        uses: actions/checkout@v6.0.2
       -
         name: Docker meta
         id: docker_meta
@@ -58,14 +58,14 @@ jobs:
       -
         name: Check out `wmde/wbaas-deploy` repository in staging child directory
         if: github.event_name != 'pull_request'
-        uses: actions/checkout@v4.1.0
+        uses: actions/checkout@v6.0.2
         with:
           repository: wmde/wbaas-deploy
           path: ./repos/wbaas-deploy-staging
       -
         name: Check out `wmde/wbaas-deploy` repository in production child directory
         if: github.event_name != 'pull_request'
-        uses: actions/checkout@v4.1.0
+        uses: actions/checkout@v6.0.2
         with:
           repository: wmde/wbaas-deploy
           path: ./repos/wbaas-deploy-production
