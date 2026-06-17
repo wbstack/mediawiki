@@ -675,8 +675,8 @@ if( $wikiInfo->getSetting('wikibaseManifestEquivEntities') ) {
             $wgWBRepoSettings['canonicalUriProperty'] = $wwEquivEntities['properties']['P1921'];
         }
         // WikibaseLexeme
-        if ( array_key_exists( 'properties', $wwEquivEntities ) && array_key_exists( 'P218', $wwEquivEntities['properties'] ) ) {
-            $wgLexemeLanguageCodePropertyId = $wwEquivEntities['properties']['P218'];
+        if ( array_key_exists( 'properties', $wwEquivEntities ) && array_key_exists( 'P305', $wwEquivEntities['properties'] ) ) {
+            $wgLexemeLanguageCodePropertyId = $wwEquivEntities['properties']['P305'];
         }
     }
 }
