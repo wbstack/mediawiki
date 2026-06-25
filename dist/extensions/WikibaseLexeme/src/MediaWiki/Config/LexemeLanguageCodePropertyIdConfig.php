@@ -23,4 +23,10 @@ class LexemeLanguageCodePropertyIdConfig extends RL\Module {
 		] ) . ');';
 	}
 
+	/**
+	 * @inheritDoc
+	 */
+	public function enableModuleContentVersion() {
+		return true;
+	}
 }
