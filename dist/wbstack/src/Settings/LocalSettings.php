@@ -761,6 +761,9 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     $wgWBCSElasticErrorFailSilently = true;
 }
 
+// T357047
+$wgKartographerMapServer = 'https://tile.openstreetmap.org';
+$wgKartographerDfltStyle = '';
 
 #######################################
 ## ---  l10n rebuild and beyond  --- ##
