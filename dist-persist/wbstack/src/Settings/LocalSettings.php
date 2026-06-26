@@ -761,6 +761,11 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     $wgWBCSElasticErrorFailSilently = true;
 }
 
+// Mitigation pre 1.43.9 Security Release
+// See: T430272/T422244
+$wgRevokePermissions['*']['importupload'] = true;
+$wgRevokePermissions['*']['import'] = true;
+
 
 #######################################
 ## ---  l10n rebuild and beyond  --- ##
