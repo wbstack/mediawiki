@@ -1,18 +1,19 @@
 {
 	"@metadata": {
 		"authors": [
-			"Winston Sung"
+			"Winston Sung",
+			"Aca"
 		]
 	},
 	"deletebatch": "Skupno brisanje stranica",
 	"deletebatch-desc": "[[Special:DeleteBatch|Brisanje skupine stranica]]",
-	"deletebatch-help": "Zbirno brisanje stranica.\nMožete napraviti jedno brisanje, ili pak izbrisati stranice navedene u datoteci.\nOdaberite korisnika za prikaz u dnevniku brisanja.\nOtpremljene datoteke trebaju sadržavati ime stranice i dodatni razlog, odvojene znakom \"|\" u svakom retku.",
-	"deletebatch-caption": "Popis stranica:",
+	"deletebatch-help": "Zbirno brisanje stranica.\nMožete napraviti jedno brisanje, ili pak izbrisati stranice navedene u datoteci.\nIzaberite korisnika za prikaz u dnevniku brisanja.\nOtpremljene datoteke trebaju sadržavati ime stranice i dodatni razlog, odvojene znakom \"|\" u svakom retku.",
+	"deletebatch-caption": "Lista stranica:",
 	"deletebatch-default-reason": "Predodređen razlog brisanja:",
 	"deletebatch-title": "Skupno brisanje",
 	"deletebatch-link-back": "Nazad na posebnu stranicu",
 	"deletebatch-as": "Pokreni skriptu kao:",
-	"deletebatch-both-modes": "Molimo vas izaberiti jednu određenu stranicu, ili popis stranica.",
+	"deletebatch-both-modes": "Izaberite jednu određenu stranicu ili listu stranica.",
 	"deletebatch-or": "<strong>ili</strong>",
 	"deletebatch-delete": "Obriši",
 	"deletebatch-page": "Stranice za brisanje:",
@@ -21,10 +22,10 @@
 	"deletebatch-omitting-nonexistent": "Izostavljanje nepostojeće stranice $1.",
 	"deletebatch-omitting-invalid": "Izostavljanje neispravne stranice $1.",
 	"deletebatch-file-bad-format": "U datoteci bi trebao biti čisti tekst",
-	"deletebatch-file-missing": "Ne mogu pročitati navedenu datoteku",
+	"deletebatch-file-missing": "Nije moguće pročitati navedenu datoteku.",
 	"deletebatch-select-script": "skripta za brisanje",
 	"deletebatch-select-yourself": "Vi",
-	"deletebatch-no-page": "Molimo vas odredite barem jednu stranicu za brisanje ili izaberite datoteku koja sadrži popis stranica.",
+	"deletebatch-no-page": "Odredite barem jednu stranicu za brisanje ili izaberite datoteku koja sadrži listu stranica.",
 	"deletebatch-system-username": "Skripta za brisanje",
 	"action-deletebatch": "skupno brisanje stranica",
 	"right-deletebatch": "Skupno brisanje stranica",

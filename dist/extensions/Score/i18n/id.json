@@ -4,7 +4,8 @@
 			"Agam Riyandana",
 			"Daud I.F. Argana",
 			"Rtnf",
-			"William Surya Permana"
+			"William Surya Permana",
+			"Penyuwangi"
 		]
 	},
 	"score-abc2lynotexecutable": "Konverter ABC ke LilyPond tidak dapat dieksekusi: $1 bukan merupakan berkas yang dapat dieksekusi. Pastikan <code>$wgScoreAbc2Ly</code> diatur dengan benar.",
@@ -18,7 +19,7 @@
 	"score-convertoverrideaudio": "Anda tidak dapat meminta penampilan audio dan menentukan override_audio dalam waktu bersamaan.",
 	"score-deprecated-category": "Halaman yang menggunakan atribut skor usang",
 	"score-deprecated-category-desc": "Halaman-halaman ini menggunakan opsi yang pernah diberikan oleh ekstensi Score dan sekarang usang. Opsi tersebut adalah: \"override_audio\", \"override_ogg\", dan \"override_midi\".",
-	"score-desc": "Tambah tag untuk menampilkan partitur musik dengan LilyPond",
+	"score-desc": "Menambahkan tanda untuk merender partitur musik dengan LilyPond.",
 	"score-download-midi-file": "Unduh berkas MIDI",
 	"score-download-source-file": "Unduh berkas LilyPond",
 	"score-error-category": "Halaman dengan kesalahan tampilan partitur",
@@ -60,5 +61,5 @@
 	"score-visualeditor-mwscoredialog-title": "Notasi musik",
 	"datatypes-type-musical-notation": "Notasi Musik",
 	"wikibase-listdatatypes-musical-notation-head": "Notasi Musik",
-	"wikibase-listdatatypes-musical-notation-body": "Isian data literal untuk partitur musik yang ditulis dalam notasi LilyPond."
+	"wikibase-listdatatypes-musical-notation-body": "Bidang data harfiah untuk skor musik yang ditulis dalam notasi LilyPond."
 }

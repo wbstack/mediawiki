@@ -191,7 +191,8 @@
 			],
 			"dependencies": [
 				"ext.advancedSearch.searchtoken",
-				"ext.advancedSearch.elements"
+				"ext.advancedSearch.elements",
+				"mediawiki.Uri"
 			]
 		},
 		"ext.advancedSearch.SearchFieldUI": {

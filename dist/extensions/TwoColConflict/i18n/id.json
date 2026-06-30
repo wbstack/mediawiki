@@ -5,7 +5,9 @@
 			"Daud I.F. Argana",
 			"Hidayatsrf",
 			"Iwan Novirion",
-			"Kenrick95"
+			"Kenrick95",
+			"Penyuwangi",
+			"Bennylin"
 		]
 	},
 	"twocolconflict": "Konflik penyuntingan berbasis paragraf",
@@ -25,7 +27,7 @@
 	"twocolconflict-special-not-saved": "Belum diterbitkan",
 	"twocolconflict-special-textarea-hint": "Anda bisa melihat dan menyalin sumber revisi Anda:",
 	"twocolconflict-special-malformed-title": "Judul hilang atau tidak sah.",
-	"twocolconflict-special-expired": "Tidak ada yang bisa dilihat di sini. Ini mungkin berarti Anda mengalami konflik pengeditan beberapa waktu yang lalu dan teks yang disimpan sementara kadaluwarsa sekarang.",
+	"twocolconflict-special-expired": "Tiada yang bisa dilihat di sini. Ini mungkin berarti Anda mengalami konflik penyuntingan beberapa waktu yang lalu dan teks yang disimpan sementara kedaluwarsa sekarang.",
 	"twocolconflict-split-header-hint": "Anda bisa membantu memperbaiki fitur ini dengan memberikan saran [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface di halaman ini].",
 	"twocolconflict-split-header-hint-beta": "Terima kasih karena menggunakan fitur beta ini. Anda bisa membantu memperbaikinya dengan meninggalkan saran [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface di halaman ini].",
 	"twocolconflict-split-your-version-header": "Revisi Anda",

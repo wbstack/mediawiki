@@ -16,7 +16,7 @@
 	"requires": {
 		"MediaWiki": ">= 1.43.0",
 		"platform": {
-			"php": ">=8.0"
+			"php": ">=8.1"
 		}
 	},
 	"MessagesDirs": {
@@ -25,7 +25,8 @@
 		]
 	},
 	"ExtensionMessagesFiles": {
-		"EmbedVideoMagic": "EmbedVideo.i18n.magic.php"
+		"EmbedVideoMagic": "EmbedVideo.i18n.magic.php",
+		"EmbedVideoAliases": "EmbedVideo.alias.php"
 	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\EmbedVideo\\": "includes/"
@@ -36,20 +37,30 @@
 	"ResourceModules": {
 		"ext.embedVideo.messages": {
 			"messages": [
+				"embedvideo-service-alugha",
+				"embedvideo-service-amazonmusic",
+				"embedvideo-service-applemusic",
 				"embedvideo-service-archiveorg",
+				"embedvideo-service-aparat",
 				"embedvideo-service-bandcamp",
 				"embedvideo-service-bilibili",
 				"embedvideo-service-dailymotion",
+				"embedvideo-service-deezer",
 				"embedvideo-service-kakaotv",
 				"embedvideo-service-loom",
 				"embedvideo-service-navertv",
 				"embedvideo-service-niconico",
 				"embedvideo-service-soundcloud",
+				"embedvideo-service-podbean",
+				"embedvideo-service-qobuz",
 				"embedvideo-service-sharepoint",
 				"embedvideo-service-spotify",
+				"embedvideo-service-takhtesefid",
 				"embedvideo-service-twitch",
+				"embedvideo-service-tidal",
 				"embedvideo-service-videolink",
 				"embedvideo-service-vimeo",
+				"embedvideo-service-reddit",
 				"embedvideo-service-youtube",
 				"embedvideo-service-youku",
 				"embedvideo-service-localvideo",
@@ -59,44 +70,38 @@
 			]
 		},
 		"ext.embedVideo.videolink": {
-			"es6": true,
 			"packageFiles": [
 				"ext.embedVideo.videolink.js",
-				{ "name": "fetchFactory.js", "file": "fetchers/fetchFactory.js" },
-				{ "name": "queryKeyParser.js", "file": "fetchers/queryKeyParser.js" },
-				{ "name": "bilibili.js", "file": "fetchers/bilibili.js" },
-				{ "name": "niconico.js", "file": "fetchers/niconico.js" },
-				{ "name": "oembed.js", "file": "fetchers/oembed.js" },
-				{ "name": "iframe.js", "file": "modules/iframe.js" }
+				"fetchers/fetchFactory.js",
+				"fetchers/queryKeyParser.js",
+				"fetchers/bilibili.js",
+				"fetchers/niconico.js",
+				"fetchers/oembed.js",
+				"modules/iframe.js"
 			],
 			"styles": [
 				"ext.embedVideo.consent.less",
 				"ext.embedVideo.evl.less"
 			],
-			"position": "top",
-			"targets": [
-				"desktop",
-				"mobile"
+			"dependencies": [
+				"mediawiki.storage"
 			]
 		},
 		"ext.embedVideo.consent": {
-			"es6": true,
 			"packageFiles": [
 				"ext.embedVideo.consent.js",
-				{ "name": "fetchFactory.js", "file": "fetchers/fetchFactory.js" },
-				{ "name": "queryKeyParser.js", "file": "fetchers/queryKeyParser.js" },
-				{ "name": "bilibili.js", "file": "fetchers/bilibili.js" },
-				{ "name": "niconico.js", "file": "fetchers/niconico.js" },
-				{ "name": "oembed.js", "file": "fetchers/oembed.js" },
-				{ "name": "iframe.js", "file": "modules/iframe.js" }
+				"fetchers/fetchFactory.js",
+				"fetchers/queryKeyParser.js",
+				"fetchers/bilibili.js",
+				"fetchers/niconico.js",
+				"fetchers/oembed.js",
+				"modules/iframe.js"
 			],
 			"styles": [
 				"ext.embedVideo.consent.less"
 			],
-			"position": "top",
-			"targets": [
-				"desktop",
-				"mobile"
+			"dependencies": [
+				"mediawiki.storage"
 			]
 		},
 		"ext.embedVideo.overlay": {
@@ -106,11 +111,6 @@
 			"styles": [
 				"ext.embedVideo.consent.less"
 			],
-			"position": "top",
-			"targets": [
-				"desktop",
-				"mobile"
-			],
 			"messages": [
 				"embedvideo-play"
 			]
@@ -118,10 +118,6 @@
 		"ext.embedVideo.styles": {
 			"styles": [
 				"ext.embedVideo.styles.less"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
 			]
 		}
 	},
@@ -184,7 +180,15 @@
 		}
 	},
 	"ConfigRegistry": {
-		"EmbedVideo": "GlobalVarConfig::newInstance"
+		"EmbedVideo": "MediaWiki\\Config\\GlobalVarConfig::newInstance"
+	},
+	"AvailableRights": [
+		"embedvideo-refreshmetadata"
+	],
+	"GroupPermissions": {
+		"sysop": {
+			"embedvideo-refreshmetadata": true
+		}
 	},
 	"ExtensionFunctions": [
 		"MediaWiki\\Extension\\EmbedVideo\\EmbedVideoHooks::setup"
@@ -194,15 +198,23 @@
 			"class": "MediaWiki\\Extension\\EmbedVideo\\EmbedVideoHooks",
 			"services": [
 				"ConfigFactory",
-				"RepoGroup",
-				"MainWANObjectCache"
+				"RepoGroup"
 			]
 		}
 	},
 	"Hooks": {
 		"ParserFirstCallInit": "EmbedVideoHooks",
 		"BeforePageDisplay": "EmbedVideoHooks",
-		"ArticlePurge": "EmbedVideoHooks"
+		"SkinTemplateNavigation::Universal": "EmbedVideoHooks"
+	},
+	"SpecialPages": {
+		"RefreshEmbedVideoMetadata": {
+			"class": "MediaWiki\\Extension\\EmbedVideo\\Specials\\SpecialRefreshEmbedVideoMetadata",
+			"services": [
+				"RepoGroup",
+				"TitleFactory"
+			]
+		}
 	},
 	"manifest_version": 2
 }

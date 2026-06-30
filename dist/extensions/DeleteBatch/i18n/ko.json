@@ -35,5 +35,5 @@
 	"right-deletebatch": "문서 일괄 삭제",
 	"action-deletebatch-spoof": "\"페이지 삭제 스크립트\"로 페이지 일괄 삭제",
 	"right-deletebatch-spoof": "\"페이지 삭제 스크립트\"로 페이지 일괄 삭제",
-	"deletebatch-deleting-file-only": "$1 파일 설명 문서가 존재하지 않아서 실제 파일만 삭제합니다.\n이 동작은 기록되지 않습니다."
+	"deletebatch-deleting-file-only": "$1 파일 설명 문서가 존재하지 않아서 실제 파일만 삭제합니다.\n이 작업은 기록되지 않습니다."
 }

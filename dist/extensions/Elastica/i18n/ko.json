@@ -2,8 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Suleiman the Magnificent Television",
-			"Ykhwong"
+			"Ykhwong",
+			"Tensama0415"
 		]
 	},
-	"elastica-desc": "[https://elastica.io/ Elastica] 라이브러리가 제공하는 다른 확장 기능을 위한 기본 [https://www.elastic.co/ Elasticsearch] 기능"
+	"elastica-desc": "[https://elastica.io/ Elastica] 라이브러리가 제공하는 다른 확장 기능을 위한 기본 [https://www.elastic.co/ 일래스틱서치] 기능"
 }

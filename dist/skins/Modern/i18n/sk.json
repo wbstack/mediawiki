@@ -2,11 +2,12 @@
 	"@metadata": {
 		"authors": [
 			"Luky001",
-			"Rudko"
+			"Rudko",
+			"Wizzard"
 		]
 	},
 	"skinname-modern": "Moderný",
-	"modern.css": "/* Tu umiestnené CSS bude ovplyvňovať používateľov štýlu Moderný */",
-	"modern.js": "/* Tu sa nachádzajúci JavaScript sa načíta používateľom vzhľadu Moderný */",
+	"modern.css": "/* CSS umiestnené tu sa načíta používateľom témy vzhľadu Modern */",
+	"modern.js": "/* JavaScript umiestnený tu sa načíta používateľom témy vzhľadu Modern */",
 	"modern-desc": "Šedomodrý vzhľad s postranným a horným panelom. Odvodený od vzhľadu MonoBook"
 }

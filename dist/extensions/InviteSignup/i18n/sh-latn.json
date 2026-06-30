@@ -1,10 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Winston Sung"
+			"Winston Sung",
+			"Aca"
 		]
 	},
-	"invitesignup": "Pozovite ljude na ovaj viki",
+	"invitesignup": "Pozovite ljude na ovaj wiki",
 	"is-desc": "Šaljite pozivnice preko imejla",
 	"is-tableth-date": "Datum",
 	"is-tableth-email": "Imejl",

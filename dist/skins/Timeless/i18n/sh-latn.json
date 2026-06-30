@@ -6,6 +6,8 @@
 			"Aca"
 		]
 	},
+	"timeless-prefs-talkpage": "[[mw:Skin talk:Timeless|razgovor]]",
+	"skinname-timeless": "Timeless",
 	"timeless-anonymous": "Neprijavljen",
 	"timeless-loggedinas": "Prijavljeni ste kao '''$1'''",
 	"timeless-notloggedin": "Niste prijavljeni",
@@ -13,7 +15,7 @@
 	"timeless-talkpage": "Razgovor sa {{GENDER:$1|korisnikom|korisnicom}}",
 	"timeless-pagelog": "Dnevnici stranice",
 	"timeless-more": "Više",
-	"timeless-sitetools": "Vikialatke",
+	"timeless-sitetools": "Wiki alati",
 	"timeless-pageactions": "Alati za stranice",
 	"timeless-userpagetools": "Alati korisničke stranice",
 	"timeless-action-addsection": "Nova tema",

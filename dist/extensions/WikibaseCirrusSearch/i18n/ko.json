@@ -16,12 +16,23 @@
 			"SeoJeongHo",
 			"Ykhwong",
 			"고솜",
-			"아라"
+			"아라",
+			"YeBoy371",
+			"Tensama0415"
 		]
 	},
+	"wikibasecirrus-desc": "CirrusSearch 기능을 사용하기 위한 위키베이스 확장 기능",
+	"wikibasecirrus-keywordfeature-unknown-language-code": "$1 키워드에 알 수 없는 언어 코드가 포함되어 있습니다: $2",
+	"wikibasecirrus-keywordfeature-too-many-language-codes": "$1 키워드에 너무 많은 언어 코드가 제공되었습니다. $3 중 $2개의 {{PLURAL:$3|언어|언어들}}로 검색합니다",
+	"wikibasecirrus-inlabel-no-query-provided": "inlabel 키워드에 빈 검색 문자열이 제공되었습니다",
+	"wikibasecirrus-rescore-profile-prefix": "완료 검색을 위한 기본 재채점 프로필",
+	"wikibasecirrus-rescore-profile-prefix-boost": "문장 강조 기능을 사용한 완료 검색을 위한 재채점 프로필",
+	"wikibasecirrus-rescore-profile-fulltext": "전문 검색을 위한 기본 재채점 프로필",
+	"wikibasecirrus-rescore-profile-fulltext-phrase": "구문 점수 계산을 사용한 전문 검색용 재채점 프로필",
 	"wikibasecirrus-search-bad-entity-type": "잘못된 엔티티 유형: $1",
 	"wikibasecirrus-search-bad-profile-name": "잘못된 검색 프로파일 이름: $1",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "haswbstatement 키워드에 유효한 문장이 포함되어 있지 않습니다",
+	"wikibasecirrus-haslicense-feature-no-valid-arguments": "haslicense 키워드에 유효한 인수가 없습니다",
 	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "wbstatementquantity 키워드에 유효한 문장이 포함되어 있지 않습니다",
 	"special-entitieswithoutdescription": "설명이 없는 개체",
 	"wikibasecirrus-entitieswithoutdescription-legend": "설명이 없는 개체 목록 얻기",
@@ -31,5 +42,5 @@
 	"wikibasecirrus-entitieswithoutlabel-label-type": "유형:",
 	"wikibasecirrus-entitieswithoutlabel-submit": "찾기",
 	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\"은(는) 올바른 언어 코드가 아닙니다.",
-	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\"(은)은 올바른 개체 유형이 아닙니다."
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\"은(는) 올바른 개체 유형이 아닙니다."
 }

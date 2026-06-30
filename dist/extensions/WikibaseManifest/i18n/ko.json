@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tensama0415"
+		]
+	},
+	"wikibasemanifest-desc": "위키베이스 설치에 대한 메타데이터를 결합하여 간단한 API로 노출합니다"
+}

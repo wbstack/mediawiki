@@ -16,7 +16,8 @@
 			"Xiplus",
 			"Yanteng3",
 			"列维劳德",
-			"沈澄心"
+			"沈澄心",
+			"TripleCamera2022"
 		]
 	},
 	"preferences": "簿註",
@@ -27,7 +28,7 @@
 	"prefs-personal": "概簿",
 	"prefs-info": "基",
 	"username": "簿名：",
-	"prefs-memberingroups": "{{PLURAL:$1|一|權任}}：",
+	"prefs-memberingroups": "權任：",
 	"prefs-edits": "數計：",
 	"prefs-registration": "注簿時辰：",
 	"yourrealname": "本名：",
@@ -37,7 +38,7 @@
 	"passwordtooshort": "符節當逾$1字。",
 	"password-name-match": "符節與簿名相異也。",
 	"password-login-forbidden": "此簿共符節之用見禁矣。",
-	"tog-prefershttps": "入簿復用安全鏈",
+	"tog-prefershttps": "甫籍記，連線恆用安全者",
 	"prefs-i18n": "萬國",
 	"yourlanguage": "語言：",
 	"yourgender": "性別︰",

@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pitchrigi",
+			"Muhamad Izzul Fiqih"
+		]
+	},
+	"wikibase-dataitem": "Butir di {{WBREPONAME}}",
+	"wikibase-editlinks": "Sunting tautan",
+	"wikibase-addlinkstitle": "Tambokan tautan antarowiki",
+	"wikibase-linkitem-addlinks": "Tambo tautan",
+	"wikibase-linkitem-title": "Tautkan dengan laman",
+	"wikibase-linkitem-linkpage": "Tautkan dengan laman",
+	"wikibase-linkitem-selectlink": "Silakan pilih situs dan laman yang Awak nak tautkan dengan laman ko.",
+	"wikibase-linkitem-input-site": "Baso:",
+	"wikibase-linkitem-input-page": "Laman:",
+	"wikibase-rc-hide-wikidata-hide": "Singiti",
+	"wikibase-rc-hide-wikidata-show": "Tampilin",
+	"wikibase-otherprojects": "Dalam proyek lain"
+}

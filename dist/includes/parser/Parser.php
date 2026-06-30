@@ -277,7 +277,7 @@ class Parser {
 	private array $mTplRedirCache;
 	/** @internal */
 	public array $mHeadings;
-	/** @var array<string,false> */
+	/** @var array<string,string> */
 	private array $mDoubleUnderscores;
 	/**
 	 * Number of expensive parser function calls
@@ -3488,6 +3488,11 @@ class Parser {
 		# Cache miss, go to the database
 		[ $text, $title ] = $this->fetchTemplateAndTitle( $title );
 
+		// T299359: Verify that the real title that's actually being transcluded is includable
+		if ( $this->nsInfo->isNonincludable( $title->getNamespace() ) ) {
+			return [ false, $title ];
+		}
+
 		if ( $text === false ) {
 			$this->mTplDomCache[$titleKey] = false;
 			return [ false, $title ];
@@ -4087,23 +4092,27 @@ class Parser {
 	private function handleDoubleUnderscore( $text ) {
 		# The position of __TOC__ needs to be recorded
 		$mw = $this->magicWordFactory->get( 'toc' );
+		$tocAlias = null;
 		if ( $mw->match( $text ) ) {
 			$this->mShowToc = true;
 			$this->mForceTocPosition = true;
+			# record the alias used
+			preg_match( $mw->getRegex(), $text, $tocAlias );
 
 			# Set a placeholder. At the end we'll fill it in with the TOC.
 			$text = $mw->replace( self::TOC_PLACEHOLDER, $text, 1 );
 
 			# Only keep the first one.
 			$text = $mw->replace( '', $text );
-			# For consistency with all other double-underscores
-			# (see below)
-			$this->mOutput->setUnsortedPageProperty( 'toc' );
 		}
 
 		# Now match and remove the rest of them
 		$mwa = $this->magicWordFactory->getDoubleUnderscoreArray();
-		$this->mDoubleUnderscores = $mwa->matchAndRemove( $text );
+		$this->mDoubleUnderscores = $mwa->matchAndRemove( $text, returnAlias: true );
+		if ( $tocAlias ) {
+			# For consistency with all other double-underscores (see below)
+			$this->mDoubleUnderscores['toc'] = $tocAlias[0];
+		}
 
 		if ( isset( $this->mDoubleUnderscores['nogallery'] ) ) {
 			$this->mOutput->setNoGallery( true );
@@ -4127,9 +4136,15 @@ class Parser {
 			$this->addTrackingCategory( 'index-category' );
 		}
 
-		# Cache all double underscores in the database
-		foreach ( $this->mDoubleUnderscores as $key => $val ) {
+		foreach ( $this->mDoubleUnderscores as $key => $alias ) {
+			# Cache all double underscores in the database
 			$this->mOutput->setUnsortedPageProperty( $key );
+			# Check for deprecated local aliases (T407289)
+			$ascii = str_starts_with( $alias, '__' ) && str_ends_with( $alias, '__' );
+			$wide = str_starts_with( $alias, '＿＿' ) && str_ends_with( $alias, '＿＿' );
+			if ( !( $ascii || $wide ) ) {
+				$this->addTrackingCategory( 'bad-double-underscore-category' );
+			}
 		}
 
 		return $text;
@@ -4213,10 +4228,12 @@ class Parser {
 					}
 				} else {
 					// Strip tag
-					$next = $node->firstChild;
-					// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
-					while ( $childNode = $node->firstChild ) {
-						$node->parentNode->insertBefore( $childNode, $node );
+					if ( $node->firstChild !== null ) {
+						$next = $node->firstChild;
+						// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+						while ( $childNode = $node->firstChild ) {
+							$node->parentNode->insertBefore( $childNode, $node );
+						}
 					}
 					DOMCompat::remove( $node );
 				}
@@ -6423,8 +6440,21 @@ class Parser {
 	 */
 	protected function lock() {
 		if ( $this->mInParse ) {
-			throw new LogicException( "Parser state cleared while parsing. "
-				. "Did you call Parser::parse recursively? Lock is held by: " . $this->mInParse );
+			$message = 'Parser state cleared while parsing. Did you call Parser::parse recursively?';
+			$xdebugMode = ini_get( 'xdebug.mode' );
+			if ( $xdebugMode !== false && str_contains( $xdebugMode, 'develop' ) ) {
+				$message .= PHP_EOL . 'xdebug.mode=develop is known to cause this issue ' .
+					'(xdebug bug #2222); consider ';
+				$improvedMode = implode( ',',
+					array_diff( explode( ',', $xdebugMode ),
+						[ 'develop' ] ) );
+				if ( $improvedMode !== '' ) {
+					$message .= "using xdebug.mode=$improvedMode instead or ";
+				}
+				$message .= "disabling xdebug.";
+			}
+			$message .= PHP_EOL . 'lock is held by: ' . $this->mInParse;
+			throw new LogicException( $message );
 		}
 
 		// Save the backtrace when locking, so that if some code tries locking again,

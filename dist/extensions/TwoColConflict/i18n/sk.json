@@ -2,11 +2,12 @@
 	"@metadata": {
 		"authors": [
 			"Luky001",
-			"Vegetator"
+			"Vegetator",
+			"Wizzard"
 		]
 	},
-	"twocolconflict": "Dvojstĺpcový editačný konflikt",
+	"twocolconflict": "Editačný konflikt po odsekoch",
 	"twocolconflict-desc": "Pri riešení editačného konfliktu zobrazuje zlučovaciu obrazovku s verziami vedľa seba",
-	"twocolconflict-beta-feature-message": "Dvojstĺpcový editačný konflikt",
-	"twocolconflict-beta-feature-description": "Zobrazovať editačný konflikt pomocou vylepšeného dvojstĺpcového vzhľadu."
+	"twocolconflict-beta-feature-message": "Editačný konflikt po odsekoch",
+	"twocolconflict-beta-feature-description": "Zobrazovať editačný konflikt pomocou pokročilejšieho zobrazenia po odsekoch."
 }

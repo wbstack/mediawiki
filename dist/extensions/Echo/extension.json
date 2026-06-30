@@ -119,9 +119,24 @@
 	},
 	"AvailableRights": [
 		"manage-all-push-subscriptions",
-		"echo-create"
+		"echo-create",
+		"echo-read-notifications"
 	],
+	"GrantPermissions": {
+		"echo-read-notifications": {
+			"echo-read-notifications": true
+		}
+	},
+	"GrantPermissionGroups": {
+		"echo-read-notifications": "private-information"
+	},
+	"GrantRiskGroups": {
+		"echo-read-notifications": "low"
+	},
 	"GroupPermissions": {
+		"*": {
+			"echo-read-notifications": true
+		},
 		"push-subscription-manager": {
 			"manage-all-push-subscriptions": true
 		}

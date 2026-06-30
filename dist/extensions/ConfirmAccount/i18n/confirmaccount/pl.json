@@ -84,6 +84,7 @@
 	"confirmaccount-needreason": "Musisz podać uzasadnienie w polu poniżej.",
 	"confirmaccount-canthold": "Ten wniosek został już wstrzymany lub usunięty.",
 	"confirmaccount-badaction": "Prawidłowe działanie (przyjmij, odrzuć, wstrzymaj) musi być określone w celu przejścia dalej.",
+	"confirmaccount-mismatched": "Treść tego pola musi być zgodna z tym co podano w oryginalnym żądaniu utworzenia konta.",
 	"confirmaccount-acc": "Potwierdzono wniosek o założenie konta;\nutworzono konto dla {{GENDER:$1|użytkownika|użytkowniczki}} [[User:$1|$1]].",
 	"confirmaccount-rej": "Odrzucono wniosek o utworzenie konta.",
 	"confirmaccount-viewing": "(aktualnie przeglądane przez użytkownika [[User:$1|$1]])",

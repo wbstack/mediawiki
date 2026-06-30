@@ -5,7 +5,8 @@
 			"Chadyka",
 			"Maksim L.",
 			"No Sleep till Krupki",
-			"Plaga med"
+			"Plaga med",
+			"Ucukor"
 		]
 	},
 	"templatedata-desc": "Рэалізацыя сховішча звестак для параметраў шаблонаў (з дапамогай JSON)",
@@ -61,7 +62,7 @@
 	"templatedata-modal-button-addmap": "Дадаць новую карту",
 	"templatedata-modal-button-apply": "Прымяніць",
 	"templatedata-modal-button-back": "Назад",
-	"templatedata-modal-button-cancel": "Адмена",
+	"templatedata-modal-button-cancel": "Скасаваць",
 	"templatedata-modal-button-changelang": "Змяніць мову",
 	"templatedata-modal-button-delparam": "Выдаліць інфармацыю пра параметр",
 	"templatedata-modal-button-done": "Гатова",
@@ -69,7 +70,7 @@
 	"templatedata-modal-button-importParams": "Імпартаваць параметры",
 	"templatedata-modal-button-removemap": "Выдаліць карту",
 	"templatedata-modal-button-saveparam": "Захаваць",
-	"templatedata-modal-confirmcancel": "Вы ўпэўнены, што хочаце адмяніць унесеныя змены?",
+	"templatedata-modal-confirmcancel": "Вы ўпэўнены, што хочаце адхіліць унесеныя змены?",
 	"templatedata-modal-current-language": "Цяперашняя мова: $1",
 	"templatedata-modal-errormsg": "Былі знойдзены памылкі. Калі ласка, пераканайцеся, што імёны параметраў не з’яўляюцца пустымі, не дублююцца і не змяшчаюць «$1», «$2» або «$3».",
 	"templatedata-modal-errormsg-duplicate-name": "Знойдзена памылка. Выбранае імя ўжо ўжываецца іншым параметрам.",

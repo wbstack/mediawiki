@@ -6,7 +6,8 @@
 			"Melos",
 			"Nemo bis",
 			"Pietrodn",
-			"Stefano-c"
+			"Stefano-c",
+			"Dream Indigo"
 		]
 	},
 	"requestaccount": "Richiedi utenza",
@@ -45,7 +46,7 @@
 	"requestaccount-sent": "La tua richiesta utenza è stata inviata ed è ora in attesa di verifica.\n\tUna email di conferma è stata inviata al tuo indirizzo di posta elettronica",
 	"requestaccount-econf": "Il tuo indirizzo e-mail è stato confermato e sarà indicato come tale nella tua richiesta.",
 	"requestaccount-email-subj": "{{SITENAME}} conferma indirizzo email",
-	"requestaccount-email-body": "Qualcuno, probabilmente tu, dall'indirizzo IP $1, ha chiesto un account \"$2\" con questo indirizzo e-mail su {{SITENAME}}.\n\nPer confermare che questo account ti appartiene veramente su {{SITENAME}}, apri questo link nel tuo browser:\n\n$3\n\nSe l'account viene creato, la password sarà inviata via e-mail solo a te.\nSe *non* sei stato tu, non seguire il link.\nQuesto codice di conferma scadrà il $4.",
+	"requestaccount-email-body": "Qualcuno, probabilmente tu, dall'indirizzo IP $1, ha chiesto un account \"$2\" con questo indirizzo e-mail su {{SITENAME}}.\n\nPer confermare che questo account ti appartiene veramente su {{SITENAME}}, apri questo link nel tuo browser:\n\n$3\n\nSe l'account viene creato, la password sarà inviata via e-mail solo a te.\nSe *non* sei stata/o tu, non seguire il link.\nQuesto codice di conferma scadrà il $4.",
 	"requestaccount-email-subj-admin": "{{SITENAME}} richiesta account",
 	"requestaccount-email-body-admin": "$1 ha chiesto un'utenza ed è in attesa di conferma.\nL'indirizzo email è stato confermato. È possibile confermare la richiesta qui:\n\n$2",
 	"acct_request_throttle_hit": "Spiacente, hai già chiesto {{PLURAL:$1|1 account|$1 account}}.\nNon puoi effettuare ulteriori richieste."

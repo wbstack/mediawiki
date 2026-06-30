@@ -3,7 +3,8 @@
 		"authors": [
 			"Leducthn",
 			"Minh Nguyen",
-			"Yurik"
+			"Yurik",
+			"Nvdtn19"
 		]
 	},
 	"jsonconfig-desc": "Cho phép lưu giữ cấu hình JSON trên wiki",
@@ -70,9 +71,9 @@
 	"jsonconfig-license-url-CC-BY-SA-3.0": "https://creativecommons.org/licenses/by-sa/3.0/deed.vi",
 	"jsonconfig-license-url-CC-BY-SA-4.0": "https://creativecommons.org/licenses/by-sa/4.0/deed.vi",
 	"jsonconfig-license-url-CC-BY-SA-4.0+": "https://creativecommons.org/licenses/by-sa/4.0/deed.vi",
-	"jsonconfig-license-copyrightwarning": "Với việc lưu các thay đổi, bạn chấp nhận [https://foundation.wikimedia.org/wiki/Terms_of_Use/vi?uselang=vi các Điều khoản Sử dụng], và bạn đồng ý phát hành, một cách không thể hủy bỏ, đóng góp của mình theo [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
-	"jsonconfig-license-copyrightwarning-license-unset": "Với việc lưu các thay đổi, bạn chấp nhận [https://foundation.wikimedia.org/wiki/Terms_of_Use/vi?uselang=vi các Điều khoản Sử dụng], và bạn đồng ý phát hành, một cách không thể hủy bỏ, đóng góp của mình theo giấy phép được chỉ định trong trường <code>licence</code>.",
-	"jsonconfig-license-notice": "'''Lưu ý:''' Khi sửa đổi trang này, bạn chấp nhận rằng các sửa đổi của bạn sẽ nằm trong giấy phép [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning": "Khi lưu thay đổi, bạn đồng ý phát hành các đóng góp của bạn theo các điều khoản của giấy phép [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning-license-unset": "Khi lưu thay đổi, bạn đồng ý phát hành các đóng góp của mình theo giấy phép được nêu trong trường <code>licence</code>.",
+	"jsonconfig-license-notice": "'''Lưu ý:''' Khi sửa đổi trang này, bạn đồng ý phát hành các đóng góp của bạn theo các điều khoản của giấy phép [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
 	"jsonconfig-license-notice-license-unset": "'''Lưu ý:''' Khi bạn sửa đổi trang này, bạn đồng ý phát hành đóng góp của mình theo giấy phép được chỉ định trong trường <code>licence</code>.",
 	"right-jsonconfig-flush": "Điều khiển JsonConfig qua API",
 	"action-jsonconfig-flush": "điều khiển JsonConfig qua API"

@@ -2,9 +2,12 @@
 	"@metadata": {
 		"authors": [
 			"BaRaN6161 TURK",
-			"Karduelis"
+			"Karduelis",
+			"HakanIST"
 		]
 	},
 	"skinname-modern": "Modern",
+	"modern.css": "/* All CSS here will be loaded for users of the Modern skin */",
+	"modern.js": "/* All JavaScript here will be loaded for users of the Modern skin */",
 	"modern-desc": "Kenar çubuğu ve üst çubuğu olan mavi/gri bir görünüm. MonoBook'tan türetildi"
 }

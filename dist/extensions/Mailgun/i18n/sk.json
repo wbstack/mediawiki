@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Wizzard"
+		]
+	},
+	"mailgun-desc": "Odosiela e-maily z MediaWiki cez službu Mailgun API"
+}

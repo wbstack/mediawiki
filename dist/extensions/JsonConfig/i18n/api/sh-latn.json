@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Winston Sung"
+			"Winston Sung",
+			"Aca"
 		]
 	},
 	"apihelp-jsonconfig-summary": "Omogućuje izravan pristup podsustavu JsonConfig.",
@@ -16,5 +17,5 @@
 	"apihelp-jsondata-example-1": "Daje JSON sadržaj stranice Sample.tab, lokaliziran na jezik korisnika",
 	"apihelp-jsondata-example-2": "Daje JSON sadržaj stranice Sample.tab, lokaliziran na francuski",
 	"apierror-jsonconfig-paramrequired": "Za ovu naredbu potreban je parametar <var>$1</var>.",
-	"apierror-jsonconfig-badtitle": "Ova stranica određena parametrima <var>namespace</var> i <var>title</var> ili je nevažeća, ili nije registrirana u konfiguraciji JsonConfig."
+	"apierror-jsonconfig-badtitle": "Ova stranica određena parametrima <var>namespace</var> i <var>title</var> ili je neispravna ili nije registrirana u konfiguraciji JsonConfig."
 }

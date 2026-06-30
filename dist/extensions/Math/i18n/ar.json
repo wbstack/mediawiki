@@ -18,7 +18,8 @@
 			"ديفيد",
 			"زكريا",
 			"علاء",
-			"محمد أحمد عبد الفتاح"
+			"محمد أحمد عبد الفتاح",
+			"Mohammed Qays"
 		]
 	},
 	"math-desc": "حوِّل الصيغ الرياضية بين وسمي <code>&lt;math&gt;</code> ... <code>&lt;/math&gt;</code>",
@@ -108,7 +109,7 @@
 	"mw-math-latexml": "LaTeXML (تجريبي؛ يستخدم MathML)",
 	"mw-math-mathjax": "عرض MathJax من جانب العميل (للمتصفحات ذات دعم MathML المحدود)",
 	"mw-math-mathml": "SVG (يمكن تمكين MathML عبر البرنامج المساعد للمتصفح)",
-	"mw-math-native": "MathML (تجريبي ؛ لا توجد صور)",
+	"mw-math-native": "MathML (تجريبي؛ لا توجد صور)",
 	"mw-math-source": "اعرض على هيئة LaTeX (للمتصفحات النصية)",
 	"prefs-math": "رياضيات",
 	"mathstatus": "حالة الرياضيات",

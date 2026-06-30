@@ -83,7 +83,7 @@
 	"confirmaccount-canthold": "Bu istek ya askıda ya da silinmiş.",
 	"confirmaccount-badaction": "Devam etmek için geçerli bir işlem (kabul, reddet, beklet) belirtilmelidir.",
 	"confirmaccount-mismatched": "Bu alan, orijinal hesap isteğiyle aynı olmalıdır.",
-	"confirmaccount-mismatched-general": "Orijinal hesap isteğinin izin verilmediği bir alanda geçersiz kılma istendi veya \"posta şifresi\" seçeneği belirlenmedi.",
+	"confirmaccount-mismatched-general": "Orijinal hesap isteğinin izin verilmediği bir alanda geçersiz kılma istendi veya \"posta parolası\" seçeneği belirlenmedi.",
 	"confirmaccount-acc": "Hesap isteği onaylandı;\n\tyeni kullanıcı hesabı oluşturdu [[User:$1|$1]].",
 	"confirmaccount-rej": "Hesap isteği reddedildi.",
 	"confirmaccount-viewing": "(şu an [[User:$1|$1]] tarafından {{GENDER:$1|inceleniyor}})",

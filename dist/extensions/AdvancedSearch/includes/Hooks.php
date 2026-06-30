@@ -71,16 +71,6 @@ class Hooks implements
 			return;
 		}
 
-		/**
-		 * Ensure the current URL is specifying the namespaces which are to be used
-		 */
-		$redirect = $this->redirectToNamespacedRequest( $special );
-		if ( $redirect !== null ) {
-			$outputPage->redirect( $redirect );
-			// Abort execution of the SpecialPage by returning false since we are redirecting
-			return false;
-		}
-
 		$outputPage->addModules( [
 			'ext.advancedSearch.init',
 			'ext.advancedSearch.searchtoken',
@@ -89,6 +79,8 @@ class Hooks implements
 		$outputPage->addModuleStyles( 'ext.advancedSearch.initialstyles' );
 
 		$outputPage->addJsConfigVars( $this->getJsConfigVars(
+			$special->getRequest(),
+			$special->getUser(),
 			$special->getContext(),
 			$special->getConfig(),
 			ExtensionRegistry::getInstance()
@@ -96,12 +88,16 @@ class Hooks implements
 	}
 
 	/**
+	 * @param WebRequest $request
+	 * @param User $user
 	 * @param MessageLocalizer $context
 	 * @param Config $config
 	 * @param ExtensionRegistry $extensionRegistry
 	 * @return array
 	 */
 	private function getJsConfigVars(
+		WebRequest $request,
+		User $user,
 		MessageLocalizer $context,
 		Config $config,
 		ExtensionRegistry $extensionRegistry
@@ -120,6 +116,10 @@ class Hooks implements
 				),
 		];
 
+		if ( !self::isNamespacedSearch( $request ) ) {
+			$vars += [ 'advancedSearch.defaultNamespaces' => $this->getDefaultNamespaces( $user ) ];
+		}
+
 		if ( $extensionRegistry->isLoaded( 'Translate' ) ) {
 			$vars += [ 'advancedSearch.languages' =>
 				$this->languageNameUtils->getLanguageNames()
@@ -127,23 +127,6 @@ class Hooks implements
 		}
 
 		return $vars;
-	}
-
-	/**
-	 * If the request does not contain any namespaces, redirect to URL with user default namespaces
-	 * @param SpecialPage $special
-	 * @return string|null the URL to redirect to or null if not needed
-	 */
-	private function redirectToNamespacedRequest( SpecialPage $special ): ?string {
-		if ( !self::isNamespacedSearch( $special->getRequest() ) ) {
-			$namespacedSearchUrl = $special->getRequest()->getFullRequestURL();
-			$queryParts = [];
-			foreach ( $this->getDefaultNamespaces( $special->getUser() ) as $ns ) {
-				$queryParts['ns' . $ns] = '1';
-			}
-			return wfAppendQuery( $namespacedSearchUrl, $queryParts );
-		}
-		return null;
 	}
 
 	/**

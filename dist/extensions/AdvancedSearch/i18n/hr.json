@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Bugoslav",
-			"MaGa"
+			"MaGa",
+			"Ponor"
 		]
 	},
 	"advancedsearch-desc": "Jednostavan pristup naprednim mogućnostima pretrage na [[Special:Search]]",
@@ -37,7 +38,7 @@
 	"advancedsearch-help-filetype": ";Opis\n:Traži samo označene vrste datoteka.\n;Imajte na umu sljedeće činjenice\n:* Možete tražiti samo jednu vrstu.\n:* Možete izabrati samo vrste iz padajućeg izbornika.\n;Stranice s pomoći\n:[https://www.mediawiki.org/wiki/Help:CirrusSearch#filetype Filetype] i [https://www.mediawiki.org/wiki/Help:CirrusSearch#filemime filemime]\n;Odgovarajuća sintaksa u normalnoj pretrazi\n:Riječi ispred kojih stoji <code>filetype:</code>, npr. <code>filetype:ogg</code>.",
 	"advancedsearch-help-filew": ";Opis\n:Ova polja omogućuju navođenje širine datoteke.\n;Imajte na umu sljedeće činjenice\n:* Ovo je moguće samo za one vrste datoteka koje imaju širinu i visinu, npr. videozapisi i slike.\n;Stranica s pomoći\n:[https://www.mediawiki.org/wiki/Help:CirrusSearch#File_measures Filemeasures]\n;Odgovarajuća sintaksa u normalnoj pretrazi\n:Brojevi ispred kojih stoji <code>filew</code>, npr. <code>filew:>800</code>.",
 	"advancedsearch-help-fileh": ";Opis\n:Ova polja omogućuju navođenje visinu datoteke.\n;Imajte na umu sljedeće činjenice\n:* Ovo je moguće samo za one vrste datoteka koje imaju širinu i visinu, npr. videozapisi i slike.\n;Stranica s pomoći\n:[https://www.mediawiki.org/wiki/Help:CirrusSearch#File_measures Filemeasures]\n;Odgovarajuća sintaksa u normalnoj pretrazi\n:Brojevi ispred kojih stoji <code>fileh</code>, npr. <code>fileh:>600</code>.",
-	"advancedsearch-placeholder-exact-text": "\"mačak voli kozu\"",
+	"advancedsearch-placeholder-exact-text": "\"zašao neki momak u šumu\"",
 	"advancedsearch-inlanguage-default": "Odaberite jezik",
 	"advancedsearch-filetype-section-types": "Opće vrste datoteka",
 	"advancedsearch-filetype-section-image": "Formati slika",

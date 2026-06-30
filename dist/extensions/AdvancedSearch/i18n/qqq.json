@@ -12,7 +12,9 @@
 			"Thibaut120094",
 			"Umherirrender",
 			"WMDE",
-			"Woytecr"
+			"Woytecr",
+			"McDutchie",
+			"SaldırganSincap"
 		]
 	},
 	"advancedsearch-desc": "{{desc|name=AdvancedSearch|url=https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:AdvancedSearch}}",
@@ -38,13 +40,13 @@
 	"advancedsearch-field-preview-sort": "Label for the sorting order field in the list of preview pills.\n\nParameters:\n* $1 - The specific type of sorting. Can be, for example, {{msg-mw|advancedsearch-sort-preview-relevance}}, {{msg-mw|advancedsearch-sort-preview-last-edit-desc}}, {{msg-mw|advancedsearch-sort-preview-create-timestamp-desc}}, and more.",
 	"advancedsearch-help-general-instruction": "Informs the user that clicking on the button will display popup instructions on how to use the search field or dropdown list.\n\nParameters:\n* $1 - Name of the field, e.g. {{msg-mw|advancedsearch-field-plain}}, {{msg-mw|advancedsearch-field-deepcategory}}, and many more.",
 	"advancedsearch-help-plain": "Help text shown in a dialog for the field for plain search",
-	"advancedsearch-help-phrase": "Help text shown in a dialog for the field for exact search",
-	"advancedsearch-help-or": "Help text shown in a dialog for the field for or search",
+	"advancedsearch-help-phrase": "Help text shown in a dialog for the field for exact search. Section \"Syntax-equivalent in the normal search\": In the example, please translate <code>Begin at the beginning</code>, but do not translate the quotation marks.",
+	"advancedsearch-help-or": "Help text shown in a dialog for the field for or search. Section \"Syntax-equivalent in the normal search\": In the example, please translate <code>Laptop</code> and <code>Notebook</code>, but do not translate <code>OR</code>.",
 	"advancedsearch-help-not": "Help text shown in a dialog for the field for excluded words in search",
 	"advancedsearch-help-intitle": "Help text shown in a dialog for the field for searching pages with titles that contain this word",
 	"advancedsearch-help-subpageof": "Help text shown in a dialog for the field for searching pages with titles that are a subpage of this page",
 	"advancedsearch-help-deepcategory": "Help text shown in a dialog for the field that restricts search to pages in a category and its child categories",
-	"advancedsearch-help-hastemplate": "Help text shown in a dialog for the field for searching pages with a template",
+	"advancedsearch-help-hastemplate": "Help text shown in a dialog for the field for searching pages with a template. Section \"Syntax-equivalent in the normal search\": In the example, please translate <code>missing information</code>, but do not translate <code>hastemplate:</code> or the quotation marks.",
 	"advancedsearch-help-inlanguage": "Help text shown in a dialog for the field for searching pages in a certain language",
 	"advancedsearch-help-filetype": "Help text shown in a dialog for the field for file type",
 	"advancedsearch-help-filew": "Help text shown in a dialog for the field for file width in pixels",

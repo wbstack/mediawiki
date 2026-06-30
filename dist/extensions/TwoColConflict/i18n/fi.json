@@ -10,7 +10,8 @@
 			"Samoasambia",
 			"Stryn",
 			"Surjection",
-			"Valtlait"
+			"Valtlait",
+			"Jack Phoenix"
 		]
 	},
 	"twocolconflict": "Kappalepohjainen päällekkäisten muokkausten näkymä",
@@ -27,7 +28,7 @@
 	"twocolconflict-core-ui-hint-close": "Älä näytä tätä uudelleen",
 	"twocolconflict-preference-enabled": "Ota [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|kappalepohjainen päällekkäisten muokkausten näkymä]] käyttöön ratkaistaksesi päällekkäiset muokkaukset.",
 	"twocolconflict-special-footer-hint": "Sulje nykyinen sivu palataksesi päällekkäisten muokkausten näkymään.",
-	"twocolconflict-special-header-overview": "Valitettavasti muokatessasi myös joku toinen käyttäjä muokkasi samaa sivua ja julkaisi ennen sinua. Katseltavissa oleva kopio versiostasi on saatavilla alempana. Päällekkäisten muokkausten näkymässä tehdyt muokkaukset eivät näy. Yhdistääksesi muutokset ja ratkaistaksesi ongelman käyttäen  muokkausristiriitakäyttöliittymää, palaa edelliselle sivulle.",
+	"twocolconflict-special-header-overview": "Valitettavasti muokatessasi myös joku toinen käyttäjä muokkasi samaa sivua ja julkaisi ennen sinua. Katseltavissa oleva kopio versiostasi on saatavilla alempana. Päällekkäisten muokkausten näkymässä tehdyt muokkaukset eivät näy. Yhdistääksesi muutokset ja ratkaistaksesi ongelman käyttäen muokkausristiriitakäyttöliittymää, palaa edelliselle sivulle.",
 	"twocolconflict-special-not-saved": "Ei julkaistu",
 	"twocolconflict-special-textarea-hint": "Voit katsella ja kopioida versiosi wikitekstiä:",
 	"twocolconflict-special-malformed-title": "Puuttuva tai virheellinen otsikko.",
@@ -42,7 +43,7 @@
 	"twocolconflict-split-other-version-chosen": "Muu versio",
 	"twocolconflict-split-your-version-chosen": "Oma versiosi",
 	"twocolconflict-split-select-all": "Valitse kaikki",
-	"twocolconflict-split-tour-dialog-dot-message": "Klikkaa sinisia pisteitä nähdäksesi hyödyllisiä vinkkejä",
+	"twocolconflict-split-tour-dialog-dot-message": "Napsauta sinisiä pisteitä nähdäksesi hyödyllisiä vinkkejä",
 	"twocolconflict-split-tour-dialog-header": "Yhdistä ristiriitaiset versiot",
 	"twocolconflict-split-tour-dialog-message": "Valitettavasti muokatessasi myös joku toinen käyttäjä muokkasi samaa sivua ja julkaisi ennen sinua.\n\nÄlä huoli, muokkauksesi eivät ole kadonneet! Ole hyvä ja tarkasta kumpikin versio ja yhdistä ne toisiinsa. Tarvittaessa voit muokata valittua tekstiä. Vain valituissa ruuduissa olevat tekstit tallennetaan, kun painat ”{{int:publishchanges}}”.",
 	"twocolconflict-split-tour-dialog-btn-text": "Aloita yhdistäminen",
