@@ -449,7 +449,7 @@
     - Gruntfile.js
     - Doxyfile
   patchUrls:
-    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseLexeme~1305583/revisions/1/patch?download
+    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseLexeme~1305583/revisions/3/patch?download
 - name: SyntaxHighlight_GeSHi
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-SyntaxHighlight_GeSHi/zip/08a01c78dc284f02ece3c5f909857769664d0176
   artifactLevel: 1

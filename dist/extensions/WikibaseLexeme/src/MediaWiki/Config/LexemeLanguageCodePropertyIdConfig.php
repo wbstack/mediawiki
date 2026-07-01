@@ -26,7 +26,11 @@ class LexemeLanguageCodePropertyIdConfig extends RL\Module {
 	/**
 	 * @inheritDoc
 	 */
-	public function enableModuleContentVersion() {
-		return true;
+	public function getDefinitionSummary( RL\Context $context ) {
+		$summary = parent::getDefinitionSummary( $context );
+		$summary[] = [
+			'LexemeLanguageCodePropertyId' => $this->getConfig()->get( 'LexemeLanguageCodePropertyId' ),
+		];
+		return $summary;
 	}
 }
