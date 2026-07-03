@@ -9,7 +9,8 @@
 			"Revi",
 			"Ykhwong",
 			"고솜",
-			"아라"
+			"아라",
+			"Tensama0415"
 		]
 	},
 	"skinname-timeless": "타임리스",
@@ -18,7 +19,7 @@
 	"timeless-loggedinas": "'''$1'''님으로 로그인됨",
 	"timeless-notloggedin": "로그인하지 않음",
 	"timeless-userpage": "{{GENDER:$1|사용자}} 문서",
-	"timeless-talkpage": "{{GENDER:$1|사용자}}토론",
+	"timeless-talkpage": "{{GENDER:$1|사용자}} 토론",
 	"timeless-pagelog": "문서 기록",
 	"timeless-more": "더 보기",
 	"timeless-sitetools": "위키 도구",
@@ -28,11 +29,11 @@
 	"timeless-view-view": "읽기",
 	"timeless-pagemisc": "더 보기",
 	"timeless-namespaces": "이름공간",
-	"timeless-pagetools": "문서 행위",
+	"timeless-pagetools": "문서 작업",
 	"timeless-languages": "언어",
 	"timeless-projects": "다른 프로젝트",
-	"timeless.css": "/* 여기의 모든 CSS는 타임리스 스킨을 사용하는 사용자에게 로드됩니다 */",
-	"timeless.js": "/* 여기의 모든 자바스크립트는 타임리스 스킨을 사용하는 사용자에게 로드됩니다 */",
+	"timeless.css": "/* 이 CSS 설정은 타임리스 스킨을 사용하는 사용자에게 적용됩니다 */",
+	"timeless.js": "/* 이 자바스크립트 설정은 타임리스 스킨을 사용하는 사용자에게 적용됩니다 */",
 	"timeless-view-history": "역사",
-	"timeless-action-undelete": "{{PLURAL:$1|편집 한 개|편집 $1개}} 되살리기"
+	"timeless-action-undelete": "{{PLURAL:$1|편집 한 개|편집 $1개}} 복구하기"
 }

@@ -2,9 +2,12 @@
 	"@metadata": {
 		"authors": [
 			"Sfic",
-			"Siddhartha Ghai"
+			"Siddhartha Ghai",
+			"Saurmandal"
 		]
 	},
-	"skinname-modern": "मॉडर्न",
-	"modern-desc": "ऊपर एवं किनारे की पट्टी के साथ एक नीला/ग्रे थीम। मोनोबुक पर आधारित।"
+	"skinname-modern": "Modern",
+	"modern.css": "/* यहाँ के CSS को Modern स्किन के उपयोगकर्ताओं के लिए लोड किया जाएगा */",
+	"modern.js": "/* यहाँ की जावास्क्रिप्ट को Modern स्किन के उपयोगकर्ताओं के लिए लोड किया जाएगा */",
+	"modern-desc": "साइडबार और ऊपरी पट्टी वाला एक नीले/धूसर रंग का स्किन। Monobook से व्युत्पन्न"
 }

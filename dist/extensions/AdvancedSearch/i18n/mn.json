@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Chinneeb"
+			"Chinneeb",
+			"Zorigt"
 		]
 	},
 	"advancedsearch-options-pane-head": "Нарийвчилсан хайлт:",
@@ -10,7 +11,7 @@
 	"advancedsearch-optgroup-files": "Файл ба зураг",
 	"advancedsearch-optgroup-sort": "Эрэмбэлэх дараалал",
 	"advancedsearch-field-plain": "Эдгээр үгс",
-	"advancedsearch-field-phrase": "Энэ бичигнээс",
+	"advancedsearch-field-phrase": "Яг энэ текст",
 	"advancedsearch-field-or": "Эдгээр үгсээс",
 	"advancedsearch-field-not": "Эдгээрээс өөр үгс",
 	"advancedsearch-field-filetype": "Файлын төрөл",

@@ -42,7 +42,7 @@
 	"twocolconflict-split-tour-dialog-header": "Toqquşan versiyaları birləşdir",
 	"twocolconflict-split-tour-dialog-message": "Təəssüf ki, redaktə edərkən başqa bir istifadəçi də eyni səhifəni redaktə etdi və sizdən əvvəl dərc etdi.\nNarahat olmayın, düzəlişləriniz itirilmədi! Xahiş edirik, hər iki versiyanı nəzərdən keçirin və onları birləşdirin.  Lazım gələrsə, seçilmiş mətni düzəldə bilərsiniz.  Yalnız \"{{int: yayınlanandeyişikliklər}}\" düyməsini basdıqda seçilmiş qutulardakı mətn yadda qalacaq.",
 	"twocolconflict-split-tour-dialog-btn-text": "Birləşməyə başla",
-	"twocolconflict-split-tour-popup-btn-text": "Tamam, başa düşdüm",
+	"twocolconflict-split-tour-popup-btn-text": "Oldu, başa düşdüm",
 	"twocolconflict-split-tour-popup1-header": "Fərqli dəyişikliklər sətir-sətir göstərilir.",
 	"twocolconflict-split-tour-popup1-message": "Digər istifadəçinin mətni ilə sizinkiniz arasında fərq olduqda, iki versiya yan-yana göstərilir: sol tərəfdəki sarı qutuda digər istifadəçinin versiyası və sağdakı mavi qutuda sizinki.<br /><br /> İki versiya arasında fərq olmadıqda, xətlər boz qutularda göstərilir. Lazım gələrsə, bunlar genişləndirilə və ya daraldıla və redaktə edilə bilər.",
 	"twocolconflict-split-tour-popup2-header": "Hansı dəyişiklikləri saxlamaq istədiyinizi seçin",

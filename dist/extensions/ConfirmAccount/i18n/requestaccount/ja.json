@@ -7,7 +7,8 @@
 			"Schu",
 			"Shirayuki",
 			"Sujiniku",
-			"青子守歌"
+			"青子守歌",
+			"Tensama0415"
 		]
 	},
 	"requestaccount": "アカウント登録申請",
@@ -25,7 +26,7 @@
 	"requestaccount-ext-text": "以下の個人情報は公開されず、この申請処理のみに利用されます。\n電話番号などの連絡先は、あなたが本人確認の補助を目的として記入いただけます。",
 	"requestaccount-bio-text": "下記のあなたの経歴に、関連する資格情報を含めるようにしてください。",
 	"requestaccount-bio-text-i": "'''経歴は自分の利用者ページに初期のコンテンツとして設定されます。'''\nこの情報を公開していいか確認してください。",
-	"requestaccount-real": "本名:",
+	"requestaccount-real": "本名 (省略可能):",
 	"requestaccount-same": "(下で入力した本名を使用します)",
 	"requestaccount-email": "メールアドレス:",
 	"requestaccount-reqtype": "サイトでの役割:",

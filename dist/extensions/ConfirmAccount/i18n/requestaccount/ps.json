@@ -14,7 +14,7 @@
 	"requestaccount-level-0": "ليکوال",
 	"requestaccount-level-1": "سمونگر",
 	"requestaccount-bio": "شخصي ژوندليک (يوازې ساده متن):",
-	"requestaccount-tooshort": "ستاسې ژوندليک بايد لږ تر لږه $1 {{PLURAL:$1|ويی|وييونه}} اوږد وي.",
+	"requestaccount-tooshort": "ستاسې ژوندليک بايد لږ تر لږه $1 {{PLURAL:$1|ويی|ويي}} اوږد وي.",
 	"requestaccount-submit": "د گڼون غوښتنه",
 	"requestaccount-email-subj-admin": "د {{SITENAME}} د گڼون غوښتنه"
 }

@@ -5,15 +5,16 @@ declare( strict_types=1 );
 namespace MediaWiki\Extension\EmbedVideo\Media;
 
 use Exception;
-use File;
 use MediaTransformOutput;
 use MediaWiki\Context\RequestContext;
 use MediaWiki\Extension\EmbedVideo\Media\TransformOutput\VideoEmbedTransformOutput;
 use MediaWiki\Extension\EmbedVideo\Media\TransformOutput\VideoTransformOutput;
+use MediaWiki\FileRepo\File\File;
 use MediaWiki\MediaWikiServices;
-use TrivialMediaHandlerState;
 
 class VideoHandler extends AudioHandler {
+	protected string $defaultProbeStream = 'v:0';
+
 	/**
 	 * @inheritDoc
 	 *
@@ -96,11 +97,8 @@ class VideoHandler extends AudioHandler {
 			$params['lazy'] = $config->get( 'EmbedVideoLazyLoadLocalVideos' );
 		}
 
-		// Note: MediaHandler declares getImageSize with a local path, but we don't need it here.
-		[ 'width' => $width, 'height' => $height ] = $this->getSizeAndMetadata(
-			new TrivialMediaHandlerState(),
-			$image->getLocalRefPath()
-		);
+		$width = $image->getWidth();
+		$height = $image->getHeight();
 
 		if ( $width === 0 && $height === 0 ) {
 			// Force a reset.
@@ -164,19 +162,15 @@ class VideoHandler extends AudioHandler {
 			->get( 'EmbedVideoUseEmbedStyleForLocalVideos' );
 
 		$request = RequestContext::getMain();
-		$useEmbedTransform = false;
+		$title = $request->getTitle();
 
-		if ( $request->getTitle() !== null ) {
-			$useEmbedTransform = $request->getTitle()->isContentPage();
-
+		if ( $title !== null && $title->getNamespace() === NS_FILE ) {
 			// Always preload if is file page
-			if ( $request->getTitle()->getNamespace() === NS_FILE ) {
-				$params['lazy'] = false;
-			}
+			$params['lazy'] = false;
 		}
 
 		// If local files are globally styled AND no gif or autoplay parameter is set
-		if ( $useEmbedTransform && $styledLocalFiles === true &&
+		if ( $styledLocalFiles === true &&
 			!( isset( $params['gif'] ) || isset( $params['autoplay'] ) ) ) {
 			return new VideoEmbedTransformOutput( $file, $params );
 		}
@@ -191,21 +185,25 @@ class VideoHandler extends AudioHandler {
 	 * @return string Dimensions
 	 */
 	public function getDimensionsString( $file ): string {
-		[
-			'stream' => $stream,
-			'format' => $format,
-		] = $this->getFFProbeResult( $file );
+		$metadata = $file->getMetadataItems( [ 'duration' ] );
+		$duration = $metadata['duration'] ?? null;
+		$width = $file->getWidth();
+		$height = $file->getHeight();
+		$parts = [];
 
-		if ( $format === false || $stream === false ) {
-			return parent::getDimensionsString( $file );
+		if ( $duration !== null && $duration !== false && $duration !== '' ) {
+			$parts[] = $this->contentLanguage->formatTimePeriod( (float)$duration );
 		}
 
-		return wfMessage(
-			'embedvideo-video-short-desc',
-			$this->contentLanguage->formatTimePeriod( $format->getDuration() ),
-			$stream->getWidth(),
-			$stream->getHeight()
-		)->text();
+		if ( $width > 0 && $height > 0 ) {
+			$parts[] = $width . 'x' . $height;
+		}
+
+		if ( !$parts ) {
+			return '';
+		}
+
+		return $this->contentLanguage->commaList( $parts );
 	}
 
 	/**
@@ -215,22 +213,25 @@ class VideoHandler extends AudioHandler {
 	 * @return string
 	 */
 	public function getShortDesc( $file ): string {
-		[
-			'stream' => $stream,
-			'format' => $format,
-		] = $this->getFFProbeResult( $file );
+		$metadata = $file->getMetadataItems( [ 'duration' ] );
+		$duration = $metadata['duration'] ?? null;
+		$width = $file->getWidth();
+		$height = $file->getHeight();
+		$parts = [];
 
-		if ( $format === false || $stream === false ) {
+		if ( $duration !== null && $duration !== false && $duration !== '' ) {
+			$parts[] = $this->contentLanguage->formatTimePeriod( (float)$duration );
+		}
+
+		if ( $width > 0 && $height > 0 ) {
+			$parts[] = $width . 'x' . $height;
+		}
+
+		if ( !$parts ) {
 			return self::getGeneralShortDesc( $file );
 		}
 
-		return wfMessage(
-			'embedvideo-video-short-desc',
-			$this->contentLanguage->formatTimePeriod( $format->getDuration() ),
-			$stream->getWidth(),
-			$stream->getHeight(),
-			$this->contentLanguage->formatSize( $file->getSize() )
-		)->text();
+		return $this->contentLanguage->commaList( $parts );
 	}
 
 	/**
@@ -240,26 +241,36 @@ class VideoHandler extends AudioHandler {
 	 * @return string
 	 */
 	public function getLongDesc( $file ): string {
-		[
-			'stream' => $stream,
-			'format' => $format,
-		] = $this->getFFProbeResult( $file );
+		$metadata = $file->getMetadataItems( [ 'duration', 'codec', 'bitrate' ] );
+		$duration = $metadata['duration'] ?? null;
+		$codec = $metadata['codec'] ?? null;
+		$bitrate = $metadata['bitrate'] ?? null;
+		$width = $file->getWidth();
+		$height = $file->getHeight();
+		$extension = $file->getExtension();
+		$parts = [ strtoupper( $extension ) ];
 
-		if ( $format === false || $stream === false ) {
+		if ( $codec !== null && $codec !== false && $codec !== '' ) {
+			$parts[] = $codec;
+		}
+
+		if ( $duration !== null && $duration !== false && $duration !== '' ) {
+			$parts[] = $this->contentLanguage->formatTimePeriod( (float)$duration );
+		}
+
+		if ( $width > 0 && $height > 0 ) {
+			$parts[] = $width . 'x' . $height;
+		}
+
+		if ( $bitrate !== null && $bitrate !== false && $bitrate !== '' ) {
+			$parts[] = $this->contentLanguage->formatBitrate( $bitrate );
+		}
+
+		if ( count( $parts ) === 1 ) {
 			return self::getGeneralLongDesc( $file );
 		}
 
-		$extension = pathinfo( $file->getPath(), PATHINFO_EXTENSION );
-
-		return wfMessage(
-			'embedvideo-video-long-desc',
-			strtoupper( $extension ),
-			$stream->getCodecName(),
-			$this->contentLanguage->formatTimePeriod( $format->getDuration() ),
-			$stream->getWidth(),
-			$stream->getHeight(),
-			$this->contentLanguage->formatBitrate( $format->getBitRate() )
-		)->text();
+		return $this->contentLanguage->commaList( $parts );
 	}
 
 	/**

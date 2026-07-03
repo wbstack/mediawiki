@@ -4,7 +4,9 @@
 			"Felba",
 			"Lokal Profil",
 			"WikiPhoenix",
-			"Yurik"
+			"Yurik",
+			"Yupik",
+			"Stefan2255"
 		]
 	},
 	"nstab-data": "Data",
@@ -57,9 +59,10 @@
 	"jsonconfig-license-name-dl-de-zero-2.0": "Datalicens Tyskland – Zero – Version 2.0",
 	"jsonconfig-license-name-dl-de-by-1.0": "Datalicens Tyskland – tillskrivning – Version 1.0",
 	"jsonconfig-license-name-dl-de-by-2.0": "Datalicens Tyskland – tillskrivning – version 2.0",
-	"jsonconfig-license-copyrightwarning": "Genom att spara ändringar samtycker du till [https://foundation.wikimedia.org/wiki/Terms_of_Use användarvillkoren] och du oåterkalleligen samtycker till att släppa ditt bidrag under [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
-	"jsonconfig-license-copyrightwarning-license-unset": "Genom att spara ändringar samtycker du till [https://foundation.wikimedia.org/wiki/Terms_of_Use användarvillkoren] och du samtycker oåterkalleligen till att släppa ditt bidrag enligt licensen som anges i fältet <code>licence</code>.",
-	"jsonconfig-license-notice": "'''OBS:''' När du redigerar denna sida samtycker du till att släppa ditt bidrag under [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-name-GeoNutzV": "Geo Data-licens Tyskland",
+	"jsonconfig-license-copyrightwarning": "Genom att publicera ändringar, samtycker du till att släppa ditt bidrag i enlighet med villkoren i  [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}] licensen.",
+	"jsonconfig-license-copyrightwarning-license-unset": "Genom att publicera ändringar, samtycker du till att släppa ditt bidrag i enlighet med den licens som anges i <code>licence</code> fältet.",
+	"jsonconfig-license-notice": "'''Obs:''' När du redigerar den här sidan, samtycker du till att släppa ditt bidrag i enlighet med villkoren i [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name- $1}}] licensen.",
 	"jsonconfig-license-notice-license-unset": "'''OBS:''' När du redigerar denna sida samtycker du till att släppa ditt bidrag enligt licensen som anges i fältet <code>licence</code>.",
 	"right-jsonconfig-flush": "Manipulera JsonConfig med API",
 	"action-jsonconfig-flush": "manipulera JsonConfig med API"

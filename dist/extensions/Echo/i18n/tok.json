@@ -3,7 +3,10 @@
 		"authors": [
 			"Robin van der Vliet",
 			"Juwan",
-			"Ne"
+			"Ne",
+			"Tamzin",
+			"Theleekycauldron",
+			"Recqy"
 		]
 	},
 	"prefs-echo": "toki suli",
@@ -86,5 +89,7 @@
 	"echo-email-batch-link-text-view-all-notifications": "o lukin e toki suli ale",
 	"notification-header-foreign-alert": "mu suli li kama tan {{PLURAL:$5|lipu ante}}",
 	"notification-header-foreign-notice": "mu li kama tan {{PLURAL:$5|lipu ante}}",
-	"notification-header-foreign-all": "toki suli li kama tan {{PLURAL:$5|lipu ante}}"
+	"notification-header-foreign-all": "toki suli li kama tan {{PLURAL:$5|lipu ante}}",
+	"right-echo-create": "ona li ken mu e jan ante",
+	"right-echo-read-notifications": "ona li ken lukin e ijo suli ona"
 }

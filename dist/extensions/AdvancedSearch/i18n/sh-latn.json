@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Winston Sung"
+			"Winston Sung",
+			"Aca"
 		]
 	},
 	"advancedsearch-desc": "Lagan pristup naprednim mogućnostima pretrage na [[Special:Search]]",
@@ -17,7 +18,7 @@
 	"advancedsearch-field-subpageof": "Podstranice ove stranice",
 	"advancedsearch-field-intitle": "Naslov stranice sadrži",
 	"advancedsearch-field-deepcategory": "Stranice u ovim kategorijama",
-	"advancedsearch-field-hastemplate": "Stranice s ovim predlošcima",
+	"advancedsearch-field-hastemplate": "Stranice s ovim šablonima",
 	"advancedsearch-field-inlanguage": "Stranice na ovom jeziku",
 	"advancedsearch-field-filetype": "Vrsta datoteke",
 	"advancedsearch-field-filew": "Širina datoteke u pikselima",
@@ -25,7 +26,7 @@
 	"advancedsearch-field-sort": "Redoslijed sortiranja",
 	"advancedsearch-field-preview-sort": "Sortiranje prema $1",
 	"advancedsearch-placeholder-exact-text": "\"mačak voli kozu\"",
-	"advancedsearch-inlanguage-default": "Odaberite jezik",
+	"advancedsearch-inlanguage-default": "Izaberite jezik",
 	"advancedsearch-filetype-section-types": "Opće vrste datoteka",
 	"advancedsearch-filetype-section-image": "Formati slika",
 	"advancedsearch-filetype-section-video": "Videoformati",
@@ -42,8 +43,8 @@
 	"advancedsearch-filesize-greater-than": "veća od",
 	"advancedsearch-filesize-smaller-than": "manja od",
 	"advancedsearch-sort-relevance": "Relevantnost",
-	"advancedsearch-sort-last-edit-desc": "Datum uređivanja — trenutačni na vrhu",
-	"advancedsearch-sort-create-timestamp-desc": "Datum pravljenja — trenutačni na vrhu",
+	"advancedsearch-sort-last-edit-desc": "Datum izmjene — aktualna na vrhu",
+	"advancedsearch-sort-create-timestamp-desc": "Datum izrade — aktualni na vrhu",
 	"advancedsearch-sort-preview-relevance": "relevantnost",
 	"advancedsearch-sort-preview-last-edit-desc": "datum uređivanja",
 	"advancedsearch-sort-preview-create-timestamp-desc": "datum pravljenja",

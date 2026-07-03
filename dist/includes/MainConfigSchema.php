@@ -2298,6 +2298,39 @@ class MainConfigSchema {
 	];
 
 	/**
+	 * Array of image widths used as steps for thumbnail sizes.
+	 *
+	 * Requested thumbnail widths are rounded up to the nearest step
+	 * The thumbnail with smallest step that has larger value than requested will be shown
+	 * but it will be downsized via HTML values.
+	 *
+	 * It increases the bandwidth to the users by serving slightly large thumbnail sizes they
+	 * have requested but it will save resources by de-duplicating thumbnail generation and storage.
+	 *
+	 * Note that these steps are "best effort" and MediaWiki might decide to use the requested size
+	 * for any reason.
+	 *
+	 * @see MediaWiki\Media\ImageHandler::getSteppedThumbWidth
+	 * @since 1.43.7
+	 */
+	public const ThumbnailSteps = [
+		'default' => null,
+		'type' => '?list',
+	];
+
+	/**
+	 * Ratio of images that will use the thumbnail steps
+	 *
+	 * This is to allow for gradual roll out of thumbnail steps. It should be a number between 0 and 1.
+	 *
+	 * The precision of this value is up to 0.001, anything below that will be ignored.
+	 */
+	public const ThumbnailStepsRatio = [
+		'default' => null,
+		'type' => '?float',
+	];
+
+	/**
 	 * When defined, is an array of image widths used as buckets for thumbnail generation.
 	 *
 	 * The goal is to save resources by generating thumbnails based on reference buckets instead of
@@ -9417,6 +9450,17 @@ class MainConfigSchema {
 		'default' => false,
 	];
 
+	/**
+	 * Enable the deprecated xslt option in the Action API.
+	 *
+	 * This is unsafe and allows users with the editinterface right to perform XSS.
+	 *
+	 * @see https://phabricator.wikimedia.org/T401995
+	 */
+	public const EnableUnsafeXsltOption = [
+		'default' => false,
+	];
+
 	// endregion -- end of security
 
 	/***************************************************************************/
@@ -10392,8 +10436,10 @@ class MainConfigSchema {
 	 */
 	public const GitRepositoryViewers = [
 		'default' => [
-			'https://(?:[a-z0-9_]+@)?gerrit.wikimedia.org/r/(?:p/)?(.*)' => 'https://gerrit.wikimedia.org/g/%R/+/%H',
-			'ssh://(?:[a-z0-9_]+@)?gerrit.wikimedia.org:29418/(.*)' => 'https://gerrit.wikimedia.org/g/%R/+/%H',
+			'https://(?:[a-z0-9_]+@)?gerrit\.wikimedia\.org/r/(?:p/)?(.*)' => 'https://gerrit.wikimedia.org/g/%R/+/%H',
+			'ssh://(?:[a-z0-9_]+@)?gerrit\.wikimedia\.org:29418/(.*)' => 'https://gerrit.wikimedia.org/g/%R/+/%H',
+			'https://github\.com/(.*?)(\.git)?' => 'https://github.com/$1/commit/%H',
+			'git@github\.com:(.*?)(\.git)?' => 'https://github.com/$1/commit/%H',
 		],
 		'type' => 'map',
 	];

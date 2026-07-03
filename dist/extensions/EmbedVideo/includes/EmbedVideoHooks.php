@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace MediaWiki\Extension\EmbedVideo;
 
+use LocalFile;
 use MediaWiki\Config\Config;
 use MediaWiki\Config\ConfigFactory;
 use MediaWiki\Exception\MWException;
@@ -12,13 +13,13 @@ use MediaWiki\Extension\EmbedVideo\Media\AudioHandler;
 use MediaWiki\Extension\EmbedVideo\Media\VideoHandler;
 use MediaWiki\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\ParserFirstCallInitHook;
+use MediaWiki\Hook\SkinTemplateNavigation__UniversalHook;
 use MediaWiki\Output\OutputPage;
-use MediaWiki\Page\Hook\ArticlePurgeHook;
-use MediaWiki\Page\WikiPage;
 use MediaWiki\Parser\Parser;
 use MediaWiki\Skin\Skin;
+use MediaWiki\Skin\SkinTemplate;
+use MediaWiki\SpecialPage\SpecialPage;
 use RepoGroup;
-use Wikimedia\ObjectCache\WANObjectCache;
 
 /**
  * EmbedVideo
@@ -29,21 +30,23 @@ use Wikimedia\ObjectCache\WANObjectCache;
  * @link    https://www.mediawiki.org/wiki/Extension:EmbedVideo
  */
 
-class EmbedVideoHooks implements ParserFirstCallInitHook, BeforePageDisplayHook, ArticlePurgeHook {
+class EmbedVideoHooks implements
+	ParserFirstCallInitHook,
+	BeforePageDisplayHook,
+	SkinTemplateNavigation__UniversalHook
+{
 
 	private Config $config;
-	private RepoGroup $repoGroup;
-	private WANObjectCache $cache;
 
 	/**
 	 * @param ConfigFactory $factory
-	 * @param RepoGroup $group
-	 * @param WANObjectCache $cache
+	 * @param RepoGroup $repoGroup
 	 */
-	public function __construct( ConfigFactory $factory, RepoGroup $group, WANObjectCache $cache ) {
+	public function __construct(
+		ConfigFactory $factory,
+		private RepoGroup $repoGroup
+	) {
 		$this->config = $factory->makeConfig( 'EmbedVideo' );
-		$this->repoGroup = $group;
-		$this->cache = $cache;
 	}
 
 	/**
@@ -176,35 +179,47 @@ class EmbedVideoHooks implements ParserFirstCallInitHook, BeforePageDisplayHook,
 	}
 
 	/**
-	 * Purges possible FFProbe results from the main cache
+	 * Adds a file-page action for explicitly refreshing stored metadata.
 	 *
-	 * @param WikiPage $wikiPage
-	 * @return void
+	 * @param SkinTemplate $sktemplate
+	 * @param array &$links
 	 */
-	public function onArticlePurge( $wikiPage ): void {
-		if ( $wikiPage->getTitle() === null || $wikiPage->getTitle()->getNamespace() !== NS_FILE ) {
+	public function onSkinTemplateNavigation__Universal( $sktemplate, &$links ): void {
+		$title = $sktemplate->getTitle();
+		if (
+			$title->getNamespace() !== NS_FILE ||
+			!$sktemplate->getUser()->isAllowed( 'embedvideo-refreshmetadata' )
+		) {
 			return;
 		}
 
-		$file = $this->repoGroup->findFile( $wikiPage->getTitle() );
-
-		if ( $file === false ) {
+		$file = $this->repoGroup->getLocalRepo()->newFile( $title );
+		if ( !$this->isRefreshableLocalFile( $file ) ) {
 			return;
 		}
 
-		// The last part is only ever a:0 or v:0
-		$audioKey = $this->cache->makeGlobalKey( 'EmbedVideo', 'ffprobe', $file->getSha1(), 'a:0' );
-		$videoKey = $this->cache->makeGlobalKey( 'EmbedVideo', 'ffprobe', $file->getSha1(), 'v:0' );
+		$label = $sktemplate->msg( 'embedvideo-refreshmetadata-tab' )->text();
+		$links['actions']['embedvideo-refreshmetadata'] = [
+			'text' => $label,
+			'title' => $label,
+			'href' => SpecialPage::getTitleFor(
+				'RefreshEmbedVideoMetadata',
+				$title->getDBkey()
+			)->getLocalURL(),
+		];
+	}
 
-		$this->cache->delete( $audioKey );
-		$this->cache->delete( $videoKey );
-
-		wfDebugLog(
-			'EmbedVideo',
-			sprintf(
-				'Purging FFProbe Cache for %s',
-				$wikiPage->getTitle()->getBaseText()
-			)
-		);
+	/**
+	 * Check whether a file can be refreshed via the metadata refresh workflow.
+	 *
+	 * @param mixed $file Candidate file object.
+	 * @return bool
+	 */
+	private function isRefreshableLocalFile( mixed $file ): bool {
+		return $file instanceof LocalFile
+			&& $file->exists()
+			&& $file->isLocal()
+			&& $file->getRedirected() === null
+			&& $file->getHandler() instanceof AudioHandler;
 	}
 }

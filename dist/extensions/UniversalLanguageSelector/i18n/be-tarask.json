@@ -3,10 +3,11 @@
 		"authors": [
 			"Red Winged Duck",
 			"Renessaince",
-			"Wizardist"
+			"Wizardist",
+			"Ucukor"
 		]
 	},
-	"uls-desc": "Дае карыстальніку некалькі спосабаў выбраць мову і зьмяніць моўныя налады",
+	"uls-desc": "Дае карыстальніку колькі спосабаў выбраць мову і зьмяніць моўныя налады",
 	"uls-plang-title-languages": "Мовы",
 	"ext-uls-select-language-settings-icon-tooltip": "Моўныя налады",
 	"ext-uls-undo-language-tooltip-text": "Папярэдняя мова — $1",
@@ -28,8 +29,8 @@
 	"ext-uls-display-settings-anon-label": "Мова інтэрфэйсу:",
 	"ext-uls-display-settings-anon-same-as-content": "$1 (як і зьмест)",
 	"ext-uls-display-settings-anon-log-in-cta": "[[Special:UserLogin|Увайдзіце]], каб выбраць іншую мову інтэрфэйсу.",
-	"ext-uls-webfonts-settings-title": "Загружаць шрыфты на патрэбу",
-	"ext-uls-webfonts-settings-info": "Загружаць адсутныя шрыфты аўтаматычна і дазволіць выбар пераважных шрыфтаў.",
+	"ext-uls-webfonts-settings-title": "Сьцягваць шрыфты на патрэбу",
+	"ext-uls-webfonts-settings-info": "Сьцягнуць бракаваныя шрыфты аўтаматычна і дазволіць выбар пераважных шрыфтаў.",
 	"ext-uls-webfonts-settings-info-link": "Болей зьвестак",
 	"ext-uls-webfonts-select-for": "Шрыфт для мовы $1",
 	"ext-uls-webfonts-select-for-ui-info": "Шрыфт для інтэрфэйсу",
@@ -42,7 +43,7 @@
 	"ext-uls-input-settings-ime-settings": "Мэтады ўводу для мовы $1",
 	"ext-uls-input-settings-ui-language": "Мова ўводу",
 	"ext-uls-back-to-input-settings": "Вярнуцца да наладаў уводу",
-	"ext-uls-ime-help": "Як карыстацца",
+	"ext-uls-ime-help": "Як ужываць",
 	"ext-uls-disable-input-method": "Ужываць сыстэмную клявіятуру",
 	"ext-uls-input-settings-more-languages-tooltip": "Болей моваў",
 	"jquery-ime-other-languages": "Іншыя мовы",

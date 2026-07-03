@@ -14,7 +14,8 @@
 			"Sujiniku",
 			"Waki285",
 			"Whym",
-			"Yusuke1109"
+			"Yusuke1109",
+			"Tensama0415"
 		]
 	},
 	"abusefilter-edit-builder-vars-oauth-consumer": "この変更を実行するために使用された OAuth コンシューマー ($1)",
@@ -41,7 +42,7 @@
 	"mwoauth-consumer-stage": "現在の状態:",
 	"mwoauth-consumer-email": "連絡先メールアドレス:",
 	"mwoauth-consumer-email-help": "新規コンシューマーを承認する人にのみ表示されます",
-	"mwoauth-consumer-owner-only-label": "オーナー専用:",
+	"mwoauth-consumer-owner-only-label": "所有者専用:",
 	"mwoauth-consumer-owner-only": "このコンシューマーは$1でのみ使用されます。",
 	"mwoauth-consumer-owner-only-help": "このオプションを選択すると、このコンシューマーが $1 によって自動的に承認され、使用が許可されます。他の利用者は使用できず、通常の認証フローは機能しません。このコンシューマーを使用した操作はタグ付けされません。",
 	"mwoauth-consumer-description": "アプリケーションの説明:",
@@ -175,7 +176,7 @@
 	"mwoauthlistconsumers-version": "コンシューマーのバージョン",
 	"mwoauthlistconsumers-user": "発行者",
 	"mwoauthlistconsumers-description": "説明",
-	"mwoauthlistconsumers-owner-only": "オーナー専用",
+	"mwoauthlistconsumers-owner-only": "所有者専用",
 	"mwoauthlistconsumers-wiki": "対象プロジェクト",
 	"mwoauthlistconsumers-callbackurl": "OAuth コールバック URL",
 	"mwoauthlistconsumers-callbackisprefix": "コンシューマーがリクエストでコールバックを指定し、必要な接頭辞として上記の「コールバック」URLを使用できるようにする",
@@ -279,6 +280,7 @@
 	"right-mwoauthviewprivate": "非公開OAuthデータを閲覧",
 	"right-mwoauthmanagemygrants": "OAuth付与を管理",
 	"action-mwoauthmanageconsumer": "OAuthコンシューマーの管理",
+	"action-mwoauthsuppress": "OAuthコンシューマーを秘匿",
 	"action-mwoauthmanagemygrants": "OAuth付与の管理",
 	"action-mwoauthproposeconsumer": "新しいコンシューマーの提案",
 	"action-mwoauthupdateownconsumer": "自分が制御できるOAuthコンシューマーの更新",
@@ -308,6 +310,7 @@
 	"notification-oauth-app-reenable-primary-link": "アプリを表示",
 	"notification-oauth-app-body": "理由: $1",
 	"mwoauth-oauth-version": "OAuth プロトコルのバージョン",
+	"mwoauth-oauth2-is-confidential": "機密クライアントを使用していますか？",
 	"mwoauth-oauth2-granttype-refresh-token": "トークンの更新",
 	"mwoauth-oauth2-invalid-access-token": "無効なアクセストークン",
 	"grant-oauthmanageownclient": "OAuth クライアントを管理"

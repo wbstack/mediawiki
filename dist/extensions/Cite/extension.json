@@ -74,161 +74,6 @@
 				"minerva": "ext.cite.parsoid.styles.minerva.less"
 			}
 		},
-		"ext.cite.visualEditor.core": {
-			"localBasePath": "modules/ve-cite",
-			"remoteExtPath": "Cite/modules/ve-cite",
-			"scripts": [
-				"ve.dm.MWDocumentReferences.js",
-				"ve.dm.MWGroupReferences.js",
-				"ve.dm.MWReferenceModel.js",
-				"ve.dm.MWReferencesListNode.js",
-				"ve.dm.MWReferenceNode.js",
-				"ve.ce.MWReferencesListNode.js",
-				"ve.ce.MWReferenceNode.js",
-				"ve.ui.MWReferencesListCommand.js"
-			],
-			"styles": [
-				"ve.ce.MWReferencesListNode.less"
-			],
-			"dependencies": [
-				"ext.visualEditor.mwcore",
-				"ext.visualEditor.mwtransclusion"
-			],
-			"messages": [
-				"cite-ve-referenceslist-isempty",
-				"cite-ve-referenceslist-isempty-default",
-				"cite-ve-referenceslist-missing-parent",
-				"cite-ve-referenceslist-missingref",
-				"cite-ve-referenceslist-missingref-in-list",
-				"cite-ve-referenceslist-missingreflist"
-			]
-		},
-		"ext.cite.visualEditor": {
-			"localBasePath": "modules/ve-cite",
-			"remoteExtPath": "Cite/modules/ve-cite",
-			"scripts": [
-				{
-					"name": "ve.ui.MWCitationTools.js",
-					"callback": "Cite\\ResourceLoader\\CitationToolDefinition::makeScript"
-				},
-				"ve.ui.MWReferenceGroupInputWidget.js",
-				"ve.ui.MWReferenceSearchWidget.js",
-				"ve.ui.MWReferenceResultWidget.js",
-				"ve.ui.MWUseExistingReferenceCommand.js",
-				"ve.ui.MWCitationDialog.js",
-				"ve.ui.MWReferencesListDialog.js",
-				"ve.ui.MWReferenceDialog.js",
-				"ve.ui.MWReferenceDialogTool.js",
-				"ve.ui.MWReferenceEditPanel.js",
-				"ve.ui.MWCitationDialogTool.js",
-				"ve.ui.MWReferenceContextItem.js",
-				"ve.ui.MWReferencesListContextItem.js",
-				"ve.ui.MWCitationContextItem.js",
-				"ve.ui.MWCitationAction.js",
-				"ve.ui.MWReference.init.js",
-				"ve.ui.MWCitationNeededContextItem.js",
-				{
-					"name": "ve.ui.contentLanguage.js",
-					"callback": "Cite\\ResourceLoader\\ContentLanguage::makeScript"
-				}
-			],
-			"styles": [
-				"ve.ui.MWReferenceDialog.less",
-				"ve.ui.MWReferenceContextItem.less",
-				"ve.ui.MWReferenceResultWidget.less",
-				"ve.ui.MWCitationDialogTool.less"
-			],
-			"dependencies": [
-				"oojs-ui.styles.icons-alerts",
-				"oojs-ui.styles.icons-editing-citation",
-				"oojs-ui.styles.icons-interactions",
-				"ext.cite.visualEditor.core",
-				"ext.cite.parsoid.styles",
-				"ext.cite.styles",
-				"ext.visualEditor.mwtransclusion",
-				"ext.visualEditor.base",
-				"ext.visualEditor.mediawiki"
-			],
-			"messages": [
-				"cite-ve-changedesc-ref-group-both",
-				"cite-ve-changedesc-ref-group-from",
-				"cite-ve-changedesc-ref-group-to",
-				"cite-ve-changedesc-reflist-group-both",
-				"cite-ve-changedesc-reflist-group-from",
-				"cite-ve-changedesc-reflist-group-to",
-				"cite-ve-changedesc-reflist-responsive-set",
-				"cite-ve-changedesc-reflist-responsive-unset",
-				"cite-ve-citationneeded-button",
-				"cite-ve-citationneeded-description",
-				"cite-ve-citationneeded-reason",
-				"cite-ve-citationneeded-title",
-				"cite-ve-dialog-reference-contextitem-extends",
-				"cite-ve-dialog-reference-editing-add-details",
-				"cite-ve-dialog-reference-editing-add-details-placeholder",
-				"cite-ve-dialog-reference-editing-reused",
-				"cite-ve-dialog-reference-editing-reused-long",
-				"cite-ve-dialog-reference-editing-extends",
-				"cite-ve-dialog-reference-extend-long-tool",
-				"cite-ve-dialog-reference-missing-parent-ref",
-				"cite-ve-dialog-reference-options-group-label",
-				"cite-ve-dialog-reference-options-group-placeholder",
-				"cite-ve-dialog-reference-options-responsive-label",
-				"cite-ve-dialog-reference-options-section",
-				"cite-ve-dialog-reference-placeholder",
-				"cite-ve-dialog-reference-title",
-				"cite-ve-dialog-reference-title-add-details",
-				"cite-ve-dialog-reference-title-edit-details",
-				"cite-ve-dialog-reference-useexisting-tool",
-				"cite-ve-dialog-reference-useexisting-long-tool",
-				"cite-ve-dialog-referenceslist-contextitem-description-general",
-				"cite-ve-dialog-referenceslist-contextitem-description-named",
-				"cite-ve-dialog-referenceslist-title",
-				"cite-ve-dialogbutton-citation-educationpopup-title",
-				"cite-ve-dialogbutton-citation-educationpopup-text",
-				"cite-ve-dialogbutton-reference-full-label",
-				"cite-ve-dialogbutton-reference-tooltip",
-				"cite-ve-dialogbutton-reference-title",
-				"cite-ve-dialogbutton-referenceslist-tooltip",
-				"cite-ve-reference-input-placeholder",
-				"cite-ve-toolbar-group-label",
-				"cite-ve-othergroup-item",
-				"parentheses",
-				"word-separator"
-			]
-		},
-		"ext.cite.wikiEditor": {
-			"localBasePath": "modules",
-			"remoteExtPath": "Cite/modules",
-			"scripts": [
-				"ext.cite.wikiEditor.js"
-			],
-			"dependencies": [
-				"ext.wikiEditor",
-				"mediawiki.jqueryMsg",
-				"mediawiki.language"
-			],
-			"messages": [
-				"cite-wikieditor-tool-reference",
-				"cite-wikieditor-help-page-references",
-				"cite-wikieditor-help-content-reference-example-text1",
-				"cite-wikieditor-help-content-reference-example-text2",
-				"cite-wikieditor-help-content-reference-example-text3",
-				"cite-wikieditor-help-content-reference-example-ref-id",
-				"cite-wikieditor-help-content-reference-example-extra-details",
-				"cite-wikieditor-help-content-reference-example-ref-normal",
-				"cite-wikieditor-help-content-reference-example-ref-named",
-				"cite-wikieditor-help-content-reference-example-ref-reuse",
-				"cite-wikieditor-help-content-reference-example-ref-extends",
-				"cite-wikieditor-help-content-reference-example-ref-result",
-				"cite-wikieditor-help-content-reference-example-reflist",
-				"cite-wikieditor-help-content-reference-description",
-				"cite-wikieditor-help-content-named-reference-description",
-				"cite-wikieditor-help-content-rereference-description",
-				"cite-wikieditor-help-content-extended-reference-description",
-				"cite-wikieditor-help-content-showreferences-description",
-				"cite_reference_backlink_symbol"
-			]
-		},
 		"ext.cite.ux-enhancements": {
 			"localBasePath": "modules",
 			"remoteExtPath": "Cite/modules",
@@ -259,37 +104,45 @@
 		"localBasePath": "",
 		"remoteExtPath": "Cite",
 		"scripts": [
-			"tests/qunit/ve-cite/ve.dm.citeExample.js",
-			"tests/qunit/ve-cite/ve.dm.Converter.test.js",
-			"tests/qunit/ve-cite/ve.dm.MWDocumentReferences.test.js",
-			"tests/qunit/ve-cite/ve.dm.MWGroupReferences.test.js",
-			"tests/qunit/ve-cite/ve.dm.InternalList.test.js",
-			"tests/qunit/ve-cite/ve.dm.MWReferenceModel.test.js",
-			"tests/qunit/ve-cite/ve.dm.MWReferenceNode.test.js",
-			"tests/qunit/ve-cite/ve.dm.MWReferencesListNode.test.js",
-			"tests/qunit/ve-cite/ve.dm.Transaction.test.js",
-			"tests/qunit/ve-cite/ve.ui.DiffElement.test.js",
-			"tests/qunit/ve-cite/ve.ui.MWCitationDialogTool.test.js",
-			"tests/qunit/ve-cite/ve.ui.MWReferenceContextItem.test.js",
-			"tests/qunit/ve-cite/ve.ui.MWReferenceEditPanel.test.js",
-			"tests/qunit/ve-cite/ve.ui.MWReferenceGroupInputWidget.test.js",
-			"tests/qunit/ve-cite/ve.ui.MWReferenceResultWidget.test.js",
-			"tests/qunit/ve-cite/ve.ui.MWReferenceSearchWidget.test.js",
-			"tests/qunit/ve-cite/ve.ui.MWReferencesListDialog.test.js",
-			"tests/qunit/ve-cite/ve.ui.MWUseExistingReferenceCommand.test.js",
-			"tests/qunit/ve-cite/ve.ui.MWWikitextStringTransferHandler.test.js",
 			"tests/qunit/ext.cite.referencePreviews/createReferenceGateway.test.js",
 			"tests/qunit/ext.cite.referencePreviews/isReferencePreviewsEnabled.test.js",
 			"tests/qunit/ext.cite.referencePreviews/renderer.test.js"
 		],
-		"dependencies": [
-			"ext.cite.visualEditor",
-			"test.VisualEditor"
-		],
-		"optionalDependencies": {
-			"Popups": "ext.cite.referencePreviews"
+		"optional": {
+			"Popups": {
+				"dependencies": [
+					"ext.cite.referencePreviews"
+				]
+			},
+			"VisualEditor": {
+				"scripts": [
+					"tests/qunit/ve-cite/ve.dm.citeExample.js",
+					"tests/qunit/ve-cite/ve.dm.Converter.test.js",
+					"tests/qunit/ve-cite/ve.dm.MWDocumentReferences.test.js",
+					"tests/qunit/ve-cite/ve.dm.MWGroupReferences.test.js",
+					"tests/qunit/ve-cite/ve.dm.InternalList.test.js",
+					"tests/qunit/ve-cite/ve.dm.MWReferenceModel.test.js",
+					"tests/qunit/ve-cite/ve.dm.MWReferenceNode.test.js",
+					"tests/qunit/ve-cite/ve.dm.MWReferencesListNode.test.js",
+					"tests/qunit/ve-cite/ve.dm.Transaction.test.js",
+					"tests/qunit/ve-cite/ve.ui.DiffElement.test.js",
+					"tests/qunit/ve-cite/ve.ui.MWCitationDialogTool.test.js",
+					"tests/qunit/ve-cite/ve.ui.MWReferenceContextItem.test.js",
+					"tests/qunit/ve-cite/ve.ui.MWReferenceEditPanel.test.js",
+					"tests/qunit/ve-cite/ve.ui.MWReferenceGroupInputWidget.test.js",
+					"tests/qunit/ve-cite/ve.ui.MWReferenceResultWidget.test.js",
+					"tests/qunit/ve-cite/ve.ui.MWReferenceSearchWidget.test.js",
+					"tests/qunit/ve-cite/ve.ui.MWReferencesListDialog.test.js",
+					"tests/qunit/ve-cite/ve.ui.MWUseExistingReferenceCommand.test.js",
+					"tests/qunit/ve-cite/ve.ui.MWWikitextStringTransferHandler.test.js"
+				],
+				"dependencies": [
+					"ext.cite.visualEditor",
+					"test.VisualEditor"
+				]
+			}
 		},
-		"factory": "Cite\\ResourceLoader\\OptionalLoader::addOptionalDependencies"
+		"factory": "Cite\\ResourceLoader\\OptionalLoader::addOptional"
 	},
 	"attributes": {
 		"CodeMirror": {

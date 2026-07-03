@@ -3,7 +3,8 @@
 		"authors": [
 			"Helix84",
 			"Luky001",
-			"Macofe"
+			"Macofe",
+			"Wizzard"
 		]
 	},
 	"requestaccount": "Vyžiadať účet",
@@ -19,7 +20,7 @@
 	"requestaccount-areas-text": "Nižšie zvoľte tematické oblasti v ktorých ste formálne expertom alebo by ste v nich radi vykonávali väčšinu práce.",
 	"requestaccount-ext-text": "Nasledovné informácie budú držané v tajnosti a použijú sa iba na účel tejto žiadosti. Možno budete chcieť uviesť kontakty ako telefónne číslo, ktoré môžu pomôcť pri potvrdení.",
 	"requestaccount-bio-text": "Pokúste sa do vášho životopisu nižšie uviesť všetky relevantné informácie.",
-	"requestaccount-real": "Skutočné meno:",
+	"requestaccount-real": "Skutočné meno (voliteľné):",
 	"requestaccount-same": "(rovnaké ako skutočné meno)",
 	"requestaccount-email": "Emailová adresa:",
 	"requestaccount-reqtype": "Pozícia:",

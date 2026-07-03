@@ -41,7 +41,9 @@
 			"珍庵",
 			"組曲師",
 			"Waki285",
-			"Dragoniez"
+			"Dragoniez",
+			"ブラックチャック",
+			"Tensama0415"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "利用者が携帯機器版インターフェイスで編集しているかどうか（$1）",
@@ -194,7 +196,7 @@
 	"tag-mobile_edit": "モバイル編集",
 	"tag-mobile_edit-description": "モバイルから行われた編集（ウェブまたはアプリ）",
 	"tag-advanced_mobile_edit": "改良版モバイル編集",
-	"tag-advanced_mobile_edit-description": "Advanced modeを使った編集",
+	"tag-advanced_mobile_edit-description": "拡張編集モードを使った編集",
 	"tag-mobile_web_edit": "モバイルウェブ編集",
 	"tag-mobile_web_edit-description": "携帯機器版ウェブサイトから行われた編集",
 	"mobile-frontend-loading-message": "読み込み中…",

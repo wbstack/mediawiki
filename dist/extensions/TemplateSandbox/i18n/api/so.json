@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"AhmedG612"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Horgalaha bacaadka tusmada, sida ku jirta [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Bogga u falanqee adigoo isticmaalaya <var>$1templatesandboxtext</var> halkii laga isticmaali lahaa waxa ku jira bogga halkan lagu magacaabay.",
+	"templatesandbox-apihelp-text": "Bogga u falanqee adigoo isticmaalaya waxa ku jira boggan halkii laga isticmaali lahaa bogga uu tilmaamayo <var>$1templatesandboxtitle</var>.",
+	"templatesandbox-apihelp-contentmodel": "Qaabka nuxurka ee <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Qaabka nuxurka ee <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Halbeegyada <var>$1templatesandboxtitle</var> iyo <var>$1templatesandboxtext</var> waa in labadaba la qeexaa ama labadaba laga tagaa."
+}

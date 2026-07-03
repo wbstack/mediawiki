@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Robby",
-			"Soued031"
+			"Soued031",
+			"Volvox"
 		]
 	},
 	"special-entitieswithoutdescription": "Objeten ouni Beschreiwung",
@@ -11,6 +12,6 @@
 	"wikibasecirrus-entitieswithoutlabel-label-language": "Sproochcode:",
 	"wikibasecirrus-entitieswithoutlabel-label-type": "Typ:",
 	"wikibasecirrus-entitieswithoutlabel-submit": "Sichen",
-	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" ass kee valabele Sproochecode.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "„$1“ ass kee gültege Sproochcode.",
 	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" ass kee valabelen Typ vun Eenheet."
 }

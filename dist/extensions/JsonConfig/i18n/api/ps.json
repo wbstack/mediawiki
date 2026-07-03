@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"شاه زمان پټان"
+		]
+	},
+	"apihelp-jsonconfig-summary": "د JsonConfig څېرمه‌غونډال ته د نېغ لاسرسي اجازه ورکوي.",
+	"apihelp-jsonconfig-param-command": "په JsonConfig کې کومه څېرمه‌چاره بايد ترسره شي:",
+	"apihelp-jsonconfig-paramvalue-command-status": "د JsonConfig ترتيب ښيي.",
+	"apihelp-jsonconfig-example-2": "د [[Data:Brazil/Amazonas.map]] بيااوڼل",
+	"apihelp-jsonconfig-example-3": "د [[Data:Brazil/Amazonas.map]] بيابارول",
+	"apihelp-jsondata-summary": "د ځايي‌شوي JSON اومتوک بياموندنه",
+	"apihelp-jsondata-param-title": "د ترلاسه کولو سرليک. په تلواليز ډول د نو‌م‌تشيال په توگه \"اومتوک:\" اخلي"
+}

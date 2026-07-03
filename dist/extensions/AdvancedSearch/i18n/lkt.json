@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tuwewanzi"
+		]
+	},
+	"advancedsearch-options-pane-head": "Ektáwapȟaya wóle {{GENDER:|yo|ye|yo/ye}}:",
+	"advancedsearch-optgroup-files": "Wópȟaȟta na itowapi",
+	"advancedsearch-field-filetype": "Wópȟaȟta-owéčhaže",
+	"advancedsearch-filetype-default": "Wópȟaȟta-owéčhaže kaȟníǧa {{GENDER:|yo|ye|yo/ye}}",
+	"advancedsearch-filetype-bitmap": "Itówapi",
+	"advancedsearch-filetype-audio": "Naǧóyapi",
+	"advancedsearch-filetype-video": "Wanáškaƞškaƞyaƞpi",
+	"advancedsearch-namespaces-preset-all": "Iyúha",
+	"prefs-advancedsearch": "Ektáwapȟaya Wóle"
+}

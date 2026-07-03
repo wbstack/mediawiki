@@ -15,7 +15,7 @@
 	"apihelp-jsonconfig-paramvalue-command-reset": "从缓存中清空配置。需要$1title参数和jsonconfig-flush权限。",
 	"apihelp-jsonconfig-paramvalue-command-reload": "从配置库中重新加载并缓存配置。需要$1title参数和jsonconfig-reset权限。",
 	"apihelp-jsonconfig-param-namespace": "要处理的标题的命名空间编号。",
-	"apihelp-jsonconfig-param-title": "要不带命名空间前缀处理的标题。",
+	"apihelp-jsonconfig-param-title": "要处理的不带命名空间前缀的标题。",
 	"apihelp-jsonconfig-param-content": "对于$1command=reload，使用此内容。",
 	"apihelp-jsonconfig-example-1": "显示配置",
 	"apihelp-jsonconfig-example-2": "重置[[Data:Brazil/Amazonas.map]]",

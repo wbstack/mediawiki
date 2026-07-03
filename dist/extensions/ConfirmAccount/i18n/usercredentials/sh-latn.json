@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Winston Sung"
+			"Winston Sung",
+			"Aca"
 		]
 	},
 	"usercredentials-user": "Korisničko ime:",
@@ -14,7 +15,7 @@
 	"usercredentials-bio": "Biografija:",
 	"usercredentials-attach": "Rezime/CV:",
 	"usercredentials-notes": "Dodatne napomene:",
-	"usercredentials-urls": "Spisak web sajtova:",
+	"usercredentials-urls": "Lista sajtova:",
 	"usercredentials-ip": "Izvorna IP adresa:",
 	"usercredentials-member": "Prava:"
 }

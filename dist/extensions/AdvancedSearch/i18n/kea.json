@@ -1,8 +1,29 @@
 {
 	"@metadata": {
 		"authors": [
-			"Quintino Lopes Castro Tavares"
+			"Quintino Lopes Castro Tavares",
+			"GrogeXaKaba",
+			"Letra.berdi"
 		]
 	},
-	"advancedsearch-placeholder-exact-text": "\"Gatu ama kabra\""
+	"advancedsearch-options-pane-head": "Piskiza vansadu:",
+	"advancedsearch-options-pane-preview-list": "Térmus di piskiza uzadu gósi",
+	"advancedsearch-optgroup-text": "Piskiza na testu di pájina",
+	"advancedsearch-optgroup-structure": "Strutura",
+	"advancedsearch-optgroup-files": "Fixerus ku imájis",
+	"advancedsearch-optgroup-sort": "Órdi di klasifikason",
+	"advancedsearch-field-plain": "Tudu es palabra",
+	"advancedsearch-field-phrase": "Es testu izatu",
+	"advancedsearch-field-or": "Un di es palabra",
+	"advancedsearch-field-not": "Niun di es palabra",
+	"advancedsearch-field-subpageof": "Subipájinas di es pájina",
+	"advancedsearch-field-intitle": "Titlu di pájina ta konte",
+	"advancedsearch-field-deepcategory": "Pájinas na tudu es katiguria",
+	"advancedsearch-field-hastemplate": "Pájinas ku tudu es mudelu pridifinidu",
+	"advancedsearch-field-inlanguage": "Pájinas na es linga",
+	"advancedsearch-field-filetype": "Tipu di fixeru",
+	"advancedsearch-field-filew": "Largéza di fixeru, na píksels",
+	"advancedsearch-field-fileh": "Oltura di fixeru, na píksels",
+	"advancedsearch-field-sort": "Órdi di klasifikason",
+	"advancedsearch-placeholder-exact-text": "\"gatu ta ama kabra\""
 }

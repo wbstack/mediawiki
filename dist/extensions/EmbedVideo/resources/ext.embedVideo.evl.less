@@ -1,5 +1,7 @@
 .evlplayer {
-  &[data-service="videolink"] {
-	display: none;
-  }
+	// Previously hidden when service == videolink. Restore visibility so a
+	// placeholder appears until a link is clicked.
+	&[ data-service='videolink' ] {
+		display: block;
+	}
 }

@@ -50,7 +50,7 @@
 	"jsonconfig-move-aborted-model": "het JSON-configuratiemodel \"$1\" van deze pagina zou niet overeen komen met het model \"$2\" van de nieuwe naam",
 	"jsonconfig-move-aborted-ns": "de nieuwe paginanaam is niet ingesteld om de nieuwe JSON-configuratie te bevatten",
 	"jsonconfig-optional-field": "(optioneel)",
-	"jsonconfig-type-name-invalid": "ongeldig",
+	"jsonconfig-type-name-invalid": "onjuist",
 	"jsonconfig-type-name-string": "tekenreeks",
 	"jsonconfig-type-name-localized": "gelocaliseerd",
 	"jsonconfig-type-name-number": "getal",

@@ -1,25 +1,26 @@
 {
 	"@metadata": {
 		"authors": [
-			"Winston Sung"
+			"Winston Sung",
+			"Aca"
 		]
 	},
 	"nstab-data": "Podaci",
 	"tooltip-ca-nstab-data": "Podatkovna stranica",
-	"jsonconfig-desc": "Dozvoljava skladištenje JSON konfiguracije na vikiju",
+	"jsonconfig-desc": "Dozvoljava skladištenje JSON konfiguracije na wikiju",
 	"jsonconfig-duplicate-field": "Pronađeno je više od jedne vrijednosti \"$1\"",
 	"jsonconfig-edit-action-apply": "Primijeni",
 	"jsonconfig-edit-action-cancel": "Otkaži",
 	"jsonconfig-edit-button-label": "Uredi kao tablicu",
 	"jsonconfig-edit-dialog-error": "Nije moguće uređivati kao tablicu: $1",
-	"jsonconfig-edit-dialog-error-data-invalid": "Podaci ne odgovaraju shemi",
+	"jsonconfig-edit-dialog-error-data-invalid": "Podaci ne odgovaraju šemi",
 	"jsonconfig-edit-dialog-error-data-missing": "JSON <code>data</code> svojstvo nedostaje ili nije niz",
 	"jsonconfig-edit-dialog-error-data-too-large": "Skup podataka je prevelik da bi se uređivao kao tablica",
 	"jsonconfig-edit-dialog-title": "Uredi JSON",
 	"jsonconfig-move-aborted-model": "JSON-ovi konfiguracijski model ove stranice \"$1\" ne bi odgovarao modelu novog naslova \"$2\"",
 	"jsonconfig-move-aborted-ns": "novi naslov stranice nije postavljen za držanje JSON konfiguracije",
 	"jsonconfig-optional-field": "(izborno)",
-	"jsonconfig-type-name-invalid": "nevažeće",
+	"jsonconfig-type-name-invalid": "neispravan",
 	"jsonconfig-type-name-string": "niz",
 	"jsonconfig-type-name-localized": "lokaliziran",
 	"jsonconfig-type-name-number": "broj",

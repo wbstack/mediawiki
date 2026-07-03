@@ -7,7 +7,8 @@
 			"Revi",
 			"Yjs5497",
 			"아라",
-			"Ykhwong"
+			"Ykhwong",
+			"Tensama0415"
 		]
 	},
 	"requestaccount": "계정 요청",
@@ -25,7 +26,7 @@
 	"requestaccount-ext-text": "다음 정보는 공개되지 않으며 이 요청을 처리하는 데에만 사용됩니다. \n휴대 전화 번호 등 연락처를 입력하면 본인 확인에 도움이 됩니다.",
 	"requestaccount-bio-text": "아래의 경력에 관련된 자격 정보를 포함해주세요.",
 	"requestaccount-bio-text-i": "'''당신의 경력은 사용자 페이지의 첫 내용으로 설정될 것입니다.'''\n해당 정보를 공개해도 되는지 다시 한 번 확인해주세요.",
-	"requestaccount-real": "실명(선택사항):",
+	"requestaccount-real": "실명 (선택 사항):",
 	"requestaccount-same": "(실명과 같음)",
 	"requestaccount-email": "이메일 주소:",
 	"requestaccount-reqtype": "위치:",
@@ -36,9 +37,9 @@
 	"requestaccount-notes": "특기 사항:",
 	"requestaccount-urls": "웹 사이트 목록, 어떤 답변 (줄 바꿈으로 구분합니다):",
 	"requestaccount-agree": "실명이 정확하고 서비스 이용 약관에 동의했다는 것을 인증해야 합니다.",
-	"requestaccount-inuse": "사용자 이름은 보류 중인 계정 요청에서 사용되고 있습니다.",
+	"requestaccount-inuse": "사용자 이름은 대기 중인 계정 요청에서 사용되고 있습니다.",
 	"requestaccount-tooshort": "당신의 경력은 최소한 $1 {{PLURAL:$1|자}}가 넘어야 합니다.",
-	"requestaccount-emaildup": "다른 보류 중인 계정 요청이 같은 이메일 주소를 사용하고 있습니다.",
+	"requestaccount-emaildup": "다른 대기 중인 계정 요청이 같은 이메일 주소를 사용하고 있습니다.",
 	"requestaccount-exts": "첨부 파일 형식이 비활성화되어 있습니다.",
 	"requestaccount-resub": "보안상의 이유로 당신의 이력서 파일을 다시 선택해야 합니다.\n더 이상 이력서를 포함시키고 싶지 않다면 필드를 비워두세요.",
 	"requestaccount-tos": "나는 {{SITENAME}}의 [[{{MediaWiki:Requestaccount-page}}|서비스 이용 약관]]을 읽었으며 이를 따르는 데 동의합니다. \n나의 \"실명\"이라고 기입한 이름은 나의 실제 이름입니다.",

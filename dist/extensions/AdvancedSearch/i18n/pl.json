@@ -9,7 +9,10 @@
 			"Railfail536",
 			"SemanticPioneer",
 			"Shirayuki",
-			"Woytecr"
+			"Woytecr",
+			"McDutchie",
+			"Msz2001",
+			"Rzuwig"
 		]
 	},
 	"advancedsearch-desc": "Ułatwia korzystanie z zaawansowanych możliwości wyszukiwania na [[Special:Search|Specjalna:Szukaj]]",
@@ -66,9 +69,9 @@
 	"advancedsearch-filesize-smaller-than": "niższa niż",
 	"advancedsearch-sort-relevance": "Trafność",
 	"advancedsearch-sort-last-edit-asc": "Daty edycji – najstarsze na górze",
-	"advancedsearch-sort-last-edit-desc": "Daty edycji – najnowsze na górze",
+	"advancedsearch-sort-last-edit-desc": "Data edycji – najnowsze na górze",
 	"advancedsearch-sort-create-timestamp-asc": "Daty utworzenia – najstarsze na gó©ze",
-	"advancedsearch-sort-create-timestamp-desc": "Daty utworzenia – najnowsze na górze",
+	"advancedsearch-sort-create-timestamp-desc": "Data utworzenia – najnowsze na górze",
 	"advancedsearch-sort-preview-relevance": "trafność",
 	"advancedsearch-sort-preview-last-edit-asc": "ostatnio edytowany",
 	"advancedsearch-sort-preview-last-edit-desc": "data edycji",

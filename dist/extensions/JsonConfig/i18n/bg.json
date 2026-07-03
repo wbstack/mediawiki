@@ -36,8 +36,8 @@
 	"jsonconfig-license-name-dl-de-zero-2.0": "Лиценз за данни Германия - Нула - Версия 2.0",
 	"jsonconfig-license-name-dl-de-by-1.0": "Лиценз за данни Германия – приписване – Версия 1.0",
 	"jsonconfig-license-name-dl-de-by-2.0": "Лиценз за данни Германия – приписване – версия 2.0",
-	"jsonconfig-license-copyrightwarning": "С публикуването на промените, се съгласявате с [https://foundation.wikimedia.org/wiki/Terms_of_Use/bg Условията за ползване] и се съгласявате безвъзвратно да отдадете своя принос под [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
-	"jsonconfig-license-copyrightwarning-license-unset": "С публикуването на промените, се съгласявате с [https://foundation.wikimedia.org/wiki/Terms_of_Use/bg Условията за ползване] и се съгласявате безвъзвратно да отдадете своя принос под лиценза, който е посочен в полето <code>licence</code>.",
+	"jsonconfig-license-copyrightwarning": "Чрез публикуването на промените Вие се съгласявате да предоставите своя принос съгласно условията на лиценза [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning-license-unset": "С публикуването на промените, се съгласявате безвъзвратно да отдадете своя принос под лиценза, който е посочен в полето <code>licence</code>.",
 	"right-jsonconfig-flush": "Работа с JsonConfig чрез API",
 	"action-jsonconfig-flush": "работа с JsonConfig чрез API"
 }

@@ -2,7 +2,15 @@
 	"@metadata": {
 		"authors": [
 			"Dbsnp",
-			"ZebaX2010"
+			"ZebaX2010",
+			"CeciMagi",
+			"Monicapozo03",
+			"IZapico (WMF)",
+			"Ed g2s",
+			"Kookoriko",
+			"Superzerocool",
+			"Johannes Richter (WMDE)",
+			"MONUMENTA"
 		]
 	},
 	"editcheck-dialog-action-no": "No",
@@ -16,5 +24,13 @@
 	"editcheck-dialog-addref-reject-other": "Otro",
 	"editcheck-dialog-addref-success-notify": "¡Gracias por añadir una cita!",
 	"editcheck-dialog-addref-title": "Añade una cita",
-	"editcheck-dialog-title": "Antes de publicar"
+	"editcheck-dialog-title": "Antes de publicar",
+	"tag-editcheck-reference-decline-common-knowledge": "Revisión de edición (referencias) rechazada (conocimiento común)",
+	"tag-editcheck-reference-decline-common-knowledge-description": "La referencia de EditCheck fue rechazada por ser de conocimiento general.",
+	"tag-editcheck-reference-decline-irrelevant": "Revisión de edición (referencias) rechazada (irrelevante)",
+	"tag-editcheck-reference-decline-irrelevant-description": "La referencia EditCheck fue rechazada por irrelevante.",
+	"tag-editcheck-reference-decline-other": "Revisión de edición (referencias) rechazada (otros)",
+	"tag-editcheck-reference-decline-other-description": "La referencia EditCheck fue rechazada por un motivo no especificado.",
+	"tag-editcheck-reference-decline-uncertain": "Revisión de edición (referencias) rechazada (incierta)",
+	"tag-editcheck-reference-decline-uncertain-description": "La referencia EditCheck fue rechazada por irrelevante."
 }

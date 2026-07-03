@@ -2,9 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Cybernenea11",
-			"TheChampionMan1234"
+			"TheChampionMan1234",
+			"Orbitminis"
 		]
 	},
+	"vector-languages": "Лимбь",
+	"vector-language-button-label": "{{PLURAL:$1|$1 лимбэ|$1 лимби}}",
+	"vector-no-language-button-label": "Адэуӂаре лимби",
+	"vector-action-addsection": "Адэуӂаре субиект",
 	"vector-action-delete": "Штерӂере",
 	"vector-action-move": "Реденумире",
 	"vector-action-protect": "Протежаре",
@@ -12,5 +17,26 @@
 	"vector-view-edit": "Едитязэ",
 	"vector-view-history": "Историк",
 	"vector-view-view": "Лектурэ",
-	"vector-more-actions": "Май мулт"
+	"vector-more-actions": "Май мулт",
+	"vector-appearance-label": "Аспект",
+	"vector-feature-limited-width-name": "Лэциме",
+	"vector-feature-limited-width-0-label": "Лат",
+	"vector-feature-limited-width-1-label": "Стандард",
+	"vector-feature-custom-font-size-name": "Теxт",
+	"vector-feature-custom-font-size-0-label": "Мик",
+	"vector-feature-custom-font-size-1-label": "Стандард",
+	"vector-feature-custom-font-size-2-label": "Маре",
+	"skin-theme-name": "Кулоаре",
+	"skin-theme-day-label": "Луминос",
+	"skin-theme-night-label": "Ынтунекат",
+	"skin-theme-os-label": "Аутомат",
+	"skin-theme-exclusion-notice": "Акеастэ паӂинэ есте мереу ын модул луминос.",
+	"vector-toc-label": "Купринс",
+	"vector-toc-beginning": "Ынкепут",
+	"vector-main-menu-label": "Менюл принкипал",
+	"vector-feature-custom-font-size-exclusion-notice": "Акеастэ паӂинэ фолосеште мереу мэриме микэ пентру фонт",
+	"vector-page-tools-label": "Инструменте",
+	"vector-page-tools-general-label": "Генерал",
+	"vector-page-tools-actions-label": "Акциуни",
+	"vector-unpin-element-label": "аскунде"
 }

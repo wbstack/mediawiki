@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kallmemel"
+		]
+	},
+	"templatesandbox": "Klatblòk di malchi",
+	"templatesandbox-suffix": "klatblòk",
+	"templatesandbox-legend": "Klatblòk pa malchi",
+	"templatesandbox-prefix-label": "Prefiho di klatblòk:",
+	"templatesandbox-title-output": "Malchi di klatblòk: $1",
+	"templatesandbox-invalid-prefix": "E prefiho di klatblòk ku bo a spesifiká no ta bálido.",
+	"templatesandbox-prefix-not-local": "E prefiho di klatblòk ku bo a spesifiká no ta lokal."
+}

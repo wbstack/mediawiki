@@ -93,7 +93,7 @@ mw.hook( 'wikiEditor.toolbarReady' ).add( ( $textarea ) => {
 					'</a></span> ' +
 					mw.message( 'cite-wikieditor-help-content-reference-example-text3', window.location.href + '#' ).parse() +
 
-					( mw.config.get( 'wgCiteBookReferencing' ) ?
+					( mw.config.get( 'wgCiteSubReferencing' ) ?
 						'<ol style="list-style-type: none; padding-left: 0; margin-top: 0;">' +
 						'<li style="margin-left: -1em;">' +
 						'2.1 ' + mw.message( 'cite-wikieditor-help-content-reference-example-extra-details' ).parse() +
@@ -106,8 +106,7 @@ mw.hook( 'wikiEditor.toolbarReady' ).add( ( $textarea ) => {
 
 	];
 
-	if ( mw.config.get( 'wgCiteBookReferencing' ) ) {
-
+	if ( mw.config.get( 'wgCiteSubReferencing' ) ) {
 		const extendedRefObj = {
 			description: {
 				html: mw.message( 'cite-wikieditor-help-content-extended-reference-description' ).parse()
@@ -122,7 +121,8 @@ mw.hook( 'wikiEditor.toolbarReady' ).add( ( $textarea ) => {
 			}
 		};
 
-		// Insert extendedRefObj right after the row for named refs with the description message key "Additional use of the same reference"
+		// Insert extendedRefObj right after the row for named refs with the description message key
+		// "Additional use of the same reference"
 		const indexOfNamedRefItem = helpRows.findIndex( ( obj ) => mw.message( 'cite-wikieditor-help-content-rereference-description' ).plain() === obj.description.html );
 		helpRows.splice( indexOfNamedRefItem + 1, 0, extendedRefObj );
 	}

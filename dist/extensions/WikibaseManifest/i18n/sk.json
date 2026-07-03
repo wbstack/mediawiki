@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Wizzard"
+		]
+	},
+	"wikibasemanifest": "WikibaseManifest",
+	"wikibasemanifest-desc": "Spája metadáta o inštalácii Wikibase a sprístupňuje ich ako jednoduché API"
+}

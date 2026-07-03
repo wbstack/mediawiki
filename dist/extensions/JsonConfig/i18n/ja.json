@@ -14,7 +14,8 @@
 			"Yusuke1109",
 			"つぶあん派",
 			"春春眠眠",
-			"Shulmj"
+			"Shulmj",
+			"Tensama0415"
 		]
 	},
 	"nstab-data": "データ",
@@ -43,6 +44,17 @@
 	"jsonconfig-use-category": "JsonConfig拡張機能を使用しているページ",
 	"jsonconfig-license": "データは$1の下で利用できます。",
 	"jsonconfig-license-name-CC0-1.0": "クリエイティブ・コモンズ・ゼロ",
+	"jsonconfig-license-name-CC-BY-1.0": "クリエイティブ・コモンズ 表示 1.0",
+	"jsonconfig-license-name-CC-BY-2.0": "クリエイティブ・コモンズ 表示 2.0",
+	"jsonconfig-license-name-CC-BY-2.5": "クリエイティブ・コモンズ 表示 2.5",
+	"jsonconfig-license-name-CC-BY-3.0": "クリエイティブ・コモンズ 表示 3.0",
+	"jsonconfig-license-name-CC-BY-4.0": "クリエイティブ・コモンズ 表示 4.0",
+	"jsonconfig-license-name-CC-BY-4.0+": "クリエイティブ・コモンズ 表示-継承 4.0 または以降のバージョン",
+	"jsonconfig-license-name-CC-BY-SA-1.0": "クリエイティブ・コモンズ 表示-継承 1.0",
+	"jsonconfig-license-name-CC-BY-SA-2.0": "クリエイティブ・コモンズ 表示-継承 2.0",
+	"jsonconfig-license-name-CC-BY-SA-2.5": "クリエイティブ・コモンズ 表示-継承 2.5",
+	"jsonconfig-license-name-CC-BY-SA-3.0": "クリエイティブ・コモンズ 表示-継承 3.0",
+	"jsonconfig-license-name-CC-BY-SA-4.0": "クリエイティブ・コモンズ 表示-継承 4.0",
 	"jsonconfig-license-name-GeoNutzV": "地理データライセンスドイツ",
 	"right-jsonconfig-flush": "API を経由して JsonConfig を操作",
 	"action-jsonconfig-flush": "API 経由での JsonConfig の操作"
