@@ -448,6 +448,8 @@
     - .rubocop_todo.yml
     - Gruntfile.js
     - Doxyfile
+  patchUrls:
+    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseLexeme~1305583/revisions/3/patch?download
 - name: SyntaxHighlight_GeSHi
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-SyntaxHighlight_GeSHi/zip/e3d0c1b06885eeb4237c9b0743601f4f739addf4
   artifactLevel: 1
