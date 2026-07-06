@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"AhmedG612"
+		]
+	},
+	"confirmaccount-newrequests": "'''$1''' codsi {{PLURAL:$1|akoon ayaa sugaya|akoonno ayaa sugaya}} oo leh iimayl furan oo la xaqiijiyay gudaha [[Special:ConfirmAccounts|account]]. '''Fiiro gaar ah ayaa loo baahan yahay!'''",
+	"requestaccount-loginnotice": "Si aad u hesho akoon isticmaale, waa inaad '''[[Special:RequestAccount|codsataa mid]]'''.",
+	"action-confirmaccount": "dib u eeg oo aqbal akoonnada",
+	"right-confirmaccount": "Eeg [[Special:ConfirmAccounts|safka akoonnada la codsaday]]",
+	"right-confirmaccount-notify": "Ku hel ogeysiis iimayl ah codsiyada akoonnada cusub ee la ansixiyay",
+	"action-requestips": "arag cinwaannada IP-ga codsadaha inta lagu jiro habaynta akoonnada la codsaday",
+	"right-requestips": "Arag cinwaannada IP-ga codsadaha inta lagu jiro habaynta akoonnada la codsaday",
+	"action-lookupcredentials": "arag aqoonsiyada isticmaalaha",
+	"right-lookupcredentials": "Eeg [[Special:UserCredentials|aqoonsiyada isticmaalaha]]"
+}

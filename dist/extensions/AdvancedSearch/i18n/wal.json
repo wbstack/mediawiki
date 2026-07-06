@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ella Lachow"
+			"Ella Lachow",
+			"Malaalaa"
 		]
 	},
 	"advancedsearch-desc": "[[Special:Search]]iyan kawushsha gakettawu koyettaa danddayaa",
@@ -23,5 +24,32 @@
 	"advancedsearch-field-filew": "Fayiliyaa aahotettaa pikseeliyan",
 	"advancedsearch-field-fileh": "Fayiliyaa adussatettaa pikseeliyan",
 	"advancedsearch-field-sort": "Maarayiyoogaa",
-	"advancedsearch-field-preview-sort": "$1iyan maaraya"
+	"advancedsearch-field-preview-sort": "$1iyan maaraya",
+	"advancedsearch-help-general-instruction": "$1ssi qonccida kaaletots",
+	"advancedsearch-placeholder-exact-text": "\"gawaray deeshshaa dosees\"",
+	"advancedsearch-inlanguage-default": "Doonaa doora",
+	"advancedsearch-filetype-section-image": "Misiliya formaateta",
+	"advancedsearch-filetype-section-video": "Viiduwa formaateta",
+	"advancedsearch-filetype-section-audio": "Cenggurssaa formaateta",
+	"advancedsearch-filetype-section-document": "Sanadiya formaateta",
+	"advancedsearch-filetype-section-other": "Hara formaateta",
+	"advancedsearch-filetype-default": "Fayliya qommuwa doora",
+	"advancedsearch-filetype-bitmap": "Misiliya",
+	"advancedsearch-filetype-drawing": "Si'iliya",
+	"advancedsearch-filetype-audio": "Cenggurssaa",
+	"advancedsearch-filetype-video": "Viiduwa",
+	"advancedsearch-filesize-equals": "laggetees",
+	"advancedsearch-filesize-greater-than": "darees",
+	"advancedsearch-filesize-smaller-than": "guuxxees",
+	"advancedsearch-sort-last-edit-asc": "Goydetto gallassaa - kasetiyagaa bollaara",
+	"advancedsearch-sort-last-edit-desc": "Goydetto gallassaa - ha'iigaa bollaara",
+	"advancedsearch-sort-create-timestamp-asc": "Meretto gallassaa - kasetiyagaa bollaara",
+	"advancedsearch-sort-create-timestamp-desc": "Meretto gallassaa - ha'iigaa bollaara",
+	"advancedsearch-sort-preview-last-edit-asc": "mata wodiyan guuttaa goydettidaagaa",
+	"advancedsearch-sort-preview-last-edit-desc": "goydetto gallassaa",
+	"advancedsearch-sort-preview-create-timestamp-asc": "mata wodiyan guuttaa merettidaagaa",
+	"advancedsearch-sort-preview-create-timestamp-desc": "meretto gallassaa",
+	"advancedsearch-namespaces-remember": "Sinttanaa koshshaassi doorota hassaya",
+	"advancedsearch-namespaces-preset-all": "Ubbaa",
+	"advancedsearch-namespaces-preset-discussion": "Tobbiya"
 }

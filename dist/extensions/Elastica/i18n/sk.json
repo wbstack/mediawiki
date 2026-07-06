@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Wizzard"
+		]
+	},
+	"elastica-desc": "Základná funkcionalita [https://www.elastic.co/ Elasticsearch] pre ostatné rozšírenia poskytnutím knižnice [https://elastica.io/ Elastica]"
+}

@@ -3,7 +3,8 @@
 		"authors": [
 			"BrennodAloisi",
 			"Cedric31",
-			"Macofe"
+			"Macofe",
+			"Lhanars"
 		]
 	},
 	"templatesandbox": "Nauc de sabla de modèl",
@@ -14,6 +15,7 @@
 	"templatesandbox-revid-label": "Rendut de la revision :",
 	"templatesandbox-text-label": "Rendut del wikitèxte :",
 	"templatesandbox-submit": "Afichar",
+	"templatesandbox-editform-legend": "Previsualizacion d'una pagina amb aquel modèl",
 	"templatesandbox-editform-page-label": "Títol de la pagina",
 	"templatesandbox-editform-view-label": "Mostrar previsualizacion",
 	"templatesandbox-preview": "Previsualizacion de $2",

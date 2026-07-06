@@ -6,7 +6,8 @@
 			"Amjad Khan",
 			"Baloch Khan",
 			"عثمان خان شاہ",
-			"شاه زمان پټان"
+			"شاه زمان پټان",
+			"SaldırganSincap"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "ايا کارن د موبايل مخبڼې له مخې سمون کوي، که نه($1)",
@@ -58,7 +59,7 @@
 	"mobile-frontend-editor-new-page-confirm": "{{GENDER:$1|ايا تاسو باوري ياست}} چې تاسو په {{SITENAME}} کې نوې ليکنه جوړوئ؟",
 	"mobile-frontend-editor-placeholder": "دا برخه تشه ده. غځولو کې يې لومړيتوب وکړئ!",
 	"mobile-frontend-editor-placeholder-new-page": "{{GENDER:$1|تاسو}} په {{SITENAME}} کې نوې ليکنه جوړوئ!",
-	"mobile-frontend-editor-previewing-page": "<span>د $1</span><span><strong>مخليدنه</strong>",
+	"mobile-frontend-editor-previewing-page": "<span>د $1 <strong>مخليدنه</strong></span>",
 	"mobile-frontend-editor-publish": "خپرول",
 	"mobile-frontend-editor-save": "خوندي کول",
 	"mobile-frontend-editor-summary-placeholder": "بېلگه: ليک‌تېروتنې سمون، منځپانگې ورگډول",
@@ -118,7 +119,7 @@
 	"mobile-frontend-missing-image": "انځور",
 	"mobile-frontend-opt-in-explain": "{{SITENAME}} بېټا ستاسو لپاره يو لار ده چې دا ازمايښتي بڼې وکاروئ او موږ ته ارزښتناک نظر راکړئ.",
 	"mobile-frontend-overlay-close": "تړل",
-	"mobile-frontend-privacy-link-text": "پټنتيا",
+	"mobile-frontend-privacy-link-text": "پټتيا",
 	"mobile-frontend-references-citation": "اخځ",
 	"mobile-frontend-references-citation-error": "يوه تېروتنه رامنځته شوه چې د دې سرچينې برسېرول يې ناشوني کړل.",
 	"mobile-frontend-requires-mobile": "دا مخ په ډېسکټاپ د لاسرسي وړ نه دی. مهرباني وکړئ، د مخ لاندې برخه کې په موبايل بڼې باندې وټوکئ.",

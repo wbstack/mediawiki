@@ -2,15 +2,25 @@
 	"@metadata": {
 		"authors": [
 			"Jonghaya",
-			"Ykhwong"
+			"Ykhwong",
+			"Tensama0415"
 		]
 	},
 	"apihelp-jsonconfig-summary": "JsonConfig 하위 시스템으로의 직접 접근을 허용합니다.",
+	"apihelp-jsonconfig-param-command": "JsonConfig에서 수행할 하위 작업:",
+	"apihelp-jsonconfig-paramvalue-command-status": "JsonConfig 구성을 표시합니다.",
+	"apihelp-jsonconfig-paramvalue-command-reset": "캐시에서 구성을 지웁니다. $1title 매개변수와 jsonconfig-flush 권한이 필요합니다.",
+	"apihelp-jsonconfig-paramvalue-command-reload": "설정 저장소에서 구성을 다시 로드하고 캐시합니다. $1title 매개변수와 jsonconfig-reset 권한이 필요합니다.",
 	"apihelp-jsonconfig-param-namespace": "처리할 제목의 이름공간 숫자.",
 	"apihelp-jsonconfig-param-title": "네임스페이스의 어미가 없는 타이틀",
+	"apihelp-jsonconfig-param-content": "$1command=reload의 경우, 대신 이 내용을 대신 사용하세요.",
 	"apihelp-jsonconfig-example-1": "구성 보기",
 	"apihelp-jsonconfig-example-2": "[[Data:Brazil/Amazonas.map]] 재설정",
 	"apihelp-jsonconfig-example-3": "[[Data:Brazil/Amazonas.map]] 다시 불러오기",
 	"apihelp-jsondata-summary": "지역화된 JSON 데이터를 검색합니다.",
-	"apierror-jsonconfig-paramrequired": "이 명령에는 <var>$1</var> 변수가 필요합니다."
+	"apihelp-jsondata-param-title": "가져올 제목입니다. 기본값으로써 이름공간은 \"Data:\"로 가정합니다.",
+	"apihelp-jsondata-example-1": "Sample.tab 문서의 JSON 콘텐츠를 사용자의 언어로 현지화하여 가져옵니다",
+	"apihelp-jsondata-example-2": "Sample.tab 문서의 JSON 콘텐츠를 프랑스어로 현지화하여 가져옵니다",
+	"apierror-jsonconfig-paramrequired": "이 명령에는 <var>$1</var> 매개변수가 필요합니다.",
+	"apierror-jsonconfig-badtitle": "<var>namespace</var> 및 <var>title</var> 매개변수를 통해 지정된 문서가 유효하지 않거나 JsonConfig 구성에 등록되어 있지 않습니다."
 }

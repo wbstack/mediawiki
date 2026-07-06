@@ -3,7 +3,6 @@
 namespace Wikimedia\Message;
 
 use InvalidArgumentException;
-use MediaWiki\Json\JsonDeserializer;
 use Stringable;
 
 /**
@@ -18,6 +17,7 @@ use Stringable;
  * @newable
  */
 class ScalarParam extends MessageParam {
+
 	/**
 	 * Construct a text parameter
 	 *
@@ -42,10 +42,7 @@ class ScalarParam extends MessageParam {
 			// Ensure that $this->value is JSON-serializable, even if $value is not
 			// (but don't do it when using ParamType::OBJECT, since those objects may not expect it)
 			$value = MessageValue::newFromSpecifier( $value );
-		} elseif ( is_object( $value ) && (
-			$value instanceof Stringable || is_callable( [ $value, '__toString' ] )
-		) ) {
-			// TODO: Remove separate '__toString' check above once we drop PHP 7.4
+		} elseif ( is_object( $value ) && $value instanceof Stringable ) {
 			$value = (string)$value;
 		} elseif ( !is_string( $value ) && !is_numeric( $value ) ) {
 			$valType = get_debug_type( $value );
@@ -72,7 +69,7 @@ class ScalarParam extends MessageParam {
 		return "<{$this->type}>" . $contents . "</{$this->type}>";
 	}
 
-	protected function toJsonArray(): array {
+	public function toJsonArray(): array {
 		// WARNING: When changing how this class is serialized, follow the instructions
 		// at <https://www.mediawiki.org/wiki/Manual:Parser_cache/Serialization_compatibility>!
 		return [
@@ -80,7 +77,15 @@ class ScalarParam extends MessageParam {
 		];
 	}
 
-	public static function newFromJsonArray( JsonDeserializer $deserializer, array $json ) {
+	/** @inheritDoc */
+	public static function jsonClassHintFor( string $keyName ) {
+		// If this is not a scalar value (string|int|float) then it's
+		// probably a MessageValue, and we can hint it as such to
+		// reduce serialization overhead.
+		return MessageValue::hint();
+	}
+
+	public static function newFromJsonArray( array $json ): ScalarParam {
 		// WARNING: When changing how this class is serialized, follow the instructions
 		// at <https://www.mediawiki.org/wiki/Manual:Parser_cache/Serialization_compatibility>!
 		if ( count( $json ) !== 1 ) {

@@ -4,14 +4,15 @@
 			"EugeneZelenko",
 			"Jim-by",
 			"Red Winged Duck",
-			"Wizardist"
+			"Wizardist",
+			"Ucukor"
 		]
 	},
 	"deletebatch": "Выдаленьне групы старонак",
 	"deletebatch-desc": "[[Special:DeleteBatch|Выдаліць групу старонак]]",
 	"deletebatch-help": "Выдаленьне групы старонак.\nВы можаце выдаляць старонкі па адной альбо выдаліць старонкі зьмешчаныя ў файле.\nАбярыце ўдзельніка, які будзе паказаны ў журнале выдаленьняў.\nЗагружаныя файлы павінныя зьмяшчаць назвы старонак і неабавязковую прычыну выдаленьня, якія падзеленыя паміж сабой сымбалем «|».",
 	"deletebatch-caption": "Сьпіс старонак:",
-	"deletebatch-default-reason": "Прычына выдаленьня па змоўчаньні:",
+	"deletebatch-default-reason": "Перадвызначаная прычына выдаленьня:",
 	"deletebatch-title": "Выдаліць групу",
 	"deletebatch-link-back": "Вярнуцца да спэцыяльнай старонкі",
 	"deletebatch-as": "Запусьціць скрыпт як:",
@@ -21,7 +22,7 @@
 	"deletebatch-page": "Старонкі да выдаленьня:",
 	"deletebatch-processing-from-file": "выдаленьне старонак, пералічаных у файле",
 	"deletebatch-processing-from-form": "выдаленьне старонак, якія пералічаныя ў форме",
-	"deletebatch-omitting-nonexistent": "Прапушчаная неіснуючая старонка $1.",
+	"deletebatch-omitting-nonexistent": "Прапусканьне няіснай старонкі $1.",
 	"deletebatch-omitting-invalid": "Прапушчаная няслушная старонка $1.",
 	"deletebatch-file-bad-format": "Файл павінен утрымліваць толькі тэкст",
 	"deletebatch-file-missing": "Немагчыма прачытаць пададзены файл",

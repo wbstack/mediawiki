@@ -6,7 +6,8 @@
 			"Felipe L. Ewald",
 			"Jhonnatanricardo",
 			"McDutchie",
-			"Rafaelff"
+			"Rafaelff",
+			"Fúlvio"
 		]
 	},
 	"twocolconflict": "Conflito de edição baseado em parágrafos",
@@ -28,8 +29,8 @@
 	"twocolconflict-special-textarea-hint": "Você pode visualizar e copiar a fonte da sua revisão:",
 	"twocolconflict-special-malformed-title": "Título ausente ou inválido.",
 	"twocolconflict-special-expired": "Nada para ver aqui. Isso provavelmente significa que você já teve um conflito de edição antes, mas isso foi há um tempo atrás e seu texto armazenado temporariamente expirou a essa altura.",
-	"twocolconflict-split-header-hint": "Você pode ajudar a melhorar ainda mais esta funcionalidade, se você deixar comentários [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface nessa página].",
-	"twocolconflict-split-header-hint-beta": "Obrigado por usar esta funcionalidade beta. Pode ajudar a melhorá-la, deixando um comentário [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface nesta página].",
+	"twocolconflict-split-header-hint": "Você pode ajudar a melhorar ainda mais esta funcionalidade, se você deixar comentários na [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface página de discussão do projeto].",
+	"twocolconflict-split-header-hint-beta": "Obrigado por usar esta funcionalidade beta. Pode ajudar a melhorá-la, deixando um comentário na [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface página de discussão do projeto].",
 	"twocolconflict-split-header-overview": "Enquanto você editava, outro usuário editou a mesma página e publicou antes de você. Revise as duas versões e mescle-as. Somente o texto nas caixas selecionadas será salvo quando você clicar em \"{{int:publishchanges}}\".",
 	"twocolconflict-split-your-version-header": "A sua revisão",
 	"twocolconflict-split-current-version-header": "Edição atual tal como às $1",

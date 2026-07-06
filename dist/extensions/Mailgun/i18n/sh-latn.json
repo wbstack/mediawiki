@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Winston Sung"
+			"Winston Sung",
+			"Aca"
 		]
 	},
-	"mailgun-desc": "Slanje e-pošte iz MediaWikija putem priložne usluge Mailgun"
+	"mailgun-desc": "Slanje e-pošte iz MediaWikija putem API usluge Mailgun"
 }

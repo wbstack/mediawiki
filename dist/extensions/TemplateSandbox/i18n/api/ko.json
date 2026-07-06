@@ -1,9 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ykhwong"
+			"Ykhwong",
+			"Tensama0415"
 		]
 	},
+	"templatesandbox-apihelp-prefix": "[[Special:TemplateSandbox]]와 같은 틀 샌드박스 접두사입니다.",
+	"templatesandbox-apihelp-title": "여기에 지정된 문서의 내용 대신 <var>$1templatesandboxtext</var>를 사용하여 문서를 구문 분석합니다.",
+	"templatesandbox-apihelp-text": "<var>$1templatesandboxtitle</var> 로 지정된 문서 대신 이 페이지 콘텐츠를 사용하여 문서를 구문 분석합니다.",
 	"templatesandbox-apihelp-contentmodel": "<var>$1templatesandboxtext</var>의 콘텐츠 모델.",
-	"templatesandbox-apihelp-contentformat": "<var>$1templatesandboxtext</var>의 콘텐츠 포맷."
+	"templatesandbox-apihelp-contentformat": "<var>$1templatesandboxtext</var>의 콘텐츠 포맷.",
+	"templatesandbox-apierror-titleandtext": "매개변수 <var>$1templatesandboxtitle</var> 과 <var>$1templatesandboxtext</var>는 모두 지정하거나 둘 다 생략해야 합니다."
 }

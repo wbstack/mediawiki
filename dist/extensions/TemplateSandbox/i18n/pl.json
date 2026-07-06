@@ -34,9 +34,13 @@
 	"templatesandbox-invalid-prefix": "Podany prefiks do brudnopisu nie istnieje.",
 	"templatesandbox-prefix-not-local": "Podany prefiks do brudnopisu nie jest lokalny.",
 	"templatesandbox-page-or-revid": "Musisz wpisać nazwę strony albo numer ID wersji.",
+	"templatesandbox-fail-post": "<em>Z powodu utraty danych sesji podgląd jest ukryty jako zabezpieczenie przed atakami JavaScript.</em> \n\n<strong>Jeśli to zamierzona próba podglądu, spróbuj ponownie.</strong> \nJeśli nadal nie działa, spróbuj [[Special:UserLogout|wylogować się]] i zalogować ponownie.",
+	"templatesandbox-fail-post-anon": "<em>Ponieważ jesteś niezalogowany, podgląd został ukryty jako zabezpieczenie przed atakami JavaScript.</em> \n\n<strong>Jeśli to zamierzona próba podglądu, [[Special:UserLogin|zaloguj się]] i spróbuj ponownie.</strong>",
+	"templatesandbox-anon-limited-preview": "Podgląd zmian JavaScript i CSS jest wyłączony, gdy użytkownik nie jest zalogowany. Jeśli chcesz zobaczyć podgląd tych zmian,  [[Special:UserLogin|zaloguj się]] i spróbuj ponownie.",
 	"templatesandbox-editform-need-template": "Aby obejrzeć podgląd innej strony z tym szablonem, musi zostać określona nazwa szablonu.",
 	"templatesandbox-editform-need-title": "Aby obejrzeć podgląd innej strony z tym szablonem, musi zostać określony tytuł strony.",
 	"templatesandbox-editform-invalid-template": "Nazwa podanego szablonu jest nieprawidłowa.",
 	"templatesandbox-editform-invalid-title": "Tytuł strony określony do podglądu jest nieprawidłowy.",
-	"templatesandbox-editform-title-not-exists": "Strona, którą chcesz podejrzeć, nie istnieje."
+	"templatesandbox-editform-title-not-exists": "Strona, którą chcesz podejrzeć, nie istnieje.",
+	"templatesandbox-failed-replace-section": "Nie udało się zastąpić sekcji istniejącej strony."
 }

@@ -29,7 +29,7 @@
 	"twocolconflict-split-header-hint-beta": "ھي آزمائشي خصوصيت استعمال ڪرڻ لاءِ توھان جي مھرباني. جيڪڏھن توھان [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface رٿا جي بحث صفحي تي] موٽ ڏيو تہ، توھان ان کي اڃا بھتر ڪرڻ ۾ مدد ڪري سگهو ٿا.",
 	"twocolconflict-split-header-overview": "جڏهن توهان سنواري رهيا ھيا تہ هڪ ٻئي واپرائيندڙ ساڳئي صفحي کي سنواريو ۽ توهان کان اڳ ڇاپي ڇڏيو. مھرباني ڪري ٻنهي ورجائن جو جائزو وٺو ۽ انهن کي ضم ڪريو. جڏھن توھان \"{{int:publishchanges}}\" تي ڪلڪ ڪندا تہ رڳو چونڊيل خانن جو متن محفوظ ٿيندو.",
 	"twocolconflict-split-your-version-header": "توھان جو ورجاءُ",
-	"twocolconflict-split-current-version-header": "تازو-ترين ترين ورجاءُ بمطابق $1ع",
+	"twocolconflict-split-current-version-header": "تازو ترين ورجاءُ بمطابق $1ع",
 	"twocolconflict-split-not-saved-at": "اڃا ڇپيو ناھي",
 	"twocolconflict-split-choose-version": "مھرباني ڪري ڪو ورجاءُ چونڊيو",
 	"twocolconflict-split-other-version-chosen": "ٻيو ورجاءُ",

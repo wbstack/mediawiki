@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"AhmedG612"
+		]
+	},
+	"templatesandbox": "Tusmada bacaadka",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Waxay soo bandhigtaa bog]] iyadoo laga soo xiganayo tusmada ka yimaadda bacaadka",
+	"templatesandbox-suffix": "Bacaadka",
+	"templatesandbox-legend": "Tusmada bacaadka",
+	"templatesandbox-text": "Waxaad dooran kartaa koox tusmada ah oo lagu kaydiyay booska bacaadka adigoo isticmaalaya horgale bacaad ku habboon.\nTusaale ahaan, haddii aad rabto inaad hor u eegto nooc ka mid ah {{ns:Template}}:Test oo aad u kaydisay sida \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test\", isticmaal \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\" sida horgalaha.",
+	"templatesandbox-prefix-label": "Horgalaha bacaadka:",
+	"templatesandbox-page-label": "Bog soo bandhig:",
+	"templatesandbox-revid-label": "Nooca wax ka beddelka soo bandhig:",
+	"templatesandbox-text-label": "Soo bandhig wikitext:",
+	"templatesandbox-submit": "Eeg",
+	"templatesandbox-title-output": "Bacaadka tusmada: $1",
+	"templatesandbox-editform-legend": "Hor u eeg bogga oo leh tusmadaan",
+	"templatesandbox-editform-page-label": "Cinwaanka bogga",
+	"templatesandbox-editform-view-label": "Muuji horudhaca",
+	"templatesandbox-preview": "Hor u eegista $2",
+	"templatesandbox-invalid-title": "Cinwaanka aad sheegtay waa mid aan sax ahayn.",
+	"templatesandbox-title-not-exists": "Cinwaanka aad sheegtay ma jiro.",
+	"templatesandbox-revision-not-exists": "Nooca wax ka beddelka aad sheegtay ma jiro.",
+	"templatesandbox-revision-no-content": "Nooca wax ka beddelka aad sheegtay ma laha wax ku jira, ama ma haysatid oggolaansho aad ku arki karto.",
+	"templatesandbox-invalid-prefix": "Horgalaha bacaadka aad sheegtay waa mid aan sax ahayn.",
+	"templatesandbox-prefix-not-local": "Horgalaha bacaadka aad sheegtay ma aha mid maxalli ah.",
+	"templatesandbox-page-or-revid": "Waa inaad gelisaa cinwaan bog ama lambarka aqoonsiga wax ka beddelka.",
+	"templatesandbox-fail-post": "<em>Sababo la xiriira lumis xogta fadhiga, hor-u-eegista waa la qariyey si looga taxaddaro weerarro JavaScript ah.</em>\n\n<strong>Haddii tani ay tahay isku day hor-u-eegis oo sax ah, fadlan mar kale isku day.</strong>\nHaddii weli aysan shaqayn, isku day inaad [[Special:UserLogout|ka baxdo]] ka dibna mar kale soo gasho.",
+	"templatesandbox-fail-post-anon": "<em>Maadaama aadan soo galin, hor u eegista waa la qariyey si looga taxaddaro weerarro JavaScript ah.</em>\n\n<strong>Haddii tani ay tahay isku day hor u eegis oo sax ah, fadlan [[Special:UserLogin|soo gal]] oo mar kale isku day.</strong>",
+	"templatesandbox-anon-limited-preview": "Hor u eegista isbeddellada JavaScript iyo CSS waa la damiyay marka aan la soo galin. Haddii aad u baahan tahay inaad hor u eegto isbeddelladaas, fadlan [[Special:UserLogin|soo gal]] oo mar kale isku day.",
+	"templatesandbox-editform-need-template": "Si aad u hor u eegto bog kale oo leh tusmadaan, waa in la sheegaa magaca tusmada.",
+	"templatesandbox-editform-need-title": "Si aad u hor u eegto bog kale oo leh tusmadaan, waa in la sheegaa cinwaanka bogga.",
+	"templatesandbox-editform-invalid-template": "Magaca tusmada aad sheegtay waa mid aan sax ahayn.",
+	"templatesandbox-editform-invalid-title": "Cinwaanka aad u sheegtay hor u eegista waa mid aan sax ahayn.",
+	"templatesandbox-editform-title-not-exists": "Cinwaanka aad u sheegtay hor u eegista ma jiro.",
+	"templatesandbox-failed-replace-section": "Waa lagu guul darraystay in la beddelo qayb ka mid ah bogga jira."
+}

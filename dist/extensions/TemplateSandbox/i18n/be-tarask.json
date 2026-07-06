@@ -2,17 +2,18 @@
 	"@metadata": {
 		"authors": [
 			"Red Winged Duck",
-			"Wizardist"
+			"Wizardist",
+			"Ucukor"
 		]
 	},
 	"templatesandbox": "Пясочніца для шаблёнаў",
-	"templatesandbox-desc": "[[Special:TemplateSandbox|Адлюстроўвае старонку]], уключыўшы на яе шаблён зь пясочніцы",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Адмалёўвае старонку]] празь пясочніцу шаблёнаў",
 	"templatesandbox-suffix": "пясочніца",
 	"templatesandbox-legend": "Пясочніца для шаблёнаў",
 	"templatesandbox-text": "Вы можаце выбраць набор шаблёнаў, захаваных у вашай пясочніцы, з дапамогай адпаведнага прэфіксу. Напрыклад, калі вы хочаце ўбачыць, як выглядае {{ns:Template}}:Тэст, які вы захавалі як «{{ns:User}}:Імя_ўдзельніка/{{int:templatesandbox-suffix}}/{{ns:Template}}:Тэст», скарыстайцеся прэфіксам «{{ns:User}}:Імя_ўдзельніка/{{int:templatesandbox-suffix}}».",
 	"templatesandbox-prefix-label": "Прэфікс пясочніцы:",
 	"templatesandbox-page-label": "Паказаць на старонцы:",
-	"templatesandbox-revid-label": "Вэрсія для адлюстраваньня:",
+	"templatesandbox-revid-label": "Вэрсія выяўленьня:",
 	"templatesandbox-text-label": "Дадаць вікітэкст:",
 	"templatesandbox-submit": "Паказаць",
 	"templatesandbox-title-output": "TemplateSandbox: $1",

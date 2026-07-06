@@ -1,9 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Artsiom91"
+			"Artsiom91",
+			"Ucukor"
 		]
 	},
+	"nstab-data": "Звесткі",
+	"jsonconfig-edit-action-cancel": "Скасаваць",
 	"jsonconfig-type-name-string": "радок",
 	"jsonconfig-type-name-number": "лік",
 	"jsonconfig-use-category": "Старонкі, якія ўжываюць пашырэнне JsonConfig"

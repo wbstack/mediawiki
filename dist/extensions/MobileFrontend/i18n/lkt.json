@@ -2,10 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Peter57770",
-			"R12ntech"
+			"R12ntech",
+			"Tuwewanzi"
 		]
 	},
-	"mobile-frontend-watchlist-cta-button-login": "Čhaž’óigwa",
-	"tag-mobile_edit": "omás’apȟela wóyutȟokča",
-	"tag-mobile_web_edit": "omás’apȟela wóyutȟokča"
+	"mobile-frontend-copyright": "Owápi šni haŋtáŋš, wóslolye kiŋ le $1 wóopȟe-wóiyowiƞkhiye ogná kpamnípi.",
+	"mobile-frontend-terms-text": "Úƞpi-wóopȟe",
+	"mobile-frontend-view": "Omas'apȟe owáƞyaƞke",
+	"mobile-frontend-watchlist-cta-button-login": "Čhaž'óigwa",
+	"tag-mobile_edit": "Omás'apȟela wóyutȟokča",
+	"tag-mobile_web_edit": "omás'apȟela wóyutȟokča"
 }

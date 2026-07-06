@@ -21,7 +21,7 @@
 	"twocolconflict-special-not-saved": "خپور‌شوی نه دی",
 	"twocolconflict-special-textarea-hint": "تاسو د خپلې بياکتنې سرچينې کتلی او لمېسلی شئ:",
 	"twocolconflict-special-malformed-title": "ورک يا ناسم سرليک.",
-	"twocolconflict-special-expired": "دلته د ليدلو لپره هېڅ نشته. دا شايد په دې مانا وي چې تاسو دمخه د سمون شخړې سره مخ شوي ياست، خو دا يو څه وخت مخکې وو او ستاسو په لنډمهال توگه ساتل شوی ليک اوس پای ته رسېدلی دی.",
+	"twocolconflict-special-expired": "دلته د ليدلو لپاره هېڅ نشته. دا شايد په دې مانا وي چې تاسو دمخه د سمون شخړې سره مخ شوي ياست، خو دا يو څه وخت مخکې وو او ستاسو په لنډمهاله توگه ساتل شوی ليک اوس پای ته رسېدلی دی.",
 	"twocolconflict-split-header-hint": "په [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface  پروژې خبرې اترې مخ] کې خپل غبرگون پرېښودلو سره تاسو کولی شئ د دې ځانگړنې په لاښه کولو کې مرسته وکړئ.",
 	"twocolconflict-split-header-hint-beta": "مننه چې دا ازمېښتي ځانگړنه کاروئ. په [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface  د پروژې خبرو اترو مخ] کې خپل غبرگون پرېښودلو سره تاسو د دې لاښه‌کولو کې مرسته کولی شئ.",
 	"twocolconflict-split-header-overview": "کله چې تاسو يو مخ سموئ او بل کارن هم په ورته وخت کې ياد مخ سم او خپل سمون له تاسو مخکې خپور کړي. مهرباني وکړئ د دواړو بلبڼو بياکتنې وکړئ او ويې اخږئ. يوازې د ټاکل شوو بکسونو ليک به د \"{{int:publishchanges}}\" په ټوکلو سره خوندي شي.",

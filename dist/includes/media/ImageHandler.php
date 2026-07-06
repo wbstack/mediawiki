@@ -21,6 +21,8 @@
  * @ingroup Media
  */
 
+use MediaWiki\MainConfigNames;
+use MediaWiki\MediaWikiServices;
 use Wikimedia\AtEase\AtEase;
 
 /**
@@ -169,6 +171,74 @@ abstract class ImageHandler extends MediaHandler {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Adjust the thumbnail size to fit the width steps defined in config via
+	 * $wgThumbnailSteps, according to whether $wgThumbnailStepsRatio is set.
+	 *
+	 * This logic is duplicated client-side in mw.util.adjustThumbWidthForSteps.
+	 *
+	 * @see FileTest::testThumbNameSteps
+	 * @since 1.46 (also backported to 1.43.7, 1.44.4, 1.45.2)
+	 */
+	protected function getSteppedThumbWidth(
+		File $image, int $requestWidth, int $srcWidth, int $srcHeight
+	): int {
+		$mainConfig = MediaWikiServices::getInstance()->getMainConfig();
+		$thumbnailSteps = $mainConfig->get( MainConfigNames::ThumbnailSteps );
+		$thumbnailStepsRatio = $mainConfig->get( MainConfigNames::ThumbnailStepsRatio );
+
+		if ( !$thumbnailSteps || !$thumbnailStepsRatio ) {
+			return $requestWidth;
+		}
+
+		if ( $thumbnailStepsRatio < 1 ) {
+			// If thumbnail ratio is below 100%, build a random number
+			// out of the file name and decide whether to apply adjustments
+			// based on that. This way, we get a good uniformity while not going
+			// back and forth between old and new in different requests.
+			// Also this way, ramping up (e.g. from 0.1 to 0.2) would also
+			// cover the previous values too which would reduce the scale of changes.
+			$hash = hexdec( substr( md5( $image->getName() ), 0, 8 ) ) & 0x7fffffff;
+			if ( ( $hash % 1000 ) > ( $thumbnailStepsRatio * 1000 ) ) {
+				return $requestWidth;
+			}
+		}
+
+		$prevStep = $thumbnailSteps[0];
+		foreach ( $thumbnailSteps as $widthStep ) {
+			if ( ( $widthStep > $srcWidth ) && !$image->isVectorized() ) {
+				if ( $this->mustRender( $image ) ) {
+					// Not web-safe: Round down to previous step
+					//
+					// While unlikely, this tries to upscale an original that is smaller than the smallest step
+					// (e.g. smaller than 20px if that's the smallest step configured), which is disallowed
+					// by default in MediaWiki core with HTTP 400 (ThumbnailEntryPoint::generateThumbnail).
+					return $prevStep;
+				} else {
+					// Web-safe: Round up or down and use the original
+					//
+					// There was no step between the requested width and the original width
+					// (so either a thumb between penultimate step and original,
+					// or a thumb beyond original jpg but under penultimate step).
+					//
+					// NOTE: This thumb-at-original-width is replaced with the original
+					// in a higher-level code path after this method runs.
+					return $srcWidth;
+				}
+			}
+			if ( $widthStep == $requestWidth ) {
+				return $requestWidth;
+			}
+			if ( $widthStep > $requestWidth ) {
+				return $widthStep;
+			}
+			$prevStep = $widthStep;
+		}
+
+		// Respond with the largest step if it's too big.
+		return $prevStep;
 	}
 
 	/**

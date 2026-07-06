@@ -133,7 +133,7 @@ extensions:
     repoRef: 3e039311504eb82f8c5c488a457b9e376b5cf7e3
   ## These extensions use urls directly
   - name: Wikibase
-    url: https://github.com/wbstack/mediawiki-tars/raw/ae333245e6fd22b888a925f088ac5637c6f9b6c1/Wikibase-1761224062-REL1_43.tar.gz
+    url: https://github.com/wbstack/mediawiki-tars/raw/a58eaf2a2c2324649985da8281e264a600d029fc/Wikibase-1782811529-REL1_43.tar.gz
     remove:
       - build
       - vendor
@@ -164,7 +164,7 @@ extensions:
   - name: StopForumSpam
     url: https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/archive/5e3aab6e8be0e8effa97f9b454020230b6a70e3d.zip
   - name: VisualEditor
-    url: https://github.com/wbstack/mediawiki-tars/raw/75bedb27afda71878d19f62fc5d96e5c3481cd43/VisualEditor-1761224161-REL1_43.tar.gz
+    url: https://github.com/wbstack/mediawiki-tars/raw/75e5dd93f94aba780665cdea3999ff3c5f58969a/VisualEditor-1782811647-REL1_43.tar.gz
 
 skins:
   - name: Vector

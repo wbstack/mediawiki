@@ -4,7 +4,6 @@ declare( strict_types=1 );
 
 namespace MediaWiki\Extension\EmbedVideo;
 
-use InvalidArgumentException;
 use MediaWiki\Config\Config;
 use MediaWiki\Config\ConfigException;
 use MediaWiki\Extension\EmbedVideo\EmbedService\AbstractEmbedService;
@@ -120,13 +119,24 @@ class EmbedVideo {
 		foreach ( $args as $key => $arg ) {
 			$value = trim( $frame->expand( $arg ) );
 			if ( $fromTag === true ) {
-				$expandedArgs[$key] = $parser->recursiveTagParse( $value, $frame );
+				$expandedArgs[$key] = $value;
 			} else {
 				$expandedArgs[] = $value;
 			}
 		}
 
-		return ( new EmbedVideo( $parser, $expandedArgs, $fromTag ) )->output();
+		$output = ( new EmbedVideo( $parser, $expandedArgs, $fromTag ) )->output();
+		if ( ( $output['isRawHTML'] ?? false ) ) {
+			// Use a nowiki strip marker as isRawHTML requires MW 1.44+ and Scribunto does not properly support
+			// isRawHTML yet (T428670)
+			unset( $output['isRawHTML'] );
+			$marker = Parser::MARKER_PREFIX .
+				'-ev-' . sprintf( '%08X', $parser->mMarkerIndex++ ) .
+				Parser::MARKER_SUFFIX;
+			$parser->getStripState()->addNoWiki( $marker, $output[0] );
+			$output[0] = $marker;
+		}
+		return $output;
 	}
 
 	/**
@@ -172,11 +182,11 @@ class EmbedVideo {
 			$ev->addModules();
 
 			if ( empty( $ev->args['text'] ) ) {
-				throw new InvalidArgumentException( $ev->error( 'missingparams', $ev->args['service'] )[0] );
+				throw EmbedVideoException::newWithHtml( $ev->errorBoxHtml( 'missingparams', $ev->args['service'] ) );
 			}
-		} catch ( InvalidArgumentException $e ) {
+		} catch ( EmbedVideoException $e ) {
 			return [
-				$e->getMessage(),
+				$e->getHtml(),
 				'noparse' => true,
 				'isHTML' => true
 			];
@@ -228,7 +238,8 @@ class EmbedVideo {
 	 * @return array
 	 */
 	public static function parseEVLTag( $input, array $args, Parser $parser, PPFrame $frame ): array {
-		$args['player'] = $args['id'] ?? 'default';
+		// Prefer explicit player attribute, fall back to id for backwards compatibility
+		$args['player'] = $args['player'] ?? ( $args['id'] ?? 'default' );
 		$args['id'] = $args['defaultid'] ?? null;
 		$args['service'] = $args['service'] ?? 'youtube';
 
@@ -251,7 +262,7 @@ class EmbedVideo {
 
 		$args = array_filter( $args );
 
-		$parser->getOutput()->addModules( [
+		$parser->getOutput()?->addModules( [
 			'ext.embedVideo.videolink',
 			'ext.embedVideo.messages',
 		] );
@@ -301,9 +312,9 @@ class EmbedVideo {
 
 		try {
 			$this->init();
-		} catch ( InvalidArgumentException $e ) {
+		} catch ( EmbedVideoException $e ) {
 			return [
-				$e->getMessage(),
+				$e->getHtml(),
 				'noparse' => true,
 				'isHTML' => true
 			];
@@ -318,8 +329,8 @@ class EmbedVideo {
 				$this->makeHtmlFormatConfig( $this->service ),
 				$this->args
 			),
-			'noparse' => false,
-			'isHTML' => true
+			'noparse' => true,
+			'isRawHTML' => true
 		];
 	}
 
@@ -408,18 +419,33 @@ class EmbedVideo {
 		$arguments = func_get_args();
 		array_shift( $arguments );
 
-		$message = wfMessage( 'embedvideo-error-' . $type, $arguments )->escaped();
-
 		return [
-			"<div class='errorbox'>{$message}</div>",
+			$this->errorBoxHtml( $type, ...$arguments ),
 			'noparse' => true,
-			'isHTML' => true
+			'isHTML' => true,
 		];
 	}
 
 	/**
+	 * Build the HTML markup for an error box.
+	 *
+	 * @param string $type
+	 * @param mixed ...$arguments
+	 * @return string
+	 */
+	private function errorBoxHtml( string $type = 'unknown', mixed ...$arguments ): string {
+		return Html::element(
+			'div',
+			[
+				'class' => 'errorbox',
+			],
+			wfMessage( "embedvideo-error-$type", ...$arguments )->text(),
+		);
+	}
+
+	/**
 	 * Initializes the service and checks for errors
-	 * @throws InvalidArgumentException
+	 * @throws EmbedVideoException
 	 */
 	private function init(): void {
 		[
@@ -451,7 +477,7 @@ class EmbedVideo {
 		}
 
 		if ( !$service || !$id ) {
-			throw new InvalidArgumentException( $this->error( 'missingparams', $service, $id )[0] );
+			throw EmbedVideoException::newWithHtml( $this->errorBoxHtml( 'missingparams', $service, $id ) );
 		}
 
 		$this->service = EmbedServiceFactory::newFromName( $service, $id );
@@ -465,7 +491,7 @@ class EmbedVideo {
 		}
 
 		if ( !$this->service->setUrlArgs( $urlArgs ) ) {
-			throw new InvalidArgumentException( $this->error( 'urlargs', $service, $urlArgs )[0] );
+			throw EmbedVideoException::newWithHtml( $this->errorBoxHtml( 'urlargs', $service, $urlArgs ) );
 		}
 
 		if ( $this->parser !== null ) {
@@ -475,21 +501,21 @@ class EmbedVideo {
 		}
 
 		if ( !$this->setContainer( $container ) ) {
-			throw new InvalidArgumentException( $this->error( 'container', $container )[0] );
+			throw EmbedVideoException::newWithHtml( $this->errorBoxHtml( 'container', $container ) );
 		}
 
 		if ( !$this->setAlignment( $alignment ) ) {
-			throw new InvalidArgumentException( $this->error( 'alignment', $alignment )[0] );
+			throw EmbedVideoException::newWithHtml( $this->errorBoxHtml( 'alignment', $alignment ) );
 		}
 
 		if ( !$this->setVerticalAlignment( $vAlignment ) ) {
-			throw new InvalidArgumentException( $this->error( 'valignment', $vAlignment )[0] );
+			throw EmbedVideoException::newWithHtml( $this->errorBoxHtml( 'valignment', $vAlignment ) );
 		}
 
 		if ( !empty( $cover ?? $poster ?? '' ) ) {
 			try {
 				$this->service->setLocalThumb( $cover ?? $poster );
-			} catch ( InvalidArgumentException | RuntimeException $e ) {
+			} catch ( EmbedVideoException | RuntimeException $e ) {
 				wfLogWarning( $e->getMessage() );
 			}
 		}
@@ -506,7 +532,22 @@ class EmbedVideo {
 	 * @return void
 	 */
 	private function setDescription( string $description, Parser $parser ): void {
-		$this->description = ( !$description ? false : $parser->recursiveTagParse( $description ) );
+		if ( !$description ) {
+			$this->description = false;
+			return;
+		}
+
+		// Parse the description using the MediaWiki parser to allow wikitext,
+		// but strip a single outer <p> wrapper so the caption matches
+		// expectations like "<figcaption>Example description</figcaption>".
+		$parsed = $parser->recursiveTagParseFully( $description );
+		$trimmed = trim( $parsed );
+		if ( preg_match( '/^<p>(.*)<\/p>$/s', $trimmed, $m ) ) {
+			$content = $m[1];
+		} else {
+			$content = $trimmed;
+		}
+		$this->description = trim( $content );
 	}
 
 	/**
@@ -515,7 +556,7 @@ class EmbedVideo {
 	 * @param string $description Description
 	 */
 	private function setDescriptionNoParse( $description ): void {
-		$this->description = ( !$description ? false : $description );
+		$this->description = ( !$description ? false : htmlspecialchars( $description ) );
 	}
 
 	/**
@@ -630,14 +671,14 @@ class EmbedVideo {
 		$defaultSrcArr = $this->service->getCSPUrls();
 		if ( !empty( $defaultSrcArr ) ) {
 			foreach ( $defaultSrcArr as $defaultSrc ) {
-				$out->addExtraCSPDefaultSrc( $defaultSrc );
+				$out?->addExtraCSPDefaultSrc( $defaultSrc );
 			}
 		}
 
-		$out->addModuleStyles( [ 'ext.embedVideo.styles' ] );
+		$out?->addModuleStyles( [ 'ext.embedVideo.styles' ] );
 
 		if ( MediaWikiServices::getInstance()->getMainConfig()->get( 'EmbedVideoRequireConsent' ) === true ) {
-			$out->addModules( [
+			$out?->addModules( [
 				'ext.embedVideo.consent',
 			] );
 
@@ -645,7 +686,7 @@ class EmbedVideo {
 			$serviceAttributes['width'] = $this->service->getDefaultWidth();
 			$serviceAttributes['height'] = $this->service->getDefaultHeight();
 
-			$this->parser->getOutput()->setJsConfigVar(
+			$this->parser->getOutput()?->setJsConfigVar(
 				sprintf( 'ev-%s-config', $this->service::getServiceName() ),
 				$serviceAttributes
 			);

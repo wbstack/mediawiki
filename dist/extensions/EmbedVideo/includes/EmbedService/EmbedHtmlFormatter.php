@@ -10,9 +10,11 @@ use MediaWiki\Config\ConfigException;
 use MediaWiki\Extension\EmbedVideo\EmbedVideo;
 use MediaWiki\Extension\EmbedVideo\OEmbed;
 use MediaWiki\Html\Html;
+use MediaWiki\Html\TemplateParser;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Message\Message;
 use UnexpectedValueException;
+use Wikimedia\Message\MessageValue;
 
 final class EmbedHtmlFormatter {
 	/**
@@ -37,6 +39,8 @@ final class EmbedHtmlFormatter {
 
 		$width = (int)$service->getWidth();
 		$height = (int)$service->getHeight();
+		$hasWidth = $width > 0;
+		$hasHeight = $height > 0;
 
 		$config = array_merge(
 			[
@@ -44,6 +48,7 @@ final class EmbedHtmlFormatter {
 				'style' => '',
 				'service' => '',
 				'withConsent' => false,
+				'withLocalEmbedStyle' => false,
 				'autoresize' => false,
 				'description' => '',
 			],
@@ -54,49 +59,62 @@ final class EmbedHtmlFormatter {
 			$config['class'] .= ' ' . $config['img-class'];
 		}
 
+		if ( $service instanceof LocalVideo && ( $config['withLocalEmbedStyle'] ?? false ) === true ) {
+			$config['class'] .= ' embedvideo--local-embed-style';
+		}
+
+		// Detect gallery-like contexts for local videos (packed galleries provide override-* options)
+		$isGalleryLike = $service instanceof LocalVideo && (
+			isset( $args['override-width'] ) || isset( $args['override-height'] )
+		);
+
 		$inlineStyles = [
 			'container' => $config['style'] ?? '',
 			'wrapper' => '',
 		];
 
+		// Force autoresize for gallery-like local embeds to avoid fixed dimensions
+		if ( $isGalleryLike ) {
+			$config['autoresize'] = true;
+		}
+
 		if ( $config['autoresize'] === true ) {
 			$config['class'] .= ' embedvideo--autoresize';
-			if ( isset( $args['width'] ) ) {
+			if ( isset( $args['width'] ) && $hasWidth ) {
 				$inlineStyles['container'] .= sprintf( 'max-width:%dpx', $width );
 			}
-			if ( isset( $args['height'] ) ) {
+			if ( isset( $args['height'] ) && $hasHeight ) {
 				$inlineStyles['wrapper'] .= sprintf( 'max-height:%dpx', $height );
 			}
 		} else {
 			// Autoresize does not need inline width and height
-			$inlineStyles['container'] .= sprintf( 'width:%dpx', $width );
-			$inlineStyles['wrapper'] .= sprintf( 'height:%dpx', $height );
-		}
+			if ( $hasWidth ) {
+				$inlineStyles['container'] .= sprintf( 'width:%dpx', $width );
+			}
 
-		$caption = !empty( $config['description'] ?? '' )
-			? sprintf( '<figcaption>%s</figcaption>', $config['description'] )
-			: '';
-
-		foreach ( $inlineStyles as &$inlineStyle ) {
-			if ( !empty( $inlineStyle ) ) {
-				$inlineStyle = sprintf( 'style="%s"', $inlineStyle );
+			if ( $hasHeight ) {
+				$inlineStyles['wrapper'] .= sprintf( 'height:%dpx', $height );
 			}
 		}
 
-		$iframeConfig = '';
-		try {
-			$consent = MediaWikiServices::getInstance()
-				->getConfigFactory()
-				->makeConfig( 'EmbedVideo' )
-				->get( 'EmbedVideoRequireConsent' );
-			if ( $consent === true ) {
-				$iframeConfig = sprintf(
-					"data-mw-iframeconfig='%s'",
-					$service->getIframeConfig( $width, $height )
-				);
+		$templateArgs = [];
+
+		if ( !empty( $config['description'] ?? '' ) ) {
+			$templateArgs['captionHtml'] = $config['description'];
+		}
+
+		if ( !( $service instanceof LocalVideo ) || ( $config['withConsent'] ?? false ) === true ) {
+			try {
+				$consent = MediaWikiServices::getInstance()
+					->getConfigFactory()
+					->makeConfig( 'EmbedVideo' )
+					->get( 'EmbedVideoRequireConsent' );
+				if ( $consent === true ) {
+					$templateArgs['iframeConfig'] = $service->getIframeConfig( $width, $height );
+				}
+			} catch ( JsonException | ConfigException $e ) {
+				//
 			}
-		} catch ( JsonException | ConfigException $e ) {
-			//
 		}
 
 		/**
@@ -110,23 +128,29 @@ final class EmbedHtmlFormatter {
 		/**
 		 * @see https://www.mediawiki.org/wiki/Specs/HTML/2.7.0#Audio/Video
 		 */
-		$template = <<<HTML
-			<figure class="%s" data-service="%s" %s %s>
-				<div class="embedvideo-wrapper" %s>%s%s</div>%s
-			</figure>
-			HTML;
+		$templateParser = new TemplateParser( __DIR__ . '/templates' );
 
-		return sprintf(
-			$template,
-			$config['class'] ?? '',
-			$config['service'] ?? '',
-			$iframeConfig,
-			$inlineStyles['container'],
-			$inlineStyles['wrapper'],
-			( $config['withConsent'] ?? false ) === true ? self::makeConsentContainerHtml( $service ) : '',
-			$service,
-			$caption
-		);
+		$wrapperContentsHtml = '';
+		if ( ( $config['withConsent'] ?? false ) === true ) {
+			$wrapperContentsHtml .= self::makeConsentContainerHtml( $service, $templateParser );
+		}
+		if ( $service instanceof LocalVideo && ( $config['withLocalEmbedStyle'] ?? false ) === true ) {
+			$wrapperContentsHtml .= self::makeLocalVideoEmbedStyleHtml( $service );
+		}
+		if ( $service instanceof LocalVideo ) {
+			$wrapperContentsHtml .= $service->renderVideoHtml( $args );
+		} else {
+			$wrapperContentsHtml .= (string)$service;
+		}
+
+		$templateArgs += [
+			'class' => $config['class'] ?? '',
+			'service' => $config['service'] ?? '',
+			'containerStyles' => $inlineStyles['container'],
+			'wrapperStyles' => $inlineStyles['wrapper'],
+			'wrapperContentsHtml' => $wrapperContentsHtml,
+		];
+		return $templateParser->processTemplate( 'wrapper', $templateArgs );
 	}
 
 	/**
@@ -165,11 +189,7 @@ final class EmbedHtmlFormatter {
 
 		$attributes[$srcType] = $service->getUrl();
 
-		$out = array_map( static function ( $key, $value ) {
-			return sprintf( '%s="%s"', $key, $value );
-		}, array_keys( $attributes ), $attributes );
-
-		return sprintf( '<iframe %s></iframe>', implode( ' ', $out ) );
+		return Html::element( 'iframe', $attributes );
 	}
 
 	/**
@@ -182,7 +202,7 @@ final class EmbedHtmlFormatter {
 		$emptyThumb = '';
 		$emptyThumbServices = [ LocalVideo::getServiceName(), ExternalVideo::getServiceName() ];
 		if ( in_array( $service::getServiceName(), $emptyThumbServices, true ) ) {
-			$emptyThumb = '<div class="embedvideo-thumbnail"></div>';
+			$emptyThumb = Html::element( 'div', [ 'class' => 'embedvideo-thumbnail' ] );
 		}
 
 		if ( $service->getLocalThumb() === null ) {
@@ -192,13 +212,21 @@ final class EmbedHtmlFormatter {
 		try {
 			$url = MediaWikiServices::getInstance()->getUrlUtils()->expand( $service->getLocalThumb()->getUrl() );
 
-			// phpcs:disable
-			return <<<HTML
-				<picture class="embedvideo-thumbnail">
-					<img src="{$url}" loading="lazy" class="embedvideo-thumbnail__image" alt="Thumbnail for {$service->getTitle()}"/>
-				</picture>
-				HTML;
-			// phpcs:enable
+			return Html::rawElement(
+				'picture',
+				[
+					'class' => 'embedvideo-thumbnail',
+				],
+				Html::element(
+					'img',
+					[
+						'src' => $url,
+						'loading' => 'lazy',
+						'class' => 'embedvideo-thumbnail__image',
+						'alt' => 'Thumbnail for ' . ( $service->getTitle() ?? '' ),
+					]
+				)
+			);
 		} catch ( Exception $e ) {
 			return $emptyThumb;
 		}
@@ -215,42 +243,64 @@ final class EmbedHtmlFormatter {
 			return '';
 		}
 
-		$link = Html::element( 'a', [
-			'target' => '_blank',
-			'href' => $service->getUrl(),
-			'rel' => 'noopener noreferrer nofollow'
-		], $service->getTitle() );
+		return Html::element(
+			'div',
+			[ 'class' => 'embedvideo-loader__title embedvideo-loader__title--manual' ],
+			$service->getTitle()
+		);
+	}
 
-		return sprintf( '<div class="embedvideo-loader__title embedvideo-loader__title--manual">%s</div>', $link );
+	/**
+	 * Generates passive local-video embed styling that preserves the embed look without
+	 * blocking native playback controls or browser features such as PiP.
+	 *
+	 * @param AbstractEmbedService $service
+	 * @return string
+	 */
+	public static function makeLocalVideoEmbedStyleHtml( AbstractEmbedService $service ): string {
+		return Html::rawElement(
+			'div',
+			[
+				'class' => 'embedvideo-localEmbedStyle',
+				'aria-hidden' => 'true',
+			],
+			Html::rawElement(
+				'div',
+				[ 'class' => 'embedvideo-overlay' ],
+				Html::rawElement(
+					'div',
+					[ 'class' => 'embedvideo-loader' ],
+					self::makeTitleHtml( $service ) .
+					Html::element(
+						'div',
+						[ 'class' => 'embedvideo-loader__fakeButton' ],
+						( new Message( 'embedvideo-play' ) )->text()
+					) .
+					Html::rawElement(
+						'div',
+						[ 'class' => 'embedvideo-loader__footer' ],
+						Html::element(
+							'div',
+							[ 'class' => 'embedvideo-loader__service' ],
+							( new Message( 'embedvideo-service-' . $service->getServiceKey() ) )->text()
+						)
+					)
+				)
+			)
+		);
 	}
 
 	/**
 	 * Generates the HTML consent container used when explicit consent is activated in the settings
 	 *
 	 * @param AbstractEmbedService $service
+	 * @param TemplateParser $templateParser
 	 * @return string
 	 */
-	public static function makeConsentContainerHtml( AbstractEmbedService $service ): string {
-		$template = <<<HTML
-<div class="embedvideo-consent" data-show-privacy-notice="%s">%s
-	<div class="embedvideo-overlay">
-		<div class="embedvideo-loader" role="button">%s
-			<div class="embedvideo-loader__fakeButton">%s</div>
-			<div class="embedvideo-loader__footer">
-				<div class="embedvideo-loader__service">%s</div>
-			</div>
-		</div>
-		<div class="embedvideo-privacyNotice hidden">
-			<div class="embedvideo-privacyNotice__content">%s%s</div>
-			<div class="embedvideo-privacyNotice__buttons">
-				<button class="embedvideo-privacyNotice__continue">%s</button>
-				<button class="embedvideo-privacyNotice__dismiss">%s</button>
-			</div>
-		</div>
-	</div>
-</div>
-HTML;
-
+	public static function makeConsentContainerHtml(
+		AbstractEmbedService $service,
+		TemplateParser $templateParser
+	): string {
 		$showPrivacyNotice = false;
 		try {
 			$showPrivacyNotice = MediaWikiServices::getInstance()
@@ -261,29 +311,22 @@ HTML;
 			//
 		}
 
-		$serviceNameMsg = ( new Message( 'embedvideo-service-' . $service->getServiceKey() ) )->text();
-		$contentTypeMsg = new Message( 'embedvideo-type-' . $service->getContentType() );
+		$serviceNameMsg = MessageValue::new( 'embedvideo-service-' . $service->getServiceKey() );
+		$contentTypeMsg = MessageValue::new( 'embedvideo-type-' . $service->getContentType() );
 
-		return sprintf(
-			$template,
-			// data-show-privacy-notice
-			$showPrivacyNotice,
-			// -thumbnail
-			self::makeThumbHtml( $service ),
-			// -loader__title
-			self::makeTitleHtml( $service ),
-			// -loader__fakeButton content
-			( new Message( 'embedvideo-load', [ $contentTypeMsg ] ) )->text(),
-			// -loader__service content
-			$serviceNameMsg,
-			// -privacyNotice text
-			( new Message( 'embedvideo-consent-privacy-notice-text', [ $serviceNameMsg ] ) )->text(),
-			// -privacyNotice link to Privacy Policy (may be empty)
-			self::makePrivacyPolicyLink( $service ),
-			// -continue
-			( new Message( 'embedvideo-consent-privacy-notice-continue' ) )->text(),
-			// -dismiss
-			( new Message( 'embedvideo-consent-privacy-notice-dismiss' ) )->text()
+		return $templateParser->processTemplate(
+			'consent-container',
+			[
+				'showPrivacyNotice' => $showPrivacyNotice,
+				'thumbnailHtml' => self::makeThumbHtml( $service ),
+				'titleHtml' => self::makeTitleHtml( $service ),
+				'fakeButtonText' => wfMessage( 'embedvideo-load', $contentTypeMsg )->text(),
+				'serviceText' => wfMessage( $serviceNameMsg )->text(),
+				'privacyNoticeText' => wfMessage( 'embedvideo-consent-privacy-notice-text', $serviceNameMsg )->text(),
+				'privacyPolicyLink' => self::makePrivacyPolicyLink( $service ),
+				'continueText' => wfMessage( 'embedvideo-consent-privacy-notice-continue' )->text(),
+				'dismissText' => wfMessage( 'embedvideo-consent-privacy-notice-dismiss' )->text(),
+			]
 		);
 	}
 
@@ -296,13 +339,18 @@ HTML;
 	public static function makePrivacyPolicyLink( AbstractEmbedService $service ): string {
 		$privacyUrl = $service->getPrivacyPolicyUrl();
 		if ( $privacyUrl !== null ) {
-			$privacyUrl = sprintf(
-				' <a href="%s" rel="nofollow,noopener" target="_blank" class="embedvideo-privacyNotice__link">%s</a>',
-				$privacyUrl,
-				( new Message( 'embedvideo-consent-privacy-policy' ) )->text()
+			return Html::element(
+				'a',
+				[
+					'href' => $privacyUrl,
+					'rel' => 'nofollow,noopener',
+					'target' => '_blank',
+					'class' => 'embedvideo-privacyNotice__link',
+				],
+				wfMessage( 'embedvideo-consent-privacy-policy' )->text()
 			);
 		}
 
-		return $privacyUrl ?? '';
+		return '';
 	}
 }

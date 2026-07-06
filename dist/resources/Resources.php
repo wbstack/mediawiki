@@ -30,6 +30,7 @@ use MediaWiki\Parser\Sanitizer;
 use MediaWiki\ResourceLoader as RL;
 use MediaWiki\ResourceLoader\CodexModule;
 use MediaWiki\ResourceLoader\Context;
+use MediaWiki\ResourceLoader\DateFormatterConfig;
 use MediaWiki\ResourceLoader\FilePath;
 use MediaWiki\ResourceLoader\ForeignApiModule;
 use MediaWiki\ResourceLoader\LessVarFileModule;
@@ -723,6 +724,20 @@ return [
 			'confirmleave-warning',
 		],
 	],
+	'mediawiki.DateFormatter' => [
+		'localBasePath' => MW_INSTALL_PATH . '/resources/src/mediawiki.DateFormatter',
+		'remoteBasePath' => "$wgResourceBasePath/resources/src/mediawiki.DateFormatter",
+		'packageFiles' => [
+			'DateFormatter.js',
+			[
+				'name' => 'config.json',
+				'callback' => [ DateFormatterConfig::class, 'getData' ]
+			]
+		],
+		'dependencies' => [
+			'user.options',
+		]
+	],
 	'mediawiki.debug' => [
 		'scripts' => [
 			'resources/src/mediawiki.debug/jquery.footHovzer.js',
@@ -1197,6 +1212,8 @@ return [
 				MainConfigNames::GenerateThumbnailOnParse,
 				MainConfigNames::LoadScript,
 				MainConfigNames::AutoCreateTempUser,
+				MainConfigNames::ThumbnailSteps,
+				MainConfigNames::ThumbnailStepsRatio,
 			] ],
 			[ 'name' => 'portletLinkOptions.json', 'callback' => [ Skin::class, 'getPortletLinkOptions' ] ],
 			[
@@ -2117,6 +2134,7 @@ return [
 			'apisandbox-request-php-label',
 			'apisandbox-request-time',
 			'apisandbox-request-post',
+			'apisandbox-request-post2',
 			'apisandbox-request-formdata',
 			'apisandbox-results-fixtoken',
 			'apisandbox-results-fixtoken-fail',

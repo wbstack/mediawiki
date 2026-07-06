@@ -303,6 +303,8 @@ return [
 			'ThumbnailNamespaces' => [
 				6,
 			],
+			'ThumbnailSteps' => null,
+			'ThumbnailStepsRatio' => null,
 			'ThumbnailBuckets' => null,
 			'ThumbnailMinimumBucketDistance' => 50,
 			'UploadThumbnailRenderMap' => [
@@ -1830,6 +1832,7 @@ return [
 			'AllowCrossOrigin' => false,
 			'RestAllowCrossOriginCookieAuth' => false,
 			'SessionSecret' => false,
+			'EnableUnsafeXsltOption' => false,
 			'CookieExpiration' => 2592000,
 			'ExtendedLoginCookieExpiration' => 15552000,
 			'CookieDomain' => '',
@@ -1955,8 +1958,10 @@ return [
 			'UpgradeKey' => false,
 			'GitBin' => '/usr/bin/git',
 			'GitRepositoryViewers' => [
-				'https://(?:[a-z0-9_]+@)?gerrit.wikimedia.org/r/(?:p/)?(.*)' => 'https://gerrit.wikimedia.org/g/%R/+/%H',
-				'ssh://(?:[a-z0-9_]+@)?gerrit.wikimedia.org:29418/(.*)' => 'https://gerrit.wikimedia.org/g/%R/+/%H',
+				'https://(?:[a-z0-9_]+@)?gerrit\\.wikimedia\\.org/r/(?:p/)?(.*)' => 'https://gerrit.wikimedia.org/g/%R/+/%H',
+				'ssh://(?:[a-z0-9_]+@)?gerrit\\.wikimedia\\.org:29418/(.*)' => 'https://gerrit.wikimedia.org/g/%R/+/%H',
+				'https://github\\.com/(.*?)(\\.git)?' => 'https://github.com/$1/commit/%H',
+				'git@github\\.com:(.*?)(\\.git)?' => 'https://github.com/$1/commit/%H',
 			],
 			'RCMaxAge' => 7776000,
 			'WatchersMaxAge' => 15552000,
@@ -2629,6 +2634,14 @@ return [
 			'ImageLimits' => 'array',
 			'ThumbLimits' => 'array',
 			'ThumbnailNamespaces' => 'array',
+			'ThumbnailSteps' => [
+				'array',
+				'null',
+			],
+			'ThumbnailStepsRatio' => [
+				'number',
+				'null',
+			],
 			'ThumbnailBuckets' => [
 				'array',
 				'null',

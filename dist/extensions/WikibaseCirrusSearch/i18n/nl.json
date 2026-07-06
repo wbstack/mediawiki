@@ -15,7 +15,7 @@
 	"wikibasecirrus-rescore-profile-prefix-boost": "Herschikkingsprofiel voor zoeken naar voltooiing met voorrang voor verklaringen",
 	"wikibasecirrus-rescore-profile-fulltext": "Standaard-herschikkingprofiel voor zoeken in volledige tekst",
 	"wikibasecirrus-rescore-profile-fulltext-phrase": "Herschikkingprofiel voor zoeken in volledige tekst met rangschikking op basis van zinnen",
-	"wikibasecirrus-search-bad-entity-type": "Ongeldig entiteitstype: $1",
+	"wikibasecirrus-search-bad-entity-type": "Onjuist entiteitstype: $1",
 	"wikibasecirrus-search-bad-profile-name": "Foute naam zoekprofiel: $1",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "Het sleutelwoord haswbstatement bevat geen geldige verklaringen",
 	"wikibasecirrus-haslicense-feature-no-valid-arguments": "Het sleutelwoord haslicense bevat geen geldige argumenten",

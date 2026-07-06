@@ -16,7 +16,8 @@
 			"Taleman",
 			"Valtlait",
 			"Varusmies",
-			"Yupik"
+			"Yupik",
+			"Samoasambia"
 		]
 	},
 	"requestaccount": "Pyydä käyttäjätunnusta",
@@ -48,7 +49,7 @@
 	"requestaccount-tooshort": "Kuvauksesi pituuden on oltava vähintään $1 {{PLURAL:$1|sana|sanaa}}.",
 	"requestaccount-emaildup": "Samaa sähköpostiosoitetta on käytetty toisessa parhailaan käsiteltävänä olevassa käyttäjätunnuspyynnössä.",
 	"requestaccount-exts": "Liitetiedosto ei ole sallittua tyyppiä.",
-	"requestaccount-resub": "Tietoturvasyistä antamasi ansioluettelo/CV-tiedosto on valittava uudestaan.\nJätä kenttä tyhjäksi, jos et enää halua liittää tiedostoa.",
+	"requestaccount-resub": "Tietoturvasyistä antamasi ansioluettelo/CV-tiedosto on valittava uudelleen.\nJätä kenttä tyhjäksi, jos et enää halua liittää tiedostoa.",
 	"requestaccount-tos": "Olen lukenut ja hyväksyn {{GRAMMAR:genitive|{{SITENAME}}}} [[{{MediaWiki:Requestaccount-page}}|käyttöehdot]].\nKohdasssa ''Oikea nimi'' olen antanut oman virallisen nimeni.",
 	"requestaccount-submit": "Pyydä käyttäjätunnusta",
 	"requestaccount-sent": "Käyttäjätunnuspyyntösi on lähetetty onnistuneesti ja odottaa nyt käsittelyä.\n\tVahvistusviesti on lähetetty sähköpostiosoitteeseesi.",

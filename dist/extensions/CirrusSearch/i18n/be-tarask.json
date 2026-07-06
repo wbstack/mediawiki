@@ -3,11 +3,12 @@
 		"authors": [
 			"Red Winged Duck",
 			"Renessaince",
-			"Wizardist"
+			"Wizardist",
+			"Ucukor"
 		]
 	},
 	"cirrussearch-desc": "Пошук у MediaWiki з дапамогай ElasticSearch",
-	"cirrussearch-backend-error": "Мы не змаглі выканаць пошукавы запыт з-за часовых праблемаў. Паспрабуйце пазьней, калі ласка.",
+	"cirrussearch-backend-error": "Мы не змаглі выканаць пошукавы запыт праз часовыя праблемы. Паспрабуйце пазьней, калі ласка.",
 	"cirrussearch-parse-error": "Запыт ня быў зразуметы. Калі ласка, спрасьціце яго. Запыт быў захаваны дзеля ўдасканаленьня пошукай сыстэмы.",
 	"cirrussearch-too-busy-error": "Пошук цяпер занадта заняты. Калі ласка, паспрабуйце пазьней.",
 	"cirrussearch-regex-too-busy-error": "Цяпер запушчаныя надта шмат пошукаў па рэгулярных выразах. Калі ласка, паспрабуйце пазьней.",
@@ -17,7 +18,7 @@
 	"prefs-completion": "Дапаўненьне пошуку",
 	"cirrussearch-pref-completion-section-desc": "Падказьнік запаўненьня",
 	"cirrussearch-pref-completion-profile-help": "Задае паводзіны для прапановаў аўтазапаўненьня (пошук падчас набору).\n\n[https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:CirrusSearch/CompletionSuggester Прапановы аўтазапаўненьня] — гэта альгарытм для прапановаў пошуку зь лепшым выпраўленьнем памылак і дакладнасьці пошуку. Прэфіксавы пошук — гэта альгарытм прапановаў падчас набору тэксту.",
-	"cirrussearch-completion-profile-fuzzy-pref-name": "Дапомны (рэкамэндаваны)",
+	"cirrussearch-completion-profile-fuzzy-pref-name": "Перадвызначаны (рэкамэндаваны)",
 	"cirrussearch-completion-profile-fuzzy-pref-desc": "Выпраўляе да дзьвюх абдруковак. Выдаляе перанакіраваньні, якія вельмі падобныя да асноўнай назвы.",
 	"cirrussearch-completion-profile-fuzzy-subphrases-pref-name": "Дапаўненьне падфразаў (рэкамэндуецца для доўгіх назваў старонак)",
 	"cirrussearch-completion-profile-fuzzy-subphrases-pref-desc": "Выпраўляе да дзьвюх абдруковак. Выпраўляе блізкія перанакіраваньні. Супастаўляе падфразы ў загалоўках.",

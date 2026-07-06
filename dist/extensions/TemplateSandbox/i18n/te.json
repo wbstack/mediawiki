@@ -2,9 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Macofe",
-			"Veeven"
+			"Veeven",
+			"Chaduvari"
 		]
 	},
+	"templatesandbox": "మూస ప్రయోగశాల",
+	"templatesandbox-suffix": "ప్రయోగశాల",
+	"templatesandbox-legend": "మూస ప్రయోగశాల",
+	"templatesandbox-prefix-label": "ప్రయోగశాల ఆదిపదం:",
 	"templatesandbox-editform-page-label": "పేజీ శీర్షిక",
 	"templatesandbox-editform-view-label": "మునుజూపును చూపించు",
 	"templatesandbox-preview": "$2 మునుజూపు"

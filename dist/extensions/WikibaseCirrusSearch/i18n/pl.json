@@ -22,6 +22,15 @@
 			"Woytecr"
 		]
 	},
+	"wikibasecirrus-desc": "Rozszerzenie Wikibase umożliwiające korzystanie z funkcjonalności CirrusSearch",
+	"wikibasecirrus-keywordfeature-unknown-language-code": "Słowo kluczowe $1 zawiera nieznany kod języka: $2",
+	"wikibasecirrus-keywordfeature-too-many-language-codes": "Słowo kluczowe $1 zawiera zbyt wiele kodów językowych. Przeszukiwanie $2 z $3 {{PLURAL:$3|podanego języka|podanych języków}}",
+	"wikibasecirrus-inlabel-no-query-provided": "słowo kluczowe inlabel zostało podane jako pusty ciąg wyszukiwania",
+	"wikibasecirrus-search-bad-entity-type": "Niewłaściwy typ obiektu: $1",
+	"wikibasecirrus-search-bad-profile-name": "Nieprawidłowa nazwa profilu wyszukiwania: $1",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "Słowo kluczowe 'haswbstatement' nie zawiera prawidłowych deklaracji",
+	"wikibasecirrus-haslicense-feature-no-valid-arguments": "Słowo kluczowe 'haslicense ' nie zawiera prawidłowych parametrów",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "Słowo kluczowe 'wbstatementquantity' nie zawiera prawidłowych deklaracji",
 	"special-entitieswithoutdescription": "Encje bez opisu",
 	"wikibasecirrus-entitieswithoutdescription-legend": "Wyświetl listę encji bez opisu",
 	"special-entitieswithoutlabel": "Encje bez etykiety",

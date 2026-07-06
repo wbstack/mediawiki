@@ -12,7 +12,8 @@
 			"Railfail536",
 			"Sp5uhe",
 			"ToSter",
-			"Wpedzich"
+			"Wpedzich",
+			"Woytecr"
 		]
 	},
 	"requestaccount": "Wniosek o założenie konta",
@@ -25,7 +26,7 @@
 	"requestaccount-leg-person": "Informacje osobiste",
 	"requestaccount-leg-other": "Inne informacje",
 	"requestaccount-leg-tos": "Warunki użytkowania serwisu",
-	"requestaccount-acc-text": "Na Twój adres e‐mail zostanie wysłana wiadomość potwierdzająca złożenie wniosku o założenie konta.\nKliknij na link zawarty w tej wiadomości.\nHasło do konta zostanie przesłane poprzez e‐mail, gdy konto zostanie już utworzone.",
+	"requestaccount-acc-text": "Na Twój adres e‐mail zostanie wysłana wiadomość potwierdzająca złożenie wniosku o założenie konta. Ten adres nie będzie publikowany.\nPo otrzymaniu wiadomości, kliknij na link w niej zawarty.\nHasło do konta zostanie przesłane poprzez e‐mail, gdy konto zostanie już utworzone.",
 	"requestaccount-areas-text": "Określ tematy i obszary dla których posiadasz formalne przygotowanie lub takie nad którymi planujesz najwięcej pracować.",
 	"requestaccount-ext-text": "Następujące informacje nie będą udostępniane. Zostaną użyte tylko na potrzeby tego wniosku o założenie konta użytkownika.\nMożesz wyświetlić kontakty np. numer telefonu, by łatwiej zdecydować o zatwierdzeniu lub odrzuceniu wniosku.",
 	"requestaccount-bio-text": "Spróbuj zawrzeć w swojej poniższej biografii wszelkie istotne informacje.",

@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"AhmedG612"
+		]
+	},
+	"wikibasecirrus-desc": "Kordhinta Wikibase ee loo isticmaalo shaqooyinka CirrusSearch",
+	"wikibasecirrus-keywordfeature-unknown-language-code": "$1 Ereyga muhiimka ah wuxuu ka kooban yahay koodh luqadeed aan la aqoon: $2",
+	"wikibasecirrus-keywordfeature-too-many-language-codes": "$1 Ereyga muhiimka ah wuxuu bixiyay koodhadh luqadeed aad u badan. Waxaa la baarayaa $2 ka mid ah $3 ee la bixiyay {{PLURAL:$3|luqad|luqado}}",
+	"wikibasecirrus-inlabel-no-query-provided": "inlabel ereyga muhiimka ah waxaa la bixiyay raadis madhan",
+	"wikibasecirrus-rescore-profile-prefix": "Astaan dib u darid caadi ah ee raadinta dhammaystirka",
+	"wikibasecirrus-rescore-profile-prefix-boost": "Astaan dib u darid ee raadinta dhammaystirka oo leh kor u qaadis bayaanno",
+	"wikibasecirrus-rescore-profile-fulltext": "Astaan dib u darid caadi ah ee raadinta qoraal buuxa",
+	"wikibasecirrus-rescore-profile-fulltext-phrase": "Astaan dib u darid ee raadinta qoraal buuxa oo leh qiimeyn jumlado",
+	"wikibasecirrus-search-bad-entity-type": "Nooc shay oo xun: $1",
+	"wikibasecirrus-search-bad-profile-name": "Magac astaan raadis oo xun: $1",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "haswbstatement Ereyga muhiimka ah kuma jiro bayaanno sax ah",
+	"wikibasecirrus-haslicense-feature-no-valid-arguments": "haslicense ereyga muhiimka ah kuma jiro dood sax ah",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "wbstatementquantity ereyga muhiimka ah kuma jiro bayaanno sax ah",
+	"special-entitieswithoutdescription": "Shayada aan lahayn sharaxaad",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Hel liiska shayada aan lahayn sharaxaad",
+	"special-entitieswithoutlabel": "Shayada aan lahayn calaamad",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Hel liiska shayada aan lahayn calaamad",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Koodhka luqadda:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Nooca:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Raadi",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" ma aha koodh luqadeed sax ah.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" ma aha nooc shay oo sax ah."
+}

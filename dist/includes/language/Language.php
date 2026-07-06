@@ -2000,6 +2000,367 @@ class Language implements Bcp47Code {
 	}
 
 	/**
+	 * Convert a format string as consumed by sprintfDate() to an options array
+	 * as used by the client-side mediawiki.DateFormatter.
+	 *
+	 * @param string $format
+	 * @return array An associative array with the following keys:
+	 *   - pattern: A string with parameters surrounded by braces, like {year},
+	 *       where the parameter names are those returned by Intl.DateTimeFormat.formatToParts(),
+	 *       with a few custom extensions, specifically:
+	 *       - mwMonth: The month name message text
+	 *       - mwMonthGen: The genitive month name message text
+	 *       - mwMonthAbbrev:  The abbreviated month name message text
+	 *   - locale: A fixed locale to override the default one
+	 *   - options: Associative options to pass to the Intl.DateTimeFormat constructor
+	 */
+	private function convertDateFormatToJs( $format ) {
+		// CLDR calendar IDs by format code
+		$calendars = [
+			'j' => 'hebrew',
+			'i' => 'persian', // Iranian
+			'm' => 'islamic', // Hijri
+			'k' => 'buddhist', // Thai
+			'o' => 'roc', // Minguo
+			't' => 'japanese' // Tenno
+		];
+
+		$s = '';
+		$mwOpts = [];
+		$intlOpts = [
+			'numberingSystem' => $this->localisationCache
+				->getItem( $this->mCode, 'numberingSystem' ) ?? 'latn'
+		];
+		$unsupported = [];
+		$formatLength = strlen( $format );
+
+		for ( $p = 0; $p < $formatLength; $p++ ) {
+			$code = $format[$p];
+			if ( $code == 'x' && $p < $formatLength - 1 ) {
+				$code .= $format[++$p];
+			}
+
+			if ( ( $code === 'xi'
+					|| $code === 'xj'
+					|| $code === 'xk'
+					|| $code === 'xm'
+					|| $code === 'xo'
+					|| $code === 'xt' )
+				&& $p < $formatLength - 1
+			) {
+				$code .= $format[++$p];
+			}
+
+			switch ( $code ) {
+				case 'xx':
+					$s .= 'x';
+					break;
+
+				case 'xn':
+				case 'xN':
+					// Raw number -- usually safe enough in ISO 8601 styles
+					// although we don't support switching
+					$mwOpts['locale'] = 'en';
+					unset( $intlOpts['numberingSystem'] );
+					break;
+
+				case 'xr':
+					// Roman numerals
+					// Multiple numbering systems are usually used in the one format,
+					// which is unsupported. Also, browsers do not implement it.
+					$unsupported[] = $code;
+					break;
+
+				case 'xh':
+					// Hebrew numerals. Browsers do not implement it as of 2025,
+					// and usually multiple numbering systems are desired in a
+					// single format.
+					$unsupported[] = $code;
+					$intlOpts['numberingSystem'] = 'hebr';
+					break;
+
+				case 'xg':
+					// Genitive month name
+					$intlOpts['month'] = 'long';
+					$s .= '{mwMonthGen}';
+					break;
+
+				case 'xjx':
+					// Genitive month name in Hebrew calendar
+					$intlOpts['calendar'] = 'hebrew';
+					$intlOpts['month'] = 'long';
+					$s .= '{mwMonthGen}';
+					break;
+
+				case 'd':
+					$intlOpts['day'] = '2-digit';
+					$s .= '{day}';
+					break;
+
+				case 'D':
+					$intlOpts['weekday'] = 'short';
+					$s .= '{weekday}';
+					break;
+
+				case 'j':
+					$intlOpts['day'] = 'numeric';
+					$s .= '{day}';
+					break;
+
+				case 'xij':
+				case 'xmj':
+				case 'xjj':
+					// Day number in special calendar
+					$intlOpts['day'] = 'numeric';
+					$intlOpts['calendar'] = $calendars[$code[1]];
+					$s .= '{day}';
+					break;
+
+				case 'l':
+					$intlOpts['weekday'] = 'long';
+					$s .= '{weekday}';
+					break;
+
+				case 'F':
+					$intlOpts['month'] = 'long';
+					$s .= '{mwMonth}';
+					break;
+
+				case 'xiF':
+				case 'xmF':
+				case 'xjF':
+					// Full month name in special calendar
+					$intlOpts['month'] = 'long';
+					$intlOpts['calendar'] = $calendars[$code[1]];
+					$s .= '{month}';
+					break;
+
+				case 'm':
+					$intlOpts['month'] = '2-digit';
+					$s .= '{month}';
+					break;
+
+				case 'M':
+					$intlOpts['month'] = 'short';
+					$s .= '{mwMonthAbbrev}';
+					break;
+
+				case 'n':
+					$intlOpts['month'] = 'numeric';
+					$s .= '{month}';
+					break;
+
+				case 'xin':
+				case 'xmn':
+				case 'xjn':
+					// Numeric month in special calendar
+					$intlOpts['month'] = 'numeric';
+					$intlOpts['calendar'] = $calendars[$code[1]];
+					$s .= '{month}';
+					break;
+
+				case 'xjt':
+					// Number of days in the given Hebrew month -- not supported
+					$unsupported[] = $code;
+					break;
+
+				case 'Y':
+					$intlOpts['year'] = 'numeric';
+					$s .= '{year}';
+					break;
+
+				case 'xiY':
+				case 'xmY':
+				case 'xjY':
+				case 'xkY':
+				case 'xoY':
+					// Year number in special calendar
+					$intlOpts['year'] = 'numeric';
+					$intlOpts['calendar'] = $calendars[$code[1]];
+					$s .= '{year}';
+					break;
+
+				case 'xtY':
+					// Japanese year needs to be prefixed with the era name to
+					// be consistent with tsToJapaneseGengo()
+					$intlOpts['era'] = 'short';
+					$intlOpts['year'] = 'numeric';
+					$intlOpts['calendar'] = $calendars[$code[1]];
+					$s .= '{era}{year}';
+					break;
+
+				case 'y':
+					$intlOpts['year'] = '2-digit';
+					$s .= '{year}';
+					break;
+
+				case 'xiy':
+					// Iranian 2-digit year
+					$intlOpts['calendar'] = 'persian';
+					$intlOpts['year'] = '2-digit';
+					$s .= '{year}';
+					break;
+
+				case 'xit':
+					// Number of days in Iranian month -- not supported
+					$unsupported[] = $code;
+					break;
+
+				case 'xiz':
+					// Day of the year -- not supported
+					$unsupported[] = $code;
+					break;
+
+				case 'a':
+				case 'A':
+					// AM/PM
+					$intlOpts['hour12'] = true;
+					$s .= '{dayPeriod}';
+					break;
+
+				case 'g':
+					// Hour in 12-hour clock, without leading zero
+					$intlOpts['hour'] = 'numeric';
+					$intlOpts['hour12'] = true;
+					$s .= '{hour}';
+					break;
+
+				case 'G':
+					// Hour in 24-hour clock, without leading zero
+					$intlOpts['hour'] = 'numeric';
+					$s .= '{hour}';
+					break;
+
+				case 'h':
+					// Hour in 12-hour clock, with leading zero
+					$intlOpts['hour'] = '2-digit';
+					$intlOpts['hour12'] = true;
+					$s .= '{hour}';
+					break;
+
+				case 'H':
+					// Hour in 24-hour clock, without leading zero
+					$intlOpts['hour'] = '2-digit';
+					$intlOpts['hour12'] = false;
+					$s .= '{hour}';
+					break;
+
+				case 'i':
+					$intlOpts['minute'] = '2-digit';
+					$s .= '{minute}';
+					break;
+
+				case 's':
+					$intlOpts['second'] = '2-digit';
+					$s .= '{second}';
+					break;
+
+				case 'c':
+					// ISO 8601
+					$mwOpts['locale'] = 'en';
+					$intlOpts += [
+						'year' => 'numeric', 'month' => '2-digit', 'day' => '2-digit',
+						'hour' => '2-digit', 'minute' => '2-digit', 'second' => '2-digit',
+						'hour12' => false, 'timeZoneName' => 'longOffset'
+					];
+					$s .= '{year}-{month}-{day}T{hour}:{minute}:{second}{timeZoneName}';
+					break;
+
+				case 'r':
+					// RFC 2822
+					$mwOpts['locale'] = 'en';
+					$intlOpts += [
+						'year' => 'numeric', 'month' => 'short', 'day' => 'numeric',
+						'hour' => '2-digit', 'minute' => '2-digit', 'second' => '2-digit',
+						'hour12' => false, 'weekday' => 'short', 'timeZoneName' => 'longOffset',
+					];
+					$s .= '{weekday}, {day} {month} {year} {hour}:{minute}:{second} {timeZoneName}';
+					break;
+
+				case 'e':
+					// Time zone identifier -- not supported, fall through to offset
+				case 'O':
+					// Offset without colon not supported
+					$unsupported[] = $code;
+					// Fall through to with colon
+				case 'P':
+					$intlOpts['timeZoneName'] = 'longOffset';
+					$s .= '{timeZoneName}';
+					break;
+
+				case 'T':
+					// Time zone abbreviation
+					$intlOpts['timeZoneName'] = 'short';
+					$s .= '{timeZoneName}';
+					break;
+
+				case 'w':
+				case 'N':
+					// Numeric day of week -- not supported
+					$unsupported[] = $code;
+					$intlOpts['weekday'] = 'short';
+					$s .= '{weekday}';
+					break;
+
+				case 'z':
+					// Day of year
+				case 'W':
+					// Week number
+				case 't':
+					// Number of days in month
+				case 'L':
+					// Leap year flag
+				case 'o':
+					// ISO week numbering year
+				case 'U':
+					// Seconds since UNIX epoch
+				case 'I':
+					// DST flag
+				case 'Z':
+					// Timezone offset in seconds
+					$unsupported[] = $code;
+					break;
+
+				case '\\':
+					# Backslash escaping
+					if ( $p < $formatLength - 1 ) {
+						$s .= $format[++$p];
+					} else {
+						$s .= '\\';
+					}
+					break;
+
+				case '"':
+					# Quoted literal
+					if ( $p < $formatLength - 1 ) {
+						$endQuote = strpos( $format, '"', $p + 1 );
+						if ( $endQuote === false ) {
+							# No terminating quote, assume literal "
+							$s .= '"';
+						} else {
+							$s .= substr( $format, $p + 1, $endQuote - $p - 1 );
+							$p = $endQuote;
+						}
+					} else {
+						# Quote at the end of the string, assume literal "
+						$s .= '"';
+					}
+					break;
+
+				default:
+					$s .= $format[$p];
+			}
+		}
+		$mwOpts['options'] = $intlOpts;
+		$mwOpts['pattern'] = $s;
+		if ( $unsupported ) {
+			$mwOpts['error'] = 'Unsupported format code(s): ' .
+				implode( ', ', $unsupported );
+		}
+		return $mwOpts;
+	}
+
+	/**
 	 * Convenience function to convert a PHP DateTime object to a 14-character MediaWiki timestamp,
 	 * falling back to the specified timestamp if the DateTime object holds a too large date (T32148, T277809).
 	 * This is a private utility method as it is only really useful for {@link userAdjust}.
@@ -2585,7 +2946,12 @@ class Language implements Bcp47Code {
 	 * @return string The string with uppercase conversion applied to the first character
 	 */
 	public function ucfirst( $str ) {
-		$octetCode = ord( $str );
+		// T410920: ord() doesn't like an empty string, so just return early
+		if ( $str === '' ) {
+			return '';
+		}
+
+		$octetCode = ord( $str[0] );
 		// See https://en.wikipedia.org/wiki/ASCII#Printable_characters
 		if ( $octetCode < 96 ) {
 			// Assume this is an uppercase/uncased ASCII character
@@ -2631,7 +2997,12 @@ class Language implements Bcp47Code {
 	 * @return string The string with lowercase conversion applied to the first character
 	 */
 	public function lcfirst( $str ) {
-		$octetCode = ord( $str );
+		// T410920: ord() doesn't like an empty string, so just return early
+		if ( $str === '' ) {
+			return '';
+		}
+
+		$octetCode = ord( $str[0] );
 		// See https://en.wikipedia.org/wiki/ASCII#Printable_characters
 		if ( $octetCode < 96 ) {
 			// Assume this is an uppercase/uncased ASCII character
@@ -3131,37 +3502,39 @@ class Language implements Bcp47Code {
 	 * See $separatorTransformTable on MessageIs.php for
 	 * the , => . and . => , implementation.
 	 *
-	 * @param string|int|float $number Expected to be a pre-formatted (e.g. leading zeros, number
-	 *  of decimal places) numeric string. Any non-string will be cast to string.
+	 * @param string|int|float $number The numeric string to be formatted, or integer
+	 *  or a floating point number.
 	 * @return string
 	 */
 	public function formatNum( $number ) {
-		return $this->formatNumInternal( (string)$number, false, false );
+		return $this->formatNumInternal( $number, false, false );
 	}
 
 	/**
 	 * Internal implementation function, shared between formatNum and formatNumNoSeparators.
 	 *
-	 * @param string $number The stringification of a valid PHP number
+	 * @param string|int|float $number Expected to be a pre-formatted (e.g. leading zeros, number
+	 *  of decimal places) numeric string. Any non-string will be cast to string.
 	 * @param bool $noTranslate Whether to translate digits and separators
 	 * @param bool $noSeparators Whether to add separators
 	 * @return string
 	 */
-	private function formatNumInternal(
-		string $number, bool $noTranslate, bool $noSeparators
-	): string {
-		$translateNumerals = $this->config->get( MainConfigNames::TranslateNumerals );
+	private function formatNumInternal( $number, bool $noTranslate, bool $noSeparators ): string {
+		// From PHP 8.5, we can't cast NAN to string, and since the method
+		// accepts float, there's no way to exclude NAN, which is subtype.
+		// So handle it explicitly.
+		$number = is_float( $number ) && is_nan( $number ) ? 'NAN' : (string)$number;
 
 		if ( $number === '' ) {
 			return $number;
 		}
-		if ( $number === (string)NAN ) {
+		if ( $number === 'NAN' ) {
 			return $this->msg( 'formatnum-nan' )->text();
 		}
-		if ( $number === (string)INF ) {
+		if ( $number === 'INF' ) {
 			return "∞";
 		}
-		if ( $number === (string)-INF ) {
+		if ( $number === '-INF' ) {
 			return "\u{2212}∞";
 		}
 		if ( !is_numeric( $number ) ) {
@@ -3254,7 +3627,7 @@ class Language implements Bcp47Code {
 		}
 
 		if ( !$noTranslate ) {
-			if ( $translateNumerals ) {
+			if ( $this->config->get( MainConfigNames::TranslateNumerals ) ) {
 				// This is often unnecessary: PHP's NumberFormatter will often
 				// do the digit transform itself (T267614)
 				$s = $this->digitTransformTable();
@@ -3282,13 +3655,13 @@ class Language implements Bcp47Code {
 	/**
 	 * Front-end for non-commafied formatNum
 	 *
-	 * @param string|int|float $number The string to be formatted, should be an integer
+	 * @param string|int|float $number The numeric string to be formatted, or integer
 	 *        or a floating point number.
 	 * @since 1.21
 	 * @return string
 	 */
 	public function formatNumNoSeparators( $number ) {
-		return $this->formatNumInternal( (string)$number, false, true );
+		return $this->formatNumInternal( $number, false, true );
 	}
 
 	/**
@@ -3297,16 +3670,16 @@ class Language implements Bcp47Code {
 	 */
 	public function parseFormattedNumber( $number ) {
 		if ( $number === $this->msg( 'formatnum-nan' )->text() ) {
-			return (string)NAN;
+			return "NAN";
 		}
 		if ( $number === "∞" ) {
-			return (string)INF;
+			return "INF";
 		}
 		// Accept either ASCII hyphen-minus or the unicode minus emitted by
 		// ::formatNum()
 		$number = strtr( $number, [ "\u{2212}" => '-' ] );
 		if ( $number === "-∞" ) {
-			return (string)-INF;
+			return "-INF";
 		}
 		$s = $this->digitTransformTable();
 		if ( $s ) {
@@ -4634,6 +5007,54 @@ class Language implements Bcp47Code {
 			'fallbackLanguages' => $this->getFallbackLanguages(),
 			'bcp47Map' => LanguageCode::getNonstandardLanguageCodeMapping(),
 		];
+	}
+
+	/**
+	 * @internal For DateFormatterConfig
+	 * @return array
+	 */
+	public function getJsDateFormats() {
+		$jsLcFormats = $this->localisationCache->getItem( $this->mCode, 'jsDateFormats' );
+		$phpLcFormats = $this->localisationCache->getItem( $this->mCode, 'dateFormats' );
+
+		$styles = $this->getDatePreferences() ?: [ $this->getDefaultDateFormat() ];
+		$results = [];
+		foreach ( $styles as $style ) {
+			if ( $style === 'default' ) {
+				// Default is not a real style for our purposes
+				continue;
+			}
+			foreach ( [ 'time', 'date', 'both', 'pretty' ] as $type ) {
+				$key = "$style $type";
+				$resolvedType = $type;
+				$resolvedStyle = $style;
+				$resolvedKey = $key;
+
+				// If the PHP localisation lacks the "pretty" type, fall back to "date"
+				if ( !isset( $phpLcFormats[$key] ) && $type === 'pretty' ) {
+					$resolvedType = 'date';
+					$resolvedKey = "$resolvedStyle $resolvedType";
+				}
+
+				// If $jsDateFormats has an alias, follow it.
+				// This is used to gracefully remove formats that don't work in the browser.
+				$alias = $jsLcFormats[$resolvedKey]['alias'] ?? '';
+				if ( preg_match( '/^(.*) ([^ ]*)$/', $alias, $m ) ) {
+					$resolvedType = $m[2];
+					$resolvedStyle = $m[1];
+					$resolvedKey = "$resolvedStyle $resolvedType";
+				}
+
+				$jsFormat = $this->convertDateFormatToJs(
+					$this->getDateFormatString( $resolvedType, $resolvedStyle ) );
+				if ( isset( $jsLcFormats[$resolvedKey] ) ) {
+					$results[$key] = array_merge_recursive( $jsFormat, $jsLcFormats[$resolvedKey] );
+				} else {
+					$results[$key] = $jsFormat;
+				}
+			}
+		}
+		return $results;
 	}
 }
 

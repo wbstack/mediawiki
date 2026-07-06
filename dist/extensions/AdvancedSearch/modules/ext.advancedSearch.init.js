@@ -312,6 +312,16 @@ $( () => {
 		searchableNamespaces
 	) );
 
+	// if using default namespaces, update the visible URL to include the namespaces that were used (T217445)
+	const defaultNamespaces = mw.config.get( 'advancedSearch.defaultNamespaces' );
+	if ( defaultNamespaces ) {
+		const queryParams = {};
+		defaultNamespaces.forEach( ( ns ) => {
+			queryParams[ 'ns' + ns ] = '1';
+		} );
+		history.pushState( null, '', ( new mw.Uri() ).extend( queryParams ) );
+	}
+
 	// remove old namespace selection item to avoid double ns parameters
 	$( '.mw-search-spinner, #mw-searchoptions' ).remove();
 
