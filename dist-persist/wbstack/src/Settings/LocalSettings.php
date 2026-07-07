@@ -180,11 +180,13 @@ $wgSitename = $wikiInfo->sitename;
 // Logos
 $wgLogos = [
     "1x" => $wikiInfo->getSetting('wgLogo'),
+    "icon" => $wikiInfo->getSetting('wgLogo'),
 ];
 if( $wgLogos["1x"] === null ) {
     // Fallback to the mediawiki logo without the wgLogo overlay
     $wgLogos = [
         "1x" => "/w/resources/assets/wikibase_cloud.svg",
+        "icon" => "/w/resources/assets/wikibase_cloud.svg",
     ];
 }
 
