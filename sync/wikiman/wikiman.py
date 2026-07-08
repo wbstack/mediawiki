@@ -64,23 +64,23 @@ class FixedIndentingDumper(yaml.Dumper):
 default_branch = get_mediawiki_branch_from_version(mediawiki_version) # pylint: disable-msg=C0103
 remove_from_all = codebases.get('removeFromAll', [])
 output: List[Dict] = [make_artifact_entry({
-    'name': 'mediawiki',
-    'repoName': 'wikimedia/mediawiki',
-    'repoRef': codebases.get('mediawikiRepoRef', default_branch),
-    'destination': './dist',
-    'remove': codebases.get('mediawikiRemove', []),
-    'patches': codebases.get('mediawikiPatches', []),
+        'name': 'mediawiki',
+        'repoName': 'wikimedia/mediawiki',
+        'repoRef': codebases.get('mediawikiRepoRef', default_branch),
+        'destination': './dist',
+        'remove': codebases.get('mediawikiRemove', []),
+        'patches': codebases.get('mediawikiPatches', []),
     }, remove_from_all)]
 
 output += [
     make_artifact_entry( {**ext,'destination': f"./dist/extensions/{ext['name']}", 'repoRef': ext.get('repoRef', default_branch)}, remove_from_all )
     for ext in extensions
-    ]
+]
 
 output += [
     make_artifact_entry( {**skin,'destination': f"./dist/skins/{skin['name']}", 'repoRef': skin.get('repoRef', default_branch)}, remove_from_all )
     for skin in skins
-    ]
+]
 
 # write out to the lock.yaml file
 with open(DESTINATION_YAMLFILE, 'w') as outfile:
