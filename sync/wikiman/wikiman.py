@@ -35,8 +35,9 @@ def get_github_url_from_ref(github: Github, ref: str, repository: str):
 
     return f"https://codeload.github.com/{repository}/zip/{commit.sha}"
 
-def make_artifact_entry(details: Dict[str, str], extra_remove: List[str]) -> Dict[str, Any]:
-    name = details['name']
+def make_artifact_entry(details: Dict[str, Any], extra_remove: List[str]) -> Dict[str, Any]:
+    name: str = details['name']
+    patches: List[Dict[str, str]] = details.get('patches', [])
 
     if "repoName" in details.keys():
         artifact_url = get_github_url_from_ref(github_client, details['repoRef'], details['repoName'])
@@ -45,14 +46,14 @@ def make_artifact_entry(details: Dict[str, str], extra_remove: List[str]) -> Dic
     else:
         raise ValueError(f"'repoName' or 'url' key not specified for '{name}' in '{SOURCE_YAMLFILE}'")
 
-    entry = {
+    return {
         'name': name,
         'artifactUrl': artifact_url,
         'artifactLevel': 1,
         'destination': details['destination'],
+        'patchUrls': [patch['url'] for patch in patches],
         'remove' : extra_remove + details.get('remove', []),
     }
-    return entry
 
 # pylint: disable=too-many-ancestors
 class FixedIndentingDumper(yaml.Dumper):
@@ -67,7 +68,8 @@ output: List[Dict] = [make_artifact_entry({
     'repoName': 'wikimedia/mediawiki',
     'repoRef': codebases.get('mediawikiRepoRef', default_branch),
     'destination': './dist',
-    'remove': codebases.get('mediawikiRemove', [])
+    'remove': codebases.get('mediawikiRemove', []),
+    'patches': codebases.get('mediawikiPatches', []),
     }, remove_from_all)]
 
 output += [
