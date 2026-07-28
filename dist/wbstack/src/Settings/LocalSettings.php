@@ -227,21 +227,29 @@ $wgFooterIcons = [
 
 $wgHooks['SkinAddFooterLinks'][] = function ( Skin $skin, string $key, array &$footerlinks ) {
     if ( $key === 'places' ) {
-        $footerlinks['report'] = Html::element(
-            'a',
-            [
-                'href' => 'https://wikibase.cloud/complaint',
-                'target' => '_blank',
-                'rel' => 'noopener noreferrer'
-            ],
-            'Report illegal content'
-        );
+        $addFooterLink = function ( string $label, string $url ) use ( &$footerlinks ) {
+            $key = strtolower( str_replace( ' ', '-', $label ) );
+            $footerlinks[ $key ] = Html::element(
+                'a',
+                [
+                    'href' => $url,
+                    'target' => '_blank',
+                    'rel' => 'noopener noreferrer'
+                ],
+                $label
+            );
+        };
+        // Display order and styling for these links are configured in "../Styling/footer-links.css"
+        $addFooterLink( 'Copyrights', '/wiki/Project:Copyrights' );
+        $addFooterLink( 'Wikibase Cloud Privacy Policy', 'https://www.wikibase.cloud/privacy-policy' );
+        $addFooterLink( 'DSA Information', 'https://www.wikibase.cloud/dsa-info' );
+        $addFooterLink( 'Report illegal content', 'https://wikibase.cloud/complaint' );
     }
 };
 
 // Custom CSS styling
 $wgResourceModules[ 'wbstack.styling' ] = array(
-    'styles' => [ 'footer-badges.css' ],
+    'styles' => [ 'footer-badges.css', 'footer-links.css' ],
     'localBasePath' => "$IP/wbstack/src/Styling",
     'remoteBasePath' => "$wgScriptPath/wbstack/src/Styling"
 );

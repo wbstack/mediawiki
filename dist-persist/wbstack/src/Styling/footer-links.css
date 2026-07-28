@@ -1,0 +1,43 @@
+#footer-places {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#footer-places-privacy {
+    order: 1;
+}
+
+#footer-places-copyrights {
+    order: 2;
+}
+
+#footer-places-about {
+    order: 3;
+}
+
+#footer-places-disclaimers {
+    order: 4;
+}
+
+#footer-places-mobileview {
+    order: 5;
+}
+
+#footer-places::after {
+    order: 6;
+    content: "";
+    flex-basis: 100%;
+    height: 0;
+}
+
+#footer-places-wikibase-cloud-privacy-policy {
+    order: 7;
+}
+
+#footer-places-dsa-information {
+    order: 8;
+}
+
+#footer-places-report-illegal-content {
+    order: 9;
+}
