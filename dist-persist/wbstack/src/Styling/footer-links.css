@@ -23,6 +23,10 @@
     order: 5;
 }
 
+.skin-minerva #footer-places-desktop-toggle {
+    order: 5;
+}
+
 #footer-places::after {
     order: 6;
     content: "";
@@ -40,4 +44,12 @@
 
 #footer-places-report-illegal-content {
     order: 9;
+}
+
+.skin-minerva #footer-places-report-illegal-content::after {
+    display: none;
+}
+
+.skin-minerva #footer-places li {
+    display: inline-block !important;
 }
