@@ -3,6 +3,10 @@
     flex-wrap: wrap;
 }
 
+#footer-info {
+    flex: 0 0 100%;
+}
+
 #footer-places {
     display: flex;
     flex: 1 1 0;
