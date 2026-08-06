@@ -1,6 +1,22 @@
-#footer-places {
+#footer {
     display: flex;
     flex-wrap: wrap;
+}
+
+#footer-info {
+    flex: 0 0 100%;
+}
+
+#footer-places {
+    display: flex;
+    flex: 1 1 0;
+    flex-wrap: wrap;
+    /* min-width to prevent links from becoming unreadable */
+    min-width: 250px;
+}
+
+#footer-icons {
+    margin-left: auto;
 }
 
 #footer-places-privacy {
