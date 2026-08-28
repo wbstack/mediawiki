@@ -35,8 +35,9 @@ def get_github_url_from_ref(github: Github, ref: str, repository: str):
 
     return f"https://codeload.github.com/{repository}/zip/{commit.sha}"
 
-def make_artifact_entry(details: Dict[str, str], extra_remove: List[str]) -> Dict[str, Any]:
-    name = details['name']
+def make_artifact_entry(details: Dict[str, Any], extra_remove: List[str]) -> Dict[str, Any]:
+    name: str = details['name']
+    patches: List[Dict[str, str]] = details.get('patches', [])
 
     if "repoName" in details.keys():
         artifact_url = get_github_url_from_ref(github_client, details['repoRef'], details['repoName'])
@@ -45,14 +46,14 @@ def make_artifact_entry(details: Dict[str, str], extra_remove: List[str]) -> Dic
     else:
         raise ValueError(f"'repoName' or 'url' key not specified for '{name}' in '{SOURCE_YAMLFILE}'")
 
-    entry = {
+    return {
         'name': name,
         'artifactUrl': artifact_url,
         'artifactLevel': 1,
         'destination': details['destination'],
+        'patchUrls': [patch['url'] for patch in patches],
         'remove' : extra_remove + details.get('remove', []),
     }
-    return entry
 
 # pylint: disable=too-many-ancestors
 class FixedIndentingDumper(yaml.Dumper):
@@ -63,22 +64,23 @@ class FixedIndentingDumper(yaml.Dumper):
 default_branch = get_mediawiki_branch_from_version(mediawiki_version) # pylint: disable-msg=C0103
 remove_from_all = codebases.get('removeFromAll', [])
 output: List[Dict] = [make_artifact_entry({
-    'name': 'mediawiki',
-    'repoName': 'wikimedia/mediawiki',
-    'repoRef': codebases.get('mediawikiRepoRef', default_branch),
-    'destination': './dist',
-    'remove': codebases.get('mediawikiRemove', [])
+        'name': 'mediawiki',
+        'repoName': 'wikimedia/mediawiki',
+        'repoRef': codebases.get('mediawikiRepoRef', default_branch),
+        'destination': './dist',
+        'remove': codebases.get('mediawikiRemove', []),
+        'patches': codebases.get('mediawikiPatches', []),
     }, remove_from_all)]
 
 output += [
     make_artifact_entry( {**ext,'destination': f"./dist/extensions/{ext['name']}", 'repoRef': ext.get('repoRef', default_branch)}, remove_from_all )
     for ext in extensions
-    ]
+]
 
 output += [
     make_artifact_entry( {**skin,'destination': f"./dist/skins/{skin['name']}", 'repoRef': skin.get('repoRef', default_branch)}, remove_from_all )
     for skin in skins
-    ]
+]
 
 # write out to the lock.yaml file
 with open(DESTINATION_YAMLFILE, 'w') as outfile:
