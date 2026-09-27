@@ -525,13 +525,16 @@ if ($wwUseQuestyCaptcha) {
     wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/QuestyCaptcha' ]);
     $wgCaptchaClass = 'MediaWiki\\Extension\\ConfirmEdit\\QuestyCaptcha\\QuestyCaptcha';
     $wgCaptchaQuestions = json_decode($wikiInfo->getSetting('wwCaptchaQuestions'), true);
-} else {
+} elseif (getenv('MW_RECAPTCHA_ENABLED') !== 'no') {
     $wwLocalization->loadExtension( 'ConfirmEdit/QuestyCaptcha' );
     wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
     $wgCaptchaClass = 'MediaWiki\\Extension\\ConfirmEdit\\ReCaptchaNoCaptcha\\ReCaptchaNoCaptcha';
     $wgReCaptchaSendRemoteIP = true;
     $wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
     $wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
+} else {
+    $wwLocalization->loadExtension( 'ConfirmEdit/QuestyCaptcha' );
+    wfLoadExtension( 'ConfirmEdit' );
 }
 
 # Mailgun
