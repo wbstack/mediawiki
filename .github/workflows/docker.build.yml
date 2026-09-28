@@ -22,6 +22,10 @@ jobs:
           tags: |
             type=sha
       -
+        name: Set image build timestamp
+        id: build_metadata
+        run: echo "build_date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
+      -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v4.2.0
       -
@@ -55,6 +59,9 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
+          build-args: |
+            WBSTACK_IMAGE_BUILD_DATE=${{ steps.build_metadata.outputs.build_date }}
+            WBSTACK_IMAGE_REVISION=${{ github.sha }}
       -
         name: Check out `wmde/wbaas-deploy` repository in staging child directory
         if: github.event_name != 'pull_request'
