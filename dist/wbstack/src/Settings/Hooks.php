@@ -2,6 +2,17 @@
 
 use MediaWiki\MediaWikiServices;
 
+//// Expose immutable image build provenance on Special:Version.
+$wgHooks['SoftwareInfo'][] = static function ( &$software ) {
+    foreach ( [
+        'WBStack image build' => 'WBSTACK_IMAGE_BUILD_DATE',
+        'WBStack image version' => 'WBSTACK_IMAGE_REVISION',
+    ] as $name => $environmentVariable ) {
+        $value = getenv( $environmentVariable );
+        $software[$name] = $value === false || trim( $value ) === '' ? 'unknown' : trim( $value );
+    }
+};
+
 //// CUSTOM Sidebar for WBStack
 // https://www.mediawiki.org/wiki/Manual:Hooks/SkinBuildSidebar
 $wgHooks['SkinBuildSidebar'][] = function ( $skin, &$sidebar ) use ( $wikiInfo ) {
