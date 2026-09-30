@@ -360,18 +360,20 @@ $wgGroupPermissions['platform']['mwoauthupdateownconsumer'] = true;
 #######################################
 ## ---          Skins            --- ##
 #######################################
-wfLoadSkin( 'Vector' );
-wfLoadSkin( 'Timeless' );
-wfLoadSkin( 'Modern' );
-wfLoadSkin( 'MinervaNeue' );
-
-// TODO allow turning some skins on and off?
 $wgDefaultSkin = $wikiInfo->getSetting('wgDefaultSkin');
 if( $wgDefaultSkin === null ) {
     // Fallback to vector
     $wgDefaultSkin = "vector";
 }
 
+wfLoadSkin( 'Vector' );
+wfLoadSkin( 'Timeless' );
+if( $wgDefaultSkin === 'modern' ) {
+    wfLoadSkin( 'Modern' );
+}
+wfLoadSkin( 'MinervaNeue' );
+
+// TODO allow turning some skins on and off?
 #######################################
 ## ---        Extensions         --- ##
 #######################################
