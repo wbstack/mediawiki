@@ -28,6 +28,11 @@
     },
     "settings": [
       {
+        "name": "wwLogoSvg",
+        "value": "/w/resources/assets/wikibase_cloud.svg?svg-logo-fixture",
+        "wiki_id": 2
+      },
+      {
         "id": 1,
         "name": "wgSecretKey",
         "value": "somesecret",
