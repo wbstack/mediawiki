@@ -188,6 +188,10 @@ if( $wgLogos["1x"] === null ) {
     ];
 }
 $wgLogos["icon"] = $wgLogos["1x"];
+if ( $wikiInfo->getSetting('wwLogoSvg') !== null ) {
+    $wgLogos["svg"] = $wikiInfo->getSetting('wwLogoSvg');
+    $wgLogos["icon"] = $wgLogos["svg"];
+}
 
 // Favicon
 $wgFavicon = $wikiInfo->getSetting('wgFavicon');
