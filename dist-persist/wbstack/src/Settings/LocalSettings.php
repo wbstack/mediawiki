@@ -187,6 +187,7 @@ if( $wgLogos["1x"] === null ) {
         "1x" => "/w/resources/assets/wikibase_cloud.svg",
     ];
 }
+$wgLogos["icon"] = $wgLogos["1x"];
 
 // Favicon
 $wgFavicon = $wikiInfo->getSetting('wgFavicon');
