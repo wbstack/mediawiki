@@ -3,7 +3,8 @@
 		"authors": [
 			"Araceletorres",
 			"Eduardoaddad",
-			"Felipe L. Ewald"
+			"Felipe L. Ewald",
+			"EGobi"
 		]
 	},
 	"apihelp-jsonconfig-summary": "Permite acesso direto ao subsistema JsonConfig.",
@@ -19,5 +20,5 @@
 	"apihelp-jsondata-example-1": "Obtenha o conteúdo JSON da página Sample.tab, localizada no idioma do usuário",
 	"apihelp-jsondata-example-2": "Obtenha o conteúdo JSON da página Sample.tab localizada em francês",
 	"apierror-jsonconfig-paramrequired": "O parâmetro <var>$1</var> é necessário para este comando.",
-	"apierror-jsonconfig-badtitle": "A página especificada pelos <var>namespace</var> e <var>title</var> é inválida ou não está registrada na configuração do JsonConfig."
+	"apierror-jsonconfig-badtitle": "A página especificada pelos parâmetros <var>namespace</var> e <var>title</var> é inválida ou não está registrada na configuração do JsonConfig."
 }

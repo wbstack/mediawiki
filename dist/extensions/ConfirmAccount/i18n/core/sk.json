@@ -3,13 +3,17 @@
 		"authors": [
 			"Helix84",
 			"Teslaton",
-			"Vlad5250"
+			"Vlad5250",
+			"Wizzard"
 		]
 	},
 	"confirmaccount-newrequests": "Momentálne {{PLURAL:$1|je jedna otvorená|sú '''$1''' otvorené|je '''$1''' otvorených}} [[Special:ConfirmAccounts|{{PLURAL:$1|žiadosť o účet|žiadosti o účet|žiadostí o účet}}]]. '''Vyžaduje sa vaša pozornosť!'''",
 	"requestaccount-loginnotice": "Aby ste dostali používateľský účet, musíte '''[[Special:RequestAccount|oň požiadať]]'''.",
+	"action-confirmaccount": "posudzovať a schvaľovať účty",
 	"right-confirmaccount": "Zobraziť [[Special:ConfirmAccounts|front žiadostí o účet]]",
+	"right-confirmaccount-notify": "Dostávať e-mailové upozornenia na novo schválené žiadosti o účet",
 	"action-requestips": "zobraziť IP adresu žiadateľa pri spracovaní žiadostí o účet",
 	"right-requestips": "Zobraziť IP adresu žiadateľa pri spracovaní žiadostí o účet",
+	"action-lookupcredentials": "zobraziť poverenia používateľov",
 	"right-lookupcredentials": "Zobraziť [[Special:UserCredentials|údaje používateľa]]"
 }

@@ -8,7 +8,8 @@
 			"Rail",
 			"Tar Lócesilion",
 			"WTM",
-			"Woytecr"
+			"Woytecr",
+			"PanWor"
 		]
 	},
 	"templatesandbox": "Brudnopis do szablonów",
@@ -19,7 +20,7 @@
 	"templatesandbox-prefix-label": "Prefiks do brudnopisu:",
 	"templatesandbox-page-label": "Przetestuj stronę:",
 	"templatesandbox-revid-label": "Przetestuj wersję:",
-	"templatesandbox-text-label": "Przetestuj wikitekst:",
+	"templatesandbox-text-label": "Przetestuj wikikod:",
 	"templatesandbox-submit": "Podgląd",
 	"templatesandbox-title-output": "Brudnopis do szablonów: $1",
 	"templatesandbox-editform-legend": "Podgląd strony z tym szablonem",
@@ -30,7 +31,7 @@
 	"templatesandbox-invalid-title": "Wprowadzony tytuł jest nieprawidłowy.",
 	"templatesandbox-title-not-exists": "Podany tytuł nie istnieje.",
 	"templatesandbox-revision-not-exists": "Wybrana wersja nie istnieje.",
-	"templatesandbox-revision-no-content": "Podana przez ciebie wersja nie zawiera żadnej treści, lub nie posiadasz uprawnień do jej przeglądania.",
+	"templatesandbox-revision-no-content": "Podana przez Ciebie wersja nie zawiera żadnej treści lub nie masz uprawnień do jej przeglądania.",
 	"templatesandbox-invalid-prefix": "Podany prefiks do brudnopisu nie istnieje.",
 	"templatesandbox-prefix-not-local": "Podany prefiks do brudnopisu nie jest lokalny.",
 	"templatesandbox-page-or-revid": "Musisz wpisać nazwę strony albo numer ID wersji.",

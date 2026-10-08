@@ -4,13 +4,15 @@
 			"Helix84",
 			"Luky001",
 			"TomášPolonec",
-			"Vlad5250"
+			"Vlad5250",
+			"Wizzard"
 		]
 	},
 	"deletebatch": "Zmazanie viacerých stránok",
 	"deletebatch-desc": "[[Special:DeleteBatch|Zmazanie viacerých stránok]]",
 	"deletebatch-help": "Hromadné zmazanie stránok.\nMôžete buď vykonať jedno zmazanie, alebo zmazať stránky uvedené v súbore.\nVyberte používateľa, ktorý sa zobrazí v záznamoch zmazania.\nNahraný súbor by mal na každom riadku obsahovať názov stránky a nepovinne aj dôvod zmazania oddelený znakom „|”.",
 	"deletebatch-caption": "Zoznam stránok:",
+	"deletebatch-default-reason": "Predvolený dôvod zmazania:",
 	"deletebatch-title": "Zmazať dávku",
 	"deletebatch-link-back": "Môžete sa vrátiť späť na špeciálnu stránku",
 	"deletebatch-as": "Spustiť skript ako:",
@@ -29,5 +31,8 @@
 	"deletebatch-no-page": "Prosím, zadajte aspoň jednu stránku, ktorá sa má zmazať ALEBO súbor obsahujúci zoznam stránok.",
 	"deletebatch-system-username": "Skript na zmazanie stránok",
 	"action-deletebatch": "dávkové mazanie stránok",
-	"right-deletebatch": "Dávkové mazanie stránok"
+	"right-deletebatch": "Dávkové mazanie stránok",
+	"action-deletebatch-spoof": "hromadne mazať stránky ako „Delete page script“",
+	"right-deletebatch-spoof": "Hromadne mazať stránky ako „Delete page script“",
+	"deletebatch-deleting-file-only": "Stránka s popisom súboru $1 neexistuje; maže sa iba samotný súbor.\nTáto akcia sa nezaznamená."
 }

@@ -47,7 +47,7 @@
 	"twocolconflict-split-select-all": "모두 선택",
 	"twocolconflict-split-tour-dialog-dot-message": "유용한 힌트를 얻으려면 빛나는 파란색 점을 클릭하세요.",
 	"twocolconflict-split-tour-dialog-header": "충돌되는 판 합치기",
-	"twocolconflict-split-tour-dialog-message": "유감스럽게도 당신이 편집하시는 동안 다른 사용자가 같은 문서를 편집한 후에 먼저 게시했습니다.\n\n걱정하지 마세요, 당신의 기여는 사라지지 않습니다! 두 개의 판을 검토하고 합병해 주세요. 필요한 경우, 선택된 문구를 편집할 수 있습니다. {{int:publishchanges}}를 클릭하면 선택된 상자의 문구만 저장됩니다.",
+	"twocolconflict-split-tour-dialog-message": "유감스럽게도 당신이 편집하시는 동안 다른 사용자가 같은 문서를 편집한 후에 먼저 게시했습니다.\n\n걱정하지 마세요, 당신의 기여는 사라지지 않습니다! 두 개의 판을 검토하고 병합해 주세요. 필요한 경우, 선택된 문구를 편집할 수 있습니다. {{int:publishchanges}}를 클릭하면 선택된 상자의 문구만 저장됩니다.",
 	"twocolconflict-split-tour-dialog-btn-text": "병합 시작",
 	"twocolconflict-split-tour-popup-btn-text": "알겠습니다.",
 	"twocolconflict-split-tour-popup1-header": "차이가 줄 단위로 표시됩니다.",

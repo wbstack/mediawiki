@@ -7,7 +7,8 @@
 			"KlaudiuMihaila",
 			"Mihai",
 			"Minisarm",
-			"Stelistcristi"
+			"Stelistcristi",
+			"Vellion Eagle"
 		]
 	},
 	"confirmaccounts": "Confirmă cererile de conturi",
@@ -44,7 +45,7 @@
 	"confirmaccount-withcv": "(CV atașat)",
 	"confirmaccount-rational": "Motiv oferit aplicantului:",
 	"confirmaccount-noreason": "(niciunul)",
-	"confirmaccount-create": "Acceptare (crează cont)",
+	"confirmaccount-create": "Acceptare (creează cont)",
 	"confirmaccount-deny": "Respinge (delist)",
 	"confirmaccount-hold": "Reține",
 	"confirmaccount-spam": "Spam (nu trimite e-mail)",

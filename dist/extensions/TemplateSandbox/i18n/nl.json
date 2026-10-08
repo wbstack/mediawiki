@@ -8,7 +8,8 @@
 			"Romaine",
 			"Siebrand",
 			"Sjoerddebruin",
-			"Southparkfan"
+			"Southparkfan",
+			"Sumurai8"
 		]
 	},
 	"templatesandbox": "Sjabloonzandbak",
@@ -28,6 +29,7 @@
 	"templatesandbox-preview": "Voorvertoning van $2",
 	"templatesandbox-previewnote": "'''Vergeet niet dat dit slechts een voorvertoning is van [[:$1]].'''\nUw wijzigingen zijn nog niet opgeslagen!",
 	"templatesandbox-invalid-title": "De opgegeven pagina is onjuist.",
+	"templatesandbox-cannot-view-title": "U hebt geen toegang tot de door u opgegeven titel.",
 	"templatesandbox-title-not-exists": "De titel die u hebt opgegeven bestaat niet.",
 	"templatesandbox-revision-not-exists": "De versie die u hebt opgegeven bestaat niet.",
 	"templatesandbox-revision-no-content": "De opgegeven versie heeft geen inhoud, of u hebt geen toestemming om deze te bekijken.",
@@ -37,10 +39,12 @@
 	"templatesandbox-fail-post": "<em>Vanwege het verlies van sessiegegevens is de voorvertoning verborgen als voorzorgsmaatregel tegen JavaScript-aanvallen.</em> \n\n<strong>Als dit een legitieme poging tot voorvertoning is, probeer het dan opnieuw.</strong> \nAls het nog steeds niet werkt, probeer u dan [[Special:UserLogout|af te melden]] en u opnieuw aan te melden.",
 	"templatesandbox-fail-post-anon": "<em>Omdat u niet bent aangemeld, is de voorvertoning verborgen uit voorzorg tegen JavaScript-aanvallen.</em> \n\n<strong>Als dit een legitieme poging tot voorvertoning is, [[Special:UserLogin|meld u dan aan]] en probeer het opnieuw.</strong>",
 	"templatesandbox-anon-limited-preview": "De voorvertoning van JavaScript- en CSS-wijzigingen is niet mogelijk als u niet bent aangemeld. Als u een voorvertoning van dergelijke wijzigingen wilt bekijken, kunt u zich [[Special:UserLogin|aanmelden]] en het opnieuw proberen.",
+	"templatesandbox-js-css-limited-preview": "De voorbeeldweergave van JavaScript- en CSS-wijzigingen is uitgeschakeld voor kladblok-voorvoegsels die niet toebehoren aan de huidige gebruiker.",
 	"templatesandbox-editform-need-template": "Geef een sjabloonnaam op om een voorvertoning van dit sjabloon met een andere pagina te bekijken.",
 	"templatesandbox-editform-need-title": "Om een andere pagina met dit sjabloon te bekijken, moet een paginanaam opgegeven worden.",
 	"templatesandbox-editform-invalid-template": "De sjabloonnaam die u hebt opgegeven is onjuist.",
 	"templatesandbox-editform-invalid-title": "De opgegeven titel voor de voorvertoning is onjuist.",
+	"templatesandbox-editform-cannot-view-title": "U hebt geen toegang tot de titel die u voor de voorvertoning hebt opgegeven.",
 	"templatesandbox-editform-title-not-exists": "De opgegeven titel voor de voorvertoning bestaat niet.",
 	"templatesandbox-failed-replace-section": "Het is niet gelukt om een sectie van de bestaande pagina te vervangen."
 }

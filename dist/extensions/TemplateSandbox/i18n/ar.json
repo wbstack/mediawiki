@@ -27,6 +27,7 @@
 	"templatesandbox-preview": "معاينة $2",
 	"templatesandbox-previewnote": "'''تذكر أن هذه مجرد معاينة لـ«[[:$1]]»،'''\nلم يتم حفظ تغييراتك بعد!",
 	"templatesandbox-invalid-title": "العنوان الذي حددته غير صالح.",
+	"templatesandbox-cannot-view-title": "لا يُسمح لك بعرض العنوان الذي حددته.",
 	"templatesandbox-title-not-exists": "العنوان الذي حددته غير موجود.",
 	"templatesandbox-revision-not-exists": "المراجعة التي حددتها غير موجودة.",
 	"templatesandbox-revision-no-content": "المراجعة التي حددتها ليس لها محتوى ، أو ليس لديك الإذن لعرضها.",
@@ -36,10 +37,12 @@
 	"templatesandbox-fail-post": "<em>بسبب فقدان بيانات الجلسات، يتم إخفاء المعاينة كإجراء وقائي ضد هجمات جافا سكريبت.</em>\n\n<strong>إذا كانت هذه محاولة مشروعة للمعاينة، فتُرجَى المحاولة مرة أخرى.</strong>\nإذا كانت لا تزال لا تعمل، فحاول [[Special:UserLogout|تسجيل الخروج]] وتسجيل الدخول مرة أخرى.",
 	"templatesandbox-fail-post-anon": "<em>بسبب فقدان بيانات الجلسات، يتم إخفاء المعاينة كإجراء وقائي ضد هجمات جافا سكريبت.</em>\n\n<strong>إذا كانت هذه محاولة مشروعة للمعاينة، فالرجاء [[Special:UserLogin|تسجيل الدخول]] والمحاولة مرة أخرى.</strong>",
 	"templatesandbox-anon-limited-preview": "يتم تعطيل معاينة تغييرات جافا سكريبت وCSS عند عدم تسجيل الدخول; إذا كنت تريد معاينة هذه التغييرات، فيُرجَى [[Special:UserLogin|تسجيل الدخول]] وإعادة المحاولة.",
+	"templatesandbox-js-css-limited-preview": "تم تعطيل معاينة تغييرات JavaScript و CSS لبادئات sandbox التي لا تنتمي إلى المستخدم الحالي.",
 	"templatesandbox-editform-need-template": "يجب تعيين اسم القالب المراد معاينته مع هذا القالب.",
 	"templatesandbox-editform-need-title": "يجب تعيين اسم الصفحة المراد معاينتها مع هذا القالب.",
 	"templatesandbox-editform-invalid-template": "اسم القالب الذي حددته غير صالح.",
 	"templatesandbox-editform-invalid-title": "العنوان الذي حددته للمعاينة غير صالح.",
+	"templatesandbox-editform-cannot-view-title": "لا يُسمح لك بعرض العنوان الذي حددته للمعاينة.",
 	"templatesandbox-editform-title-not-exists": "العنوان الذي حددته للمعاينة غير موجود.",
 	"templatesandbox-failed-replace-section": "فشل استبدال قسم من الصفحة الحالية."
 }

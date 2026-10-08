@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"شاه زمان پټان"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "د [[Special:TemplateSandbox]] په څېر د کينډۍ ازمون‌مخ مختاړی.",
+	"templatesandbox-apihelp-title": "د مخ د منځپانگې پرځای چې دلته نومول شوی، د var>$1templatesandboxtext</var> کارولو سره مخ ټوټه کړئ.",
+	"templatesandbox-apihelp-text": "د دې مخ منځپانگې په کارولو سره د <var>$1templatesandboxtitle</var> په نوم نومول شوی مخ ټوټه کړئ.",
+	"templatesandbox-apihelp-contentmodel": "د <var>$1templatesandboxtext</var> منځپانگيزه رغبېلگه.",
+	"templatesandbox-apihelp-contentformat": "د <var>$1templatesandboxtext</var> منځپانگيزه بڼه",
+	"templatesandbox-apierror-titleandtext": "د  <var>$1templatesandboxtitle</var> او <var>$1templatesandboxtext</var ارزښتونه بايد دواړه مشخص شي يا دواړه پرېښودل شي."
+}

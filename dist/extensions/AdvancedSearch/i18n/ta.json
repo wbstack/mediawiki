@@ -2,10 +2,12 @@
 	"@metadata": {
 		"authors": [
 			"Balajijagadesh",
-			"Fahimrazick"
+			"Fahimrazick",
+			"Sree1959"
 		]
 	},
 	"advancedsearch-options-pane-head": "மேம்பட்ட தேடல்:",
+	"advancedsearch-options-pane-preview-list": "தற்போது பயன்படுத்தப்படும் தேடல் சொற்கள்",
 	"advancedsearch-optgroup-text": "பக்க உரையில் தேடு",
 	"advancedsearch-optgroup-structure": "கட்டமைப்பு",
 	"advancedsearch-optgroup-files": "கோப்புகள் மற்றும் படங்கள்",
@@ -15,11 +17,18 @@
 	"advancedsearch-field-or": "இதிலுள்ள ஏதோவொரு வார்த்தைகள்",
 	"advancedsearch-field-not": "இந்த வார்த்தைகள் இல்லை",
 	"advancedsearch-field-subpageof": "இந்த பக்கத்தின் துணைப்பகுப்புகள்",
+	"advancedsearch-field-intitle": "பக்கத் தலைப்பின் உள்ளடக்கம்",
 	"advancedsearch-field-deepcategory": "இந்த பகுப்பிலுள்ள பக்கங்கள்",
 	"advancedsearch-field-hastemplate": "இந்த வார்ப்புருக்களைக் கொண்ட பக்கங்கள்",
 	"advancedsearch-field-inlanguage": "இந்த மொழியிலுள்ள பக்கங்கள்",
 	"advancedsearch-field-filetype": "கோப்பு வகை",
+	"advancedsearch-field-filew": "கோப்பின் அகலம் படவணுக்களில்",
+	"advancedsearch-field-fileh": "கோப்பின் உயரம் படவணுக்களில்",
 	"advancedsearch-field-sort": "வரிசைபடுத்தும் முறை",
+	"advancedsearch-field-preview-sort": "$1 ஆல் வரிசைப்படுத்துக",
+	"advancedsearch-help-general-instruction": "$1 க்கு விரிவான செயற்கட்டளைகள்",
+	"advancedsearch-help-phrase": ";விளக்கம்\n:குறிப்பிட்ட எழுத்துத் தொடரைத் தேடுகிறது. நிறுத்தற்குறிகள் புறக்கணிக்கப்படுகின்றன.\n;கவனிக்க வேண்டியவை\n:(மேற்கோள் குறிகளைப் பயன்படுத்தும்போது மட்டுமே இது பொருந்தும்; கீழே உள்ள உதாரணத்தைப் பார்க்கவும்)\n:* தேடல் சொற்றொடர்களை காற்புள்ளி அல்லது இடைவெளி மூலம் பிரிக்கவும்; எ.கா. <code>\"காலை வணக்கம்\"</code>, <code>\"வணக்கம் நண்பரே!\"</code>.\n:* நிறுத்தற்குறிகள் மற்றும் எழுத்து-எண் அல்லாத பிற குறியீடுகள் (முக்காற்புள்ளி மற்றும் காற்புள்ளி தவிர) புறக்கணிக்கப்படும்.\n:* தேடலில் பெரிய/சிறிய எழுத்து வேறுபாடு பார்க்கப்படாது.\n:* சொற்களின் வேர்ச் சொல் வடிவம் பயன்படுத்தப்படாது.\n;உதவிப் பக்கம்\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers சொற்கள், சொற்றொடர்கள் மற்றும் மாற்றிகள்]\n;சாதாரண தேடலில் இணையான சொற்றொடரியல்\n:மேற்கோள் குறிகளுக்குள் உள்ள சொற்கள்; உதாரணமாக <code>\"தொடக்கத்திலிருந்தே தொடங்குங்கள்.\"</code>.",
+	"advancedsearch-help-or": ";விளக்கம்\n:தேடல் சொற்களில் குறைந்தது ஒன்றாவது அப்பக்கத்தில் இடம்பெற்றிருக்க வேண்டும்.\n;உதவிப் பக்கம்\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers சொற்கள், சொற்றொடர்கள் மற்றும் மாற்றிகள்]\n;சாதாரண தேடலில் இதற்கு இணையான சொற்றொடரியல்\n:<code>மடிக்கணினி OR கையேட்டு கணினி</code> என்பது போல, சொற்களுக்கு இடையே <code>OR</code> கொண்ட அமைப்பு.",
 	"advancedsearch-inlanguage-default": "மொழியைத் தெரிவு செய்",
 	"advancedsearch-filetype-section-types": "பொதுவான கோப்பு வகைகள்",
 	"advancedsearch-filetype-section-image": "பட அமைவுகள்",

@@ -23,6 +23,7 @@
 	"templatesandbox-preview": "$2 üçün önbaxış",
 	"templatesandbox-previewnote": "Bunun \"[[:$1]]\" səhifəsinin sınaq görüntüsü olduğunu unutmayın.\nDəyişiklikləriniz hələ yayımlanmayıb!",
 	"templatesandbox-invalid-title": "Göstərdiyiniz başlıq etibarsızdır.",
+	"templatesandbox-cannot-view-title": "Göstərdiyiniz başlığı görə bilmə icazəniz yoxdur.",
 	"templatesandbox-title-not-exists": "Göstərdiyiniz başlıq mövcud deyil.",
 	"templatesandbox-revision-not-exists": "Göstərdiyiniz versiya mövcud deyil.",
 	"templatesandbox-revision-no-content": "Göstərdiyiniz versiyanın məzmunu yoxdur və ya sizin ona baxmaq icazəniz yoxdur.",
@@ -32,10 +33,12 @@
 	"templatesandbox-fail-post": "<em>Sessiya məlumatlarının itirilməsi səbəbindən, JavaScript hücumlarına qarşı ehtiyat tədbiri olaraq önizləmə gizlədilir.</em> \n\n<strong>Bu qanuni bir önizləmə cəhdidirsə, yenidən cəhd edin.</strong> \nƏgər hələ də işləmirsə, [[Special:UserLogout|çıxış edib]] və yenidən daxil olmağa cəhd edin.",
 	"templatesandbox-fail-post-anon": "<em>Sayta giriş etmədiyiniz önizləmə JavaScript hücumlarına qarşı ehtiyat tədbiri olaraq gizlədilir.</em> \n\n<strong>Əgər bu problemsiz önizləmə cəhdidirsə, zəhmət olmasa, [[Special:UserLogin|daxil olun]] və yenidən cəhd edin.</strong>",
 	"templatesandbox-anon-limited-preview": "Daxil olmadıqda JavaScript və CSS dəyişikliklərinin önizləməsi qeyri-aktiv edilir. Əgər belə dəyişikliklərə önizləmə lazımdırsa, [[Special:UserLogin|daxil olun]] və yenidən cəhd edin.",
+	"templatesandbox-js-css-limited-preview": "JavaScript və CSS dəyişikliklərinin önizləməsi cari istifadəçiyə aid olmayan qaralama prefiksləri üçün deaktivdir.",
 	"templatesandbox-editform-need-template": "Bu şablonla başqa səhifəyə baxmaq üçün şablon adı göstərilməlidir.",
 	"templatesandbox-editform-need-title": "Bu şablonla başqa səhifəyə baxmaq üçün səhifə başlığı göstərilməlidir.",
 	"templatesandbox-editform-invalid-template": "Göstərdiyiniz şablonun adı etibarsızdır.",
 	"templatesandbox-editform-invalid-title": "Önizləmə üçün göstərdiyiniz başlıq yanlışdır.",
+	"templatesandbox-editform-cannot-view-title": "Önizləmə üçün göstərdiyiniz başlığı görə bilməzsiniz.",
 	"templatesandbox-editform-title-not-exists": "Önizləmə üçün qeyd etdiyiniz başlıq mövcud deyil.",
 	"templatesandbox-failed-replace-section": "Mövcud səhifənin bölməsini əvəz etmək alınmadı."
 }

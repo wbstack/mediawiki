@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"AhmedG612"
+		]
+	},
+	"apihelp-jsonconfig-summary": "Waxay oggolaanaysaa gelitaan toos ah oo loo helo nidaamka hoose ee JsonConfig.",
+	"apihelp-jsonconfig-param-command": "Waa kuwee tallaabada hoosaadka lagu samaynayo JsonConfig:",
+	"apihelp-jsonconfig-paramvalue-command-status": "Waxay muujinaysaa qaabaynta JsonConfig.",
+	"apihelp-jsonconfig-paramvalue-command-reset": "Waxay ka nadiifisaa kaydka qaabaymaha. Waxay u baahan tahay halbeegga $1title iyo oggolaanshaha jsonconfig-flush.",
+	"apihelp-jsonconfig-paramvalue-command-reload": "Waxay dib uga soo rartaa kaydka qaabaymaha oo waxay ku kaydisaa kaydka. Waxay u baahan tahay halbeegga $1title iyo oggolaanshaha jsonconfig-reset.",
+	"apihelp-jsonconfig-param-namespace": "Lambarka magaca meelaha ee cinwaanka la farsamaynayo.",
+	"apihelp-jsonconfig-param-title": "Cinwaanka la farsamaynayo iyada oo aan lahayn hordhaca magaca meelaha.",
+	"apihelp-jsonconfig-param-content": "Marka $1command=reload la isticmaalo, isticmaal nuxurkan beddelkiisa.",
+	"apihelp-jsonconfig-example-1": "Muuji qaabeynta",
+	"apihelp-jsonconfig-example-2": "Dib u dejin [[Data:Brazil/Amazonas.map]]",
+	"apihelp-jsonconfig-example-3": "Dib u soo rar [[Data:Brazil/Amazonas.map]]",
+	"apihelp-jsondata-summary": "Soo celi xogta JSON ee la turjumay.",
+	"apihelp-jsondata-param-title": "Cinwaanka la helayo. Sida caadiga ah waxaa loo qaataa in magaca meeluhu yahay \"Data:\".",
+	"apihelp-jsondata-example-1": "Hel nuxurka JSON ee bogga Sample.tab, oo lagu turjumay luuqadda isticmaalaha",
+	"apihelp-jsondata-example-2": "Hel nuxurka JSON ee bogga Sample.tab oo lagu turjumay Faransiis",
+	"apierror-jsonconfig-paramrequired": "Halbeegga <var>$1</var> ayaa looga baahan yahay amarkan.",
+	"apierror-jsonconfig-badtitle": "Bogga lagu qeexay halbeegyada <var>namespace</var> iyo <var>title</var> waa mid aan sax ahayn ama aan lagu diiwaangelin qaabaynta JsonConfig."
+}

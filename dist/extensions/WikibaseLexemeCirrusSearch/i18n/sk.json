@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Wizzard"
+		]
+	},
+	"wikibaselexemecirrus-desc": "Rozšírenie WikibaseLexeme na využívanie funkcionality CirrusSearch",
+	"wikibaselexemecirrus-rescore-profile-prefix": "Profil prehodnocovania pre vyhľadávanie podľa predpony (dopĺňanie)"
+}

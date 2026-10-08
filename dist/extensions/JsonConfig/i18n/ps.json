@@ -12,8 +12,16 @@
 	"jsonconfig-edit-action-apply": "پلي‌کول",
 	"jsonconfig-edit-action-cancel": "ناگارل",
 	"jsonconfig-edit-button-label": "د لښتيال په توگه سمول",
+	"jsonconfig-edit-dialog-error": "د لښتيال په توگه نشي سمېدای: $1",
+	"jsonconfig-edit-dialog-error-data-invalid": "اومتوک له جوړښتي‌گارليک سره سمون نه خوري",
+	"jsonconfig-edit-dialog-error-field-name-missing": "هر ډگر بايد يو نوم ولري",
+	"jsonconfig-edit-dialog-title": "جی‌اېس‌او‌اېن سمول",
+	"jsonconfig-err-array": "\"$1\" ارزښت بايد يو لړليک وي، د بېلگې په توگه <kbd>[\"۱ارزښت\", \"۲ارزښت\", ...]</kbd>",
 	"jsonconfig-optional-field": "(اختياري)",
 	"jsonconfig-type-abbr-invalid": "(؟)",
 	"jsonconfig-type-name-invalid": "ناسم",
-	"jsonconfig-type-name-number": "شمېره"
+	"jsonconfig-type-name-string": "لړۍ",
+	"jsonconfig-type-name-localized": "ځايي شوی",
+	"jsonconfig-type-name-number": "شمېره",
+	"jsonconfig-license-name-GeoNutzV": "د جرمني د ځمک اومتوک منښتليک"
 }

@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nemoralis"
+		]
+	},
+	"wikibaselexemecirrus-desc": "CirrusSearch funksiyasından istifadə üçün WikibaseLexeme uzantısı",
+	"wikibaselexemecirrus-rescore-profile-prefix": "Prefiks (tamamlama) axtarışı üçün yenidən hesablama profili"
+}

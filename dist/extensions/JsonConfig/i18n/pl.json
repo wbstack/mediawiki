@@ -8,7 +8,8 @@
 			"Railfail536",
 			"SemanticPioneer",
 			"Woytecr",
-			"IOIOI"
+			"IOIOI",
+			"PanWor"
 		]
 	},
 	"nstab-data": "Dane",
@@ -28,7 +29,7 @@
 	"jsonconfig-edit-dialog-error-schema-missing": "Własność JSON <code>schema</code> nie jest obecna lub nie jest tablicą",
 	"jsonconfig-edit-dialog-title": "Edycja JSON",
 	"jsonconfig-err-array": "Parametr „$1” musi być listą, np. <kbd>[\"wartość1\", \"wartość2\", …]</kbd>",
-	"jsonconfig-err-array-count": "Lista „$1” posiada $2 {{PLURAL:$2|wartość|wartości}}, lecz musi posiadać $3 {{PLURAL:$3|wartość|wartości}}, taką samą liczbę wartości co „$4”",
+	"jsonconfig-err-array-count": "Lista „$1” zawiera $2 {{PLURAL:$2|wartość|wartości}}, lecz musi zawierać $3 {{PLURAL:$3|wartość|wartości}}, taką samą liczbę wartości co „$4”",
 	"jsonconfig-err-array-expected": "Wartość w „$1” powinna być listą otoczoną nawiasami […]",
 	"jsonconfig-err-assoc-array": "Parametr „$1” musi być tablicą asocjacyjną (słownikiem), np. <kbd>{\"klucz\": \"wartość\", … }</kbd>",
 	"jsonconfig-err-bad-header-string": "Nagłówek „$1” może zawierać wyłącznie litery, cyfry i znak podkreślenia oraz nie może rozpoczynać się cyfrą.",
@@ -57,7 +58,7 @@
 	"jsonconfig-type-name-boolean": "wartość logiczna",
 	"jsonconfig-use-category": "Strony używające rozszerzenia JsonConfig",
 	"jsonconfig-license": "Dane dostępne w ramach licencji $1.",
-	"jsonconfig-license-not-set": "Edytując tę stronę zgadzasz się na publikowanie twojego wkładu zgodnie z licencją podaną w polu <code>licence</code>.",
+	"jsonconfig-license-not-set": "Edytując tę stronę, zgadzasz się na publikowanie Twojego wkładu zgodnie z licencją podaną w polu <code>licence</code>.",
 	"jsonconfig-license-name-CC0-1.0": "Creative Commons Zero",
 	"jsonconfig-license-name-dl-de-zero-2.0": "Licencja na dane Niemcy - Zero - wersja 2.0",
 	"jsonconfig-license-name-dl-de-by-1.0": "Licencja na dane Niemcy - uznanie autorstwa - wersja 1.0",
@@ -65,8 +66,8 @@
 	"jsonconfig-license-name-GeoNutzV": "Licencja Geo Data Niemcy",
 	"jsonconfig-license-copyrightwarning": "Publikując zmiany, akceptujesz nasze [https://foundation.wikimedia.org/wiki/Terms_of_Use/pl Warunki użytkowania] i nieodwołalnie zgadzasz się na udostępnienie swojego wkładu na licencji [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
 	"jsonconfig-license-copyrightwarning-license-unset": "Publikując zmiany, zgadzasz się na udostępnienie swojego wkładu zgodnie z licencją określoną w polu <code>licence</code>.",
-	"jsonconfig-license-notice": "'''Uwaga:''' Edytując tę stronę zgadzasz się na publikowanie twojego wkładu zgodnie z zasadami licencji [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
-	"jsonconfig-license-notice-license-unset": "'''Uwaga:''' Edytując tę stronę zgadzasz się na publikowanie twojego wkładu zgodnie z licencją podaną w polu <code>licence</code>.",
+	"jsonconfig-license-notice": "'''Uwaga:''' Edytując tę stronę, zgadzasz się na publikowanie Twojego wkładu zgodnie z zasadami licencji [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-notice-license-unset": "'''Uwaga:''' Edytując tę stronę, zgadzasz się na publikowanie Twojego wkładu zgodnie z licencją podaną w polu <code>licence</code>.",
 	"right-jsonconfig-flush": "Zmienianie JsonConfig przez API",
 	"action-jsonconfig-flush": "zmieniania JsonConfig przez API",
 	"jsonconfig-blocked-page-creation": "Tytuł strony, który podano, nie pasuje do żadnych wzorów skonfigurowanych dla rozszerzenia JSONConfig dla tej wiki."

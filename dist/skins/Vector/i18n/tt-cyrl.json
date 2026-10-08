@@ -19,7 +19,7 @@
 	"vector-opt-out": "Иске дизайнга кайту",
 	"vector-languages": "Телләр",
 	"vector-language-button-label": "{{PLURAL:$1|$1 тел}}",
-	"vector-no-language-button-label": "Телләр өстә",
+	"vector-no-language-button-label": "Телләр өстәү",
 	"vector-language-variant-switcher-label": "Телне алмаштыру",
 	"vector-action-addsection": "Яңа тема өстәү",
 	"vector-action-delete": "Бетерү",

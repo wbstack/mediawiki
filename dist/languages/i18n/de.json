@@ -134,7 +134,8 @@
 			"Talex42",
 			"IWL04",
 			"NguoiDungKhongDinhDanh",
-			"DraconicDark"
+			"DraconicDark",
+			"TigerZhang"
 		]
 	},
 	"sunday": "Sonntag",
@@ -4177,6 +4178,7 @@
 	"right-renameuser": "Benutzer umbenennen",
 	"renameuser-renamed-notice": "Dieser Benutzer wurde umbenannt.\nDas Umbenennungsprotokoll ist unten als Referenz angegeben.",
 	"log-unknown-action": "führte eine unbekannte Aktion „$2“ auf [[$1]] aus",
+	"log-unsafe-logentry": "(Dieser Logbucheintrag konnte nicht angezeigt werden, da seine Parameter unsichere serialisierte Daten enthalten.)",
 	"createacct-benefit-heading-temp-user": "Vielen Dank für deinen Beitrag zu {{SITENAME}}.\nErstelle ein Konto, um auf weitere Funktionen zuzugreifen.",
 	"createacct-benefit-subheading-temp-user": "{{SITENAME}} wird von Leuten wie dir erstellt. Mit einem Konto erhältst du eine dauerhafte und sichere Identität mit Zugriff auf Funktionen wie:",
 	"benefit-1-description": "Beobachtungslisten, mit denen du den Überblick über die Seiten behältst, die dich interessieren.",
@@ -4184,5 +4186,6 @@
 	"benefit-3-description": "Voreinstellungen, mit denen du dein Konto individuell gestalten kannst.",
 	"temp-user-unable-to-acquire": "Es ist nicht möglich, einen temporären Benutzernamen für das Konto zu erstellen. Bitte versuche es erneut.",
 	"table-of-contents-show-button-aria-label": "Inhaltsverzeichnis anzeigen",
-	"table-of-contents-hide-button-aria-label": "Inhaltsverzeichnis ausblenden"
+	"table-of-contents-hide-button-aria-label": "Inhaltsverzeichnis ausblenden",
+	"mypage-disallowed-action": "Aus Sicherheitsgründen kann die Aktion „$1“ auf der Seite Spezial:MyPage nicht verwendet werden."
 }

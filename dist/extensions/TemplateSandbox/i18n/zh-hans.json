@@ -31,6 +31,7 @@
 	"templatesandbox-preview": "$2的预览",
 	"templatesandbox-previewnote": "'''请记住这仅为[[:$1]]的预览。'''\n您的更改还未保存！",
 	"templatesandbox-invalid-title": "您指定的标题无效。",
+	"templatesandbox-cannot-view-title": "您无权查看您指定的标题。",
 	"templatesandbox-title-not-exists": "您指定的标题不存在。",
 	"templatesandbox-revision-not-exists": "您指定的修订版本不存在。",
 	"templatesandbox-revision-no-content": "您指定的修订版本没有内容，或者您没有查看它的权限。",
@@ -40,10 +41,12 @@
 	"templatesandbox-fail-post": "<em>由于会话数据丢失，预览被隐藏以防止JavaScript攻击。</em>\n\n<strong>如果这是合法的预览尝试，请再次重试。</strong>如果仍然不能工作，尝试[[Special:UserLogout|退出]]并重新登录。",
 	"templatesandbox-fail-post-anon": "<em>因为您没有登录，预览被隐藏以防止JavaScript攻击。</em>\n\n<strong>如果这是合法的预览尝试，请尝试[[Special:UserLogin|登录]]并重试。</strong>",
 	"templatesandbox-anon-limited-preview": "预览JavaScript和CSS更改在未登录的情况下会被禁用。如果您需要预览这类更改，请[[Special:UserLogin|登录]]并重试。",
+	"templatesandbox-js-css-limited-preview": "对于不属于当前用户的沙盒前缀，JavaScript和CSS更改预览功能已禁用。",
 	"templatesandbox-editform-need-template": "要预览另一个使用此模板的页面，您必须指定一个模板名。",
 	"templatesandbox-editform-need-title": "要预览另一个使用此模板的页面，您必须指定一个页面标题。",
 	"templatesandbox-editform-invalid-template": "您指定的模板名无效。",
 	"templatesandbox-editform-invalid-title": "您为预览指定的标题无效。",
+	"templatesandbox-editform-cannot-view-title": "您无权查看您指定预览的标题。",
 	"templatesandbox-editform-title-not-exists": "您为预览指定的标题不存在。",
 	"templatesandbox-failed-replace-section": "替换现存页面的章节失败。"
 }
