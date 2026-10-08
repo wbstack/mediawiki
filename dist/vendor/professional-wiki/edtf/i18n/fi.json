@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joquliina",
+			"Mediawikitranslator"
+		]
+	},
+	"edtf-maybe": "Ehkä $1",
+	"edtf-spring": "Kevät",
+	"edtf-summer": "Kesä",
+	"edtf-autumn": "Syksy",
+	"edtf-winter": "Talvi",
+	"edtf-january": "tammikuu",
+	"edtf-february": "helmikuu",
+	"edtf-march": "maaliskuu",
+	"edtf-april": "huhtikuu",
+	"edtf-may": "toukokuu",
+	"edtf-june": "kesäkuu",
+	"edtf-july": "heinäkuu",
+	"edtf-august": "elokuu",
+	"edtf-september": "Syyskuu",
+	"edtf-october": "lokakuu",
+	"edtf-november": "marraskuu",
+	"edtf-december": "joulukuu",
+	"edtf-local-time": "paikallinen aika",
+	"edtf-one-of-these": "Yksi näistä:",
+	"edtf-both-dates": "$1 ja $2",
+	"edtf-one-of-two-dates": "$1 tai $2",
+	"edtf-inline-all-of-these": "Kaikki näistä: $1",
+	"edtf-inline-one-of-these": "Yksi näistä: $1"
+}

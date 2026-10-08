@@ -1,4 +1,8 @@
 <?php
+
+require_once __DIR__ . '/wbstack/src/Shim/Web.php';
+
+
 /**
  * The web entry point for all %Action API queries, handled by ApiMain
  * and ApiBase subclasses.

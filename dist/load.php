@@ -1,4 +1,8 @@
 <?php
+
+require_once __DIR__ . '/wbstack/src/Shim/Web.php';
+
+
 /**
  * @see MediaWiki\ResourceLoader\ResourceLoaderEntryPoint
  *

@@ -1,4 +1,8 @@
 <?php
+
+require_once __DIR__ . '/wbstack/src/Shim/Web.php';
+
+
 /**
  * The web entry point for serving non-public images to logged-in users.
  *
