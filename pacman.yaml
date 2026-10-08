@@ -1094,7 +1094,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Wikibase
-  artifactUrl: https://github.com/wbstack/mediawiki-tars/raw/refs/heads/main/Wikibase-1791450923-REL1_43.tar.gz
+  artifactUrl: https://github.com/wbstack/mediawiki-tars/raw/a58eaf2a2c2324649985da8281e264a600d029fc/Wikibase-1782811529-REL1_43.tar.gz
   artifactLevel: 1
   destination: ./dist/extensions/Wikibase
   remove:
@@ -1163,7 +1163,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: VisualEditor
-  artifactUrl: https://github.com/wbstack/mediawiki-tars/raw/75e5dd93f94aba780665cdea3999ff3c5f58969a/VisualEditor-1782811647-REL1_43.tar.gz
+  artifactUrl: https://github.com/wbstack/mediawiki-tars/raw/bb53cbce38171e9f16899234540cfd20bed08125/VisualEditor-1791455651-REL1_43.tar.gz
   artifactLevel: 1
   destination: ./dist/extensions/VisualEditor
   remove:
