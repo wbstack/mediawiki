@@ -37,7 +37,8 @@
 			"Tymewalk",
 			"Phurlaughn",
 			"Recqy",
-			"Jlwoodwa"
+			"Jlwoodwa",
+			"Junie-dalrezna"
 		]
 	},
 	"sunday": "tenpo suno #7 pi tenpo esun",
@@ -1333,6 +1334,9 @@
 	"rcfilters-filter-bots-description": "ante lipu tan ilo",
 	"rcfilters-filter-humans-label": "jan (ilo ala)",
 	"rcfilters-filter-humans-description": "jan li ante",
+	"rcfilters-filter-reviewstatus-unpatrolled-label": "jan wawa li lukin ala e ni",
+	"rcfilters-filter-reviewstatus-manual-label": "jan wawa li lukin e ni",
+	"rcfilters-filter-reviewstatus-auto-label": "jan ilo wawa li lukin e ni",
 	"rcfilters-filtergroup-significance": "suli",
 	"rcfilters-filter-minor-label": "ante lili",
 	"rcfilters-filter-minor-description": "ante lili",
@@ -1779,7 +1783,7 @@
 	"sp-contributions-uploads": "pana sitelen",
 	"sp-contributions-logs": "pini pali",
 	"sp-contributions-talk": "toki",
-	"sp-contributions-userrights": "wawa {{GENDER:$1|jan}}",
+	"sp-contributions-userrights": "lawa pi wawa {{GENDER:$1|jan}}",
 	"sp-contributions-search": "o alasa e pali",
 	"sp-contributions-username": "nimi anu nanpa IP",
 	"sp-contributions-toponly": "o pana e pali pi tenpo ni taso",

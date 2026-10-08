@@ -14,7 +14,7 @@
 	"action-confirmaccount": "праверку і пацьверджаньне рахункаў",
 	"right-confirmaccount": "прагляд [[Special:ConfirmAccounts|запытаў на стварэньне рахункаў]]",
 	"action-requestips": "прагляд IP-адрасоў аўтараў запытаў пры апрацоўцы запытаных рахункаў",
-	"right-requestips": "прагляд IP-адрасоў з якіх паступалі запыты на стварэньне рахункаў",
+	"right-requestips": "прагляд IP-адрасоў зь якіх прыходзілі запыты на стварэньне рахункаў",
 	"action-lookupcredentials": "глядзець пасьведчаньні удзельніка",
 	"right-lookupcredentials": "прагляд [[Special:UserCredentials|пасьведчаньняў ўдзельнікаў]]"
 }

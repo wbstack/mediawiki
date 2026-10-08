@@ -8,7 +8,8 @@
 			"Rail",
 			"Railfail536",
 			"Tar Lócesilion",
-			"Woytecr"
+			"Woytecr",
+			"PanWor"
 		]
 	},
 	"twocolconflict": "Konflikt edycji w oparciu o akapity",
@@ -17,7 +18,7 @@
 	"twocolconflict-beta-feature-message": "Konflikt edycji oparty o akapity",
 	"twocolconflict-beta-feature-description": "Pokazuje przegląd konfliktu zapisu edycji w postaci widoku opartego o akapity.",
 	"twocolconflict-copy-action": "skopiuj pełen tekst",
-	"twocolconflict-copy-notice": "Pełen wikitekst twojej wersji został skopiowany do schowka (edycje wykonane poniżej nie zostały dołączone).",
+	"twocolconflict-copy-notice": "Pełen wikikod Twojej wersji został skopiowany do schowka (edycje wykonane poniżej nie zostały dołączone).",
 	"twocolconflict-copy-tab-action": "zobacz pełen tekst",
 	"twocolconflict-copy-tab-tooltip": "Zobacz pełen tekst swojej wersji (edycje wykonane poniżej nie są uwzględnione). Otwiera się w nowej karcie.",
 	"twocolconflict-copy-tooltip": "Skopiuj pełen tekst swojej wersji do schowka (edycje wykonane poniżej nie zostaną uwzględnione)",
@@ -69,9 +70,9 @@
 	"twocolconflict-split-selected-your-tooltip": "Twoja wersja została wybrana",
 	"twocolconflict-split-help-tooltip": "Pokaż pomoc",
 	"twocolconflict-split-tour-dialog-header-single-column-view": "Kolidujące posty",
-	"twocolconflict-split-tour-dialog-message-single-column-view": "Niestety, ktoś napisał komentarz w tej samej chwili, co ty. Przejrzyj te komentarze na następnej stronie. Jeśli to konieczne, zmodyfikuj swój i zmień ich kolejność.",
+	"twocolconflict-split-tour-dialog-message-single-column-view": "Niestety, ktoś napisał komentarz w tej samej chwili, co Ty. Przejrzyj te komentarze na następnej stronie. Jeśli to konieczne, zmodyfikuj swój i zmień ich kolejność.",
 	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Rozwiąż problem",
-	"twocolconflict-talk-header-overview": "Ktoś napisał komentarz w tej samej chwili, co ty. Przejrzyj poniższe komentarze i wybierz kolejność, w której mają zostać zapisane. W razie konieczności możesz zmienić swój tekst.",
+	"twocolconflict-talk-header-overview": "Ktoś napisał komentarz w tej samej chwili, co Ty. Przejrzyj poniższe komentarze i wybierz kolejność, w której mają zostać zapisane. W razie konieczności możesz zmienić swój tekst.",
 	"twocolconflict-talk-your": "Twój komentarz",
 	"twocolconflict-talk-conflicting": "Kolidujący komentarz",
 	"twocolconflict-talk-switch-tooltip": "Zmień kolejność",

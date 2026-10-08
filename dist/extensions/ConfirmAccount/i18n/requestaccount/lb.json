@@ -11,7 +11,7 @@
 	"requestaccount-login": "Benotzerkont ufroen",
 	"requestaccount-text": "'''Fëllt dëse Formulaire aus a schéckt e fort fir e Benotzerkont unzefroen'''.\n\nPasst op datt Dir d'éischt d'[[{{MediaWiki:Requestaccount-page}}|Konditioune vum Benotze]] gelies hutt éier Dir e Benotzerkont ufrot.\n\nWann Äre Benotzerkont ugeholl as, kritt Dir eng Informatioun per E-Mail an Dir kënnt Äre Benotzerkont  [[Special:UserLogin|benotzen]].",
 	"requestaccount-page": "{{ns:project}}:Notzungsbedingungen",
-	"requestaccount-dup": "'''Opgepasst: Dir sidd scho mat engem registréierte Benotzerkont ugemellt.'''",
+	"requestaccount-dup": "'''Opgepasst: Dir sidd scho mat engem registréierte Benotzerkont ageloggt.'''",
 	"requestaccount-leg-user": "Benotzerkont",
 	"requestaccount-leg-areas": "Haaptinteressen",
 	"requestaccount-leg-person": "Perséinlech Informatiounen",

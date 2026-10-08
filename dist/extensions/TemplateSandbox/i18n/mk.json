@@ -23,6 +23,7 @@
 	"templatesandbox-preview": "Преглед на $2",
 	"templatesandbox-previewnote": "'''Имајте предвид дека ова е само преглед на [[:$1]].'''\nПромените сè уште не се зачувани!",
 	"templatesandbox-invalid-title": "Наведениот наслов е неважечки.",
+	"templatesandbox-cannot-view-title": "Не ви е дозволено да го гледате насловот што го укажавте.",
 	"templatesandbox-title-not-exists": "Наведениот наслов не постои.",
 	"templatesandbox-revision-not-exists": "Наведената преработка не постои.",
 	"templatesandbox-revision-no-content": "Укажаната преработка нема содржина или немате дозвола да ја гледате.",
@@ -32,10 +33,12 @@
 	"templatesandbox-fail-post": "<em>Поради губиток на седнички податоци, прегледот е скриен како мерка на претпазливост против напади со JavaScript.</em>\n\n<strong>Ако ова е е легитимен обид за преглед, тогаш обидете се повторно.</strong>\nАко не работи и тогаш, [[Special:UserLogout|одјавете се]] и повторно најавете се.",
 	"templatesandbox-fail-post-anon": "<em>Бидејќи не сте најавени, прегледот е скриен како мерка на претпазливост против напади со JavaScript.</em>\n\n<strong>Ако ова е е легитимен обид за преглед, тогаш обидете се повторно.</strong>\nАко не работи и тогаш, [[Special:UserLogin|најавете се]] и обидете се повторно.",
 	"templatesandbox-anon-limited-preview": "Прегледот на промени во JavaScript и CSS е оневозможен кога не сте најавени. Ако сакате да ги погледате ваквите измени, [[Special:UserLogin|најавете се]] и обидете се повторно.",
+	"templatesandbox-js-css-limited-preview": "Прегледот на промените во JavaScript и CSS е оневозможен за песочнички претставки кои не му припаѓаат на тековниот корисник.",
 	"templatesandbox-editform-need-template": "За да прегледате друга страница со предлошкава, мора да наведете име на предлошка.",
 	"templatesandbox-editform-need-title": "За да прегледате друга страница со предлошкава, мора да наведете наслов.",
 	"templatesandbox-editform-invalid-template": "Укажаното име на предлошката е неважечко.",
 	"templatesandbox-editform-invalid-title": "Наведениот наслов за преглед е неважечки.",
+	"templatesandbox-editform-cannot-view-title": "Не ви е дозволено да го гледате насловот што го укажавте за преглед.",
 	"templatesandbox-editform-title-not-exists": "Наведениот наслов за преглед не постои.",
 	"templatesandbox-failed-replace-section": "Не можев да го заменам одделот на постоечката страница."
 }

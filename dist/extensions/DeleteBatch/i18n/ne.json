@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"पर्वत सुबेदी"
+			"पर्वत सुबेदी",
+			"बडा काजी"
 		]
 	},
-	"deletebatch-delete": "मेट्ने"
+	"deletebatch-delete": "मेटाउनुहोस्"
 }

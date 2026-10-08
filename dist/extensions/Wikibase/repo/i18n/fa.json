@@ -32,7 +32,9 @@
 			"Winston Sung",
 			"Zolo",
 			"ZxxZxxZ",
-			"درفش کاویانی"
+			"درفش کاویانی",
+			"Mohammad ebz",
+			"LProfo"
 		]
 	},
 	"wikibase-desc": "مخزن داده‌های ساختاریافته",
@@ -67,6 +69,8 @@
 	"wikibase-entitytermsforlanguagelistview-more": "همهٔ زبان‌های واردشده",
 	"wikibase-entitytermsforlanguagelistview-less": "زبان‌های کمتر",
 	"wikibase-entityterms-languagelistview-mul-popup-title": "جدید! برچسب‌ها و نام‌های مستعار را برای تمام زبان‌ها اضافه کنید",
+	"wikibase-entityterms-languagelistview-mul-popup-content": "مقادیر پیش‌فرض برای همه زبان‌هایی که برچسب‌ها و نام‌های مستعار خالی دارند، به منظور به حداقل رساندن تکرار استفاده می‌شوند. [$1 اطلاعات بیشتر]",
+	"wikibase-entityterms-languagelistview-mul-popup-dont-show-again": "این را دیگر نشان نده",
 	"wikibase-label-empty": "هیچ برچسبی تعریف نشده است",
 	"wikibase-label-edit-placeholder": "یک برچسب وارد کنید",
 	"wikibase-label-edit-placeholder-language-aware": "یک برچسب به $1 وارد کنید",
@@ -142,7 +146,7 @@
 	"wikibase-snakview-snaktypeselector-value": "مقدار موجود",
 	"wikibase-snakformat-invalid-value": "مقدار نامعتبر.",
 	"wikibase-snakformat-propertynotfound": "ویژگی یافت نشد.",
-	"wikibase-shortcopyrightwarning": "با کلیک کردن بر روی «$1»، شما با [[$2|قوانین استفاده]] موافقت می‌کنید، و به‌طور غیرقابل بازگشت اجازه می‌دهید ویرایش‌هایتان با اجازه‌نامهٔ [$3 $4] منتشر شوند.",
+	"wikibase-shortcopyrightwarning": "با کلیک‌کردن بر روی «$1»، شما با [[$2|قوانین استفاده]] موافقت می‌کنید، و به‌طور بازگشت‌ناپذیری اجازه می‌دهید ویرایش‌هایتان با اجازه‌نامهٔ [$3 $4] منتشر شوند.",
 	"wikibase-copyrighttooltip-acknowledge": "این شرایط را برای ویرایش‌های بعدی‌ام قبول می‌کنم. این پیام را دوباره نشان ندهید.",
 	"wikibase-entityselector-more": "بیشتر",
 	"wikibase-entityselector-notfound": "هیچ نتیجه‌ای یافت نشد",
@@ -176,6 +180,7 @@
 	"wikibase-validator-label-conflict": "ویژگی $3 از قبل دارای نام «$1» مربوط به کد زبان $2 است.",
 	"wikibase-validator-label-with-description-conflict": "آیتم $3 از قبل دارای نام «$1» با توصیف متنی مشابه مربوط به کد زبان «$2» است",
 	"wikibase-validator-label-no-entityid": "برچسب نباید یک شناسهٔ معتبر هستار باشد.",
+	"wikibase-validator-check-file-type": "پسوند پرونده وجود ندارد.",
 	"wikibase-validator-no-such-media": "پرونده \"$1\" در [https://commons.wikimedia.org/ Wikimedia Commons] وجود ندارد.",
 	"wikibase-validator-page-not-exists": "صفحهٔ \"$1\" وجود ندارد.",
 	"wikibase-validator-not-a-language": "«$1» یک کد زبان شناخته شده نیست.",

@@ -6,7 +6,6 @@
 		]
 	},
 	"minerva-last-modified-date": "ТӀаьххьара хийцам бина $1 $2",
-	"minerva-watchlist-cta": "ХӀокхо агӀонна а, цунна бинчу массо хийцамашна а тидам бе.",
 	"mobile-frontend-cookies-required": "Хьажаран раж хийца оьшу cookie файлаш. Дехар до, уьш латайина йухагӀорта.",
 	"mobile-frontend-editor-edit": "Нисйан",
 	"minerva-download": "Схьаэца PDF",
@@ -20,7 +19,7 @@
 	"mobile-frontend-main-menu-button-tooltip": "Коьрта меню схьайелла",
 	"mobile-frontend-main-menu-contributions": "Къинхьегам",
 	"mobile-frontend-main-menu-login": "Довзийтар",
-	"mobile-frontend-main-menu-logout": "Болх дӀаберзор",
+	"mobile-frontend-main-menu-logout": "Ара",
 	"mobile-frontend-main-menu-nearby": "Йуххехь",
 	"mobile-frontend-main-menu-settings": "Параметраш",
 	"mobile-frontend-main-menu-watchlist": "Тергаме могӀам",

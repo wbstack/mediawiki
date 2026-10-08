@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"شاه زمان پټان"
+			"شاه زمان پټان",
+			"باران"
 		]
 	},
 	"twocolconflict": "د پراگراف پربنسټ د سمون شخړه",
@@ -25,8 +26,8 @@
 	"twocolconflict-split-header-hint": "په [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface  پروژې خبرې اترې مخ] کې خپل غبرگون پرېښودلو سره تاسو کولی شئ د دې ځانگړنې په لاښه کولو کې مرسته وکړئ.",
 	"twocolconflict-split-header-hint-beta": "مننه چې دا ازمېښتي ځانگړنه کاروئ. په [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface  د پروژې خبرو اترو مخ] کې خپل غبرگون پرېښودلو سره تاسو د دې لاښه‌کولو کې مرسته کولی شئ.",
 	"twocolconflict-split-header-overview": "کله چې تاسو يو مخ سموئ او بل کارن هم په ورته وخت کې ياد مخ سم او خپل سمون له تاسو مخکې خپور کړي. مهرباني وکړئ د دواړو بلبڼو بياکتنې وکړئ او ويې اخږئ. يوازې د ټاکل شوو بکسونو ليک به د \"{{int:publishchanges}}\" په ټوکلو سره خوندي شي.",
-	"twocolconflict-split-your-version-header": "ستاسو بياکتنه",
-	"twocolconflict-split-current-version-header": "$1 پورې تازه بياکتنه",
+	"twocolconflict-split-your-version-header": "ستاسو بياليدنه",
+	"twocolconflict-split-current-version-header": "$1 پورې تازه بياليدنه",
 	"twocolconflict-split-not-saved-at": "تراوسه نه دی خپور‌شوی",
 	"twocolconflict-split-choose-version": "مهرباني وکړئ يوه بلبڼه وټاکئ",
 	"twocolconflict-split-other-version-chosen": "نورې بلبڼې",
@@ -36,7 +37,7 @@
 	"twocolconflict-split-tour-dialog-header": "د شخړې بلبڼې سره اخږل",
 	"twocolconflict-split-tour-dialog-message": "له بده مرغه ستاسو د سمون پرمهال ورته مخ يو بل کارن سم او تاسو دمخه خپور کړ.\n\nاندېښنه مه کوئ، ستاسو سمونونه له منځه نه دي تللي! مهرباني وکړئ د دواړو بلبڼو بياکتنه وکړئ او ويې اخږئ. که اړتيا وي ټاکل‌شوی ليک سمولی شئ. يوازې د ټاکل شوو بکسونو ليک به د \"{{int:publishchanges}}\" په ټوکلو سره خوندي شي.",
 	"twocolconflict-split-tour-dialog-btn-text": "اخږل پيلول",
-	"twocolconflict-split-tour-popup-btn-text": "ښه، وپوهېدم",
+	"twocolconflict-split-tour-popup-btn-text": "ښه، وپوهېدم.",
 	"twocolconflict-split-tour-popup1-header": "جلاکېدونکي بدلونونه کرښه په کرښه ښودل شوي.",
 	"twocolconflict-split-tour-popup1-message": "کله چې ستاسې اوبل کارن د ليک منځ کې توپير وي؛ نو دواړه بلبڼې څنگ په څنگ ښودل کېږي: د بل کارن بلبڼه په ژېړ بکس کې کيڼ لور ته او ستاسې بلبڼه په نيلي بکس کې ښي لور ته.<br /><br />که د دواړو بلبڼو ترمنځ هېڅ توپير نه وي؛ نو کرښې په خړ رنگه بکسونو کې ښودل کېږي. دا د اړتيا پرمهال د غځېدو، پرځېدو او سمون وړ وي.",
 	"twocolconflict-split-tour-popup2-header": "هغه بدلونونه غوره کړئ چې ساتل يې غواړئ",

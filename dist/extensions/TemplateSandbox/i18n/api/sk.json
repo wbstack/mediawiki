@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Wizzard"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Predpona pieskoviska šablón, ako na stránke [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Spracovať stránku s použitím <var>$1templatesandboxtext</var> namiesto obsahu tu uvedenej stránky.",
+	"templatesandbox-apihelp-text": "Spracovať stránku s použitím tohto obsahu namiesto stránky uvedenej v <var>$1templatesandboxtitle</var>.",
+	"templatesandbox-apihelp-contentmodel": "Model obsahu <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Formát obsahu <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Parametre <var>$1templatesandboxtitle</var> a <var>$1templatesandboxtext</var> musia byť zadané oba alebo vynechané oba."
+}

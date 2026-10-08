@@ -20,6 +20,7 @@
 	"templatesandbox-editform-view-label": "Muuji horudhaca",
 	"templatesandbox-preview": "Hor u eegista $2",
 	"templatesandbox-invalid-title": "Cinwaanka aad sheegtay waa mid aan sax ahayn.",
+	"templatesandbox-cannot-view-title": "Laguuma oggola inaad aragto cinwaanka aad sheegtay.",
 	"templatesandbox-title-not-exists": "Cinwaanka aad sheegtay ma jiro.",
 	"templatesandbox-revision-not-exists": "Nooca wax ka beddelka aad sheegtay ma jiro.",
 	"templatesandbox-revision-no-content": "Nooca wax ka beddelka aad sheegtay ma laha wax ku jira, ama ma haysatid oggolaansho aad ku arki karto.",
@@ -29,10 +30,12 @@
 	"templatesandbox-fail-post": "<em>Sababo la xiriira lumis xogta fadhiga, hor-u-eegista waa la qariyey si looga taxaddaro weerarro JavaScript ah.</em>\n\n<strong>Haddii tani ay tahay isku day hor-u-eegis oo sax ah, fadlan mar kale isku day.</strong>\nHaddii weli aysan shaqayn, isku day inaad [[Special:UserLogout|ka baxdo]] ka dibna mar kale soo gasho.",
 	"templatesandbox-fail-post-anon": "<em>Maadaama aadan soo galin, hor u eegista waa la qariyey si looga taxaddaro weerarro JavaScript ah.</em>\n\n<strong>Haddii tani ay tahay isku day hor u eegis oo sax ah, fadlan [[Special:UserLogin|soo gal]] oo mar kale isku day.</strong>",
 	"templatesandbox-anon-limited-preview": "Hor u eegista isbeddellada JavaScript iyo CSS waa la damiyay marka aan la soo galin. Haddii aad u baahan tahay inaad hor u eegto isbeddelladaas, fadlan [[Special:UserLogin|soo gal]] oo mar kale isku day.",
+	"templatesandbox-js-css-limited-preview": "Horudhaca isbeddellada JavaScript iyo CSS waa la naafeeyay sanduuqyada tijaabada ee horgalayaashoodu aysan ka tirsanayn isticmaalaha hadda.",
 	"templatesandbox-editform-need-template": "Si aad u hor u eegto bog kale oo leh tusmadaan, waa in la sheegaa magaca tusmada.",
 	"templatesandbox-editform-need-title": "Si aad u hor u eegto bog kale oo leh tusmadaan, waa in la sheegaa cinwaanka bogga.",
 	"templatesandbox-editform-invalid-template": "Magaca tusmada aad sheegtay waa mid aan sax ahayn.",
 	"templatesandbox-editform-invalid-title": "Cinwaanka aad u sheegtay hor u eegista waa mid aan sax ahayn.",
+	"templatesandbox-editform-cannot-view-title": "Laguuma oggola inaad aragto cinwaanka aad u sheegtay horudhac ahaan.",
 	"templatesandbox-editform-title-not-exists": "Cinwaanka aad u sheegtay hor u eegista ma jiro.",
 	"templatesandbox-failed-replace-section": "Waa lagu guul darraystay in la beddelo qayb ka mid ah bogga jira."
 }

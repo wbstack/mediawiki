@@ -72,7 +72,8 @@
 			"Nesuprachy",
 			"Segoulas",
 			"WikipedistaOndra",
-			"Matus cz"
+			"Matus cz",
+			"Comfyquiettree"
 		]
 	},
 	"sunday": "neděle",
@@ -4154,6 +4155,7 @@
 	"right-renameuser": "Přejmenovávání uživatelů",
 	"renameuser-renamed-notice": "Tento uživatel byl přejmenován.\nPro přehled je níže zobrazen výpis z knihy přejmenování uživatelů.",
 	"log-unknown-action": "provedl neznámou akci „$2“ na [[$1]]",
+	"log-unsafe-logentry": "(Tento protokolovací záznam nebylo možné zobrazit, protože jeho parametry obsahují nezabezpečená serializovaná data.)",
 	"createacct-benefit-heading-temp-user": "Děkujeme za příspěvek do {{grammar:2sg|{{SITENAME}}}}.\nZaložte si účet, abyste získali přístup k dalším funkcím.",
 	"createacct-benefit-subheading-temp-user": "{{grammar:4sg|{{SITENAME}}}} vytvářejí lidé jako vy. S účtem můžete mít trvalou a bezpečnou identitu s přístupem k funkcím jako:",
 	"benefit-1-description": "Seznamy sledovaných stránek, které vám umožňují sledovat změny stránek, které vás zajímají.",
@@ -4161,5 +4163,6 @@
 	"benefit-3-description": "Nastavení, které vám umožní přizpůsobit si prožitek.",
 	"temp-user-unable-to-acquire": "Nebylo vám možné přidělit dočasný uživatelský účet. Zkuste to prosím znovu později.",
 	"table-of-contents-show-button-aria-label": "Zobrazit obsah",
-	"table-of-contents-hide-button-aria-label": "Skrýt obsah"
+	"table-of-contents-hide-button-aria-label": "Skrýt obsah",
+	"mypage-disallowed-action": "Z bezpečnostních důvodů nelze na stránku Speciální:Moje stránka použít akci „$1“."
 }

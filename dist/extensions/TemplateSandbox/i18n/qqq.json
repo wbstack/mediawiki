@@ -6,7 +6,8 @@
 			"Liuxinyu970226",
 			"Raymond",
 			"Shirayuki",
-			"Umherirrender"
+			"Umherirrender",
+			"Sumurai8"
 		]
 	},
 	"templatesandbox": "{{doc-special|TemplateSandbox}}\nThe name of the [[mw:Extension:TemplateSandbox|TemplateSandbox extension]].",
@@ -28,6 +29,7 @@
 	"templatesandbox-preview": "Title of preview section when previewing another page using this template. Parameters:\n* $1 - (Unused) the page being previewed\n* $2 - the title set by the DISPLAYTITLE magic word",
 	"templatesandbox-previewnote": "Message displayed when previewing another page using this template. Parameters:\n* $1 - the page being previewed",
 	"templatesandbox-invalid-title": "Error message displayed when the title specified in the special page is invalid.",
+	"templatesandbox-cannot-view-title": "Error message displayed when the user is not allowed to view the title specified in the special page.",
 	"templatesandbox-title-not-exists": "Error message displayed when the title specified in the special page does not exist.",
 	"templatesandbox-revision-not-exists": "Error message displayed when the rev_id specified in the special page does not exist.",
 	"templatesandbox-revision-no-content": "Error message displayed when the rev_id specified in the special page does not have a valid content.",
@@ -37,10 +39,12 @@
 	"templatesandbox-fail-post": "Error message displayed when attempting to use Special:TemplateSandbox with an invalid edit token.\n\nSee also:\n* {{msg-mw|expand_templates_preview_fail_html}}\n{{Identical|Loss of session data}}",
 	"templatesandbox-fail-post-anon": "Error message displayed when attempting to use Special:TemplateSandbox as an anon and anon editing disabled.\n\nSee also:\n* {{msg-mw|expand_templates_preview_fail_html_anon}}",
 	"templatesandbox-anon-limited-preview": "Message displayed when using Special:TemplateSandbox as an anon, to note that full functionality is not available.",
+	"templatesandbox-js-css-limited-preview": "Message displayed when using Special:TemplateSandbox with sandbox prefixes not belonging to the current user, to note that JS/CSS loading will not occur for those prefixes. This message can be triggered when user JohnDoe enters User:JaneDoe as the prefix.",
 	"templatesandbox-editform-need-template": "Error message displayed when no template name is given for the editpage form.\n\nSee also:\n* {{msg-mw|Templatesandbox-editform-need-title}}",
 	"templatesandbox-editform-need-title": "Error message displayed when no page title is given for the editpage form.\n\nSee also:\n* {{msg-mw|Templatesandbox-editform-need-template}}",
 	"templatesandbox-editform-invalid-template": "Error message displayed when the template name specified for the editpage form is invalid.",
 	"templatesandbox-editform-invalid-title": "Error message displayed when the title specified for the editpage form is invalid.",
+	"templatesandbox-editform-cannot-view-title": "Error message displayed when the user is not allowed to view the title specified for the editpage form.",
 	"templatesandbox-editform-title-not-exists": "Error message displayed when the title specified for the editpage form does not exist.",
 	"templatesandbox-failed-replace-section": "Error message displayed when replacing a section of existing page failed."
 }

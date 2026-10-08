@@ -8,6 +8,7 @@
 		]
 	},
 	"requestaccount": "Vyžiadať účet",
+	"requestaccount-login": "Požiadať o účet",
 	"requestaccount-text": "'''Vyplnením a odoslaním nasledovného formulára vyžiadate používateľský účet'''.\n\nUistite sa, že ste si pred vyžiadaním účtu najskôr prečítali [[{{MediaWiki:Requestaccount-page}}|Podmienky použitia]].\n\nKeď bude účet schválený, príde vám emailom oznámenie a bude možné prihlásiť sa na [[Special:UserLogin]].",
 	"requestaccount-page": "{{ns:project}}:Podmienky použitia",
 	"requestaccount-dup": "'''Pozn.: Už ste prihlásený ako zaregistrovaný používateľ.'''",
@@ -20,6 +21,7 @@
 	"requestaccount-areas-text": "Nižšie zvoľte tematické oblasti v ktorých ste formálne expertom alebo by ste v nich radi vykonávali väčšinu práce.",
 	"requestaccount-ext-text": "Nasledovné informácie budú držané v tajnosti a použijú sa iba na účel tejto žiadosti. Možno budete chcieť uviesť kontakty ako telefónne číslo, ktoré môžu pomôcť pri potvrdení.",
 	"requestaccount-bio-text": "Pokúste sa do vášho životopisu nižšie uviesť všetky relevantné informácie.",
+	"requestaccount-bio-text-i": "'''Váš životopis sa použije ako počiatočný obsah vašej používateľskej stránky.'''\nUistite sa, že vám zverejnenie takýchto informácií neprekáža.",
 	"requestaccount-real": "Skutočné meno (voliteľné):",
 	"requestaccount-same": "(rovnaké ako skutočné meno)",
 	"requestaccount-email": "Emailová adresa:",

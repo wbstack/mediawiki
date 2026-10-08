@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Helix84"
+			"Helix84",
+			"Wizzard"
 		]
 	},
 	"usercredentials": "Osobné údaje používateľa",
@@ -12,6 +13,7 @@
 	"usercredentials-leg-areas": "Hlavné oblasti záujmu",
 	"usercredentials-leg-person": "Osobné informácie",
 	"usercredentials-leg-other": "Ďalšie informácie",
+	"usercredentials-leg-ip": "Údaje o IP adrese",
 	"usercredentials-email": "Email:",
 	"usercredentials-real": "Skutočné meno:",
 	"usercredentials-bio": "Biografia:",
@@ -19,6 +21,8 @@
 	"usercredentials-notes": "Ďalšie poznámky:",
 	"usercredentials-urls": "Zoznam webstránok:",
 	"usercredentials-ip": "Pôvodná IP adresa:",
+	"usercredentials-xff": "Pôvodné X-Forwarded-For:",
+	"usercredentials-agent": "Pôvodné User-Agent:",
 	"usercredentials-member": "Práva:",
 	"usercredentials-badid": "Žiadne osobné informácie tohto používateľa neboli nájdené. Skontrolujte, či ste správne napísali meno."
 }

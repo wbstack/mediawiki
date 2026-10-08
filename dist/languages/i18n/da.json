@@ -3551,7 +3551,7 @@
 	"htmlform-multiselect-toomany": "Antallet af elementer, du har angivet, er over det maksimale på $1 .",
 	"htmlform-required": "Denne værdi skal angives",
 	"htmlform-optional-flag": "(valgfri)",
-	"htmlform-submit": "Gem",
+	"htmlform-submit": "Udfør",
 	"htmlform-reset": "Fortryd ændringer",
 	"htmlform-selectorother-other": "Anden",
 	"htmlform-no": "Nej",
@@ -3716,7 +3716,7 @@
 	"limitreport-unstrip-size-value": "$1/$2 {{PLURAL:$2|byte|bytes}}",
 	"expandtemplates": "Udfold skabeloner",
 	"expand_templates_intro": "Denne specialside tager en wikitekst og udfolder alle benyttede skabeloner rekursivt.\nDen udfolder også understøttede parserfunktioner så som\n<code><nowiki>{{</nowiki>#language:…}}</code> og variabler så som \n<code><nowiki>{{</nowiki>CURRENTDAY}}</code>\nFaktisk udfolder den stort set alt i dobbelte tuborgklammer.",
-	"expand_templates_title": "Sammenhængstitel, for {{FULLPAGENAME}} osv.:",
+	"expand_templates_title": "Konteksttitel, for {{FULLPAGENAME}} osv.:",
 	"expand_templates_input": "Indtast wikitekst:",
 	"expand_templates_output": "Resultat",
 	"expand_templates_xml_output": "XML-resultat",
@@ -4089,6 +4089,7 @@
 	"right-renameuser": "Omdøb brugere",
 	"renameuser-renamed-notice": "Denne bruger er blevet omdøbt.\nTil information er omdøbningsloggen vist nedenfor.",
 	"log-unknown-action": "udførte ukendt handling \"$2\" på [[$1]]",
+	"log-unsafe-logentry": "(Denne logpost kunne ikke vises, fordi dens parametre indeholder usikre serialiserede data.)",
 	"createacct-benefit-heading-temp-user": "Tak, fordi du bidrager til {{SITENAME}}.\nOpret en konto for at få adgang til flere funktioner.",
 	"createacct-benefit-subheading-temp-user": "{{SITENAME}} er lavet af folk som dig. Med en konto kan du have en permanent og sikker identitet med adgang til funktioner som:",
 	"benefit-1-description": "Overvågningslister, der giver dig mulighed for at holde styr på sider, du er interesseret i.",
@@ -4096,5 +4097,6 @@
 	"benefit-3-description": "Indstillinger, der giver dig mulighed for at tilpasse din brugeroplevelse.",
 	"temp-user-unable-to-acquire": "Kunne ikke hente brugernavne for midlertidig konto. Prøv gerne på nyt.",
 	"table-of-contents-show-button-aria-label": "Vis indholdsfortegnelsen",
-	"table-of-contents-hide-button-aria-label": "Skjul indholdsfortegnelsen"
+	"table-of-contents-hide-button-aria-label": "Skjul indholdsfortegnelsen",
+	"mypage-disallowed-action": "Af sikkerhedsmæssige årsager kan handlingen \"$1\" ikke bruges på siden Special:MinSide."
 }

@@ -12,7 +12,7 @@
 	"apihelp-jsonconfig-paramvalue-command-reset": "캐시에서 구성을 지웁니다. $1title 매개변수와 jsonconfig-flush 권한이 필요합니다.",
 	"apihelp-jsonconfig-paramvalue-command-reload": "설정 저장소에서 구성을 다시 로드하고 캐시합니다. $1title 매개변수와 jsonconfig-reset 권한이 필요합니다.",
 	"apihelp-jsonconfig-param-namespace": "처리할 제목의 이름공간 숫자.",
-	"apihelp-jsonconfig-param-title": "네임스페이스의 어미가 없는 타이틀",
+	"apihelp-jsonconfig-param-title": "이름공간 접두어 없이 처리하기 위한 제목입니다.",
 	"apihelp-jsonconfig-param-content": "$1command=reload의 경우, 대신 이 내용을 대신 사용하세요.",
 	"apihelp-jsonconfig-example-1": "구성 보기",
 	"apihelp-jsonconfig-example-2": "[[Data:Brazil/Amazonas.map]] 재설정",

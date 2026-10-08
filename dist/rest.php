@@ -1,9 +1,5 @@
 <?php
 
-require_once __DIR__ . '/wbstack/src/Shim/Web.php';
-
-
-
 /**
  * This is the entry point for the REST API.
  *

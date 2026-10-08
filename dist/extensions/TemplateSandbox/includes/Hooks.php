@@ -155,6 +155,10 @@ class Hooks implements
 			$out = self::wrapErrorMsg( $context, 'templatesandbox-editform-invalid-title' );
 			return false;
 		}
+		if ( !$context->getAuthority()->authorizeRead( 'read', $title ) ) {
+			$out = self::wrapErrorMsg( $context, 'templatesandbox-editform-cannot-view-title' );
+			return false;
+		}
 
 		// If we're previewing the same page we're editing, we don't need to check whether
 		// we exist, since we fake that we exist later. This is useful to, for example,

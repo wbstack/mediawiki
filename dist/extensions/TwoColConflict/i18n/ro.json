@@ -4,7 +4,8 @@
 			"Dan Mihai Pitea",
 			"Matrafox",
 			"NGC 54",
-			"Paloi Sciurala"
+			"Paloi Sciurala",
+			"Vellion Eagle"
 		]
 	},
 	"twocolconflict": "Conflict de modificare bazat pe paragrafe",
@@ -18,9 +19,11 @@
 	"twocolconflict-special-not-saved": "Nepublicat",
 	"twocolconflict-special-malformed-title": "Titlu lipsă sau invalid.",
 	"twocolconflict-split-your-version-header": "Revizia dumneavoastră",
+	"twocolconflict-split-not-saved-at": "Nepublicat",
 	"twocolconflict-split-other-version-chosen": "Altă versiune",
 	"twocolconflict-split-your-version-chosen": "Versiunea dumneavoastră",
 	"twocolconflict-split-select-all": "Selectează tot",
+	"twocolconflict-split-tour-dialog-message": "Din păcate, în timp ce editați, un alt utilizator a editat aceeași pagină și a publicat-o înaintea dvs.\n\nNu vă faceți griji, modificările dvs. nu s-au pierdut! Vă rugăm să revizuiți ambele versiuni și să le îmbinați. Dacă este necesar, puteți edita textul selectat. Numai textul din casetele selectate va fi salvat când faceți clic pe „{{int:publishchanges}}”.",
 	"twocolconflict-split-tour-popup-btn-text": "Bine, am înțeles.",
 	"twocolconflict-split-tour-popup2-header": "Alegeți modificările care doriți să fie păstrate",
 	"twocolconflict-split-selected-other-tooltip": "Altă versiune este selectată",

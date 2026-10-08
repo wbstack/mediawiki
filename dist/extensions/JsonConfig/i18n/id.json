@@ -4,9 +4,18 @@
 			"Kenrick95",
 			"Presidenvolksraad",
 			"Rachmat.Wahidi",
-			"Rachmat04"
+			"Rachmat04",
+			"AF1011"
 		]
 	},
+	"nstab-data": "Data",
+	"tooltip-ca-nstab-data": "Lihat halaman data",
+	"jsonconfig-duplicate-field": "Lebih dari satu nilai \"$1\" ditemukan",
+	"jsonconfig-edit-action-apply": "Terapkan",
+	"jsonconfig-edit-action-cancel": "Batalkan",
+	"jsonconfig-edit-button-label": "Sunting sebagai tabel",
+	"jsonconfig-edit-dialog-error": "Tidak dapat menyunting sebagai tabel: $1",
+	"jsonconfig-edit-dialog-error-data-invalid": "Data tidak sesuai dengan skema",
 	"jsonconfig-err-array": "Parameter \"$1\" harus merupakah sebuah daftar, mis. <kbd>[\"value1\", \"value2\", ...]</kbd>",
 	"jsonconfig-err-bool": "Parameter \"$1\" harus berupa <code>true</code> atau <code>false</code>",
 	"jsonconfig-err-string": "Parameter \"$1\" harus berupa string",

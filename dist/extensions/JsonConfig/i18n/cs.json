@@ -12,5 +12,7 @@
 	"jsonconfig-edit-action-cancel": "Storno",
 	"jsonconfig-edit-button-label": "Editovat jako tabulku",
 	"jsonconfig-edit-dialog-error": "Nelze editovat jako tabulku: $1",
-	"jsonconfig-edit-dialog-error-data-invalid": "Data neodpovídají schématu"
+	"jsonconfig-edit-dialog-error-data-invalid": "Data neodpovídají schématu",
+	"jsonconfig-edit-dialog-error-data-missing": "Chybí JSON vlastnost <code>data</code> nebo není pole",
+	"jsonconfig-edit-dialog-error-field-name-missing": "Každé pole musí mít název"
 }
