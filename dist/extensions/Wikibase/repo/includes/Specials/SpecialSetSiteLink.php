@@ -249,7 +249,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 		try {
 			$status = $this->setSiteLink( $entity, $this->site, $this->page, $this->badges, $summary );
 		} catch ( ChangeOpException $e ) {
-			$this->showErrorHTML( $e->getMessage() );
+			$this->showErrorHTML( htmlspecialchars( $e->getMessage() ) );
 			return false;
 		}
 
@@ -339,10 +339,10 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 				],
 			];
 		} else {
-			$intro = $this->msg( 'wikibase-setsitelink-intro' )->text();
+			$intro = $this->msg( 'wikibase-setsitelink-intro' )->escaped();
 
 			if ( $this->badgeItems ) {
-				$intro .= $this->msg( 'word-separator' )->text() . $this->msg( 'wikibase-setsitelink-intro-badges' )->text();
+				$intro .= $this->msg( 'word-separator' )->escaped() . $this->msg( 'wikibase-setsitelink-intro-badges' )->escaped();
 			}
 
 			$formDescriptor = $this->getFormElements( $entity );
