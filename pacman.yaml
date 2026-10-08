@@ -1,5 +1,5 @@
 - name: mediawiki
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki/zip/8831dba484beb0f5bc14ff6fb5389788daf566cc
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki/zip/2301fb33b0554172909368c9bdcce91f26d0c713
   artifactLevel: 1
   destination: ./dist
   remove:
@@ -24,7 +24,7 @@
     - extensions/README
     - skins/README
 - name: RevisionSlider
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-RevisionSlider/zip/8fe9245032e1c839ed80c083597b78ce10bffb51
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-RevisionSlider/zip/8d54815e06145e3182c754c70f7f40a66ea9f845
   artifactLevel: 1
   destination: ./dist/extensions/RevisionSlider
   remove:
@@ -46,7 +46,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Mailgun
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Mailgun/zip/f1c6ca66abc70de2dd48acff4424b903cd1bcc42
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Mailgun/zip/651e2222da568ebd988f8fea55d3437d17953cd9
   artifactLevel: 1
   destination: ./dist/extensions/Mailgun
   remove:
@@ -68,7 +68,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: SpamBlacklist
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-SpamBlacklist/zip/2d13804ef20c2af9b28261db493b7fa34833fd32
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-SpamBlacklist/zip/e5c6b845ef48b3d981e645bce82f7fcf05ad1c82
   artifactLevel: 1
   destination: ./dist/extensions/SpamBlacklist
   remove:
@@ -90,7 +90,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: ConfirmEdit
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-ConfirmEdit/zip/2f2c0e93fdf2d28b986f93c187f727f37db04535
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-ConfirmEdit/zip/96ff7bb276321c5d95c561c0bbb082862ce20501
   artifactLevel: 1
   destination: ./dist/extensions/ConfirmEdit
   remove:
@@ -112,7 +112,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: ConfirmAccount
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-ConfirmAccount/zip/21a0baae647e3f86afa7ecbff80a6ea4c5795df0
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-ConfirmAccount/zip/6fee556c230e5575570281b9cdd730467f6757f6
   artifactLevel: 1
   destination: ./dist/extensions/ConfirmAccount
   remove:
@@ -134,7 +134,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Nuke
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Nuke/zip/a2927d26468c4d03845899980583cf355c222293
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Nuke/zip/579267fd4eb5fe3cecb1420c8b8c14188df882dc
   artifactLevel: 1
   destination: ./dist/extensions/Nuke
   remove:
@@ -156,7 +156,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: InviteSignup
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-InviteSignup/zip/010bb9369a0419cac7d6d6d8563c52e88df3147a
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-InviteSignup/zip/e0576a2099238ef700ac5f98d3408a98ecfe7853
   artifactLevel: 1
   destination: ./dist/extensions/InviteSignup
   remove:
@@ -178,7 +178,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: TorBlock
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-TorBlock/zip/04f0971469376fbdae02869b58cf9c1db4722a59
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-TorBlock/zip/a2047242c833741ac1b6cc89b7e3742052e631f3
   artifactLevel: 1
   destination: ./dist/extensions/TorBlock
   remove:
@@ -200,7 +200,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Elastica
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Elastica/zip/4feb817e2559d246c4cebfd6855e6713e5677066
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Elastica/zip/dc22ccac223a628226e0c6b42074b16361f2cbd5
   artifactLevel: 1
   destination: ./dist/extensions/Elastica
   remove:
@@ -222,7 +222,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: CirrusSearch
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-CirrusSearch/zip/2ab1bab6bbd0c95e72b817ca6fc904fa44d0f14e
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-CirrusSearch/zip/bd6e8e74340bf604398e94a89bac8bbe4afe585e
   artifactLevel: 1
   destination: ./dist/extensions/CirrusSearch
   remove:
@@ -244,7 +244,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: WikibaseCirrusSearch
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseCirrusSearch/zip/5e9504404a67824fbf8e0b9f9f2b106be3a1f6c1
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseCirrusSearch/zip/12c1aedc176b209ea9e7c810cc4d9b38e158b9ff
   artifactLevel: 1
   destination: ./dist/extensions/WikibaseCirrusSearch
   remove:
@@ -269,7 +269,7 @@
     - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseCirrusSearch~1120939/revisions/2/patch?download
     - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseCirrusSearch~1120941/revisions/1/patch?download
 - name: WikibaseLexemeCirrusSearch
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseLexemeCirrusSearch/zip/ca8c36c620fe55624d62f44d61e64c7dd81ade8f
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseLexemeCirrusSearch/zip/df9151038c93e27a7c2ea9ae72dee8693757fad9
   artifactLevel: 1
   destination: ./dist/extensions/WikibaseLexemeCirrusSearch
   remove:
@@ -293,7 +293,7 @@
   patchUrls:
     - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseLexemeCirrusSearch~1120949/revisions/1/patch?download
 - name: UniversalLanguageSelector
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-UniversalLanguageSelector/zip/177728a0bf4ec45a2f670b68bb144495ccaf108d
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-UniversalLanguageSelector/zip/da84b70ec18ff2aece95a55ec3b9f3a77dba0a22
   artifactLevel: 1
   destination: ./dist/extensions/UniversalLanguageSelector
   remove:
@@ -315,7 +315,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: cldr
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-cldr/zip/2935d3d92d99ab2ac98f394440f95ed91bdf5307
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-cldr/zip/8b36e6d82d0fff8e7f226472e81c65945f2c127f
   artifactLevel: 1
   destination: ./dist/extensions/cldr
   remove:
@@ -337,7 +337,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Gadgets
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Gadgets/zip/a9ede5e40945b319d2be7461655fe3ca324605d5
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Gadgets/zip/f859cfe44b00b3fac2097b42fd288bfe968f957c
   artifactLevel: 1
   destination: ./dist/extensions/Gadgets
   remove:
@@ -359,7 +359,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Thanks
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Thanks/zip/dcd584515ffa8ba6472a40ca33e751809b992810
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Thanks/zip/bad15a0e30e0ba5bb6b424ea463e73a2b2779a7e
   artifactLevel: 1
   destination: ./dist/extensions/Thanks
   remove:
@@ -381,7 +381,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: TwoColConflict
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-TwoColConflict/zip/1d8056a87d4cc565d05ce2f14fb314c439b96c14
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-TwoColConflict/zip/d140c8ee8e96ea4b4171a15a3fff965692a28fd2
   artifactLevel: 1
   destination: ./dist/extensions/TwoColConflict
   remove:
@@ -403,7 +403,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: OAuth
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-OAuth/zip/2deadfa73ad7897e7f3ac6965a5ccefa09c61f6d
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-OAuth/zip/3deb6bb3279abbc9ac7e2e7570abd4f53fb95a07
   artifactLevel: 1
   destination: ./dist/extensions/OAuth
   remove:
@@ -427,7 +427,7 @@
   patchUrls:
     - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FOAuth~1197610/revisions/2/patch?download
 - name: WikibaseLexeme
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseLexeme/zip/fa78661769bd699ac46902ee97d8de723a71621e
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseLexeme/zip/68d679459f258bd438880bc0c9343e449d6eef7a
   artifactLevel: 1
   destination: ./dist/extensions/WikibaseLexeme
   remove:
@@ -451,7 +451,7 @@
   patchUrls:
     - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseLexeme~1305583/revisions/3/patch?download
 - name: SyntaxHighlight_GeSHi
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-SyntaxHighlight_GeSHi/zip/e3d0c1b06885eeb4237c9b0743601f4f739addf4
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-SyntaxHighlight_GeSHi/zip/e3eb9d9cf30a93c2cc3170cac4f5901292d76648
   artifactLevel: 1
   destination: ./dist/extensions/SyntaxHighlight_GeSHi
   remove:
@@ -473,7 +473,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: JsonConfig
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-JsonConfig/zip/8ac9783250e93b19f201318eca853598950c4d21
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-JsonConfig/zip/e094b361cd65128128620f5d5f8547af96921500
   artifactLevel: 1
   destination: ./dist/extensions/JsonConfig
   remove:
@@ -495,7 +495,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Kartographer
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Kartographer/zip/7072122e43c25b76518d72db8b5f4ee5286ef883
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Kartographer/zip/8aadd3d29f63b02c0b3819e03d0293c61914e084
   artifactLevel: 1
   destination: ./dist/extensions/Kartographer
   remove:
@@ -517,7 +517,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Math
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Math/zip/80bd9f9855169a164bad52d7a2af374904051b04
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Math/zip/645897b5ec9505520fa9b7526033f2d030de15e3
   artifactLevel: 1
   destination: ./dist/extensions/Math
   remove:
@@ -539,7 +539,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Score
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Score/zip/1dd1e7f10a2123954f629ceed0ebc4c808035ea1
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Score/zip/743f68ef100772f73550f5c4f39d296c90c96635
   artifactLevel: 1
   destination: ./dist/extensions/Score
   remove:
@@ -561,7 +561,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: PageImages
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-PageImages/zip/1b9c2c918e83301ffd6f47776b38ef194f4c9701
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-PageImages/zip/dc1f8684bb921f79102b177fc317bcdd9a427858
   artifactLevel: 1
   destination: ./dist/extensions/PageImages
   remove:
@@ -583,7 +583,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Scribunto
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Scribunto/zip/88e414f1c9d30a1d13e5df4cac322f95401382c3
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Scribunto/zip/94b5a1d75dc43485493ab75f646648a00ce623c4
   artifactLevel: 1
   destination: ./dist/extensions/Scribunto
   remove:
@@ -605,7 +605,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Cite
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Cite/zip/be960c78d053fade47a477594058f816cbc1a960
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Cite/zip/1885d983ec593726b9a1735b3d29eed65aa0dead
   artifactLevel: 1
   destination: ./dist/extensions/Cite
   remove:
@@ -627,7 +627,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: TemplateSandbox
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-TemplateSandbox/zip/ab47533b65d61f754bcece051a5009209b7edeb0
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-TemplateSandbox/zip/896f903d172abd01723a5f0b07cc7dc7ac7eeaab
   artifactLevel: 1
   destination: ./dist/extensions/TemplateSandbox
   remove:
@@ -649,7 +649,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: CodeEditor
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-CodeEditor/zip/82800494d7f04e61d7152473a4c91bd4bec9e1c8
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-CodeEditor/zip/3f6310218e1f9b7caaa7735ebdbc23ef3ff53924
   artifactLevel: 1
   destination: ./dist/extensions/CodeEditor
   remove:
@@ -671,7 +671,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: CodeMirror
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-CodeMirror/zip/0096f3b26b3235647e7c83cc76dad62b8940f68a
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-CodeMirror/zip/d80cde18245d24ea70d0db643bc88faa208896a5
   artifactLevel: 1
   destination: ./dist/extensions/CodeMirror
   remove:
@@ -693,7 +693,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: WikiEditor
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikiEditor/zip/e785332234c0287ead9420170cec89f9d523be09
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikiEditor/zip/b3c419319722d58649e270aae965e28d015233a7
   artifactLevel: 1
   destination: ./dist/extensions/WikiEditor
   remove:
@@ -715,7 +715,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: SecureLinkFixer
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-SecureLinkFixer/zip/d6666aff448ebb4ef0aaf16c1442904c5e6351f6
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-SecureLinkFixer/zip/bd4579b889a00b153bcb6a71de97242ce48c79a2
   artifactLevel: 1
   destination: ./dist/extensions/SecureLinkFixer
   remove:
@@ -737,7 +737,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Echo
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Echo/zip/08b9ec7bf91f446f2f6c04cb648f97589dafe45c
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Echo/zip/1427154661a9c6ec7b3aaa468a72a1543e5f72b2
   artifactLevel: 1
   destination: ./dist/extensions/Echo
   remove:
@@ -763,7 +763,7 @@
     # Remove when updated to 1.44+ (Bug: T412100).
     - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FEcho~1093496/revisions/1/patch?download
 - name: Poem
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Poem/zip/a56eed8bf352cc992f303bfb1ad9ea61a2328920
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Poem/zip/dffad2ad64c2fbdbc1d9def9de29791d6ee0e22e
   artifactLevel: 1
   destination: ./dist/extensions/Poem
   remove:
@@ -785,7 +785,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: TemplateData
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-TemplateData/zip/57023e5b9686386650d60e582f59df8b9f080fc4
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-TemplateData/zip/3930b2e9ff0a4d600bfe4589b1f3d0a933b0c305
   artifactLevel: 1
   destination: ./dist/extensions/TemplateData
   remove:
@@ -807,7 +807,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: AdvancedSearch
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-AdvancedSearch/zip/e6003da2a7d9b9f4202939c5f6b2cf51486eeb64
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-AdvancedSearch/zip/3853b91e84e0f40851c2e40c0253b4cdf18051b0
   artifactLevel: 1
   destination: ./dist/extensions/AdvancedSearch
   remove:
@@ -829,7 +829,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: ParserFunctions
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-ParserFunctions/zip/8f535d6318ddb4c5f09bfdfebbf04943ede6a236
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-ParserFunctions/zip/a062e47a9d6e57fa3f12121b900e28bb5aee617c
   artifactLevel: 1
   destination: ./dist/extensions/ParserFunctions
   remove:
@@ -851,7 +851,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: MobileFrontend
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-MobileFrontend/zip/65f905378d107a0410481df7ec22bf40c7de4675
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-MobileFrontend/zip/bbc93d3e00bfa7b96198da308b284735b28a58fb
   artifactLevel: 1
   destination: ./dist/extensions/MobileFrontend
   remove:
@@ -873,7 +873,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: DeleteBatch
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-DeleteBatch/zip/4b477cdaa35a25113c09dd1881b84c9b99ce6498
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-DeleteBatch/zip/b008686cb3077a41659b0d53e31db9b451f83d01
   artifactLevel: 1
   destination: ./dist/extensions/DeleteBatch
   remove:
@@ -895,7 +895,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: MultimediaViewer
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-MultimediaViewer/zip/f928053282615c046696c44287738b6e7c3329e8
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-MultimediaViewer/zip/ec2455a0b44ee443da4807b2198c6261ea317405
   artifactLevel: 1
   destination: ./dist/extensions/MultimediaViewer
   remove:
@@ -917,7 +917,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: WikibaseManifest
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseManifest/zip/8a6476857acaa4296f11c183a01de98d61bcb077
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseManifest/zip/60efd69e50599b964f48401ecd6e99bdc580780d
   artifactLevel: 1
   destination: ./dist/extensions/WikibaseManifest
   remove:
@@ -940,7 +940,7 @@
     - Doxyfile
     - infrastructure
 - name: WikiHiero
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikiHiero/zip/e3f27980399b4626ed001f98ee2cc0acd5bde050
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikiHiero/zip/d92b35363e255f5d55944f803895327ad99c3236
   artifactLevel: 1
   destination: ./dist/extensions/WikiHiero
   remove:
@@ -962,7 +962,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: TextExtracts
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-TextExtracts/zip/5d8c29e46cafe1b21e11757c0591346592ce24d3
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-TextExtracts/zip/b97531350a0a448563f165b4ad3b6cf718acaaf2
   artifactLevel: 1
   destination: ./dist/extensions/TextExtracts
   remove:
@@ -984,7 +984,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: EntitySchema
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/9658b7cef335a3fa10a0171f0e2c04b4be719ec9
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/6f64bbb7c3261650eee3c6e939e379ae02367b6e
   artifactLevel: 1
   destination: ./dist/extensions/EntitySchema
   remove:
@@ -1094,7 +1094,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Wikibase
-  artifactUrl: https://github.com/wbstack/mediawiki-tars/raw/a58eaf2a2c2324649985da8281e264a600d029fc/Wikibase-1782811529-REL1_43.tar.gz
+  artifactUrl: https://github.com/wbstack/mediawiki-tars/raw/refs/heads/main/Wikibase-1791450923-REL1_43.tar.gz
   artifactLevel: 1
   destination: ./dist/extensions/Wikibase
   remove:
@@ -1185,7 +1185,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Vector
-  artifactUrl: https://codeload.github.com/wikimedia/Vector/zip/f4d8dfe7c085bb030b58af293ee3d57c9b712e1f
+  artifactUrl: https://codeload.github.com/wikimedia/Vector/zip/6d3c8e51148942c01461ae7b4123a4133d6127a3
   artifactLevel: 1
   destination: ./dist/skins/Vector
   remove:
@@ -1207,7 +1207,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Timeless
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-skins-Timeless/zip/ce4122bf1642a523967bb2b7e12e0c9f84d910c8
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-skins-Timeless/zip/0eaf5c34c12605b5f203553f9e114d0ca07be824
   artifactLevel: 1
   destination: ./dist/skins/Timeless
   remove:
@@ -1229,7 +1229,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Modern
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-skins-Modern/zip/2b9aa6eb0afc86a9e57b6dff6bafce6c655e28cf
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-skins-Modern/zip/0d6b823674cd3f50c5ec2bfb5b5d566493998852
   artifactLevel: 1
   destination: ./dist/skins/Modern
   remove:
@@ -1251,7 +1251,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: MinervaNeue
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-skins-MinervaNeue/zip/ae73372c6a100791acfbe365079c76479d1d34f6
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-skins-MinervaNeue/zip/cc060423cca743c163f5980fc6f46e41af264f68
   artifactLevel: 1
   destination: ./dist/skins/MinervaNeue
   remove:
