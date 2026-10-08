@@ -48,8 +48,16 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-CirrusSearch
   - name: WikibaseCirrusSearch
     repoName: wikimedia/mediawiki-extensions-WikibaseCirrusSearch
+    patches:
+      # Add a config option to allow ignoring Elasticsearch errors
+      - url: https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseCirrusSearch~1120939/revisions/2/patch?download
+      # Fallback to EntityTermSearchHelper when no results are found
+      - url: https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseCirrusSearch~1120941/revisions/1/patch?download
   - name: WikibaseLexemeCirrusSearch
     repoName: wikimedia/mediawiki-extensions-WikibaseLexemeCirrusSearch
+    patches:
+      # Add a config option to allow ignoring Elasticsearch errors
+      - url: https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseLexemeCirrusSearch~1120949/revisions/1/patch?download
   - name: UniversalLanguageSelector
     repoName: wikimedia/mediawiki-extensions-UniversalLanguageSelector
   - name: cldr
@@ -62,6 +70,9 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-TwoColConflict
   - name: OAuth
     repoName: wikimedia/mediawiki-extensions-OAuth
+    patches:
+      # Remove warning when using OAuth server's URL
+      - url: https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FOAuth~1197610/revisions/2/patch?download
   - name: WikibaseLexeme
     repoName: wikimedia/mediawiki-extensions-WikibaseLexeme
   - name: SyntaxHighlight_GeSHi
@@ -92,6 +103,10 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-SecureLinkFixer
   - name: Echo
     repoName: wikimedia/mediawiki-extensions-Echo
+    patches:
+      # Fixes SQLBagOStuff duplicate warnings due to a bug in the Echo extension.
+      # Remove when updated to 1.44+ (Bug: T412100).
+      - url: https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FEcho~1093496/revisions/1/patch?download
   - name: Poem
     repoName: wikimedia/mediawiki-extensions-Poem
   - name: TemplateData
@@ -134,6 +149,9 @@ extensions:
   ## These extensions use urls directly
   - name: Wikibase
     url: https://github.com/wbstack/mediawiki-tars/raw/a58eaf2a2c2324649985da8281e264a600d029fc/Wikibase-1782811529-REL1_43.tar.gz
+    patches:
+      # Support for fallback search helpers in CombinedEntitySearchHelper
+      - url: https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~1120952/revisions/1/patch?download
     remove:
       - build
       - vendor
