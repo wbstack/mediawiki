@@ -4,8 +4,7 @@
 			"Guycn2",
 			"Ilimanaq29",
 			"Matěj Suchánek",
-			"Walter Klosse",
-			"Comfyquiettree"
+			"Walter Klosse"
 		]
 	},
 	"apihelp-query+pageterms-param-terms": "Typy řetězců k načtení (např. 'description'), každý zobrazen jako pole řetězců s typem jako klíčem (např. {\"description\": [\"foo\"]}). Pokud není specifikován, jsou vráceny všechny typy.",

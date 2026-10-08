@@ -1,14 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Terfili",
-			"Albinfo",
-			"Bild-Sprache"
+			"Terfili"
 		]
 	},
 	"wikibase-edit": "modifitgar",
 	"wikibase-add": "agiuntar",
-	"wikibase-label-empty": "I n'è vegni fixà nagina denominaziun",
-	"wikibase-description-empty": "I n'exista nagina descripziun",
 	"wikibase-sitelinks-special": "autras paginas"
 }

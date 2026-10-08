@@ -3,30 +3,27 @@
 		"authors": [
 			"Kaszeba",
 			"Kirsan",
-			"Orbitminis",
-			"Terrus38",
-			"Iketsi"
+			"Orbitminis"
 		]
 	},
 	"tooltip-t-wikibase": "Lënk do sparłączonegò elementu w repòzytorëjach pòdôwków",
 	"wikibase-comment-update": "Zmieniono element w Wikipòdôwkach",
 	"wikibase-dataitem": "Element Wikipòdôwków",
-	"wikibase-editlinks": "Edituj pòwrózczi",
-	"wikibase-editlinkstitle": "Edituj pòwrózczi midzë jãzëkòwima wersjama",
-	"wikibase-addlinkstitle": "Dodôj pòwrózczi midzë jãzëkòwima wersjama",
-	"wikibase-linkitem-addlinks": "Dodôj pòwrózczi",
-	"wikibase-linkitem-title": "Sparłãczë ze starną",
-	"wikibase-linkitem-linkpage": "Sparłãczë ze starną",
-	"wikibase-linkitem-selectlink": "Wëbierzë witrinã ë starnã, z chtërną chcesz sparłãczëc tã starnã.",
+	"wikibase-editlinks": "Editëjë lënczi",
+	"wikibase-editlinkstitle": "Editëjë lënczi midzy jãzëkòwima wersëjama",
+	"wikibase-addlinkstitle": "Dodôj lënczi midzy jãzëkòwima wersëjama",
+	"wikibase-linkitem-addlinks": "Dodôj lënczi",
+	"wikibase-linkitem-title": "Sparłączë ze starną",
+	"wikibase-linkitem-linkpage": "Sparłączë ze starną",
+	"wikibase-linkitem-selectlink": "Wëbierzë sąstawã ë starnã, z chtërną chcesz sparłãczëc tã starnã.",
 	"wikibase-linkitem-input-site": "Jãzëk:",
 	"wikibase-linkitem-input-page": "Starna:",
 	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
 	"wikibase-rc-hide-wikidata-hide": "Zatacë",
-	"wikibase-rc-hide-wikidata-show": "Pòkażë",
+	"wikibase-rc-hide-wikidata-show": "Pòkôżë",
 	"wikibase-rc-wikibase-edit-letter": "d",
 	"wikibase-rc-wikibase-edit-title": "Edicëjô w Wikipòdôwkach",
 	"wikibase-rcfilters-hide-wikibase-label": "Edicje w Wikipòdôwkach",
 	"wikibase-pageinfo-entity-usage": "Òbiektë z Wikipòdôwków ùżëté na ti starnie",
-	"wikibase-otherprojects": "W jinëch ùdbach",
-	"connected-redirect-category": "Przeczerowania sparłãczoné z elementã Wikipòdôwków"
+	"wikibase-otherprojects": "W jinnych ùdbach"
 }

@@ -207,9 +207,7 @@ class EntityContentDataCodec {
 				$data = json_decode( $blob, true );
 				break;
 			case CONTENT_FORMAT_SERIALIZED:
-				$data = unserialize( $blob, [
-					'allowed_classes' => false, // only nested arrays and primitives expected
-				] );
+				$data = unserialize( $blob );
 				break;
 			default:
 				throw new InvalidArgumentException( "Unsupported decoding format: $format" );

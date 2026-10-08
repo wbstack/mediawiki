@@ -3,15 +3,14 @@
 		"authors": [
 			"Ladsgroup",
 			"Leli Forte",
-			"ToniSant",
-			"JiodoJ"
+			"ToniSant"
 		]
 	},
 	"wikibase-edit": "immodifika",
-	"wikibase-add": "żid",
+	"wikibase-add": "Żid",
 	"wikibase-entitytermsview-entitytermsforlanguagelistview-toggler": "F'lingwi oħra",
 	"wikibase-label-empty": "M'hemm l-ebda tikketta definita",
-	"wikibase-description-empty": "L-ebda deskrizzjoni definita",
+	"wikibase-description-empty": "M'hemm l-ebda deskrizzjoni definita",
 	"wikibase-statementsection-statements": "Dikjarazzjonijiet",
 	"wikibase-sitelinks-special": "Siti oħra",
 	"wikibase-statementview-rank-normal": "Klassifikazzjoni normali",
