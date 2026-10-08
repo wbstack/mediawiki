@@ -164,7 +164,7 @@ extensions:
   - name: StopForumSpam
     url: https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/archive/5e3aab6e8be0e8effa97f9b454020230b6a70e3d.zip
   - name: VisualEditor
-    url: https://github.com/wbstack/mediawiki-tars/raw/75e5dd93f94aba780665cdea3999ff3c5f58969a/VisualEditor-1782811647-REL1_43.tar.gz
+    url: https://github.com/wbstack/mediawiki-tars/raw/bb53cbce38171e9f16899234540cfd20bed08125/VisualEditor-1791455651-REL1_43.tar.gz
 
 skins:
   - name: Vector
