@@ -134,4 +134,10 @@ ARG LOCALIZATION_CACHE_THREAD_COUNT=1
 ARG LOCALIZATION_CACHE_ADDITIONAL_PARAMS
 RUN WBS_DOMAIN=maint php ./w/maintenance/rebuildLocalisationCache.php --threads=${LOCALIZATION_CACHE_THREAD_COUNT} ${LOCALIZATION_CACHE_ADDITIONAL_PARAMS}
 
+# Preserve build provenance in the runtime environment for MediaWiki hooks.
+ARG WBSTACK_IMAGE_BUILD_DATE=unknown
+ARG WBSTACK_IMAGE_REVISION=unknown
+ENV WBSTACK_IMAGE_BUILD_DATE=${WBSTACK_IMAGE_BUILD_DATE} \
+	WBSTACK_IMAGE_REVISION=${WBSTACK_IMAGE_REVISION}
+
 LABEL org.opencontainers.image.source="https://github.com/wbstack/mediawiki"
