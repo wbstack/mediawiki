@@ -373,7 +373,6 @@ if( $wgDefaultSkin === 'modern' ) {
 }
 wfLoadSkin( 'MinervaNeue' );
 
-// TODO allow turning some skins on and off?
 #######################################
 ## ---        Extensions         --- ##
 #######################################
