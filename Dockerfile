@@ -87,6 +87,7 @@ RUN { \
 RUN set -eux; \
 	a2enmod rewrite; \
 	{ \
+		echo 'LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Host}i\" \"%{Referer}i\" \"%{User-Agent}i\"" mediawiki_combined'; \
 		echo '<Directory /var/www/html>'; \
 		echo '  RewriteEngine On'; \
         # wikidata-like rewrite rules. "?" added everywhere but we are not sure why
@@ -118,7 +119,8 @@ RUN set -eux; \
 	} > "$APACHE_CONFDIR/conf-available/mediawiki.conf"; \
 	a2enconf mediawiki
 
-RUN sed -i '/<\/VirtualHost>/i \\n\tAllowEncodedSlashes NoDecode' "$APACHE_CONFDIR/sites-enabled/000-default.conf"
+RUN sed -i '/<\/VirtualHost>/i \\n\tAllowEncodedSlashes NoDecode' "$APACHE_CONFDIR/sites-enabled/000-default.conf"; \
+	sed -i 's~access.log combined~access.log mediawiki_combined~' "$APACHE_CONFDIR/sites-enabled/000-default.conf"
 
 ARG INSTALL_XDEBUG=0
 COPY install_xdebug.sh /install_xdebug.sh
