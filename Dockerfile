@@ -1,4 +1,4 @@
-FROM php:8.1.31-apache
+FROM php:8.3-apache
 
 # This file is mostly copied from the community mediawiki-docker image
 # Just with the actual mediawiki install etc removed
@@ -60,7 +60,7 @@ RUN set -eux; \
 	apt-mark auto '.*' > /dev/null; \
 	apt-mark manual $savedAptMark; \
 	ldd "$(php -r 'echo ini_get("extension_dir");')"/*.so \
-		| awk '/=>/ { print $3 }' \
+		| awk '/=>/ { so = $(NF-1); if (index(so, "/usr/local/") == 1) { next }; gsub("^/(usr/)?", "", so); printf "*%s\n", so }' \
 		| sort -u \
 		| xargs -r dpkg-query -S \
 		| cut -d: -f1 \
