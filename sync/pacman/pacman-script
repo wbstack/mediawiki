@@ -84,7 +84,7 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     fi
     echo $patch | jq -c -r '.[]' | while read patchEntry; do
         echo "Applying ${patchEntry} to ${destination}"
-        curl -s --output - ${patchEntry} |\
+        curl -s -A "Wikibase Cloud MediaWiki Builder/1.0 (https://github.com/wbstack/mediawiki) curl/8" --output - ${patchEntry} |\
          base64 -d |\
          git apply -v --unsafe-paths --directory=${targetDestination}
 
