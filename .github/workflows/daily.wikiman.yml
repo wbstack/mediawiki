@@ -20,7 +20,7 @@ jobs:
       - name: write GH action token to file
         run: echo ${{ secrets.GITHUB_TOKEN }} > ./sync/.github
       - name: run wikiman
-        run: ./sync/wikiman/wikiman .
+        run: ./sync/wikiman/wikiman . --patches keep
       - name: Show diff of current pacman.yaml
         id: diff
         run: diff pacman.yaml current-pacman.yaml

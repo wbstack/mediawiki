@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  lint:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
@@ -19,3 +19,6 @@ jobs:
 
       - name: Validate wikiman.yaml
         run: ajv validate --spec=draft2020 -s sync/wikiman/wikiman-schema.json -d wikiman.yaml
+
+      - name: Verify patches match in wikiman.yaml and pacman.yaml
+        run: ./bin/verify-wikiman-pacman-patches.sh

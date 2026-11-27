@@ -66,6 +66,9 @@
         },
         "remove": {
           "$ref": "#/$defs/RemoveList"
+        },
+        "patches": {
+          "$ref": "#/$defs/PatchList"
         }
       },
       "additionalProperties": false,
@@ -88,6 +91,9 @@
         },
         "remove": {
           "$ref": "#/$defs/RemoveList"
+        },
+        "patches": {
+          "$ref": "#/$defs/PatchList"
         }
       },
       "additionalProperties": false,
@@ -102,6 +108,27 @@
       "items": {
         "type": "string"
       }
+    },
+    "PatchList": {
+      "description": "Patches to apply to the repo",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Patch"
+      }
+    },
+    "Patch": {
+      "description": "A patch to apply (currently only Gerrit base64 patches are supported)",
+      "type": "object",
+      "properties": {
+        "url": {
+          "description": "URL to download the patch from",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "url"
+      ]
     }
   }
 }
