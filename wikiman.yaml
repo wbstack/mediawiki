@@ -64,6 +64,10 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-OAuth
   - name: WikibaseLexeme
     repoName: wikimedia/mediawiki-extensions-WikibaseLexeme
+    patches:
+      # Prevent stale ResourceLoader cache of LexemeLanguageCodePropertyId
+      # Included in REL1_47 - remove this patch when we update to REL1_47+ or if we backport it to an earlier release
+      - url: https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseLexeme~1305583/revisions/3/patch?download
   - name: SyntaxHighlight_GeSHi
     repoName: wikimedia/mediawiki-extensions-SyntaxHighlight_GeSHi
   - name: JsonConfig
@@ -116,18 +120,23 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-TextExtracts
   - name: EntitySchema
     repoName: wikimedia/mediawiki-extensions-EntitySchema
+  - name: StopForumSpam
+    repoName: wikimedia/mediawiki-extensions-StopForumSpam
 
     # Uses this fork now https://www.mediawiki.org/wiki/Extension:EmbedVideo_(fork)
   - name: EmbedVideo
     repoName: StarCitizenWiki/mediawiki-extensions-EmbedVideo
 
   ## These extensions should not currently use the mediawikiVersion
+  # TODO: Why is WikibaseInWikitext pinned to a specific commit when it is a wbstack repo that we can create REL branches / tags in?
   - name: WikibaseInWikitext
     repoName: wbstack/mediawiki-extensions-WikibaseInWikitext
     repoRef: 445c7efaa145fa7c31b0caca7400ef6a87cac7d9
+  # TODO: We should update this to `^2.0.0` according to the README - https://github.com/ProfessionalWiki/WikibaseEdtf#installation
   - name: WikibaseEdtf
     repoName: ProfessionalWiki/WikibaseEdtf
     repoRef: "1.2.0"
+  # TODO: This hasn't been updated since July 2020...
   - name: ThatSrc
     repoName: nyurik/ThatSrc
     repoRef: 3e039311504eb82f8c5c488a457b9e376b5cf7e3
@@ -158,13 +167,9 @@ extensions:
       - lib/.phan
       - lib/.storybook
       - lib/.vscode
-  # It looks like StopForumSpam inadvertently introduced a dependency on AbuseFilter in REL1_39 (https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/commit/3639e0120d53bf5643de57dc6e94293f69680e9f)
-  # AFAIK it should be possible to run StopForumSpam without AbuseFilter installed (https://www.mediawiki.org/wiki/Extension:StopForumSpam#AbuseFilter_integration)
-  # A subsequent patch, only available in REL1_40, appears to removes this dependency again (https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/commit/5e3aab6e8be0e8effa97f9b454020230b6a70e3d)
-  - name: StopForumSpam
-    url: https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/archive/5e3aab6e8be0e8effa97f9b454020230b6a70e3d.zip
+
   - name: VisualEditor
-    url: https://github.com/wbstack/mediawiki-tars/raw/bb53cbce38171e9f16899234540cfd20bed08125/VisualEditor-1791455651-REL1_43.tar.gz
+    url: https://github.com/wbstack/mediawiki-tars/raw/1be30332a884197f7cc63c4b3ed06d0ea1d0c1ae/VisualEditor-1791455651-REL1_43.tar.gz
 
 skins:
   - name: Vector
